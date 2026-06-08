@@ -2,7 +2,7 @@
 title: "Common Diseases in Cattle and Their Prevention"
 description: "Learn about the most common cattle diseases and effective prevention strategies to protect your herd's health and productivity."
 date: "2024-01-15"
-author: "Dr. James Kipchoge"
+author: "Mathews Chilongo"
 category: "Animal Health"
 tags: ["cattle", "disease-prevention", "livestock", "veterinary-medicine"]
 image: "/images/articles/cattle-diseases.jpg"
@@ -151,9 +151,3 @@ Contact your veterinarian immediately if you notice:
 ## Conclusion
 
 Implementing a comprehensive disease prevention program requires dedication to biosecurity, vaccination, nutrition, and good management practices. Regular consultation with your veterinarian ensures your herd remains healthy, productive, and profitable.
-
----
-
-**About the Author**: Dr. James Kipchoge is a veterinary practitioner with 15+ years of experience in East African cattle production systems.
-
-**Disclaimer**: This article is for informational purposes only. Always consult with a qualified veterinarian for specific health concerns regarding your animals.
