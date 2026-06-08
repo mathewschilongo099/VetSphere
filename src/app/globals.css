@@ -3,25 +3,11 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --primary: 234 179 8;
+  html {
+    scroll-behavior: smooth;
   }
 }
 
-.container {
-  @apply max-w-7xl mx-auto px-6;
-}
-
-.line-clamp-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.line-clamp-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
