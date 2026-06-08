@@ -1,5 +1,5 @@
 import Link from 'next/link';
-
+import Image from 'next/image';
 import { BlogPost } from '@/types';
 
 interface ArticleCardProps {
@@ -8,21 +8,45 @@ interface ArticleCardProps {
 
 export default function ArticleCard({ post }: ArticleCardProps) {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group">
-      <div className="h-48 bg-gradient-to-br from-emerald-500 to-teal-600 relative">
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+    <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border border-gray-100">
+      
+      {/* Image */}
+      <div className="relative h-48 w-full bg-gradient-to-br from-emerald-500 to-teal-600">
+        {post.image && (
+          <Image
+            src={post.image}
+            alt={post.imageAlt || post.title}
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        )}
       </div>
-      <div className="p-6">
-        <div className="flex gap-2 mb-3">
-          <span className="text-xs px-3 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-400 rounded-full">{post.category}</span>
-          <span className="text-xs text-gray-500">{post.readTime}</span>
+
+      {/* Content */}
+      <div className="p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs px-3 py-1 bg-green-100 text-green-700 rounded-full font-medium">
+            {post.category}
+          </span>
+          <span className="text-xs text-gray-400">{post.readTime}</span>
         </div>
-        <h3 className="font-semibold text-xl mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors">{post.title}</h3>
-        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">{post.excerpt}</p>
-        <Link href={`/articles/${post.slug}`} className="text-emerald-600 font-medium text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
-          Read full article →
-        </Link>
+        <h3 className="font-bold text-gray-900 text-lg mb-2 line-clamp-2 group-hover:text-green-600 transition-colors">
+          {post.title}
+        </h3>
+        <p className="text-gray-500 text-sm line-clamp-3 mb-4 leading-relaxed">
+          {post.excerpt}
+        </p>
+        <div className="flex items-center justify-between">
+          <span className="text-xs text-gray-400">{post.author}</span>
+          <Link
+            href={`/articles/${post.slug}`}
+            className="text-green-600 font-semibold text-sm hover:underline"
+          >
+            Read more →
+          </Link>
+        </div>
       </div>
+
     </div>
   );
 }
