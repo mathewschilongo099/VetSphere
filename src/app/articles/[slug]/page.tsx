@@ -62,7 +62,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
         <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex items-center gap-5">
           <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-green-500">
             <Image
-              src="/images/mathews.jpg"
+              src="/images/articles/mathews.jpg"
               alt="Mathews Chilongo"
               fill
               className="object-cover"
