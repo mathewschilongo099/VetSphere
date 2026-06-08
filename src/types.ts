@@ -10,6 +10,7 @@ export interface BlogPost {
   imageAlt: string;
   content: string;
   readingTime: number;
+  readTime: string;
   featured: boolean;
 }
 
