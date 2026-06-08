@@ -48,6 +48,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       imageAlt: data.imageAlt || data.title,
       content,
       readingTime,
+      readTime: `${readingTime} min read`,  // ← added
       featured: data.featured || false,
     };
   } catch (error) {
