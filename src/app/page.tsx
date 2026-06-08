@@ -2,7 +2,7 @@ import { getFeaturedPosts } from '@/lib/blog';
 import ArticleCard from '@/components/content/ArticleCard';
 
 export default async function HomePage() {
-  const featuredPosts = getFeaturedPosts(6);
+  const featuredPosts = getFeaturedPosts(3);
 
   return (
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
@@ -38,14 +38,14 @@ export default async function HomePage() {
               <div className="flex items-center gap-4">
                 <span className="text-3xl">📰</span>
                 <div>
-                  <p className="text-2xl font-extrabold text-white">50+</p>
-                  <p className="text-gray-400 text-sm">Free Articles</p>
+                  <p className="text-2xl font-extrabold text-white">Growing</p>
+                  <p className="text-gray-400 text-sm">Article Library</p>
                 </div>
               </div>
               <div className="flex items-center gap-4">
                 <span className="text-3xl">🐄</span>
                 <div>
-                  <p className="text-2xl font-extrabold text-white">10+</p>
+                  <p className="text-2xl font-extrabold text-white">5+</p>
                   <p className="text-gray-400 text-sm">Topics Covered</p>
                 </div>
               </div>
