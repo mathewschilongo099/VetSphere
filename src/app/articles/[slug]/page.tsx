@@ -1,5 +1,6 @@
 import { getPostBySlug, getAllPosts } from '@/lib/blog';
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -23,8 +24,8 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
             {post.title}
           </h1>
-          <div className="flex items-center justify-center gap-4 text-gray-400 text-sm">
-            <span>By {post.author}</span>
+          <div className="flex items-center justify-center gap-4 text-gray-400 text-sm flex-wrap">
+            <span>By Mathews Chilongo</span>
             <span>•</span>
             <span>{post.readTime}</span>
             <span>•</span>
@@ -48,6 +49,34 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </article>
+
+      {/* Disclaimer */}
+      <div className="max-w-3xl mx-auto px-4 mb-10">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">
+          <strong>Disclaimer:</strong> This article is for informational purposes only. Always consult with a qualified veterinarian for specific health concerns regarding your animals.
+        </div>
+      </div>
+
+      {/* Author Bio */}
+      <div className="max-w-3xl mx-auto px-4 mb-16">
+        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex items-center gap-5">
+          <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-green-500">
+            <Image
+              src="/images/mathews.jpg"
+              alt="Mathews Chilongo"
+              fill
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <p className="font-bold text-gray-900 text-base">Mathews Chilongo</p>
+            <p className="text-green-600 text-xs font-medium mb-1">Veterinary Practitioner & Freelancer</p>
+            <p className="text-gray-500 text-sm leading-relaxed">
+              Passionate about animal health and helping African farmers and pet owners with practical, reliable veterinary knowledge.
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Back Link */}
       <div className="max-w-3xl mx-auto px-4 pb-16">
