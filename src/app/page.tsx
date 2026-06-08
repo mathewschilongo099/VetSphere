@@ -9,8 +9,8 @@ export default async function HomePage() {
 
       {/* Hero */}
       <section className="bg-gray-900 text-white w-full py-20 sm:py-28">
-        <div className="max-w-6xl mx-auto px-4 flex flex-col lg:flex-row items-center gap-12">
-          <div className="flex-1 text-center lg:text-left">
+        <div className="max-w-4xl mx-auto px-4 flex flex-col items-center">
+          <div className="flex-1 text-center">
             <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-5 uppercase tracking-widest">
               Trusted Veterinary Knowledge
             </span>
@@ -18,44 +18,16 @@ export default async function HomePage() {
               Better Animal Health <br className="hidden sm:block" />
               <span className="text-green-400">Starts Here</span>
             </h1>
-            <p className="text-gray-400 text-base sm:text-lg mb-8 max-w-xl mx-auto lg:mx-0">
+            <p className="text-gray-400 text-base sm:text-lg mb-8 max-w-xl mx-auto">
               Expert veterinary articles for African farmers and pet owners — practical, reliable, and completely free.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a href="/articles" className="bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-4 rounded-xl transition text-center">
                 Explore Articles
               </a>
               <a href="/contact" className="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl transition text-center border border-white/20">
                 Get in Touch
               </a>
-            </div>
-          </div>
-
-          {/* Stats Card */}
-          <div className="flex-shrink-0 bg-gray-800 rounded-2xl p-6 sm:p-8 w-full max-w-xs mx-auto lg:mx-0 border border-gray-700">
-            <p className="text-gray-400 text-sm mb-6 font-medium">VetSphere Africa at a glance</p>
-            <div className="space-y-5">
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">📰</span>
-                <div>
-                  <p className="text-2xl font-extrabold text-white">Growing</p>
-                  <p className="text-gray-400 text-sm">Article Library</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">🐄</span>
-                <div>
-                  <p className="text-2xl font-extrabold text-white">5+</p>
-                  <p className="text-gray-400 text-sm">Topics Covered</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">🌍</span>
-                <div>
-                  <p className="text-2xl font-extrabold text-white">Africa</p>
-                  <p className="text-gray-400 text-sm">Focused Content</p>
-                </div>
-              </div>
             </div>
           </div>
         </div>
