@@ -1,7 +1,14 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import MarkdownIt from 'markdown-it';
 import { BlogPost } from '@/types';
+
+const md = new MarkdownIt({
+  html: true,
+  linkify: true,
+  typographer: true,
+});
 
 const POSTS_DIRECTORY = path.join(process.cwd(), 'src/content/articles');
 
@@ -35,6 +42,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data, content } = matter(fileContents);
     const readingTime = calculateReadingTime(content);
+    const contentHtml = md.render(content);
 
     return {
       slug: realSlug,
@@ -47,7 +55,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       tags: data.tags || [],
       image: data.image || '/images/placeholder.jpg',
       imageAlt: data.imageAlt || data.title,
-      content,
+      content: contentHtml,
       readingTime,
       readTime: `${readingTime} min read`,
       featured: data.featured || false,
