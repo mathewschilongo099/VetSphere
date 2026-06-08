@@ -1,93 +1,27 @@
-'use client';
+import Link from 'next/link';
 
-import { useTheme } from '@/hooks/useTheme';
-import { NAVIGATION } from '@/lib/constants';
-import { useUIStore } from '@/store/ui';
-import { useEffect } from 'react';
-import { FiMenu, FiX, FiSun, FiMoon } from 'react-icons/fi';
-
-export function Header() {
-  const { isDark, toggleTheme, mounted } = useTheme();
-  const { isMobileMenuOpen, toggleMobileMenu, closeMobileMenu } = useUIStore();
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth >= 768) {
-        closeMobileMenu();
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [closeMobileMenu]);
-
-  if (!mounted) return null;
-
+export default function Header() {
   return (
-    <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
-      <div className="container">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <a href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-bold text-lg">
-              V
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="font-bold text-primary text-lg md:text-xl">VetSphere</h1>
-              <p className="text-xs text-gray-600 dark:text-gray-400">Africa</p>
-            </div>
-          </a>
-
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            {NAVIGATION.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-
-          {/* Right Side Controls */}
-          <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {isDark ? <FiSun size={20} /> : <FiMoon size={20} />}
-            </button>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={toggleMobileMenu}
-              className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <FiX size={20} /> : <FiMenu size={20} />}
-            </button>
+    <header className="bg-white dark:bg-gray-900 shadow sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl">VS</div>
+          <div>
+            <h1 className="text-2xl font-bold text-emerald-700 dark:text-emerald-500">VetSphere</h1>
+            <p className="text-xs text-gray-500">Veterinary Care</p>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMobileMenuOpen && (
-          <nav className="md:hidden pb-4 space-y-2">
-            {NAVIGATION.map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                className="block px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                onClick={closeMobileMenu}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
-        )}
+        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+          <Link href="/" className="hover:text-emerald-600 transition-colors">Home</Link>
+          <Link href="/about" className="hover:text-emerald-600 transition-colors">About</Link>
+          <Link href="/services" className="hover:text-emerald-600 transition-colors">Services</Link>
+          <Link href="/articles" className="hover:text-emerald-600 transition-colors">Articles</Link>
+          <Link href="/gallery" className="hover:text-emerald-600 transition-colors">Gallery</Link>
+          <Link href="/contact" className="hover:text-emerald-600 transition-colors">Contact</Link>
+        </nav>
+        <div className="flex items-center gap-4">
+          <button className="text-sm px-4 py-2 rounded-full border border-emerald-600 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950 transition-colors">Book Appointment</button>
+        </div>
       </div>
     </header>
   );
