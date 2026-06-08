@@ -25,7 +25,8 @@
     "markdown-it-toc-done-right": "^4.2.0",
     "zustand": "^4.4.0",
     "react-icons": "^4.11.0",
-    "axios": "^1.5.0"
+    "axios": "^1.5.0",
+    "@tailwindcss/typography": "^0.5.10"
   },
   "devDependencies": {
     "@types/node": "^20.4.0",
