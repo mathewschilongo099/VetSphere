@@ -40,6 +40,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       slug: realSlug,
       title: data.title || '',
       description: data.description || '',
+      excerpt: data.description || '',
       date: data.date || '',
       author: data.author || 'VetSphere Team',
       category: data.category || '',
@@ -48,7 +49,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       imageAlt: data.imageAlt || data.title,
       content,
       readingTime,
-      readTime: `${readingTime} min read`,  // ← added
+      readTime: `${readingTime} min read`,
       featured: data.featured || false,
     };
   } catch (error) {
