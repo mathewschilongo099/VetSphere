@@ -1,44 +1,28 @@
 import Link from 'next/link';
-import Image from 'next/image';
+
 import { BlogPost } from '@/types';
 
 interface ArticleCardProps {
   post: BlogPost;
 }
 
-export function ArticleCard({ post }: ArticleCardProps) {
+export default function ArticleCard({ post }: ArticleCardProps) {
   return (
-    <Link href={`/articles/${post.slug}`} className="group block bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800">
-      <div className="relative h-48">
-        <Image
-          src={post.image}
-          alt={post.imageAlt}
-          fill
-          className="object-cover group-hover:scale-105 transition-transform duration-500"
-        />
-        <div className="absolute top-4 right-4 bg-white/90 dark:bg-gray-900/90 px-3 py-1 rounded-full text-xs font-medium text-gray-700 dark:text-gray-300">
-          {post.readingTime} min read
-        </div>
+    <div className="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group">
+      <div className="h-48 bg-gradient-to-br from-emerald-500 to-teal-600 relative">
+        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
       </div>
-
       <div className="p-6">
-        <div className="flex items-center gap-2 mb-3 text-xs uppercase tracking-wider text-primary dark:text-blue-400">
-          {post.category}
+        <div className="flex gap-2 mb-3">
+          <span className="text-xs px-3 py-1 bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-400 rounded-full">{post.category}</span>
+          <span className="text-xs text-gray-500">{post.readTime}</span>
         </div>
-
-        <h3 className="font-semibold text-xl leading-tight mb-3 line-clamp-2 group-hover:text-primary transition-colors">
-          {post.title}
-        </h3>
-
-        <p className="text-gray-600 dark:text-gray-400 line-clamp-3 mb-4 text-sm">
-          {post.description}
-        </p>
-
-        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-500">
-          <span>{post.author}</span>
-          <time dateTime={post.date}>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</time>
-        </div>
+        <h3 className="font-semibold text-xl mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors">{post.title}</h3>
+        <p className="text-gray-600 dark:text-gray-400 text-sm line-clamp-3 mb-4">{post.excerpt}</p>
+        <Link href={`/articles/${post.slug}`} className="text-emerald-600 font-medium text-sm flex items-center gap-1 group-hover:gap-2 transition-all">
+          Read full article →
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
