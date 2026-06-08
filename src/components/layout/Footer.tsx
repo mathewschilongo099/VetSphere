@@ -1,48 +1,66 @@
 export default function Footer() {
   return (
-    <footer className="bg-green-900 text-white w-full">
-      <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="bg-gray-900 text-gray-300 w-full">
+
+      {/* Main Footer */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
 
         {/* Brand */}
-        <div>
-          <h3 className="text-xl font-extrabold mb-3">🐾 VetSphere</h3>
-          <p className="text-green-300 text-sm leading-relaxed">
+        <div className="lg:col-span-1">
+          <a href="/" className="flex items-center gap-2 mb-4">
+            <span className="text-2xl">🐾</span>
+            <span className="text-xl font-extrabold text-white">Vet<span className="text-green-400">Sphere</span></span>
+          </a>
+          <p className="text-sm text-gray-400 leading-relaxed">
             Trusted veterinary knowledge for African farmers and pet owners. Practical, reliable, and free.
           </p>
         </div>
 
-        {/* Quick Links */}
+        {/* Learn */}
         <div>
-          <h4 className="font-bold mb-3 text-green-200">Quick Links</h4>
-          <ul className="space-y-2 text-sm text-green-300">
-            <li><a href="/" className="hover:text-white transition">Home</a></li>
-            <li><a href="/articles" className="hover:text-white transition">Articles</a></li>
-            <li><a href="/services" className="hover:text-white transition">Services</a></li>
-            <li><a href="/about" className="hover:text-white transition">About</a></li>
-            <li><a href="/contact" className="hover:text-white transition">Contact</a></li>
+          <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Learn</h4>
+          <ul className="space-y-2 text-sm">
+            <li><a href="/articles" className="hover:text-green-400 transition">All Articles</a></li>
+            <li><a href="/articles" className="hover:text-green-400 transition">Livestock Health</a></li>
+            <li><a href="/articles" className="hover:text-green-400 transition">Pet Care</a></li>
+            <li><a href="/articles" className="hover:text-green-400 transition">Disease Prevention</a></li>
+          </ul>
+        </div>
+
+        {/* Company */}
+        <div>
+          <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Company</h4>
+          <ul className="space-y-2 text-sm">
+            <li><a href="/about" className="hover:text-green-400 transition">About Us</a></li>
+            <li><a href="/services" className="hover:text-green-400 transition">Services</a></li>
+            <li><a href="/gallery" className="hover:text-green-400 transition">Gallery</a></li>
+            <li><a href="/contact" className="hover:text-green-400 transition">Contact</a></li>
           </ul>
         </div>
 
         {/* Contact */}
         <div>
-          <h4 className="font-bold mb-3 text-green-200">Get In Touch</h4>
-          <p className="text-sm text-green-300 leading-relaxed">
-            Have a question or want to collaborate? Reach out through our contact page.
+          <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Get In Touch</h4>
+          <p className="text-sm text-gray-400 mb-4 leading-relaxed">
+            Have a question or want to collaborate? We'd love to hear from you.
           </p>
           <a
             href="/contact"
-            className="inline-block mt-4 bg-green-600 hover:bg-green-500 text-white text-sm px-5 py-2 rounded-lg transition"
+            className="inline-block bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition"
           >
-            Contact Us
+            Contact Us →
           </a>
         </div>
-
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-green-800 py-4 text-center text-green-400 text-xs px-4">
-        © 2026 VetSphere Africa. All rights reserved. Caring for your animals with expertise.
+      <div className="border-t border-gray-800 py-5 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-500">
+          <p>© 2026 VetSphere Africa. All rights reserved.</p>
+          <p>Caring for your animals with expertise 🐄</p>
+        </div>
       </div>
+
     </footer>
   );
 }
