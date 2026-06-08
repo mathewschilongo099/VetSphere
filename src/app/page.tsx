@@ -1,5 +1,3 @@
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
 import { getFeaturedPosts } from '@/lib/blog';
 import ArticleCard from '@/components/content/ArticleCard';
 
@@ -7,32 +5,109 @@ export default async function HomePage() {
   const featuredPosts = getFeaturedPosts(6);
 
   return (
-    <div>
-      <Header />
-      {/* Hero */}
-      <section className="bg-gradient-to-r from-blue-900 to-green-700 text-white py-24">
-        <div className="max-w-6xl mx-auto px-6 text-center">
-          <h1 className="text-6xl font-bold mb-6">VetSphere Africa</h1>
-          <p className="text-2xl mb-10">Trusted Veterinary Knowledge for Better Animal Health</p>
-          <div className="flex justify-center gap-4">
-            <a href="/articles" className="bg-white text-blue-900 px-8 py-4 rounded-xl font-semibold text-lg">Explore Articles</a>
-            <a href="/contact" className="border-2 border-white px-8 py-4 rounded-xl font-semibold text-lg">Get in Touch</a>
+    <div className="min-h-screen bg-white">
+
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-green-800 via-green-700 to-emerald-600 text-white py-28">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <span className="inline-block bg-green-500/30 text-green-100 text-sm font-medium px-4 py-1 rounded-full mb-6 tracking-wide uppercase">
+            Trusted Veterinary Knowledge
+          </span>
+          <h1 className="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">
+            Better Animal Health <br className="hidden md:block" />
+            Starts Here
+          </h1>
+          <p className="text-xl text-green-100 mb-10 max-w-2xl mx-auto">
+            Expert veterinary articles for African farmers and pet owners — practical, reliable, and free.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a
+              href="/articles"
+              className="bg-white text-green-800 px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-50 transition"
+            >
+              Explore Articles
+            </a>
+            <a
+              href="/contact"
+              className="border-2 border-white text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/10 transition"
+            >
+              Get in Touch
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Featured */}
-      <section className="max-w-6xl mx-auto px-6 py-16">
-        <h2 className="text-4xl font-bold text-center mb-12">Featured Articles</h2>
-        <div className="grid md:grid-cols-3 gap-8">
-          {featuredPosts.map(post => <ArticleCard key={post.slug} post={post} />)}
-        </div>
-        <div className="text-center mt-12">
-          <a href="/articles" className="inline-block bg-blue-900 text-white px-8 py-3 rounded-lg">View All Articles</a>
+      {/* Stats Bar */}
+      <section className="bg-green-900 text-white py-6">
+        <div className="max-w-5xl mx-auto px-6 grid grid-cols-3 text-center gap-4">
+          <div>
+            <p className="text-2xl font-bold">50+</p>
+            <p className="text-green-300 text-sm">Articles</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold">10+</p>
+            <p className="text-green-300 text-sm">Topics Covered</p>
+          </div>
+          <div>
+            <p className="text-2xl font-bold">100%</p>
+            <p className="text-green-300 text-sm">Free to Read</p>
+          </div>
         </div>
       </section>
 
-      <Footer />
+      {/* Featured Articles */}
+      <section className="max-w-6xl mx-auto px-6 py-20">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-3">Featured Articles</h2>
+          <p className="text-gray-500 text-lg">Handpicked reads for livestock and pet owners</p>
+          <div className="w-16 h-1 bg-green-600 mx-auto mt-4 rounded-full"></div>
+        </div>
+
+        {featuredPosts.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {featuredPosts.map(post => (
+              <ArticleCard key={post.slug} post={post} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-400 py-12">No featured articles yet. Check back soon!</p>
+        )}
+
+        <div className="text-center mt-14">
+          <a
+            href="/articles"
+            className="inline-block bg-green-700 hover:bg-green-800 text-white px-10 py-4 rounded-xl font-bold text-lg transition"
+          >
+            View All Articles →
+          </a>
+        </div>
+      </section>
+
+      {/* Why VetSphere */}
+      <section className="bg-green-50 py-20">
+        <div className="max-w-5xl mx-auto px-6 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Why VetSphere?</h2>
+          <div className="w-16 h-1 bg-green-600 mx-auto mb-12 rounded-full"></div>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <div className="text-4xl mb-4">🐄</div>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Livestock Focus</h3>
+              <p className="text-gray-500 text-sm">Practical advice for cattle, goats, poultry and more — tailored for African conditions.</p>
+            </div>
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <div className="text-4xl mb-4">🐾</div>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Pet Care</h3>
+              <p className="text-gray-500 text-sm">Trusted guidance for dogs, cats and small animals to keep your pets healthy.</p>
+            </div>
+            <div className="bg-white rounded-2xl p-8 shadow-sm">
+              <div className="text-4xl mb-4">💡</div>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Expert Knowledge</h3>
+              <p className="text-gray-500 text-sm">All articles are written with veterinary accuracy and easy to understand language.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
   );
 }
