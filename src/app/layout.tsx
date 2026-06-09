@@ -4,10 +4,18 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
-  title: 'VetSphere - Veterinary Care for Livestock & Pets',
-  description: 'Professional veterinary services for your animals.',
+  title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
+  description: 'Free expert veterinary articles for farmers and pet owners worldwide. Learn about cattle diseases, livestock management, poultry health, dog and cat care — practical, reliable and completely free.',
+  keywords: 'veterinary, cattle diseases, livestock health, pet care, animal health, poultry farming, goat health, vet articles, livestock farming, dog care, cat care, animal diseases',
   icons: {
     icon: '/favicon.ico',
+  },
+  openGraph: {
+    title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
+    description: 'Free expert veterinary articles for farmers and pet owners worldwide. Practical, reliable and completely free.',
+    url: 'https://vet-sphere.vercel.app',
+    siteName: 'VetSphere',
+    type: 'website',
   },
   verification: {
     google: 'WcTgOlPtjU0VSOKY-8uGBTnceddxZbLtVI_QIGG5jhQ',
@@ -21,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+      <body className="min-h-screen bg-white text-gray-900">
         <Header />
         <main>{children}</main>
         <Footer />
