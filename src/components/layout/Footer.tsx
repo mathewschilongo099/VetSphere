@@ -88,9 +88,9 @@ export default function Footer() {
           <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Learn</h4>
           <ul className="space-y-2 text-sm">
             <li><a href="/articles" className="hover:text-green-400 transition">All Articles</a></li>
-            <li><a href="/articles" className="hover:text-green-400 transition">Livestock Health</a></li>
-            <li><a href="/articles" className="hover:text-green-400 transition">Pet Care</a></li>
-            <li><a href="/articles" className="hover:text-green-400 transition">Disease Prevention</a></li>
+            <li><a href="/articles?category=livestock" className="hover:text-green-400 transition">Livestock Health</a></li>
+            <li><a href="/articles?category=pets" className="hover:text-green-400 transition">Pet Care</a></li>
+            <li><a href="/articles?category=disease-prevention" className="hover:text-green-400 transition">Disease Prevention</a></li>
           </ul>
         </div>
 
