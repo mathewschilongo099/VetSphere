@@ -15,8 +15,8 @@ export default async function HomePage() {
               Better Animal Health <br className="hidden sm:block" />
               <span className="text-green-400">Starts Here</span>
             </h1>
-            <p className="text-gray-400 text-base sm:text-lg mb-8 max-w-xl mx-auto">
-              Free veterinary articles for farmers and pet owners worldwide. Written to be practical, easy to understand, and actually useful.
+            <p className="text-gray-300 text-base sm:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+              Practical veterinary guides for livestock farmers, students, and pet owners. Learn animal health, nutrition, disease prevention, and farm management through easy-to-understand articles written by professionals.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a href="/articles" className="bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-4 rounded-xl transition text-center">
@@ -36,10 +36,10 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Featured Articles</h2>
-              <p className="text-gray-500 mt-2">Handpicked reads for livestock and pet owners</p>
+              <p className="text-gray-500 mt-2">A few good reads to get you started</p>
             </div>
             <a href="/articles" className="text-green-600 font-semibold text-sm hover:underline shrink-0">
-              View all →
+              View all
             </a>
           </div>
 
@@ -50,7 +50,7 @@ export default async function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-400 py-16">No featured articles yet. Check back soon!</p>
+            <p className="text-center text-gray-400 py-16">No featured articles yet. Check back soon.</p>
           )}
 
           <div className="text-center mt-12">
@@ -64,23 +64,23 @@ export default async function HomePage() {
       {/* Why VetSphere */}
       <section className="w-full py-16 sm:py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Why VetSphere?</h2>
-          <p className="text-gray-500 mb-12 max-w-xl mx-auto">Everything you need to keep your animals healthy, all in one place.</p>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">What You Will Find Here</h2>
+          <p className="text-gray-500 mb-12 max-w-xl mx-auto">VetSphere covers the topics that matter most to farmers, students, and pet owners.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-left hover:shadow-md transition">
               <div className="text-4xl mb-4">🐄</div>
               <h3 className="font-bold text-lg text-gray-900 mb-2">Livestock Health</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Practical guidance on cattle, goats, poultry and pigs. From disease prevention to feeding and breeding.</p>
+              <p className="text-gray-500 text-sm leading-relaxed">Guides on cattle, goats, poultry and pigs covering disease prevention, feeding, breeding and daily farm management.</p>
             </div>
             <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-left hover:shadow-md transition">
               <div className="text-4xl mb-4">🐾</div>
               <h3 className="font-bold text-lg text-gray-900 mb-2">Pet Care</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Reliable advice for dog and cat owners. Health tips, nutrition guides, and what to watch out for.</p>
+              <p className="text-gray-500 text-sm leading-relaxed">Straightforward advice for dog and cat owners on health, vaccinations, nutrition and common conditions to watch out for.</p>
             </div>
             <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-left hover:shadow-md transition">
               <div className="text-4xl mb-4">💡</div>
-              <h3 className="font-bold text-lg text-gray-900 mb-2">Expert Knowledge</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">Articles written with veterinary accuracy in plain language anyone can understand and apply.</p>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Disease Prevention</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Learn how to identify early signs of illness, set up proper biosecurity, and keep your animals healthy before problems start.</p>
             </div>
           </div>
         </div>
