@@ -1,10 +1,49 @@
 import { getPostBySlug, getAllPosts } from '@/lib/blog';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import type { Metadata } from 'next';
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
   return posts.map((post) => ({ slug: post.slug }));
+}
+
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
+  const post = getPostBySlug(params.slug);
+
+  if (!post) {
+    return {
+      title: 'Article Not Found | VetSphere',
+    };
+  }
+
+  return {
+    title: `${post.title} | VetSphere`,
+    description: post.description,
+    keywords: post.tags.join(', '),
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: 'article',
+      publishedTime: post.date,
+      authors: ['Mathews Chilongo'],
+      url: `https://vet-sphere.vercel.app/articles/${post.slug}`,
+      images: [
+        {
+          url: `https://vet-sphere.vercel.app${post.image}`,
+          alt: post.imageAlt,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.description,
+      images: [`https://vet-sphere.vercel.app${post.image}`],
+    },
+  };
 }
 
 export default function ArticlePage({ params }: { params: { slug: string } }) {
@@ -34,6 +73,21 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
         </div>
       </section>
 
+      {/* Featured Image */}
+      {post.image && (
+        <div className="relative w-full max-w-3xl mx-auto px-4 mt-8">
+          <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden">
+            <Image
+              src={post.image}
+              alt={post.imageAlt || post.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        </div>
+      )}
+
       {/* Article Content */}
       <article className="max-w-3xl mx-auto px-4 py-12">
         <div
@@ -49,6 +103,22 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </article>
+
+      {/* Tags */}
+      {post.tags.length > 0 && (
+        <div className="max-w-3xl mx-auto px-4 mb-10">
+          <div className="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span
+                key={tag}
+                className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Disclaimer */}
       <div className="max-w-3xl mx-auto px-4 mb-10">
@@ -72,7 +142,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             <p className="font-bold text-gray-900 text-base">Mathews Chilongo</p>
             <p className="text-green-600 text-xs font-medium mb-1">Veterinary Practitioner & Freelancer</p>
             <p className="text-gray-500 text-sm leading-relaxed">
-              Passionate about animal health and helping African farmers and pet owners with practical, reliable veterinary knowledge.
+              Passionate about animal health and helping farmers and pet owners worldwide with practical, reliable veterinary knowledge.
             </p>
           </div>
         </div>
