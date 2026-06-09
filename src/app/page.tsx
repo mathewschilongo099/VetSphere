@@ -11,15 +11,12 @@ export default async function HomePage() {
       <section className="bg-gray-900 text-white w-full py-20 sm:py-28">
         <div className="max-w-4xl mx-auto px-4 flex flex-col items-center">
           <div className="flex-1 text-center">
-            <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-5 uppercase tracking-widest">
-              Trusted Veterinary Knowledge
-            </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
               Better Animal Health <br className="hidden sm:block" />
               <span className="text-green-400">Starts Here</span>
             </h1>
             <p className="text-gray-400 text-base sm:text-lg mb-8 max-w-xl mx-auto">
-              Expert veterinary articles for African farmers and pet owners — practical, reliable, and completely free.
+              Free veterinary articles for farmers and pet owners worldwide. Written to be practical, easy to understand, and actually useful.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a href="/articles" className="bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-4 rounded-xl transition text-center">
@@ -30,16 +27,6 @@ export default async function HomePage() {
               </a>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Trust Bar */}
-      <section className="bg-green-600 text-white py-4 w-full">
-        <div className="max-w-6xl mx-auto px-4 flex flex-wrap justify-center gap-6 text-sm font-medium text-center">
-          <span>✅ Veterinary Accuracy</span>
-          <span>✅ Free to Read</span>
-          <span>✅ Livestock & Pets</span>
-          <span>✅ African Conditions</span>
         </div>
       </section>
 
@@ -68,7 +55,7 @@ export default async function HomePage() {
 
           <div className="text-center mt-12">
             <a href="/articles" className="inline-block bg-gray-900 hover:bg-gray-800 text-white px-10 py-4 rounded-xl font-bold transition">
-              Browse All Articles →
+              Browse All Articles
             </a>
           </div>
         </div>
@@ -78,19 +65,23 @@ export default async function HomePage() {
       <section className="w-full py-16 sm:py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">Why VetSphere?</h2>
-          <p className="text-gray-500 mb-12 max-w-xl mx-auto">Everything you need to keep your animals healthy, in one place.</p>
+          <p className="text-gray-500 mb-12 max-w-xl mx-auto">Everything you need to keep your animals healthy, all in one place.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              { icon: '🐄', title: 'Livestock Focus', desc: 'Practical advice for cattle, goats, poultry and more — tailored for African conditions.' },
-              { icon: '🐾', title: 'Pet Care', desc: 'Trusted guidance for dogs, cats and small animals to keep your pets healthy and happy.' },
-              { icon: '💡', title: 'Expert Knowledge', desc: 'All articles written with veterinary accuracy in easy to understand language.' },
-            ].map(({ icon, title, desc }) => (
-              <div key={title} className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-left hover:shadow-md transition">
-                <div className="text-4xl mb-4">{icon}</div>
-                <h3 className="font-bold text-lg text-gray-900 mb-2">{title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
-              </div>
-            ))}
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-left hover:shadow-md transition">
+              <div className="text-4xl mb-4">🐄</div>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Livestock Health</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Practical guidance on cattle, goats, poultry and pigs. From disease prevention to feeding and breeding.</p>
+            </div>
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-left hover:shadow-md transition">
+              <div className="text-4xl mb-4">🐾</div>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Pet Care</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Reliable advice for dog and cat owners. Health tips, nutrition guides, and what to watch out for.</p>
+            </div>
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 text-left hover:shadow-md transition">
+              <div className="text-4xl mb-4">💡</div>
+              <h3 className="font-bold text-lg text-gray-900 mb-2">Expert Knowledge</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">Articles written with veterinary accuracy in plain language anyone can understand and apply.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -99,7 +90,7 @@ export default async function HomePage() {
       <section className="w-full bg-green-600 py-14">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Have a question about your animals?</h2>
-          <p className="text-green-100 mb-8 text-base sm:text-lg">Browse our articles or get in touch with us directly.</p>
+          <p className="text-green-100 mb-8 text-base sm:text-lg">Browse our articles or reach out and we will be happy to help.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="/articles" className="bg-white text-green-700 font-bold px-8 py-4 rounded-xl hover:bg-green-50 transition text-center">
               Read Articles
