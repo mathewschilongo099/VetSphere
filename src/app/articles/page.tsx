@@ -1,10 +1,10 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ArticleCard from '@/components/content/ArticleCard';
 import { BlogPost } from '@/types';
 
-export default function ArticlesPage() {
+function ArticlesContent() {
   const searchParams = useSearchParams();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [filtered, setFiltered] = useState<BlogPost[]>([]);
@@ -94,8 +94,6 @@ export default function ArticlesPage() {
 
       {/* Articles */}
       <section className="max-w-6xl mx-auto px-4 py-16">
-
-        {/* Search Result Info */}
         {query && (
           <div className="flex items-center justify-between mb-8">
             <p className="text-gray-500 text-sm">
@@ -140,5 +138,20 @@ export default function ArticlesPage() {
       </section>
 
     </div>
+  );
+}
+
+export default function ArticlesPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading articles...</p>
+        </div>
+      </div>
+    }>
+      <ArticlesContent />
+    </Suspense>
   );
 }
