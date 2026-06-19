@@ -26,7 +26,7 @@ export default function AnimalSearch() {
 
     try {
       const res = await fetch(
-        `https://api.you.com/v1/search?query=${encodeURIComponent(query + ' animal health veterinary')}&num_web_results=6`,
+        `https://api.ydc-index.io/search?query=${encodeURIComponent(query + ' animal health veterinary')}&num_web_results=6`,
         {
           headers: {
             'X-API-Key': process.env.NEXT_PUBLIC_YOU_API_KEY || '',
