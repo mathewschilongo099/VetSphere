@@ -1,5 +1,6 @@
 import { getFeaturedPosts } from '@/lib/blog';
 import ArticleCard from '@/components/content/ArticleCard';
+import AnimalSearch from '@/components/AnimalSearch';
 
 export default async function HomePage() {
   const featuredPosts = getFeaturedPosts(3);
@@ -26,6 +27,10 @@ export default async function HomePage() {
                 Get in Touch
               </a>
             </div>
+            <div className="mt-6">
+              <p className="text-gray-400 text-sm mb-2">Or search any animal health question</p>
+              <AnimalSearch />
+            </div>
           </div>
         </div>
       </section>
@@ -38,11 +43,8 @@ export default async function HomePage() {
               <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Featured Articles</h2>
               <p className="text-gray-500 mt-2">A few good reads to get you started</p>
             </div>
-            <a href="/articles" className="text-green-600 font-semibold text-sm hover:underline shrink-0">
-              View all
-            </a>
+            <a href="/articles" className="text-green-600 font-semibold text-sm hover:underline shrink-0">View all</a>
           </div>
-
           {featuredPosts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {featuredPosts.map(post => (
@@ -52,7 +54,6 @@ export default async function HomePage() {
           ) : (
             <p className="text-center text-gray-400 py-16">No featured articles yet. Check back soon.</p>
           )}
-
           <div className="text-center mt-12">
             <a href="/articles" className="inline-block bg-gray-900 hover:bg-gray-800 text-white px-10 py-4 rounded-xl font-bold transition">
               Browse All Articles
@@ -92,12 +93,8 @@ export default async function HomePage() {
           <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-4">Have a question about your animals?</h2>
           <p className="text-green-100 mb-8 text-base sm:text-lg">Browse our articles or reach out and we will be happy to help.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="/articles" className="bg-white text-green-700 font-bold px-8 py-4 rounded-xl hover:bg-green-50 transition text-center">
-              Read Articles
-            </a>
-            <a href="/contact" className="border-2 border-white text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 transition text-center">
-              Contact Us
-            </a>
+            <a href="/articles" className="bg-white text-green-700 font-bold px-8 py-4 rounded-xl hover:bg-green-50 transition text-center">Read Articles</a>
+            <a href="/contact" className="border-2 border-white text-white font-bold px-8 py-4 rounded-xl hover:bg-white/10 transition text-center">Contact Us</a>
           </div>
         </div>
       </section>
