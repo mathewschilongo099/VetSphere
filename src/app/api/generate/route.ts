@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Fetch article and images in parallel
     const [researchRes, heroImage, causesImage, symptomsImage, treatmentImage, preventionImage] =
       await Promise.all([
         fetch('https://api.you.com/v1/research', {
@@ -50,10 +49,10 @@ Requirements:
           }),
         }),
         getUnsplashImage(topic + ' animal'),
-        getUnsplashImage(topic + ' animal disease cause'),
-        getUnsplashImage(topic + ' sick animal symptoms'),
-        getUnsplashImage(topic + ' veterinary treatment'),
-        getUnsplashImage(topic + ' animal farm prevention'),
+        getUnsplashImage('livestock disease cattle'),
+        getUnsplashImage('sick animal veterinary'),
+        getUnsplashImage('veterinarian treating animal'),
+        getUnsplashImage('farm animal prevention biosecurity'),
       ]);
 
     const data = await researchRes.json();
@@ -62,6 +61,10 @@ Requirements:
     // Remove citation numbers
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
+
+    // Generate excerpt BEFORE injecting images
+    const plainText = content.replace(/[#*![\]()]/g, '').trim();
+    const excerpt = plainText.substring(0, 150) + '...';
 
     // Inject images after each section heading
     if (heroImage) {
@@ -116,8 +119,6 @@ Requirements:
     }
 
     const title = topic.charAt(0).toUpperCase() + topic.slice(1);
-    const plainText = content.replace(/[#*![\]()]/g, '').trim();
-    const excerpt = plainText.substring(0, 150) + '...';
 
     return NextResponse.json({
       content,
