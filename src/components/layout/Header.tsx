@@ -31,6 +31,7 @@ export default function Header() {
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
           <a href="/" className="hover:text-green-600 transition">Home</a>
           <a href="/articles" className="hover:text-green-600 transition">Articles</a>
+          <a href="/ask" className="hover:text-green-600 transition text-green-600 font-semibold">Ask VetAssist</a>
           <a href="/services" className="hover:text-green-600 transition">Services</a>
           <a href="/about" className="hover:text-green-600 transition">About</a>
         </nav>
@@ -110,6 +111,7 @@ export default function Header() {
             {[
               { href: '/', label: 'Home' },
               { href: '/articles', label: 'Articles' },
+              { href: '/ask', label: '🤖 Ask VetAssist' },
               { href: '/services', label: 'Services' },
               { href: '/about', label: 'About' },
             ].map(({ href, label }) => (
