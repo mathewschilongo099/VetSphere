@@ -17,7 +17,7 @@ async function getTrendingVetTopic(): Promise<string> {
     const xml = await res.text();
 
     // Extract titles from RSS
-    const titles = [...xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g)]
+    const titles = Array.from(xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g))
       .map(m => m[1])
       .filter(t => t !== 'Google Trends');
 
@@ -158,7 +158,11 @@ WRITING REQUIREMENTS:
         '## Introduction',
         `## Introduction\n\n
 
+
+
 ![${topic}](${heroImage})
+
+
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -168,7 +172,11 @@ WRITING REQUIREMENTS:
         `## Causes of ${topic}`,
         `## Causes of ${topic}\n\n
 
+
+
 ![Causes of ${topic}](${causesImage})
+
+
 
 \n*Photo: Causes — via Unsplash*\n`
       );
@@ -178,7 +186,11 @@ WRITING REQUIREMENTS:
         `## Clinical Signs and Symptoms of ${topic}`,
         `## Clinical Signs and Symptoms of ${topic}\n\n
 
+
+
 ![Symptoms of ${topic}](${symptomsImage})
+
+
 
 \n*Photo: Clinical Signs — via Unsplash*\n`
       );
@@ -188,7 +200,11 @@ WRITING REQUIREMENTS:
         `## Treatment of ${topic}`,
         `## Treatment of ${topic}\n\n
 
+
+
 ![Treatment for ${topic}](${treatmentImage})
+
+
 
 \n*Photo: Treatment — via Unsplash*\n`
       );
@@ -198,7 +214,11 @@ WRITING REQUIREMENTS:
         `## Prevention and Control of ${topic}`,
         `## Prevention and Control of ${topic}\n\n
 
+
+
 ![Prevention of ${topic}](${preventionImage})
+
+
 
 \n*Photo: Prevention — via Unsplash*\n`
       );
