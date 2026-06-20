@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 
 async function getUnsplashImage(query: string): Promise<string> {
   try {
+    const randomPage = Math.floor(Math.random() * 5) + 1;
     const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=landscape`,
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
       {
         headers: {
           Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
@@ -11,7 +12,10 @@ async function getUnsplashImage(query: string): Promise<string> {
       }
     );
     const data = await res.json();
-    return data.results?.[0]?.urls?.regular || '';
+    const results = data.results || [];
+    if (results.length === 0) return '';
+    const randomIndex = Math.floor(Math.random() * results.length);
+    return results[randomIndex]?.urls?.regular || '';
   } catch {
     return '';
   }
@@ -70,11 +74,11 @@ WRITING REQUIREMENTS:
             research_effort: 'standard',
           }),
         }),
-        getUnsplashImage(topic + ' animal'),
-        getUnsplashImage(topic + ' disease'),
-        getUnsplashImage(topic + ' sick animal'),
-        getUnsplashImage(topic + ' veterinary'),
-        getUnsplashImage(topic + ' farm prevention'),
+        getUnsplashImage(topic + ' livestock farm'),
+        getUnsplashImage(topic + ' animal disease'),
+        getUnsplashImage('sick ' + topic + ' animal'),
+        getUnsplashImage('veterinarian farmer treatment'),
+        getUnsplashImage('farm biosecurity prevention animal'),
       ]);
 
     const data = await researchRes.json();
@@ -86,13 +90,24 @@ WRITING REQUIREMENTS:
 
     // Generate SEO excerpt BEFORE injecting images
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
-    const excerpt = plainText.substring(0, 155) + '...';
+    const introMatch = plainText.match(/Introduction\s*([\s\S]+)/i);
+    const introText = (introMatch ? introMatch[1] : plainText).trim();
+
+    const buildExcerpt = (text: string, maxLength: number): string => {
+      const clean = text.replace(/\s+/g, ' ').trim();
+      if (clean.length <= maxLength) return clean;
+      const truncated = clean.substring(0, maxLength);
+      const lastSpace = truncated.lastIndexOf(' ');
+      return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+    };
+
+    const excerpt = buildExcerpt(introText, 155);
 
     // Generate SEO title
     const seoTitle = `${topic.charAt(0).toUpperCase() + topic.slice(1)}: Causes, Symptoms, Treatment and Prevention`;
 
     // Generate SEO meta description
-    const metaDescription = `Learn everything about ${topic} — causes, symptoms, diagnosis, treatment and prevention. Expert veterinary guide for farmers and pet owners.`;
+    const metaDescription = buildExcerpt(introText, 160) || `Learn everything about ${topic} — causes, symptoms, diagnosis, treatment and prevention. Expert veterinary guide for farmers and pet owners.`;
 
     // Generate tags from topic
     const tags = [
