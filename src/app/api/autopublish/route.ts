@@ -216,13 +216,25 @@ WRITING REQUIREMENTS:
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    // Generate excerpt BEFORE injecting images
+    // Generate excerpt BEFORE injecting images — pull the real opening lines
+    // of the article (after the "## Introduction" heading) instead of a fixed template
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
-    const excerpt = plainText.substring(0, 155) + '...';
+    const introMatch = plainText.match(/Introduction\s*([\s\S]+)/i);
+    const introText = (introMatch ? introMatch[1] : plainText).trim();
+
+    function buildExcerpt(text: string, maxLength: number): string {
+      const clean = text.replace(/\s+/g, ' ').trim();
+      if (clean.length <= maxLength) return clean;
+      const truncated = clean.substring(0, maxLength);
+      const lastSpace = truncated.lastIndexOf(' ');
+      return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+    }
+
+    const excerpt = buildExcerpt(introText, 155);
 
     // SEO title and meta
     const seoTitle = `${topic.charAt(0).toUpperCase() + topic.slice(1)}: Causes, Symptoms, Treatment and Prevention`;
-    const metaDescription = `Learn everything about ${topic} — causes, symptoms, diagnosis, treatment and prevention. Expert veterinary guide for farmers and pet owners.`;
+    const metaDescription = buildExcerpt(introText, 160) || `Learn everything about ${topic} — causes, symptoms, diagnosis, treatment and prevention. Expert veterinary guide for farmers and pet owners.`;
     const tags = [
       topic.toLowerCase(),
       ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
@@ -312,7 +324,7 @@ WRITING REQUIREMENTS:
 
     const markdown = `---
 title: "${seoTitle}"
-description: "${metaDescription}"
+description: "${metaDescription.replace(/"/g, '\\"')}"
 date: "${date}"
 author: "VetSphere"
 category: "Animal Health"
