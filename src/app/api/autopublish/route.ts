@@ -30,7 +30,7 @@ async function getTrendingVetTopic(): Promise<string> {
 
     if (vetTrend) return vetTrend;
 
-    // If no trending vet topic found, use AI to pick a relevant topic
+    // If no trending vet topic found, pick from fallback list
     const fallbackTopics = [
       'Mastitis in Dairy Cows',
       'Newcastle Disease in Poultry',
@@ -47,13 +47,78 @@ async function getTrendingVetTopic(): Promise<string> {
       'Parvovirus in Dogs',
       'Feline Panleukopenia in Cats',
       'Contagious Caprine Pleuropneumonia in Goats',
+      'Bovine Respiratory Disease',
+      'Coccidiosis in Poultry',
+      'Heartworm Disease in Dogs',
+      'Ringworm in Cattle',
+      'Pneumonia in Calves',
+      'Anthrax in Livestock',
+      'Bloat in Cattle',
+      'Foot and Mouth Disease in Cattle',
+      'Tetanus in Goats',
+      'Salmonellosis in Poultry',
+      'Canine Distemper',
+      'Feline Leukemia Virus',
+      'Mange in Dogs',
+      'Trypanosomiasis in Cattle',
+      'Peste des Petits Ruminants in Goats',
+      'Fowl Pox in Chickens',
+      'Liver Fluke in Cattle',
+      'Pink Eye in Cattle',
+      'Milk Fever in Dairy Cows',
+      'Bovine Tuberculosis',
+      'Kennel Cough in Dogs',
+      'Toxoplasmosis in Cats',
+      'Johne\'s Disease in Cattle',
+      'Anaplasmosis in Cattle',
+      'Goat Pox',
+      'Infectious Bursal Disease in Poultry',
     ];
 
-    // Pick a random fallback topic
-    return fallbackTopics[Math.floor(Math.random() * fallbackTopics.length)];
+    // Try to find a topic that hasn't already been published
+    const existingSlugs = await getExistingSlugs();
+    const unusedTopics = fallbackTopics.filter(
+      t => !existingSlugs.some(slug => slug.startsWith(topicToSlug(t)))
+    );
+
+    const pool = unusedTopics.length > 0 ? unusedTopics : fallbackTopics;
+    return pool[Math.floor(Math.random() * pool.length)];
   } catch {
     return 'Lumpy Skin Disease in Cattle';
   }
+}
+
+async function getExistingSlugs(): Promise<string[]> {
+  try {
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const token = process.env.GITHUB_TOKEN;
+
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/src/content/articles`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    if (!res.ok) return [];
+
+    const files = await res.json();
+    if (!Array.isArray(files)) return [];
+
+    return files
+      .map((f: { name: string }) => f.name.replace(/\.md$/, ''))
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function topicToSlug(topic: string): string {
+  return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
 async function getUnsplashImage(query: string): Promise<string> {
@@ -78,6 +143,19 @@ export async function GET() {
     // Step 1 — Get trending topic
     const topic = await getTrendingVetTopic();
     console.log('Auto-publishing topic:', topic);
+
+    // Safety check — skip if this topic was already published
+    const existingSlugs = await getExistingSlugs();
+    const topicSlugPrefix = topicToSlug(topic);
+    const alreadyPublished = existingSlugs.some(slug => slug.startsWith(topicSlugPrefix));
+
+    if (alreadyPublished) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: `Topic "${topic}" already has a published article. Skipping to avoid duplicate.`,
+      });
+    }
 
     // Step 2 — Generate article and images in parallel
     const [researchRes, heroImage, causesImage, symptomsImage, treatmentImage, preventionImage] =
