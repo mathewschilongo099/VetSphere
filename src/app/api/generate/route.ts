@@ -19,12 +19,13 @@ export async function GET(request: NextRequest) {
 
 Requirements:
 - Minimum 800 words
-- Use these sections with markdown headings: Introduction, Causes, Clinical Signs and Symptoms, Diagnosis, Treatment, Prevention and Control, Conclusion
+- Use these sections with markdown headings: Introduction, Causes, Clinical Signs and Symptoms, Diagnosis, Treatment, Prevention and Control, When to Call a Veterinarian, Conclusion
 - Write in clear simple English for farmers, students and pet owners
-- Do NOT include citation numbers like [[1]] or [[2]] anywhere in the text
+- Do NOT include citation numbers like [[1]] or [[2]] anywhere
 - Do NOT include a references section
 - Make each section at least 2-3 paragraphs long
-- Sound professional like a veterinary textbook`,
+- Sound professional like a veterinary textbook
+- Start directly with the Introduction heading, no preamble`,
         research_effort: 'standard',
       }),
     });
@@ -32,13 +33,17 @@ Requirements:
     const data = await res.json();
     let content = data.output?.content || '';
 
-    // Remove citation numbers like [[1, 2]] or [[3]]
+    // Remove citation numbers
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
     const title = topic.charAt(0).toUpperCase() + topic.slice(1);
 
-    return NextResponse.json({ content, title });
+    // Generate excerpt from first 150 characters of content
+    const plainText = content.replace(/[#*]/g, '').trim();
+    const excerpt = plainText.substring(0, 150) + '...';
+
+    return NextResponse.json({ content, title, excerpt });
   } catch (error) {
     return NextResponse.json({ error: 'Generation failed' }, { status: 500 });
   }
