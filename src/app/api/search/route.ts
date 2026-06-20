@@ -9,7 +9,25 @@ function cleanAnswer(text: string): string {
     .replace(/^\s*[\*\-]\s+/gm, '')
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/\n{3,}/g, '\n\n')
+    // Remove self-introduction sentences
+    .replace(/I am VetAssist[^.]*\./gi, '')
+    .replace(/As VetAssist[^.]*\./gi, '')
+    .replace(/VetAssist[^.]*created by[^.]*\./gi, '')
+    .replace(/I was created by[^.]*\./gi, '')
+    .replace(/built for VetSphere[^.]*\./gi, '')
+    .replace(/\s{2,}/g, ' ')
     .trim();
+}
+
+const IDENTITY_KEYWORDS = [
+  'who are you', 'what are you', 'who created you', 'who made you',
+  'who built you', 'your name', 'introduce yourself', 'about you',
+  'who is mathews', 'tell me about yourself'
+];
+
+function isIdentityQuestion(query: string): boolean {
+  const lower = query.toLowerCase();
+  return IDENTITY_KEYWORDS.some(k => lower.includes(k));
 }
 
 export async function GET(request: NextRequest) {
@@ -17,6 +35,13 @@ export async function GET(request: NextRequest) {
 
   if (!query) {
     return NextResponse.json({ error: 'Query required' }, { status: 400 });
+  }
+
+  // Handle identity questions directly without calling the API
+  if (isIdentityQuestion(query)) {
+    return NextResponse.json({
+      answer: 'I am VetAssist, the AI assistant for VetSphere. VetSphere was created by Mathews Chilongo to help farmers and pet owners with animal health questions. How can I help you today?'
+    });
   }
 
   try {
@@ -27,21 +52,16 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        input: `You are VetAssist, a friendly veterinary AI assistant built for VetSphere — a website created by Mathews Chilongo to help farmers and pet owners with animal health.
+        input: `You are a veterinary assistant. Answer the following animal health question directly and helpfully.
 
-IDENTITY RULES:
-- Your name is VetAssist
-- You were built for VetSphere by Mathews Chilongo
-- If asked who you are or who created you, mention your name and Mathews Chilongo
-- Never say you were made by Google, OpenAI, Anthropic or any other company
-- Do NOT introduce yourself on every message — only when directly asked
-
-ANSWERING RULES:
-- Answer animal health questions directly without introducing yourself first
-- Write in plain conversational paragraphs
-- No bullet points, no bold text, no markdown, no citation numbers
-- Be warm, professional and easy to understand for farmers and pet owners
-- If the question is not about animals, politely redirect to animal health topics
+STRICT RULES:
+- Answer the question directly — do not introduce yourself
+- Do not mention VetAssist, VetSphere, or Mathews Chilongo in your answer
+- No bullet points, no bold text, no markdown formatting
+- No citation numbers like [[1]] or [1]
+- Write in plain conversational paragraphs only
+- Be warm and professional for farmers and pet owners
+- If not about animals, say: "I can only help with animal health questions. Please ask me about your livestock or pets."
 
 Question: ${query}`,
         research_effort: 'lite',
