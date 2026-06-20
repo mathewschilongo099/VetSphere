@@ -2,7 +2,9 @@ name: Auto Publish Article
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Runs every day at 8:00 AM UTC
+    - cron: '0 6 * * *'   # Runs at 6:00 AM UTC
+    - cron: '0 12 * * *'  # Runs at 12:00 PM UTC
+    - cron: '0 18 * * *'  # Runs at 6:00 PM UTC
   workflow_dispatch:  # Also allows manual trigger
 
 jobs:
