@@ -10,6 +10,8 @@ export default function AdminPage() {
   const [title, setTitle] = useState('');
   const [heroImage, setHeroImage] = useState('');
   const [excerpt, setExcerpt] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState('');
@@ -31,6 +33,8 @@ export default function AdminPage() {
     setArticle('');
     setHeroImage('');
     setExcerpt('');
+    setMetaDescription('');
+    setTags([]);
 
     try {
       const res = await fetch(`/api/generate?topic=${encodeURIComponent(topic)}`);
@@ -39,6 +43,8 @@ export default function AdminPage() {
       setTitle(data.title || topic);
       setHeroImage(data.heroImage || '');
       setExcerpt(data.excerpt || '');
+      setMetaDescription(data.metaDescription || '');
+      setTags(data.tags || []);
       setMessage('Article generated! Review it below then publish.');
     } catch {
       setMessage('Failed to generate. Try again.');
@@ -56,7 +62,7 @@ export default function AdminPage() {
       const res = await fetch('/api/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content: article, excerpt, heroImage }),
+        body: JSON.stringify({ title, content: article, excerpt, metaDescription, tags, heroImage }),
       });
       const data = await res.json();
       if (data.success) {
@@ -66,6 +72,8 @@ export default function AdminPage() {
         setTitle('');
         setHeroImage('');
         setExcerpt('');
+        setMetaDescription('');
+        setTags([]);
       } else {
         setMessage('Publishing failed. Try again.');
       }
@@ -139,18 +147,53 @@ export default function AdminPage() {
 
         {article && (
           <div className="space-y-4">
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-5 py-3 rounded-xl bg-gray-800 text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-            <textarea
-              value={article}
-              onChange={(e) => setArticle(e.target.value)}
-              rows={20}
-              className="w-full px-5 py-4 rounded-xl bg-gray-800 text-gray-200 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
+
+            {/* SEO Title */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">SEO Title</label>
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="w-full px-5 py-3 rounded-xl bg-gray-800 text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Meta Description (shown on Google)</label>
+              <textarea
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
+                rows={2}
+                className="w-full px-5 py-3 rounded-xl bg-gray-800 text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+              <p className="text-xs text-gray-500 mt-1">{metaDescription.length}/155 characters</p>
+            </div>
+
+            {/* Tags */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">SEO Tags</label>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag, i) => (
+                  <span key={i} className="bg-green-800 text-green-200 text-xs px-3 py-1 rounded-full">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Article Content */}
+            <div>
+              <label className="text-xs text-gray-400 mb-1 block">Article Content</label>
+              <textarea
+                value={article}
+                onChange={(e) => setArticle(e.target.value)}
+                rows={20}
+                className="w-full px-5 py-4 rounded-xl bg-gray-800 text-gray-200 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+            </div>
+
             <button
               onClick={handlePublish}
               disabled={publishing}
