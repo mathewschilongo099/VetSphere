@@ -9,19 +9,16 @@ const VETERINARY_KEYWORDS = [
 
 async function getTrendingVetTopic(): Promise<string> {
   try {
-    // Fetch Google Trends RSS for agriculture/animals
     const res = await fetch(
       'https://trends.google.com/trending/rss?geo=ZW&hl=en',
       { next: { revalidate: 0 } }
     );
     const xml = await res.text();
 
-    // Extract titles from RSS
     const titles = Array.from(xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g))
       .map(m => m[1])
       .filter(t => t !== 'Google Trends');
 
-    // Find a veterinary-related trend
     const vetTrend = titles.find(title =>
       VETERINARY_KEYWORDS.some(keyword =>
         title.toLowerCase().includes(keyword)
@@ -30,7 +27,6 @@ async function getTrendingVetTopic(): Promise<string> {
 
     if (vetTrend) return vetTrend;
 
-    // If no trending vet topic found, pick from fallback list
     const fallbackTopics = [
       'Mastitis in Dairy Cows',
       'Newcastle Disease in Poultry',
@@ -75,7 +71,6 @@ async function getTrendingVetTopic(): Promise<string> {
       'Infectious Bursal Disease in Poultry',
     ];
 
-    // Try to find a topic that hasn't already been published
     const existingSlugs = await getExistingSlugs();
     const unusedTopics = fallbackTopics.filter(
       t => !existingSlugs.some(slug => slug.startsWith(topicToSlug(t)))
@@ -105,10 +100,8 @@ async function getExistingSlugs(): Promise<string[]> {
     );
 
     if (!res.ok) return [];
-
     const files = await res.json();
     if (!Array.isArray(files)) return [];
-
     return files
       .map((f: { name: string }) => f.name.replace(/\.md$/, ''))
       .filter(Boolean);
@@ -123,8 +116,9 @@ function topicToSlug(topic: string): string {
 
 async function getUnsplashImage(query: string): Promise<string> {
   try {
+    const randomPage = Math.floor(Math.random() * 5) + 1;
     const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=1&orientation=landscape`,
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
       {
         headers: {
           Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
@@ -132,7 +126,10 @@ async function getUnsplashImage(query: string): Promise<string> {
       }
     );
     const data = await res.json();
-    return data.results?.[0]?.urls?.regular || '';
+    const results = data.results || [];
+    if (results.length === 0) return '';
+    const randomIndex = Math.floor(Math.random() * results.length);
+    return results[randomIndex]?.urls?.regular || '';
   } catch {
     return '';
   }
@@ -140,11 +137,9 @@ async function getUnsplashImage(query: string): Promise<string> {
 
 export async function GET() {
   try {
-    // Step 1 — Get trending topic
     const topic = await getTrendingVetTopic();
     console.log('Auto-publishing topic:', topic);
 
-    // Safety check — skip if this topic was already published
     const existingSlugs = await getExistingSlugs();
     const topicSlugPrefix = topicToSlug(topic);
     const alreadyPublished = existingSlugs.some(slug => slug.startsWith(topicSlugPrefix));
@@ -157,7 +152,6 @@ export async function GET() {
       });
     }
 
-    // Step 2 — Generate article and images in parallel
     const [researchRes, heroImage, causesImage, symptomsImage, treatmentImage, preventionImage] =
       await Promise.all([
         fetch('https://api.you.com/v1/research', {
@@ -202,22 +196,19 @@ WRITING REQUIREMENTS:
             research_effort: 'standard',
           }),
         }),
-        getUnsplashImage(topic + ' animal'),
-        getUnsplashImage(topic + ' disease'),
-        getUnsplashImage(topic + ' sick animal'),
-        getUnsplashImage(topic + ' veterinary'),
-        getUnsplashImage(topic + ' farm prevention'),
+        getUnsplashImage(topic + ' livestock farm'),
+        getUnsplashImage(topic + ' animal disease'),
+        getUnsplashImage('sick ' + topic + ' animal'),
+        getUnsplashImage('veterinarian farmer treatment'),
+        getUnsplashImage('farm biosecurity prevention animal'),
       ]);
 
     const data = await researchRes.json();
     let content = data.output?.content || '';
 
-    // Remove citation numbers
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    // Generate excerpt BEFORE injecting images — pull the real opening lines
-    // of the article (after the "## Introduction" heading) instead of a fixed template
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
     const introMatch = plainText.match(/Introduction\s*([\s\S]+)/i);
     const introText = (introMatch ? introMatch[1] : plainText).trim();
@@ -231,8 +222,6 @@ WRITING REQUIREMENTS:
     };
 
     const excerpt = buildExcerpt(introText, 155);
-
-    // SEO title and meta
     const seoTitle = `${topic.charAt(0).toUpperCase() + topic.slice(1)}: Causes, Symptoms, Treatment and Prevention`;
     const metaDescription = buildExcerpt(introText, 160) || `Learn everything about ${topic} — causes, symptoms, diagnosis, treatment and prevention. Expert veterinary guide for farmers and pet owners.`;
     const tags = [
@@ -242,17 +231,12 @@ WRITING REQUIREMENTS:
       'veterinary',
     ].slice(0, 6);
 
-    // Inject images
     if (heroImage) {
       content = content.replace(
         '## Introduction',
         `## Introduction\n\n
 
-
-
 ![${topic}](${heroImage})
-
-
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -262,11 +246,7 @@ WRITING REQUIREMENTS:
         `## Causes of ${topic}`,
         `## Causes of ${topic}\n\n
 
-
-
 ![Causes of ${topic}](${causesImage})
-
-
 
 \n*Photo: Causes — via Unsplash*\n`
       );
@@ -276,11 +256,7 @@ WRITING REQUIREMENTS:
         `## Clinical Signs and Symptoms of ${topic}`,
         `## Clinical Signs and Symptoms of ${topic}\n\n
 
-
-
 ![Symptoms of ${topic}](${symptomsImage})
-
-
 
 \n*Photo: Clinical Signs — via Unsplash*\n`
       );
@@ -290,11 +266,7 @@ WRITING REQUIREMENTS:
         `## Treatment of ${topic}`,
         `## Treatment of ${topic}\n\n
 
-
-
 ![Treatment for ${topic}](${treatmentImage})
-
-
 
 \n*Photo: Treatment — via Unsplash*\n`
       );
@@ -304,17 +276,12 @@ WRITING REQUIREMENTS:
         `## Prevention and Control of ${topic}`,
         `## Prevention and Control of ${topic}\n\n
 
-
-
 ![Prevention of ${topic}](${preventionImage})
-
-
 
 \n*Photo: Prevention — via Unsplash*\n`
       );
     }
 
-    // Step 3 — Publish to GitHub
     const slug = seoTitle
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
