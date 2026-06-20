@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const { title, content, excerpt, heroImage } = await request.json();
+  const { title, content, excerpt, metaDescription, tags, heroImage } = await request.json();
 
   const slug = title
     .toLowerCase()
@@ -10,21 +10,13 @@ export async function POST(request: NextRequest) {
 
   const date = new Date().toISOString().split('T')[0];
 
-  // Generate tags from title words
-  const tags = title
-    .toLowerCase()
-    .split(' ')
-    .filter((w: string) => w.length > 3)
-    .slice(0, 4)
-    .map((w: string) => w.replace(/[^a-z]/g, ''));
-
   const markdown = `---
 title: "${title}"
-description: "${excerpt}"
+description: "${metaDescription || excerpt}"
 date: "${date}"
 author: "Mathews Chilongo"
 category: "Animal Health"
-tags: [${tags.map((t: string) => `"${t}"`).join(', ')}]
+tags: [${(tags || []).map((t: string) => `"${t}"`).join(', ')}]
 image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
 imageAlt: "${title}"
 featured: false
