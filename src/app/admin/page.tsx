@@ -8,6 +8,8 @@ export default function AdminPage() {
   const [topic, setTopic] = useState('');
   const [article, setArticle] = useState('');
   const [title, setTitle] = useState('');
+  const [heroImage, setHeroImage] = useState('');
+  const [excerpt, setExcerpt] = useState('');
   const [generating, setGenerating] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [message, setMessage] = useState('');
@@ -27,12 +29,16 @@ export default function AdminPage() {
     setGenerating(true);
     setMessage('');
     setArticle('');
+    setHeroImage('');
+    setExcerpt('');
 
     try {
       const res = await fetch(`/api/generate?topic=${encodeURIComponent(topic)}`);
       const data = await res.json();
       setArticle(data.content || '');
       setTitle(data.title || topic);
+      setHeroImage(data.heroImage || '');
+      setExcerpt(data.excerpt || '');
       setMessage('Article generated! Review it below then publish.');
     } catch {
       setMessage('Failed to generate. Try again.');
@@ -50,7 +56,7 @@ export default function AdminPage() {
       const res = await fetch('/api/publish', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content: article }),
+        body: JSON.stringify({ title, content: article, excerpt, heroImage }),
       });
       const data = await res.json();
       if (data.success) {
@@ -58,6 +64,8 @@ export default function AdminPage() {
         setArticle('');
         setTopic('');
         setTitle('');
+        setHeroImage('');
+        setExcerpt('');
       } else {
         setMessage('Publishing failed. Try again.');
       }
@@ -120,6 +128,13 @@ export default function AdminPage() {
           <p className={`text-center text-sm mb-4 ${message.includes('success') ? 'text-green-400' : 'text-yellow-400'}`}>
             {message}
           </p>
+        )}
+
+        {heroImage && (
+          <div className="mb-4 rounded-xl overflow-hidden">
+            <img src={heroImage} alt={title} className="w-full h-48 object-cover" />
+            <p className="text-gray-400 text-xs text-center mt-1">Hero image from Unsplash</p>
+          </div>
         )}
 
         {article && (
