@@ -49,10 +49,10 @@ Requirements:
           }),
         }),
         getUnsplashImage(topic + ' animal'),
-        getUnsplashImage('livestock disease cattle'),
-        getUnsplashImage('sick animal veterinary'),
-        getUnsplashImage('veterinarian treating animal'),
-        getUnsplashImage('farm animal prevention biosecurity'),
+        getUnsplashImage(topic + ' disease'),
+        getUnsplashImage(topic + ' sick animal'),
+        getUnsplashImage(topic + ' veterinary'),
+        getUnsplashImage(topic + ' farm prevention'),
       ]);
 
     const data = await researchRes.json();
