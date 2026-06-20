@@ -222,13 +222,13 @@ WRITING REQUIREMENTS:
     const introMatch = plainText.match(/Introduction\s*([\s\S]+)/i);
     const introText = (introMatch ? introMatch[1] : plainText).trim();
 
-    function buildExcerpt(text: string, maxLength: number): string {
+    const buildExcerpt = (text: string, maxLength: number): string => {
       const clean = text.replace(/\s+/g, ' ').trim();
       if (clean.length <= maxLength) return clean;
       const truncated = clean.substring(0, maxLength);
       const lastSpace = truncated.lastIndexOf(' ');
       return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
-    }
+    };
 
     const excerpt = buildExcerpt(introText, 155);
 
