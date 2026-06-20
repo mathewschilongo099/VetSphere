@@ -8,8 +8,11 @@ interface ArticleCardProps {
 
 export default function ArticleCard({ post }: ArticleCardProps) {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border border-gray-100">
-      
+    <Link
+      href={`/articles/${post.slug}`}
+      className="block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border border-gray-100"
+    >
+
       {/* Image */}
       <div className="relative h-48 w-full bg-gradient-to-br from-emerald-500 to-teal-600">
         {post.image && (
@@ -38,15 +41,12 @@ export default function ArticleCard({ post }: ArticleCardProps) {
         </p>
         <div className="flex items-center justify-between">
           <span className="text-xs text-gray-400">{post.author}</span>
-          <Link
-            href={`/articles/${post.slug}`}
-            className="text-green-600 font-semibold text-sm hover:underline"
-          >
+          <span className="text-green-600 font-semibold text-sm group-hover:underline">
             Read more →
-          </Link>
+          </span>
         </div>
       </div>
 
-    </div>
+    </Link>
   );
 }
