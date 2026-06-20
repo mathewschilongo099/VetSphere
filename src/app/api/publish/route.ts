@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const { title, content, excerpt } = await request.json();
+  const { title, content, excerpt, heroImage } = await request.json();
 
   const slug = title
     .toLowerCase()
@@ -25,7 +25,7 @@ date: "${date}"
 author: "Mathews Chilongo"
 category: "Animal Health"
 tags: [${tags.map((t: string) => `"${t}"`).join(', ')}]
-image: "/images/articles/cattle-diseases.jpg"
+image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
 imageAlt: "${title}"
 featured: false
 ---
