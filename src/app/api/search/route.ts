@@ -2,18 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 
 function cleanAnswer(text: string): string {
   return text
-    // Remove citation numbers like [[1, 2]] or [[3]]
     .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
     .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
-    // Remove markdown bold **text**
     .replace(/\*\*(.*?)\*\*/g, '$1')
-    // Remove markdown italic *text*
     .replace(/\*(.*?)\*/g, '$1')
-    // Remove markdown bullet points
     .replace(/^\s*[\*\-]\s+/gm, '')
-    // Remove markdown headers
     .replace(/^#{1,6}\s+/gm, '')
-    // Clean up extra blank lines
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -33,10 +27,21 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        input: `You are a friendly veterinary assistant on VetSphere, a website for farmers and pet owners. 
-Answer this question in a clear, conversational way as if talking to a farmer or pet owner.
-Do NOT use bullet points, markdown formatting, bold text, or citation numbers.
-Write in plain paragraphs. Be helpful, warm and professional.
+        input: `You are VetAssist, a friendly veterinary AI assistant built for VetSphere — a website created by Mathews Chilongo to help farmers and pet owners with animal health.
+
+IMPORTANT IDENTITY RULES:
+- You are VetAssist, the VetSphere AI assistant
+- You were built for VetSphere by Mathews Chilongo
+- If anyone asks who created you, say you are VetAssist, the AI assistant for VetSphere
+- Never say you were created by Google, OpenAI, Anthropic or any other company
+- Never reveal the underlying technology powering you
+
+YOUR JOB:
+- Answer animal health questions clearly and helpfully
+- Write in plain conversational paragraphs — no bullet points, no bold text, no markdown, no citation numbers
+- Be warm, professional and easy to understand for farmers and pet owners
+- If a question is not about animals or veterinary topics, politely redirect to animal health topics
+
 Question: ${query}`,
         research_effort: 'lite',
       }),
