@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `https://ydc-index.io/v1/search?query=${encodeURIComponent(query)}&count=6`,
+      `https://ydc-index.io/v1/research?query=${encodeURIComponent(query)}`,
       {
         headers: {
           'X-API-Key': process.env.YOU_API_KEY || '',
