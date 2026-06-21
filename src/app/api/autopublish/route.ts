@@ -30,7 +30,6 @@ async function getTrendingVetTopic(): Promise<string> {
     if (vetTrend) return vetTrend;
 
     const fallbackTopics = [
-      // === CATTLE DISEASES ===
       'Mastitis in Dairy Cows',
       'Tick Fever in Cattle',
       'East Coast Fever in Cattle',
@@ -50,21 +49,17 @@ async function getTrendingVetTopic(): Promise<string> {
       'Trypanosomiasis in Cattle',
       'Worm Infestation in Cattle',
       'Brucellosis in Livestock',
-      'Johne\'s Disease in Cattle',
-
-      // === POULTRY DISEASES ===
+      "Johne's Disease in Cattle",
       'Newcastle Disease in Poultry',
       'Avian Influenza in Poultry',
       'Coccidiosis in Poultry',
       'Infectious Bursal Disease in Poultry',
       'Fowl Pox in Chickens',
       'Salmonellosis in Poultry',
-      'Marek\'s Disease in Chickens',
+      "Marek's Disease in Chickens",
       'Fowl Cholera in Poultry',
       'Infectious Bronchitis in Chickens',
       'Mycoplasma Infection in Poultry',
-
-      // === GOAT AND SHEEP DISEASES ===
       'Foot Rot in Goats',
       'Peste des Petits Ruminants in Goats',
       'Contagious Caprine Pleuropneumonia in Goats',
@@ -72,18 +67,14 @@ async function getTrendingVetTopic(): Promise<string> {
       'Goat Pox',
       'Caseous Lymphadenitis in Goats',
       'Enterotoxemia in Goats',
-      'Ovine Johne\'s Disease in Sheep',
+      "Ovine Johne's Disease in Sheep",
       'Scrapie in Sheep',
       'Nairobi Sheep Disease',
-
-      // === PIG DISEASES ===
       'African Swine Fever',
       'Porcine Reproductive and Respiratory Syndrome',
       'Swine Erysipelas',
       'Porcine Circovirus Disease',
       'Classical Swine Fever',
-
-      // === DOG DISEASES AND CARE ===
       'Rabies Prevention in Dogs',
       'Parvovirus in Dogs',
       'Canine Distemper',
@@ -99,8 +90,6 @@ async function getTrendingVetTopic(): Promise<string> {
       'Dental Care for Dogs',
       'Exercise and Weight Management in Dogs',
       'Puppy Care and Vaccination Schedule',
-
-      // === CAT DISEASES AND CARE ===
       'Feline Panleukopenia in Cats',
       'Feline Leukemia Virus',
       'Toxoplasmosis in Cats',
@@ -111,8 +100,6 @@ async function getTrendingVetTopic(): Promise<string> {
       'Nutrition and Feeding Guide for Cats',
       'Common Signs of Illness in Cats',
       'Indoor vs Outdoor Cat Health',
-
-      // === LIVESTOCK NUTRITION ===
       'Mineral Nutrition for Dairy Cattle',
       'Protein Supplementation for Beef Cattle',
       'Feeding Dairy Cows for Maximum Milk Production',
@@ -127,8 +114,6 @@ async function getTrendingVetTopic(): Promise<string> {
       'How to Supplement Minerals for Livestock',
       'Energy Requirements for Lactating Cows',
       'Feed Quality and Storage on the Farm',
-
-      // === FARM MANAGEMENT ===
       'Biosecurity Measures on Livestock Farms',
       'How to Set Up a Poultry House',
       'Record Keeping for Livestock Farmers',
@@ -144,8 +129,6 @@ async function getTrendingVetTopic(): Promise<string> {
       'Livestock Identification and Tagging',
       'Farm Sanitation and Disease Prevention',
       'How to Build a Healthy Poultry Flock',
-
-      // === REPRODUCTION AND BREEDING ===
       'Cattle Breeding and Reproduction Guide',
       'Signs of Heat in Dairy Cows',
       'Artificial Insemination in Cattle',
@@ -156,8 +139,6 @@ async function getTrendingVetTopic(): Promise<string> {
       'Retained Placenta in Dairy Cows',
       'Reproductive Health in Pigs',
       'Goat Kidding Management for Farmers',
-
-      // === GENERAL ANIMAL HEALTH ===
       'How to Do a Body Condition Score in Cattle',
       'Signs of Pain and Stress in Animals',
       'Animal Welfare on the Farm',
@@ -304,6 +285,14 @@ WRITING REQUIREMENTS:
     const data = await researchRes.json();
     let content = data.output?.content || '';
 
+    if (!researchRes.ok || !content || content.trim().length < 200) {
+      console.error('Research API returned no usable content:', researchRes.status, data);
+      return NextResponse.json({
+        success: false,
+        error: 'Research API did not return usable article content. Skipping publish to avoid a blank article.',
+      }, { status: 500 });
+    }
+
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
@@ -334,7 +323,11 @@ WRITING REQUIREMENTS:
         '## Introduction',
         `## Introduction\n\n
 
+
+
 ![${topic}](${heroImage})
+
+
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -344,7 +337,11 @@ WRITING REQUIREMENTS:
         `## What is ${topic}?`,
         `## What is ${topic}?\n\n
 
+
+
 ![${topic}](${causesImage})
+
+
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -354,7 +351,11 @@ WRITING REQUIREMENTS:
         `## Key Facts About ${topic}`,
         `## Key Facts About ${topic}\n\n
 
+
+
 ![${topic} facts](${symptomsImage})
+
+
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -364,7 +365,11 @@ WRITING REQUIREMENTS:
         `## Practical Guide to ${topic}`,
         `## Practical Guide to ${topic}\n\n
 
+
+
 ![${topic} guide](${treatmentImage})
+
+
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -374,7 +379,11 @@ WRITING REQUIREMENTS:
         `## Common Mistakes to Avoid`,
         `## Common Mistakes to Avoid\n\n
 
+
+
 ![Common mistakes](${preventionImage})
+
+
 
 \n*Photo: Farm management — via Unsplash*\n`
       );
@@ -408,29 +417,59 @@ ${content}
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
     const token = process.env.GITHUB_TOKEN;
+    const contentsUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
 
-    const githubRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      {
-        method: 'PUT',
+    // GitHub's Contents API requires the current file's sha to update it.
+    // If this file already exists (e.g. a near-simultaneous run already published
+    // this exact slug), PUT-ing without a sha returns a 422 conflict — which is
+    // the "Error" deployments you were seeing in Vercel. Check first and skip
+    // cleanly instead of erroring out.
+    let existingSha: string | undefined;
+    try {
+      const existingRes = await fetch(contentsUrl, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          message: `Auto-publish: ${seoTitle}`,
-          content: Buffer.from(markdown).toString('base64'),
-        }),
+      });
+      if (existingRes.ok) {
+        const existingData = await existingRes.json();
+        existingSha = existingData.sha;
       }
-    );
+    } catch {
+      // If this check itself fails, fall through and attempt a normal create.
+    }
+
+    if (existingSha) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: `File "${path}" already exists (likely published by a concurrent run). Skipping.`,
+      });
+    }
+
+    const githubRes = await fetch(contentsUrl, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: `Auto-publish: ${seoTitle}`,
+        content: Buffer.from(markdown).toString('base64'),
+      }),
+    });
 
     if (!githubRes.ok) {
-      const err = await githubRes.json();
-      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+      const err = await githubRes.json().catch(() => ({ message: 'Unknown GitHub API error' }));
+      console.error('Auto-publish GitHub PUT failed:', githubRes.status, err);
+      return NextResponse.json({ success: false, error: err.message || 'GitHub publish failed' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, topic, title: seoTitle });
   } catch (error) {
-    return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
+    console.error('Auto-publish failed:', error);
+    const message = error instanceof Error ? error.message : 'Auto-publish failed';
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
