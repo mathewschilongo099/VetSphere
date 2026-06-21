@@ -54,6 +54,11 @@ ${content}
       return NextResponse.json({ success: false, error: err.message }, { status: 500 });
     }
 
+    // Trigger Vercel redeploy so article appears immediately
+    if (process.env.VERCEL_DEPLOY_HOOK) {
+      await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
+    }
+
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ success: false }, { status: 500 });
