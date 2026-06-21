@@ -60,16 +60,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Trust / category strip — gives scope at a glance right under the hero */}
-      <section className="w-full bg-gray-950 border-t border-white/10">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-gray-400">
-          <span className="flex items-center gap-2"><span className="text-green-400">●</span> Livestock Health</span>
-          <span className="flex items-center gap-2"><span className="text-green-400">●</span> Pet Care</span>
-          <span className="flex items-center gap-2"><span className="text-green-400">●</span> Disease Prevention</span>
-          <span className="flex items-center gap-2"><span className="text-green-400">●</span> New articles published daily</span>
-        </div>
-      </section>
-
       {/* Latest Articles */}
       <section className="w-full py-16 sm:py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
