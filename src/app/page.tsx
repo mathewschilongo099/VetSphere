@@ -1,9 +1,9 @@
-import { getFeaturedPosts } from '@/lib/blog';
+import { getAllPosts } from '@/lib/blog';
 import ArticleCard from '@/components/content/ArticleCard';
 import AnimalSearch from '@/components/AnimalSearch';
 
 export default async function HomePage() {
-  const featuredPosts = getFeaturedPosts(3);
+  const latestPosts = getAllPosts().slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
@@ -35,24 +35,24 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Featured Articles */}
+      {/* Latest Articles */}
       <section className="w-full py-16 sm:py-20 bg-gray-50">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Featured Articles</h2>
-              <p className="text-gray-500 mt-2">A few good reads to get you started</p>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Latest Articles</h2>
+              <p className="text-gray-500 mt-2">Fresh veterinary knowledge published daily</p>
             </div>
             <a href="/articles" className="text-green-600 font-semibold text-sm hover:underline shrink-0">View all</a>
           </div>
-          {featuredPosts.length > 0 ? (
+          {latestPosts.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {featuredPosts.map(post => (
+              {latestPosts.map(post => (
                 <ArticleCard key={post.slug} post={post} />
               ))}
             </div>
           ) : (
-            <p className="text-center text-gray-400 py-16">No featured articles yet. Check back soon.</p>
+            <p className="text-center text-gray-400 py-16">No articles yet. Check back soon.</p>
           )}
           <div className="text-center mt-12">
             <a href="/articles" className="inline-block bg-gray-900 hover:bg-gray-800 text-white px-10 py-4 rounded-xl font-bold transition">
