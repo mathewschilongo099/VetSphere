@@ -86,7 +86,7 @@ export default function AdminPage() {
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+      <div className="min-h-screen w-full bg-gray-900 flex items-center justify-center px-4">
         <div className="bg-gray-800 rounded-2xl p-8 w-full max-w-sm">
           <h1 className="text-white text-2xl font-bold mb-6 text-center">Admin Login</h1>
           <form onSubmit={handleLogin} className="space-y-4">
@@ -111,98 +111,101 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white px-4 py-10">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-center">VetSphere Admin</h1>
+    <div className="w-full bg-gray-900 text-white" style={{ minHeight: '100vh' }}>
+      <div className="w-full bg-gray-900 px-4 py-10 pb-24">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-3xl font-bold mb-8 text-center">VetSphere Admin</h1>
 
-        <form onSubmit={handleGenerate} className="flex gap-3 mb-6">
-          <input
-            type="text"
-            value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            placeholder="Enter article topic e.g. Foot and Mouth Disease in Cattle"
-            className="flex-1 px-5 py-4 rounded-xl bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
-          />
-          <button
-            type="submit"
-            disabled={generating || !topic.trim()}
-            className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold px-6 py-4 rounded-xl transition"
-          >
-            {generating ? 'Generating...' : 'Generate'}
-          </button>
-        </form>
-
-        {message && (
-          <p className={`text-center text-sm mb-4 ${message.includes('success') ? 'text-green-400' : 'text-yellow-400'}`}>
-            {message}
-          </p>
-        )}
-
-        {heroImage && (
-          <div className="mb-4 rounded-xl overflow-hidden">
-            <img src={heroImage} alt={title} className="w-full h-48 object-cover" />
-            <p className="text-gray-400 text-xs text-center mt-1">Hero image from Unsplash</p>
-          </div>
-        )}
-
-        {article && (
-          <div className="space-y-4">
-
-            {/* SEO Title */}
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">SEO Title</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full px-5 py-3 rounded-xl bg-gray-800 text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-
-            {/* Meta Description */}
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">Meta Description (shown on Google)</label>
-              <textarea
-                value={metaDescription}
-                onChange={(e) => setMetaDescription(e.target.value)}
-                rows={2}
-                className="w-full px-5 py-3 rounded-xl bg-gray-800 text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-              <p className="text-xs text-gray-500 mt-1">{metaDescription.length}/155 characters</p>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">SEO Tags</label>
-              <div className="flex flex-wrap gap-2">
-                {tags.map((tag, i) => (
-                  <span key={i} className="bg-green-800 text-green-200 text-xs px-3 py-1 rounded-full">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Article Content */}
-            <div>
-              <label className="text-xs text-gray-400 mb-1 block">Article Content</label>
-              <textarea
-                value={article}
-                onChange={(e) => setArticle(e.target.value)}
-                rows={20}
-                className="w-full px-5 py-4 rounded-xl bg-gray-800 text-gray-200 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-400"
-              />
-            </div>
-
+          <form onSubmit={handleGenerate} className="flex gap-3 mb-6">
+            <input
+              type="text"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="Enter article topic e.g. Foot and Mouth Disease in Cattle"
+              className="flex-1 px-5 py-4 rounded-xl bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
+            />
             <button
-              onClick={handlePublish}
-              disabled={publishing}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition"
+              type="submit"
+              disabled={generating || !topic.trim()}
+              className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white font-bold px-6 py-4 rounded-xl transition"
             >
-              {publishing ? 'Publishing...' : 'Publish Article'}
+              {generating ? 'Generating...' : 'Generate'}
             </button>
-          </div>
-        )}
+          </form>
+
+          {message && (
+            <p className={`text-center text-sm mb-4 ${message.includes('success') ? 'text-green-400' : 'text-yellow-400'}`}>
+              {message}
+            </p>
+          )}
+
+          {heroImage && (
+            <div className="mb-4 rounded-xl overflow-hidden">
+              <img src={heroImage} alt={title} className="w-full h-48 object-cover" />
+              <p className="text-gray-400 text-xs text-center mt-1">Hero image from Unsplash</p>
+            </div>
+          )}
+
+          {article && (
+            <div className="space-y-4">
+
+              {/* SEO Title */}
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">SEO Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full px-5 py-3 rounded-xl bg-gray-800 text-white font-bold text-lg focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+              </div>
+
+              {/* Meta Description */}
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Meta Description (shown on Google)</label>
+                <textarea
+                  value={metaDescription}
+                  onChange={(e) => setMetaDescription(e.target.value)}
+                  rows={2}
+                  className="w-full px-5 py-3 rounded-xl bg-gray-800 text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+                <p className="text-xs text-gray-500 mt-1">{metaDescription.length}/155 characters</p>
+              </div>
+
+              {/* Tags */}
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">SEO Tags</label>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag, i) => (
+                    <span key={i} className="bg-green-800 text-green-200 text-xs px-3 py-1 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Article Content */}
+              <div>
+                <label className="text-xs text-gray-400 mb-1 block">Article Content</label>
+                <textarea
+                  value={article}
+                  onChange={(e) => setArticle(e.target.value)}
+                  rows={20}
+                  className="w-full px-5 py-4 rounded-xl bg-gray-800 text-gray-200 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-400"
+                />
+              </div>
+
+              <button
+                onClick={handlePublish}
+                disabled={publishing}
+                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-4 rounded-xl transition mb-10"
+              >
+                {publishing ? 'Publishing...' : 'Publish Article'}
+              </button>
+
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
