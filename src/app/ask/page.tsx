@@ -19,7 +19,16 @@ export default function AskPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Wait for the new message to fully render and the container to expand
+    // to its final height before scrolling — otherwise scrollIntoView
+    // calculates "bottom" using the old, shorter height and undershoots,
+    // landing above the new response instead of right at it.
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      });
+    });
+    return () => cancelAnimationFrame(id);
   }, [messages, loading]);
 
   const handleAsk = async (e: React.FormEvent) => {
