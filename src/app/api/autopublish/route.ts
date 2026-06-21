@@ -9,19 +9,35 @@ const VETERINARY_KEYWORDS = [
   'nutrition', 'breeding', 'health', 'treatment', 'prevention'
 ];
 
+// Google's Trends RSS feed has no true "worldwide" mode — it always requires
+// a country geo code. To approximate a global/worldwide audience instead of
+// one country, we sample trending topics across several major English-speaking
+// regions and pool the results together.
+const TRENDING_REGIONS = ['US', 'GB', 'IN', 'NG', 'ZA', 'AU', 'CA'];
+
 async function getTrendingVetTopic(): Promise<string> {
   try {
-    const res = await fetch(
-      'https://trends.google.com/trending/rss?geo=ZW&hl=en',
-      { next: { revalidate: 0 } }
+    const allTitles: string[] = [];
+
+    await Promise.all(
+      TRENDING_REGIONS.map(async (geo) => {
+        try {
+          const res = await fetch(
+            `https://trends.google.com/trending/rss?geo=${geo}&hl=en`,
+            { next: { revalidate: 0 } }
+          );
+          const xml = await res.text();
+          const titles = Array.from(xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g))
+            .map(m => m[1])
+            .filter(t => t !== 'Google Trends');
+          allTitles.push(...titles);
+        } catch {
+          // Ignore failures from any single region; others may still succeed.
+        }
+      })
     );
-    const xml = await res.text();
 
-    const titles = Array.from(xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g))
-      .map(m => m[1])
-      .filter(t => t !== 'Google Trends');
-
-    const vetTrend = titles.find(title =>
+    const vetTrend = allTitles.find(title =>
       VETERINARY_KEYWORDS.some(keyword =>
         title.toLowerCase().includes(keyword)
       )
@@ -49,14 +65,14 @@ async function getTrendingVetTopic(): Promise<string> {
       'Trypanosomiasis in Cattle',
       'Worm Infestation in Cattle',
       'Brucellosis in Livestock',
-      "Johne's Disease in Cattle",
+      'Johne\'s Disease in Cattle',
       'Newcastle Disease in Poultry',
       'Avian Influenza in Poultry',
       'Coccidiosis in Poultry',
       'Infectious Bursal Disease in Poultry',
       'Fowl Pox in Chickens',
       'Salmonellosis in Poultry',
-      "Marek's Disease in Chickens",
+      'Marek\'s Disease in Chickens',
       'Fowl Cholera in Poultry',
       'Infectious Bronchitis in Chickens',
       'Mycoplasma Infection in Poultry',
@@ -67,7 +83,7 @@ async function getTrendingVetTopic(): Promise<string> {
       'Goat Pox',
       'Caseous Lymphadenitis in Goats',
       'Enterotoxemia in Goats',
-      "Ovine Johne's Disease in Sheep",
+      'Ovine Johne\'s Disease in Sheep',
       'Scrapie in Sheep',
       'Nairobi Sheep Disease',
       'African Swine Fever',
@@ -194,6 +210,38 @@ function topicToSlug(topic: string): string {
   return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+// Free, global, no API key: Google's public autocomplete endpoint returns
+// real search-phrase suggestions for a query. This gives genuine keyword
+// signal (what people actually type) without any paid SEO API.
+async function getAutocompleteKeywords(topic: string): Promise<string[]> {
+  try {
+    const prefixes = ['', 'how to ', 'best ', 'signs of ', 'treatment for '];
+    const suggestionSets = await Promise.all(
+      prefixes.map(async (prefix) => {
+        try {
+          const query = `${prefix}${topic}`;
+          const res = await fetch(
+            `https://suggestqueries.google.com/complete/search?client=firefox&q=${encodeURIComponent(query)}`,
+            { next: { revalidate: 0 } }
+          );
+          const data = await res.json();
+          // Response shape: [query, [suggestion1, suggestion2, ...]]
+          return Array.isArray(data?.[1]) ? (data[1] as string[]) : [];
+        } catch {
+          return [];
+        }
+      })
+    );
+
+    const merged = suggestionSets.flat();
+    // De-duplicate and cap to a reasonable number for the prompt
+    const unique = Array.from(new Set(merged.map(s => s.trim()).filter(Boolean)));
+    return unique.slice(0, 12);
+  } catch {
+    return [];
+  }
+}
+
 async function getUnsplashImage(query: string): Promise<string> {
   try {
     const randomPage = Math.floor(Math.random() * 5) + 1;
@@ -232,6 +280,11 @@ export async function GET() {
       });
     }
 
+    const autocompleteKeywords = await getAutocompleteKeywords(topic);
+    const keywordLine = autocompleteKeywords.length > 0
+      ? `\n\nREAL SEARCH PHRASES PEOPLE USE (from Google Autocomplete) — weave these naturally into the article where relevant, especially in subheadings and the FAQ section:\n${autocompleteKeywords.map(k => `- ${k}`).join('\n')}`
+      : '';
+
     const [researchRes, heroImage, causesImage, symptomsImage, treatmentImage, preventionImage] =
       await Promise.all([
         fetch('https://api.you.com/v1/research', {
@@ -248,7 +301,7 @@ SEO REQUIREMENTS:
 - Also use related long-tail keywords like "how to ${topic}", "tips for ${topic}", "guide to ${topic}"
 - Minimum 1500 words
 - The first paragraph must mention the main keyword within the first 100 words
-- Use keyword-rich subheadings (H2 and H3)
+- Use keyword-rich subheadings (H2 and H3)${keywordLine}
 
 STRUCTURE — use these EXACT headings:
 ## Introduction
@@ -314,20 +367,17 @@ WRITING REQUIREMENTS:
     const tags = [
       topic.toLowerCase(),
       ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
+      ...autocompleteKeywords.slice(0, 2).map(k => k.toLowerCase()),
       'animal health',
       'veterinary',
-    ].slice(0, 6);
+    ].slice(0, 8);
 
     if (heroImage) {
       content = content.replace(
         '## Introduction',
         `## Introduction\n\n
 
-
-
 ![${topic}](${heroImage})
-
-
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -337,11 +387,7 @@ WRITING REQUIREMENTS:
         `## What is ${topic}?`,
         `## What is ${topic}?\n\n
 
-
-
 ![${topic}](${causesImage})
-
-
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -351,11 +397,7 @@ WRITING REQUIREMENTS:
         `## Key Facts About ${topic}`,
         `## Key Facts About ${topic}\n\n
 
-
-
 ![${topic} facts](${symptomsImage})
-
-
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -365,11 +407,7 @@ WRITING REQUIREMENTS:
         `## Practical Guide to ${topic}`,
         `## Practical Guide to ${topic}\n\n
 
-
-
 ![${topic} guide](${treatmentImage})
-
-
 
 \n*Photo: ${topic} — via Unsplash*\n`
       );
@@ -379,11 +417,7 @@ WRITING REQUIREMENTS:
         `## Common Mistakes to Avoid`,
         `## Common Mistakes to Avoid\n\n
 
-
-
 ![Common mistakes](${preventionImage})
-
-
 
 \n*Photo: Farm management — via Unsplash*\n`
       );
