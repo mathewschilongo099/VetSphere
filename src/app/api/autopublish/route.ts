@@ -28,47 +28,144 @@ async function getTrendingVetTopic(): Promise<string> {
     if (vetTrend) return vetTrend;
 
     const fallbackTopics = [
+      // === CATTLE DISEASES ===
       'Mastitis in Dairy Cows',
-      'Newcastle Disease in Poultry',
       'Tick Fever in Cattle',
-      'Foot Rot in Goats',
-      'Rabies Prevention in Dogs',
-      'Worm Infestation in Cattle',
-      'Brucellosis in Livestock',
-      'African Swine Fever',
-      'Avian Influenza in Poultry',
       'East Coast Fever in Cattle',
       'Blackleg Disease in Cattle',
       'Lumpy Skin Disease in Cattle',
-      'Parvovirus in Dogs',
-      'Feline Panleukopenia in Cats',
-      'Contagious Caprine Pleuropneumonia in Goats',
       'Bovine Respiratory Disease',
-      'Coccidiosis in Poultry',
-      'Heartworm Disease in Dogs',
       'Ringworm in Cattle',
       'Pneumonia in Calves',
       'Anthrax in Livestock',
       'Bloat in Cattle',
       'Foot and Mouth Disease in Cattle',
-      'Tetanus in Goats',
-      'Salmonellosis in Poultry',
-      'Canine Distemper',
-      'Feline Leukemia Virus',
-      'Mange in Dogs',
-      'Trypanosomiasis in Cattle',
-      'Peste des Petits Ruminants in Goats',
-      'Fowl Pox in Chickens',
-      'Liver Fluke in Cattle',
-      'Pink Eye in Cattle',
       'Milk Fever in Dairy Cows',
       'Bovine Tuberculosis',
-      'Kennel Cough in Dogs',
-      'Toxoplasmosis in Cats',
-      'Johne\'s Disease in Cattle',
       'Anaplasmosis in Cattle',
-      'Goat Pox',
+      'Liver Fluke in Cattle',
+      'Pink Eye in Cattle',
+      'Trypanosomiasis in Cattle',
+      'Worm Infestation in Cattle',
+      'Brucellosis in Livestock',
+      'Johne\'s Disease in Cattle',
+
+      // === POULTRY DISEASES ===
+      'Newcastle Disease in Poultry',
+      'Avian Influenza in Poultry',
+      'Coccidiosis in Poultry',
       'Infectious Bursal Disease in Poultry',
+      'Fowl Pox in Chickens',
+      'Salmonellosis in Poultry',
+      'Marek\'s Disease in Chickens',
+      'Fowl Cholera in Poultry',
+      'Infectious Bronchitis in Chickens',
+      'Mycoplasma Infection in Poultry',
+
+      // === GOAT AND SHEEP DISEASES ===
+      'Foot Rot in Goats',
+      'Peste des Petits Ruminants in Goats',
+      'Contagious Caprine Pleuropneumonia in Goats',
+      'Tetanus in Goats',
+      'Goat Pox',
+      'Caseous Lymphadenitis in Goats',
+      'Enterotoxemia in Goats',
+      'Ovine Johne\'s Disease in Sheep',
+      'Scrapie in Sheep',
+      'Nairobi Sheep Disease',
+
+      // === PIG DISEASES ===
+      'African Swine Fever',
+      'Porcine Reproductive and Respiratory Syndrome',
+      'Swine Erysipelas',
+      'Porcine Circovirus Disease',
+      'Classical Swine Fever',
+
+      // === DOG DISEASES AND CARE ===
+      'Rabies Prevention in Dogs',
+      'Parvovirus in Dogs',
+      'Canine Distemper',
+      'Mange in Dogs',
+      'Heartworm Disease in Dogs',
+      'Kennel Cough in Dogs',
+      'Tick Infestation in Dogs',
+      'Canine Parvovirus Vaccination Guide',
+      'How to Keep Your Dog Healthy',
+      'Common Signs of Illness in Dogs',
+      'Dog Nutrition and Feeding Guide',
+      'Deworming Your Dog Safely',
+      'Dental Care for Dogs',
+      'Exercise and Weight Management in Dogs',
+      'Puppy Care and Vaccination Schedule',
+
+      // === CAT DISEASES AND CARE ===
+      'Feline Panleukopenia in Cats',
+      'Feline Leukemia Virus',
+      'Toxoplasmosis in Cats',
+      'Cat Flu and Respiratory Infections',
+      'Feline Immunodeficiency Virus',
+      'How to Keep Your Cat Healthy',
+      'Cat Vaccination Schedule for Pet Owners',
+      'Nutrition and Feeding Guide for Cats',
+      'Common Signs of Illness in Cats',
+      'Indoor vs Outdoor Cat Health',
+
+      // === LIVESTOCK NUTRITION ===
+      'Mineral Nutrition for Dairy Cattle',
+      'Protein Supplementation for Beef Cattle',
+      'Feeding Dairy Cows for Maximum Milk Production',
+      'Best Feeding Practices for Goats',
+      'Vitamin Deficiencies in Livestock',
+      'Calcium and Phosphorus Balance in Cattle',
+      'Selenium Deficiency in Livestock',
+      'How to Feed Calves for Healthy Growth',
+      'Nutrition for Pregnant Cows',
+      'Feeding Goats During Dry Season',
+      'Poultry Feed Formulation for Farmers',
+      'How to Supplement Minerals for Livestock',
+      'Energy Requirements for Lactating Cows',
+      'Feed Quality and Storage on the Farm',
+
+      // === FARM MANAGEMENT ===
+      'Biosecurity Measures on Livestock Farms',
+      'How to Set Up a Poultry House',
+      'Record Keeping for Livestock Farmers',
+      'When to Call a Veterinarian',
+      'How to Handle and Restrain Cattle Safely',
+      'Water Quality and Animal Health',
+      'Vaccination Programs for Livestock Farmers',
+      'Deworming Programs for Cattle and Goats',
+      'Housing and Shelter for Livestock',
+      'How to Manage a Small Dairy Farm',
+      'Rotational Grazing for Cattle Health',
+      'Pasture Management for Livestock Farmers',
+      'Livestock Identification and Tagging',
+      'Farm Sanitation and Disease Prevention',
+      'How to Build a Healthy Poultry Flock',
+
+      // === REPRODUCTION AND BREEDING ===
+      'Cattle Breeding and Reproduction Guide',
+      'Signs of Heat in Dairy Cows',
+      'Artificial Insemination in Cattle',
+      'Pregnancy and Calving Management in Cows',
+      'Common Reproductive Problems in Goats',
+      'Improving Fertility in Livestock',
+      'Dystocia and Difficult Births in Cattle',
+      'Retained Placenta in Dairy Cows',
+      'Reproductive Health in Pigs',
+      'Goat Kidding Management for Farmers',
+
+      // === GENERAL ANIMAL HEALTH ===
+      'How to Do a Body Condition Score in Cattle',
+      'Signs of Pain and Stress in Animals',
+      'Animal Welfare on the Farm',
+      'First Aid for Farm Animals',
+      'How to Give Injections to Livestock',
+      'Zoonotic Diseases Farmers Should Know',
+      'Heat Stress in Livestock During Summer',
+      'Cold Stress and Winter Care for Animals',
+      'How to Spot a Sick Animal Early',
+      'Importance of Clean Water for Animal Health',
     ];
 
     const existingSlugs = await getExistingSlugs();
@@ -165,7 +262,7 @@ export async function GET() {
 
 SEO REQUIREMENTS:
 - Target the main keyword: "${topic}" and use it naturally throughout
-- Also use related long-tail keywords like "how to treat ${topic}", "symptoms of ${topic}", "prevention of ${topic}", "causes of ${topic}"
+- Also use related long-tail keywords like "how to ${topic}", "tips for ${topic}", "guide to ${topic}"
 - Minimum 1500 words
 - The first paragraph must mention the main keyword within the first 100 words
 - Use keyword-rich subheadings (H2 and H3)
@@ -173,11 +270,10 @@ SEO REQUIREMENTS:
 STRUCTURE — use these EXACT headings:
 ## Introduction
 ## What is ${topic}?
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
+## Why ${topic} Matters for Farmers and Pet Owners
+## Key Facts About ${topic}
+## Practical Guide to ${topic}
+## Common Mistakes to Avoid
 ## Frequently Asked Questions About ${topic}
 ## When to Call a Veterinarian
 ## Conclusion
@@ -197,10 +293,10 @@ WRITING REQUIREMENTS:
           }),
         }),
         getUnsplashImage(topic + ' livestock farm'),
-        getUnsplashImage(topic + ' animal disease'),
-        getUnsplashImage('sick ' + topic + ' animal'),
+        getUnsplashImage(topic + ' animal'),
+        getUnsplashImage(topic + ' farmer'),
         getUnsplashImage('veterinarian farmer treatment'),
-        getUnsplashImage('farm biosecurity prevention animal'),
+        getUnsplashImage('farm animal healthy'),
       ]);
 
     const data = await researchRes.json();
@@ -222,8 +318,8 @@ WRITING REQUIREMENTS:
     };
 
     const excerpt = buildExcerpt(introText, 155);
-    const seoTitle = `${topic.charAt(0).toUpperCase() + topic.slice(1)}: Causes, Symptoms, Treatment and Prevention`;
-    const metaDescription = buildExcerpt(introText, 160) || `Learn everything about ${topic} — causes, symptoms, diagnosis, treatment and prevention. Expert veterinary guide for farmers and pet owners.`;
+    const seoTitle = `${topic.charAt(0).toUpperCase() + topic.slice(1)}: A Complete Guide for Farmers and Pet Owners`;
+    const metaDescription = buildExcerpt(introText, 160) || `Complete guide to ${topic} — expert veterinary advice for farmers and pet owners to keep their animals healthy.`;
     const tags = [
       topic.toLowerCase(),
       ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
@@ -243,42 +339,42 @@ WRITING REQUIREMENTS:
     }
     if (causesImage) {
       content = content.replace(
-        `## Causes of ${topic}`,
-        `## Causes of ${topic}\n\n
+        `## What is ${topic}?`,
+        `## What is ${topic}?\n\n
 
-![Causes of ${topic}](${causesImage})
+![${topic}](${causesImage})
 
-\n*Photo: Causes — via Unsplash*\n`
+\n*Photo: ${topic} — via Unsplash*\n`
       );
     }
     if (symptomsImage) {
       content = content.replace(
-        `## Clinical Signs and Symptoms of ${topic}`,
-        `## Clinical Signs and Symptoms of ${topic}\n\n
+        `## Key Facts About ${topic}`,
+        `## Key Facts About ${topic}\n\n
 
-![Symptoms of ${topic}](${symptomsImage})
+![${topic} facts](${symptomsImage})
 
-\n*Photo: Clinical Signs — via Unsplash*\n`
+\n*Photo: ${topic} — via Unsplash*\n`
       );
     }
     if (treatmentImage) {
       content = content.replace(
-        `## Treatment of ${topic}`,
-        `## Treatment of ${topic}\n\n
+        `## Practical Guide to ${topic}`,
+        `## Practical Guide to ${topic}\n\n
 
-![Treatment for ${topic}](${treatmentImage})
+![${topic} guide](${treatmentImage})
 
-\n*Photo: Treatment — via Unsplash*\n`
+\n*Photo: ${topic} — via Unsplash*\n`
       );
     }
     if (preventionImage) {
       content = content.replace(
-        `## Prevention and Control of ${topic}`,
-        `## Prevention and Control of ${topic}\n\n
+        `## Common Mistakes to Avoid`,
+        `## Common Mistakes to Avoid\n\n
 
-![Prevention of ${topic}](${preventionImage})
+![Common mistakes](${preventionImage})
 
-\n*Photo: Prevention — via Unsplash*\n`
+\n*Photo: Farm management — via Unsplash*\n`
       );
     }
 
