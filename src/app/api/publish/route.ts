@@ -384,12 +384,18 @@ No references section`;
     content = content.replace(/<[^>]*>/g, '');
 
     // =========================
-    // REMOVE UNWANTED IMAGE AFTER INTRODUCTION
+    // REMOVE UNWANTED IMAGE AND CAPTION AFTER INTRODUCTION
     // =========================
-    // Remove image markdown and caption after Introduction heading
+    // This removes: Photo: ... — via Unsplash and the image markdown above it
     content = content.replace(
-      /(##\s*Introduction\s*\n+)\!\[[^\]]*\]\([^)]*\)\s*\n*\*Photo:[^\n]*\n+/i,
-      '$1'
+      /(?:^|\n)(!\[[^\]]*\]\([^)]*\)\s*\n*Photo:[^\n]*via Unsplash[^\n]*\n+)/gi,
+      '\n'
+    );
+    
+    // Also remove any standalone Photo: lines with image references
+    content = content.replace(
+      /(?:^|\n)Photo:[^\n]*via Unsplash[^\n]*\n+/gi,
+      '\n'
     );
 
     // =========================
