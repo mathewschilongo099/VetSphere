@@ -23,9 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'title and content are required' }, { status: 400 });
     }
 
-    // Defensive: strip a leading H1 if present, since the page template
-    // already renders the title separately from frontmatter — a duplicate
-    // H1 in the body would show the title twice on the page.
+    // Strip leading H1 if present to avoid duplicate title on the page
     const cleanedContent = content.replace(/^\s*#\s+.+\n+/, '');
 
     const slug = topicToSlug(title);
@@ -63,8 +61,7 @@ ${cleanedContent}
       'Content-Type': 'application/json',
     };
 
-    // Check if a file with this slug already exists, to avoid a 422 conflict
-    // from GitHub when two publishes land on the same topic close together.
+    // Check if file already exists to avoid conflict
     let existingSha: string | undefined;
     try {
       const existingRes = await fetch(contentsUrl, { headers });
@@ -73,7 +70,7 @@ ${cleanedContent}
         existingSha = existingData.sha;
       }
     } catch {
-      // If this check fails, fall through and attempt a normal create.
+      // Fall through and attempt normal create
     }
 
     if (existingSha) {
@@ -100,6 +97,15 @@ ${cleanedContent}
         { success: false, error: err.message || 'GitHub publish failed' },
         { status: 500 }
       );
+    }
+
+    // Trigger Vercel redeploy so article appears immediately
+    if (process.env.VERCEL_DEPLOY_HOOK) {
+      try {
+        await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
+      } catch {
+        // Don't fail publish if deploy hook fails
+      }
     }
 
     return NextResponse.json({
