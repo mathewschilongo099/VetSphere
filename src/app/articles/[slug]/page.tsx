@@ -3,6 +3,84 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 
+// =========================
+// CLEAN CONTENT FUNCTION
+// Removes all unwanted image credits, photo lines, and image sections
+// =========================
+function cleanArticleContent(html: string): string {
+  // Remove "Photo: ... — via Unsplash" (bold or not)
+  html = html.replace(
+    /<p>\s*(\*{1,2})?Photo:[^<]*via Unsplash[^<]*(\*{1,2})?\s*<\/p>/gi,
+    ''
+  );
+  
+  // Remove any "Photo: ..." standalone lines
+  html = html.replace(
+    /<p>\s*Photo:[^<]*<\/p>/gi,
+    ''
+  );
+  
+  // Remove "## Image 1", "## Image 2" headings and their content (including descriptions)
+  html = html.replace(
+    /<h2>Image\s+\d+.*?<\/h2>[\s\S]*?(?=<h2>|$)/gi,
+    ''
+  );
+  
+  // Remove "### Image 1", "### Image 2" headings
+  html = html.replace(
+    /<h3>Image\s+\d+.*?<\/h3>[\s\S]*?(?=<h3>|$)/gi,
+    ''
+  );
+  
+  // Remove "Image Description" and "Caption" lines
+  html = html.replace(
+    /<p><strong>Image Description:<\/strong>.*?<\/p>/gi,
+    ''
+  );
+  html = html.replace(
+    /<p><strong>Caption:<\/strong>.*?<\/p>/gi,
+    ''
+  );
+  html = html.replace(
+    /<p><em>Image Description:<\/em>.*?<\/p>/gi,
+    ''
+  );
+  html = html.replace(
+    /<p><em>Caption:<\/em>.*?<\/p>/gi,
+    ''
+  );
+  
+  // Remove any markdown image syntax that might have slipped through
+  html = html.replace(
+    /!\[[^\]]*\]\([^)]*\)/g,
+    ''
+  );
+  
+  // Remove "Image 1:", "Image 2:" lines
+  html = html.replace(
+    /<p>\s*Image\s+\d+:[^<]*<\/p>/gi,
+    ''
+  );
+  
+  // Remove "Source:" and "Credit:" lines
+  html = html.replace(
+    /<p>\s*Source:[^<]*<\/p>/gi,
+    ''
+  );
+  html = html.replace(
+    /<p>\s*Credit:[^<]*<\/p>/gi,
+    ''
+  );
+  
+  // Clean up extra empty paragraphs
+  html = html.replace(/<p>\s*<\/p>/g, '');
+  
+  // Remove extra whitespace
+  html = html.trim();
+  
+  return html;
+}
+
 export async function generateStaticParams() {
   const posts = getAllPosts();
   return posts.map((post) => ({ slug: post.slug }));
@@ -56,6 +134,9 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
   const post = getPostBySlug(params.slug);
 
   if (!post) return notFound();
+
+  // Clean the content before rendering
+  const cleanedContent = cleanArticleContent(post.content);
 
   return (
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
@@ -114,7 +195,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             prose-td:p-2 prose-td:border prose-td:border-gray-100
             prose-blockquote:border-l-4 prose-blockquote:border-green-400 prose-blockquote:bg-green-50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:rounded-r-xl
           "
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: cleanedContent }}
         />
       </article>
 
