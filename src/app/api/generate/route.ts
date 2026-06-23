@@ -6,7 +6,6 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 async function getUnsplashImage(query: string): Promise<string> {
   try {
     const randomPage = Math.floor(Math.random() * 5) + 1;
-
     const res = await fetch(
       `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
       {
@@ -15,12 +14,9 @@ async function getUnsplashImage(query: string): Promise<string> {
         },
       }
     );
-
     const data = await res.json();
     const results = data.results || [];
-
     if (results.length === 0) return '';
-
     const randomIndex = Math.floor(Math.random() * results.length);
     return results[randomIndex]?.urls?.regular || '';
   } catch {
@@ -31,7 +27,6 @@ async function getUnsplashImage(query: string): Promise<string> {
 async function getPexelsImage(query: string): Promise<string> {
   try {
     const randomPage = Math.floor(Math.random() * 5) + 1;
-
     const res = await fetch(
       `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
       {
@@ -40,14 +35,10 @@ async function getPexelsImage(query: string): Promise<string> {
         },
       }
     );
-
     if (!res.ok) return '';
-
     const data = await res.json();
     const results = data.photos || [];
-
     if (results.length === 0) return '';
-
     const randomIndex = Math.floor(Math.random() * results.length);
     return results[randomIndex]?.src?.large || '';
   } catch {
@@ -55,20 +46,13 @@ async function getPexelsImage(query: string): Promise<string> {
   }
 }
 
-// Tries Pexels first (higher rate limit), falls back to Unsplash if Pexels
-// returns nothing — same resilience pattern as the Gemini/you.com fallback,
-// so a single provider issue never results in a missing image.
 async function getArticleImage(query: string): Promise<string> {
   const pexelsResult = await getPexelsImage(query);
   if (pexelsResult) return pexelsResult;
-
   console.error(`Pexels returned no image for "${query}", falling back to Unsplash`);
   return getUnsplashImage(query);
 }
 
-// Gemini often wraps JSON in markdown code fences even when told not to.
-// Strip those before parsing so the SEO keyword step doesn't silently fall
-// back to empty data on every single run.
 function extractJson(text: string): string {
   return text
     .replace(/^```json\s*/i, '')
@@ -77,10 +61,6 @@ function extractJson(text: string): string {
     .trim();
 }
 
-// Fallback content generator using you.com, used only when Gemini is
-// unavailable (e.g. 503 high-demand errors, outages, or quota limits).
-// This keeps autopublish working even during a Gemini outage instead of
-// failing the whole pipeline.
 async function generateWithYouCom(topic: string): Promise<string> {
   const res = await fetch('https://api.you.com/v1/research', {
     method: 'POST',
@@ -187,8 +167,8 @@ Topic: "${topic}"
         primary_keyword: topic,
         secondary_keywords: [],
         long_tail_keywords: [],
-        search_intent: "informational",
-        questions: []
+        search_intent: 'informational',
+        questions: [],
       };
     }
 
@@ -268,13 +248,10 @@ RULES:
     };
 
     const excerpt = buildExcerpt(plainText, 155);
-
     const seoTitle =
       topic.charAt(0).toUpperCase() + topic.slice(1) +
       ': Causes, Symptoms, Treatment and Prevention';
-
     const metaDescription = buildExcerpt(plainText, 160);
-
     const tags = [
       topic.toLowerCase(),
       ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
@@ -284,9 +261,10 @@ RULES:
     ].slice(0, 6);
 
     // =========================
-    // IMAGES (Pexels primary, Unsplash fallback)
-    // Queries are topic-specific so images actually relate to the disease/
-    // condition being discussed, not generic stock photos.
+    // IMAGES
+    // Hero image is shown in the page template above the article body,
+    // so we do NOT inject it into ## Introduction to avoid duplication.
+    // Only inject images for Causes, Symptoms, Treatment and Prevention.
     // =========================
     const heroImage = await getArticleImage(`${topic} livestock farm`);
     const causesImage = await getArticleImage(`${topic} cause infection`);
@@ -294,14 +272,6 @@ RULES:
     const treatmentImage = await getArticleImage(`${topic} veterinarian treatment`);
     const preventionImage = await getArticleImage(`${topic} prevention vaccine biosecurity`);
 
-    // =========================
-    // IMAGE INJECTION
-    // Matches on the heading PATTERN (## Causes of ..., ## ...Symptoms...,
-    // etc.) using regex rather than an exact string, since Gemini's actual
-    // heading wording can vary slightly from what was requested in the
-    // prompt — an exact-string match would silently fail to insert the
-    // image with no warning, which is what was happening before.
-    // =========================
     const insertAfterHeading = (
       text: string,
       headingPattern: RegExp,
@@ -322,7 +292,7 @@ RULES:
 \n`);
     };
 
-    content = insertAfterHeading(content, /^##\s*Introduction.*$/im, heroImage, topic);
+    // ✅ NO image injection at Introduction — hero image already shows above article
     content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
