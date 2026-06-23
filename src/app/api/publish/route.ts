@@ -33,8 +33,8 @@ async function getUnsplashImage(query: string): Promise<string> {
 
 function extractJson(text: string): string {
   return text
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/, '')
+    .replace(/^json\s*/i, '')
+    .replace(/^\s*/, '')
     .replace(/```\s*$/, '')
     .trim();
 }
@@ -50,24 +50,40 @@ async function generateWithYouCom(topic: string): Promise<string> {
       input: `You are an expert veterinary SEO writer. Write a 1500+ word SEO blog about: "${topic}"
 
 STRICT STRUCTURE:
-## Introduction
-## What is ${topic}?
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
-## When to Call a Veterinarian
-## Conclusion
+
+Introduction
+
+What is ${topic}?
+
+Causes of ${topic}
+
+Clinical Signs and Symptoms of ${topic}
+
+How to Diagnose ${topic}
+
+Treatment of ${topic}
+
+Prevention and Control of ${topic}
+
+Frequently Asked Questions About ${topic}
+
+When to Call a Veterinarian
+
+Conclusion
 
 RULES:
-- Use simple English for farmers and students
-- Naturally include keywords related to "${topic}"
-- Include at least 5 FAQs
-- No citations
-- No references section
-- Start directly with ## Introduction`,
+
+Use simple English for farmers and students
+
+Naturally include keywords related to "${topic}"
+
+Include at least 5 FAQs
+
+No citations
+
+No references section
+
+Start directly with ## Introduction`,
       research_effort: 'standard',
     }),
   });
@@ -199,9 +215,9 @@ async function getTrendingVetTopic(): Promise<string> {
     const unusedTopics = fallbackTopics.filter(
       t => !existingSlugs.some(slug => slug.startsWith(topicToSlug(t)))
     );
-
     const pool = unusedTopics.length > 0 ? unusedTopics : fallbackTopics;
     return pool[Math.floor(Math.random() * pool.length)];
+
   } catch {
     return 'Lumpy Skin Disease in Cattle';
   }
@@ -222,7 +238,6 @@ async function getExistingSlugs(): Promise<string[]> {
         },
       }
     );
-
     if (!res.ok) return [];
     const files = await res.json();
     if (!Array.isArray(files)) return [];
@@ -248,11 +263,7 @@ const insertAfterHeading = (
   const match = text.match(headingPattern);
   if (!match) return text;
   const heading = match[0];
-  return text.replace(heading, `${heading}\n\n
-
-![${altText}](${imageUrl})
-
-\n`);
+  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" />\n`);
 };
 
 export async function GET() {
@@ -263,7 +274,6 @@ export async function GET() {
     const existingSlugs = await getExistingSlugs();
     const topicSlugPrefix = topicToSlug(topic);
     const alreadyPublished = existingSlugs.some(slug => slug.startsWith(topicSlugPrefix));
-
     if (alreadyPublished) {
       return NextResponse.json({
         success: false,
@@ -281,7 +291,7 @@ export async function GET() {
 
     if (apiKey) {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const seoPrompt = `
 Return ONLY valid JSON, no markdown fences.
@@ -298,7 +308,13 @@ Topic: "${topic}"
         const seoResult = await model.generateContent(seoPrompt);
         seo = JSON.parse(extractJson(seoResult.response.text()));
       } catch {
-        seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
+        seo = {
+          primary_keyword: topic,
+          secondary_keywords: [],
+          long_tail_keywords: [],
+          search_intent: 'informational',
+          questions: []
+        };
       }
 
       const prompt = `
@@ -309,23 +325,38 @@ SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
 Write a 1500+ word SEO blog about: "${topic}"
 
 STRICT STRUCTURE:
-## Introduction
-## What is ${topic}?
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
-## When to Call a Veterinarian
-## Conclusion
+
+Introduction
+
+What is ${topic}?
+
+Causes of ${topic}
+
+Clinical Signs and Symptoms of ${topic}
+
+How to Diagnose ${topic}
+
+Treatment of ${topic}
+
+Prevention and Control of ${topic}
+
+Frequently Asked Questions About ${topic}
+
+When to Call a Veterinarian
+
+Conclusion
 
 RULES:
-- Simple English for farmers and students
-- Include keywords naturally
-- Include at least 5 FAQs
-- No citations
-- No references section`;
+
+Simple English for farmers and students
+
+Include keywords naturally
+
+Include at least 5 FAQs
+
+No citations
+
+No references section`;
 
       try {
         const result = await model.generateContent(prompt);
@@ -336,20 +367,35 @@ RULES:
         content = await generateWithYouCom(topic);
       }
     } else {
-      seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
+      seo = {
+        primary_keyword: topic,
+        secondary_keywords: [],
+        long_tail_keywords: [],
+        search_intent: 'informational',
+        questions: []
+      };
       content = await generateWithYouCom(topic);
     }
 
     // =========================
     // CLEAN TEXT
     // =========================
-    content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
-    content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
+    content = content.replace(/[#*!`[\]]/g, '');
+    content = content.replace(/<[^>]*>/g, '');
+
+    // =========================
+    // REMOVE UNWANTED IMAGE AFTER INTRODUCTION
+    // =========================
+    // Remove image markdown and caption after Introduction heading
+    content = content.replace(
+      /(##\s*Introduction\s*\n+)\!\[[^\]]*\]\([^)]*\)\s*\n*\*Photo:[^\n]*\n+/i,
+      '$1'
+    );
 
     // =========================
     // SEO DATA
     // =========================
-    const plainText = content.replace(/[#*![\]()]/g, '').trim();
+    const plainText = content.replace(/[#*!`[\]]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
       const clean = text.replace(/\s+/g, ' ').trim();
@@ -371,8 +417,6 @@ RULES:
 
     // =========================
     // IMAGES
-    // Hero image shown in page template — do NOT inject at Introduction
-    // to avoid duplicate image at top of article
     // =========================
     const heroImage = await getUnsplashImage(topic + ' livestock farm');
     const causesImage = await getUnsplashImage(topic + ' disease');
@@ -380,11 +424,10 @@ RULES:
     const treatmentImage = await getUnsplashImage('veterinarian treatment');
     const preventionImage = await getUnsplashImage('farm biosecurity');
 
-    // ✅ NO image at Introduction — hero already shows above article body
-    content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Prevention.*$/im, preventionImage, `Prevention of ${topic}`);
+    content = insertAfterHeading(content, new RegExp(`^##\\s+Causes? of ${topic}\\.?`, 'im'), causesImage, `Causes of ${topic}`);
+    content = insertAfterHeading(content, new RegExp(`^##\\s+Clinical Signs? and Symptoms? of ${topic}\\.?`, 'im'), symptomsImage, `Symptoms of ${topic}`);
+    content = insertAfterHeading(content, new RegExp(`^##\\s+Treatment of ${topic}\\.?`, 'im'), treatmentImage, `Treatment of ${topic}`);
+    content = insertAfterHeading(content, new RegExp(`^##\\s+Prevention and? Control? of ${topic}\\.?`, 'im'), preventionImage, `Prevention of ${topic}`);
 
     // =========================
     // PUBLISH TO GITHUB
@@ -402,6 +445,7 @@ tags: [${tags.map((t: string) => `"${t}"`).join(', ')}]
 image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
 imageAlt: "${seoTitle}"
 featured: false
+excerpt: "${excerpt.replace(/"/g, '\\"')}"
 ---
 
 ${content}
@@ -441,7 +485,12 @@ ${content}
       }
     }
 
-    return NextResponse.json({ success: true, topic, title: seoTitle });
+    return NextResponse.json({
+      success: true,
+      topic,
+      title: seoTitle
+    });
+
   } catch (error) {
     console.error('Auto-publish failed:', error);
     return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
