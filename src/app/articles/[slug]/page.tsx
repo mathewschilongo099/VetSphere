@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 
 // =========================
 // AGGRESSIVE CLEAN CONTENT FUNCTION
-// Removes ANY element containing Photo, Image Description, Caption, etc.
+// Removes duplicated images, captions, and fixes ghost spacing gaps
 // =========================
 function cleanArticleContent(html: string): string {
   // 1. Remove any <h2> or <h3> that says "Image" followed by a number
@@ -26,7 +26,7 @@ function cleanArticleContent(html: string): string {
   html = html.replace(/<p[^>]*>.*?Source:.*?<\/p>/gi, '');
   html = html.replace(/<p[^>]*>.*?Credit:.*?<\/p>/gi, '');
   
-  // 6. NEW: Remove any HTML image tags to prevent duplication with the featured image banner
+  // 6. Remove any HTML image tags to prevent duplication with the featured image banner
   html = html.replace(/<img[^>]*>/gi, '');
   
   // 7. Remove any image markdown that might be left
@@ -35,13 +35,17 @@ function cleanArticleContent(html: string): string {
   // 8. Remove any remaining "Photo:" anywhere (including inside other tags)
   html = html.replace(/Photo:[^<]*(?:<[^>]+>)*/gi, '');
   
-  // 9. Clean up multiple empty paragraphs
-  html = html.replace(/(<p>\s*<\/p>)+/g, '');
+  // ==========================================
+  // NEW FIXES FOR THE LARGE GAPS
+  // ==========================================
   
-  // 10. Remove excessive whitespace
-  html = html.trim();
+  // 9. Wipe out any paragraphs that are completely empty or only contain spaces, &nbsp;, or <br> tags
+  html = html.replace(/<p[^>]*>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '');
   
-  return html;
+  // 10. Collapse multiple consecutive line breaks down to a single one
+  html = html.replace(/(<br\s*\/?>\s*){2,}/gi, '');
+  
+  return html.trim();
 }
 
 export async function generateStaticParams() {
