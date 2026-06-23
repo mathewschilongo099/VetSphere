@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-3.1-flash-lite',
     });
 
     // =========================
@@ -204,7 +204,11 @@ RULES:
         '## Introduction',
         `## Introduction\n\n
 
+
+
 ![${topic}](${heroImage})
+
+
 
 `
       );
@@ -215,7 +219,11 @@ RULES:
         `## Causes of ${topic}`,
         `## Causes of ${topic}\n\n
 
+
+
 ![Causes](${causesImage})
+
+
 
 `
       );
@@ -226,7 +234,11 @@ RULES:
         `## Clinical Signs and Symptoms of ${topic}`,
         `## Clinical Signs and Symptoms of ${topic}\n\n
 
+
+
 ![Symptoms](${symptomsImage})
+
+
 
 `
       );
@@ -237,7 +249,11 @@ RULES:
         `## Treatment of ${topic}`,
         `## Treatment of ${topic}\n\n
 
+
+
 ![Treatment](${treatmentImage})
+
+
 
 `
       );
@@ -248,7 +264,11 @@ RULES:
         `## Prevention and Control of ${topic}`,
         `## Prevention and Control of ${topic}\n\n
 
+
+
 ![Prevention](${preventionImage})
+
+
 
 `
       );
