@@ -4,78 +4,68 @@ import Image from 'next/image';
 import type { Metadata } from 'next';
 
 // =========================
-// CLEAN CONTENT FUNCTION
-// Removes all unwanted image credits, photo lines, and image sections
+// AGGRESSIVE CLEAN CONTENT FUNCTION
+// Removes ANY element containing Photo, Image Description, Caption, etc.
 // =========================
 function cleanArticleContent(html: string): string {
-  // Remove "Photo: ... — via Unsplash" (bold or not)
+  // 1. Remove any <h2> or <h3> that says "Image" followed by a number
   html = html.replace(
-    /<p>\s*(\*{1,2})?Photo:[^<]*via Unsplash[^<]*(\*{1,2})?\s*<\/p>/gi,
+    /<h[23][^>]*>Image\s+\d+.*?<\/h[23]>/gi,
     ''
   );
   
-  // Remove any "Photo: ..." standalone lines
+  // 2. Remove any paragraph that contains "Photo:" or "via Unsplash" (case insensitive)
   html = html.replace(
-    /<p>\s*Photo:[^<]*<\/p>/gi,
+    /<p[^>]*>.*?Photo:.*?<\/p>/gi,
+    ''
+  );
+  html = html.replace(
+    /<p[^>]*>.*?via\s+Unsplash.*?<\/p>/gi,
     ''
   );
   
-  // Remove "## Image 1", "## Image 2" headings and their content (including descriptions)
+  // 3. Remove any paragraph with "Image Description" or "Caption" (case insensitive)
   html = html.replace(
-    /<h2>Image\s+\d+.*?<\/h2>[\s\S]*?(?=<h2>|$)/gi,
+    /<p[^>]*>.*?Image\s+Description.*?<\/p>/gi,
+    ''
+  );
+  html = html.replace(
+    /<p[^>]*>.*?Caption:.*?<\/p>/gi,
     ''
   );
   
-  // Remove "### Image 1", "### Image 2" headings
+  // 4. Remove any paragraph with "Image 1:", "Image 2:", etc.
   html = html.replace(
-    /<h3>Image\s+\d+.*?<\/h3>[\s\S]*?(?=<h3>|$)/gi,
+    /<p[^>]*>.*?Image\s+\d+:.*?<\/p>/gi,
     ''
   );
   
-  // Remove "Image Description" and "Caption" lines
+  // 5. Remove any paragraph with "Source:" or "Credit:"
   html = html.replace(
-    /<p><strong>Image Description:<\/strong>.*?<\/p>/gi,
+    /<p[^>]*>.*?Source:.*?<\/p>/gi,
     ''
   );
   html = html.replace(
-    /<p><strong>Caption:<\/strong>.*?<\/p>/gi,
-    ''
-  );
-  html = html.replace(
-    /<p><em>Image Description:<\/em>.*?<\/p>/gi,
-    ''
-  );
-  html = html.replace(
-    /<p><em>Caption:<\/em>.*?<\/p>/gi,
+    /<p[^>]*>.*?Credit:.*?<\/p>/gi,
     ''
   );
   
-  // Remove any markdown image syntax that might have slipped through
+  // 6. Remove any image markdown that might be left
   html = html.replace(
     /!\[[^\]]*\]\([^)]*\)/g,
     ''
   );
   
-  // Remove "Image 1:", "Image 2:" lines
+  // 7. Remove any remaining "Photo:" anywhere (including inside other tags)
   html = html.replace(
-    /<p>\s*Image\s+\d+:[^<]*<\/p>/gi,
+    /Photo:[^<]*(?:<[^>]+>)*/gi,
     ''
   );
   
-  // Remove "Source:" and "Credit:" lines
-  html = html.replace(
-    /<p>\s*Source:[^<]*<\/p>/gi,
-    ''
-  );
-  html = html.replace(
-    /<p>\s*Credit:[^<]*<\/p>/gi,
-    ''
-  );
+  // 8. Clean up multiple empty paragraphs
+  html = html.replace(/(<p>\s*<\/p>)+/g, '');
   
-  // Clean up extra empty paragraphs
-  html = html.replace(/<p>\s*<\/p>/g, '');
-  
-  // Remove extra whitespace
+  // 9. Remove excessive whitespace
   html = html.trim();
   
   return html;
@@ -135,7 +125,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
   if (!post) return notFound();
 
-  // Clean the content before rendering
+  // Clean the content aggressively
   const cleanedContent = cleanArticleContent(post.content);
 
   return (
