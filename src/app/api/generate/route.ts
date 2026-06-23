@@ -28,6 +28,17 @@ async function getUnsplashImage(query: string): Promise<string> {
   }
 }
 
+// Gemini often wraps JSON in markdown code fences even when told not to.
+// Strip those before parsing so the SEO keyword step doesn't silently fall
+// back to empty data on every single run.
+function extractJson(text: string): string {
+  return text
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/, '')
+    .replace(/```\s*$/, '')
+    .trim();
+}
+
 export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic');
 
@@ -54,7 +65,7 @@ export async function GET(request: NextRequest) {
     // SEO KEYWORD ENGINE
     // =========================
     const seoPrompt = `
-Return ONLY valid JSON.
+Return ONLY valid JSON, with no markdown code fences and no extra commentary.
 
 Topic: "${topic}"
 
@@ -75,14 +86,14 @@ Topic: "${topic}"
 }
 `;
 
-    const seoResult = await model.generateContent(seoPrompt);
-    const seoResponse = await seoResult.response;
-    let seoText = seoResponse.text();
-
     let seo;
     try {
+      const seoResult = await model.generateContent(seoPrompt);
+      const seoResponse = await seoResult.response;
+      const seoText = extractJson(seoResponse.text());
       seo = JSON.parse(seoText);
-    } catch {
+    } catch (seoError) {
+      console.error('SEO keyword step failed:', seoError);
       seo = {
         primary_keyword: topic,
         secondary_keywords: [],
@@ -125,9 +136,21 @@ RULES:
 - No references section
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let content = response.text();
+    let content: string;
+    try {
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      content = response.text();
+    } catch (genError) {
+      console.error('Main article generation failed:', genError);
+      throw new Error(
+        `Gemini article generation failed: ${genError instanceof Error ? genError.message : 'unknown error'}`
+      );
+    }
+
+    if (!content || content.trim().length < 200) {
+      throw new Error('Gemini returned empty or too-short content');
+    }
 
     // =========================
     // CLEAN TEXT
@@ -179,35 +202,55 @@ RULES:
     if (heroImage) {
       content = content.replace(
         '## Introduction',
-        `## Introduction\n\n![${topic}](${heroImage})`
+        `## Introduction\n\n
+
+![${topic}](${heroImage})
+
+`
       );
     }
 
     if (causesImage) {
       content = content.replace(
         `## Causes of ${topic}`,
-        `## Causes of ${topic}\n\n![Causes](${causesImage})`
+        `## Causes of ${topic}\n\n
+
+![Causes](${causesImage})
+
+`
       );
     }
 
     if (symptomsImage) {
       content = content.replace(
         `## Clinical Signs and Symptoms of ${topic}`,
-        `## Clinical Signs and Symptoms of ${topic}\n\n![Symptoms](${symptomsImage})`
+        `## Clinical Signs and Symptoms of ${topic}\n\n
+
+![Symptoms](${symptomsImage})
+
+`
       );
     }
 
     if (treatmentImage) {
       content = content.replace(
         `## Treatment of ${topic}`,
-        `## Treatment of ${topic}\n\n![Treatment](${treatmentImage})`
+        `## Treatment of ${topic}\n\n
+
+![Treatment](${treatmentImage})
+
+`
       );
     }
 
     if (preventionImage) {
       content = content.replace(
         `## Prevention and Control of ${topic}`,
-        `## Prevention and Control of ${topic}\n\n![Prevention](${preventionImage})`
+        `## Prevention and Control of ${topic}\n\n
+
+![Prevention](${preventionImage})
+
+`
       );
     }
 
@@ -222,8 +265,9 @@ RULES:
     });
 
   } catch (error) {
+    console.error('Generate route failed:', error);
     return NextResponse.json(
-      { error: 'Generation failed' },
+      { error: error instanceof Error ? error.message : 'Generation failed' },
       { status: 500 }
     );
   }
