@@ -55,12 +55,12 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
 
       {/* Hero */}
-      <section className="bg-gray-900 text-white py-16 w-full">
+      <section className="bg-gray-900 text-white py-12 sm:py-16 w-full">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">
             {post.category}
           </span>
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-6">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold sm:font-extrabold leading-snug sm:leading-tight mb-5">
             {post.title}
           </h1>
           <div className="flex items-center justify-center gap-4 text-gray-400 text-sm flex-wrap">
