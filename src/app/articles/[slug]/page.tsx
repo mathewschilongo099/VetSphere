@@ -35,10 +35,6 @@ function cleanArticleContent(html: string): string {
   // 8. Remove any remaining "Photo:" anywhere (including inside other tags)
   html = html.replace(/Photo:[^<]*(?:<[^>]+>)*/gi, '');
   
-  // ==========================================
-  // NEW FIXES FOR THE LARGE GAPS
-  // ==========================================
-  
   // 9. Wipe out any paragraphs that are completely empty or only contain spaces, &nbsp;, or <br> tags
   html = html.replace(/<p[^>]*>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '');
   
@@ -150,9 +146,10 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             prose prose-sm sm:prose-base max-w-none
             prose-headings:font-bold prose-headings:text-gray-900
             prose-h1:hidden
-            prose-h2:text-base sm:prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3 prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-2
-            prose-h3:text-sm sm:prose-h3:text-base prose-h3:mt-6 prose-h3:mb-2
+            prose-h2:text-base sm:prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3 prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-2
+            prose-h3:text-sm sm:prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2
             prose-p:text-gray-600 prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base
+            prose-hr:mt-6 prose-hr:mb-4 prose-hr:border-gray-100
             prose-li:text-gray-600 prose-li:text-sm sm:prose-li:text-base
             prose-strong:text-gray-800
             prose-a:text-green-600 prose-a:no-underline hover:prose-a:underline
