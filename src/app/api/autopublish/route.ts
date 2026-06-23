@@ -67,7 +67,7 @@ RULES:
 - Include at least 5 FAQs
 - No citations
 - No references section
-- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS
+- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS, NO PHOTO CREDITS
 - Start directly with ## Introduction`,
       research_effort: 'standard',
     }),
@@ -249,12 +249,11 @@ const insertAfterHeading = (
   const match = text.match(headingPattern);
   if (!match) return text;
   const heading = match[0];
-  // Use HTML img tag instead of markdown to avoid duplication issues
   return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
 };
 
 // =========================
-// CLEAN CONTENT FUNCTION - Removes all unwanted image sections
+// CLEAN CONTENT FUNCTION - Removes ALL unwanted image sections
 // =========================
 function cleanContent(content: string): string {
   // Remove "## Image 1", "## Image 2", etc. headings and everything until next heading
@@ -281,9 +280,15 @@ function cleanContent(content: string): string {
     ''
   );
   
-  // Remove "Photo: ... — via Unsplash" lines
+  // Remove "Photo: ... — via Unsplash" lines (bold or not)
   content = content.replace(
-    /Photo:[^\n]*via Unsplash[^\n]*\n+/gi,
+    /\*\*?Photo:[^\n]*via Unsplash[^\n]*\*\*?\n*/gi,
+    ''
+  );
+  
+  // Remove "Photo: ..." lines (any variation)
+  content = content.replace(
+    /^Photo:[^\n]*\n+/gim,
     ''
   );
   
@@ -308,6 +313,18 @@ function cleanContent(content: string): string {
   // Remove "Credit: ..." lines
   content = content.replace(
     /^Credit:[^\n]*\n+/gim,
+    ''
+  );
+  
+  // Remove "Image: ..." lines
+  content = content.replace(
+    /^Image:[^\n]*\n+/gim,
+    ''
+  );
+  
+  // Remove markdown image syntax with caption
+  content = content.replace(
+    /!\[[^\]]*\]\([^)]*\)\s*"\s*[^"]*\s*"\s*\n*/g,
     ''
   );
   
@@ -345,7 +362,6 @@ export async function GET() {
     let seo: any;
 
     if (apiKey) {
-      // Fix: Use correct model name
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -392,8 +408,9 @@ RULES:
 - Include at least 5 FAQs
 - No citations
 - No references section
-- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS
+- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS, NO PHOTO CREDITS
 - NO "Image 1:", "Image 2:", etc.
+- NO "Photo: ..." anywhere in the article
 - Write only the article content with the specified headings`;
 
       try {
