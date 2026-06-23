@@ -8,37 +8,31 @@ import type { Metadata } from 'next';
 // Removes duplicated images, captions, and fixes ghost spacing gaps
 // =========================
 function cleanArticleContent(html: string): string {
-  // 1. Remove any <h2> or <h3> that says "Image" followed by a number
+  // 1. Bulletproof Multi-line Image Removal (Fixes sneaky duplicate images)
+  html = html.replace(/<img[\s\S]*?>/gi, '');
+  html = html.replace(/!\[[\s\S]*?\]\([\s\S]*?\)/g, '');
+  
+  // 2. Remove any <h2> or <h3> that says "Image" followed by a number
   html = html.replace(/<h[23][^>]*>Image\s+\d+.*?<\/h[23]>/gi, '');
   
-  // 2. Remove any paragraph that contains "Photo:" or "via Unsplash" (case insensitive)
+  // 3. Remove any paragraph that contains "Photo:" or "via Unsplash" (case insensitive)
   html = html.replace(/<p[^>]*>.*?Photo:.*?<\/p>/gi, '');
   html = html.replace(/<p[^>]*>.*?via\s+Unsplash.*?<\/p>/gi, '');
-  
-  // 3. Remove any paragraph with "Image Description" or "Caption" (case insensitive)
   html = html.replace(/<p[^>]*>.*?Image\s+Description.*?<\/p>/gi, '');
   html = html.replace(/<p[^>]*>.*?Caption:.*?<\/p>/gi, '');
-  
-  // 4. Remove any paragraph with "Image 1:", "Image 2:", etc.
   html = html.replace(/<p[^>]*>.*?Image\s+\d+:.*?<\/p>/gi, '');
-  
-  // 5. Remove any paragraph with "Source:" or "Credit:"
   html = html.replace(/<p[^>]*>.*?Source:.*?<\/p>/gi, '');
   html = html.replace(/<p[^>]*>.*?Credit:.*?<\/p>/gi, '');
   
-  // 6. Remove any HTML image tags to prevent duplication with the featured image banner
-  html = html.replace(/<img[^>]*>/gi, '');
-  
-  // 7. Remove any image markdown that might be left
-  html = html.replace(/!\[[^\]]*\]\([^)]*\)/g, '');
-  
-  // 8. Remove any remaining "Photo:" anywhere (including inside other tags)
+  // 4. Remove any remaining "Photo:" anywhere (including inside other tags)
   html = html.replace(/Photo:[^<]*(?:<[^>]+>)*/gi, '');
   
-  // 9. Wipe out any paragraphs that are completely empty or only contain spaces, &nbsp;, or <br> tags
+  // 5. Wipe out any paragraphs, divs, or figures that are completely empty
   html = html.replace(/<p[^>]*>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '');
+  html = html.replace(/<div[^>]*>(\s|&nbsp;|<br\s*\/?>)*<\/div>/gi, '');
+  html = html.replace(/<figure[^>]*>(\s|&nbsp;)*<\/figure>/gi, '');
   
-  // 10. Collapse multiple consecutive line breaks down to a single one
+  // 6. Collapse multiple consecutive line breaks down to a single one
   html = html.replace(/(<br\s*\/?>\s*){2,}/gi, '');
   
   return html.trim();
@@ -140,20 +134,22 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
       )}
 
       {/* Article Content */}
-      <article className="max-w-3xl mx-auto px-4 py-10">
+      <article className="max-w-3xl mx-auto px-4 py-6">
         <div
           className="
             prose prose-sm sm:prose-base max-w-none
             prose-headings:font-bold prose-headings:text-gray-900
             prose-h1:hidden
-            prose-h2:text-base sm:prose-h2:text-lg prose-h2:mt-6 prose-h2:mb-3 prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-2
-            prose-h3:text-sm sm:prose-h3:text-base prose-h3:mt-4 prose-h3:mb-2
-            prose-p:text-gray-600 prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base
-            prose-hr:mt-6 prose-hr:mb-4 prose-hr:border-gray-100
+            
+            /* FORCE SPACING OVERRIDES ON ALL ELEMENTS */
+            [&_p]:text-gray-600 [&_p]:leading-relaxed [&_p]:text-sm sm:[&_p]:text-base [&_p]:my-2
+            [&_h2]:text-base sm:[&_h2]:text-lg [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:border-b [&_h2]:border-gray-100 [&_h2]:pb-1
+            [&_h3]:text-sm sm:[&_h3]:text-base [&_h3]:mt-4 [&_h3]:mb-1
+            [&_hr]:my-2 [&_hr]:border-gray-100
+            
             prose-li:text-gray-600 prose-li:text-sm sm:prose-li:text-base
             prose-strong:text-gray-800
             prose-a:text-green-600 prose-a:no-underline hover:prose-a:underline
-            prose-img:rounded-xl prose-img:my-6
             prose-table:text-xs sm:prose-table:text-sm
             prose-th:bg-gray-50 prose-th:p-2 prose-th:font-semibold
             prose-td:p-2 prose-td:border prose-td:border-gray-100
