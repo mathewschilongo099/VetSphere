@@ -28,6 +28,44 @@ async function getUnsplashImage(query: string): Promise<string> {
   }
 }
 
+async function getPexelsImage(query: string): Promise<string> {
+  try {
+    const randomPage = Math.floor(Math.random() * 5) + 1;
+
+    const res = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
+      {
+        headers: {
+          Authorization: process.env.PEXELS_API_KEY || '',
+        },
+      }
+    );
+
+    if (!res.ok) return '';
+
+    const data = await res.json();
+    const results = data.photos || [];
+
+    if (results.length === 0) return '';
+
+    const randomIndex = Math.floor(Math.random() * results.length);
+    return results[randomIndex]?.src?.large || '';
+  } catch {
+    return '';
+  }
+}
+
+// Tries Pexels first (higher rate limit), falls back to Unsplash if Pexels
+// returns nothing — same resilience pattern as the Gemini/you.com fallback,
+// so a single provider issue never results in a missing image.
+async function getArticleImage(query: string): Promise<string> {
+  const pexelsResult = await getPexelsImage(query);
+  if (pexelsResult) return pexelsResult;
+
+  console.error(`Pexels returned no image for "${query}", falling back to Unsplash`);
+  return getUnsplashImage(query);
+}
+
 // Gemini often wraps JSON in markdown code fences even when told not to.
 // Strip those before parsing so the SEO keyword step doesn't silently fall
 // back to empty data on every single run.
@@ -37,6 +75,57 @@ function extractJson(text: string): string {
     .replace(/^```\s*/, '')
     .replace(/```\s*$/, '')
     .trim();
+}
+
+// Fallback content generator using you.com, used only when Gemini is
+// unavailable (e.g. 503 high-demand errors, outages, or quota limits).
+// This keeps autopublish working even during a Gemini outage instead of
+// failing the whole pipeline.
+async function generateWithYouCom(topic: string): Promise<string> {
+  const res = await fetch('https://api.you.com/v1/research', {
+    method: 'POST',
+    headers: {
+      'X-API-Key': process.env.YOU_API_KEY || '',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      input: `You are an expert veterinary SEO writer. Write a 1500+ word SEO blog about: "${topic}"
+
+STRICT STRUCTURE:
+## Introduction
+## What is ${topic}?
+## Causes of ${topic}
+## Clinical Signs and Symptoms of ${topic}
+## How to Diagnose ${topic}
+## Treatment of ${topic}
+## Prevention and Control of ${topic}
+## Frequently Asked Questions About ${topic}
+## When to Call a Veterinarian
+## Conclusion
+
+RULES:
+- Use simple English for farmers and students
+- Naturally include keywords related to "${topic}"
+- Include at least 5 FAQs
+- No citations
+- No references section
+- Start directly with ## Introduction`,
+      research_effort: 'standard',
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`you.com fallback request failed with status ${res.status}`);
+  }
+
+  const data = await res.json();
+  const content = data.output?.content || '';
+
+  if (!content || content.trim().length < 200) {
+    throw new Error('you.com fallback returned empty or too-short content');
+  }
+
+  return content;
 }
 
 export async function GET(request: NextRequest) {
@@ -137,19 +226,26 @@ RULES:
 `;
 
     let content: string;
+    let usedFallback = false;
     try {
       const result = await model.generateContent(prompt);
       const response = await result.response;
       content = response.text();
-    } catch (genError) {
-      console.error('Main article generation failed:', genError);
-      throw new Error(
-        `Gemini article generation failed: ${genError instanceof Error ? genError.message : 'unknown error'}`
-      );
-    }
 
-    if (!content || content.trim().length < 200) {
-      throw new Error('Gemini returned empty or too-short content');
+      if (!content || content.trim().length < 200) {
+        throw new Error('Gemini returned empty or too-short content');
+      }
+    } catch (genError) {
+      console.error('Gemini generation failed, falling back to you.com:', genError);
+      try {
+        content = await generateWithYouCom(topic);
+        usedFallback = true;
+      } catch (fallbackError) {
+        console.error('you.com fallback also failed:', fallbackError);
+        throw new Error(
+          `Both Gemini and you.com fallback failed. Gemini: ${genError instanceof Error ? genError.message : 'unknown'}. you.com: ${fallbackError instanceof Error ? fallbackError.message : 'unknown'}`
+        );
+      }
     }
 
     // =========================
@@ -188,13 +284,13 @@ RULES:
     ].slice(0, 6);
 
     // =========================
-    // UNSPLASH IMAGES
+    // IMAGES (Pexels primary, Unsplash fallback)
     // =========================
-    const heroImage = await getUnsplashImage(topic + ' livestock farm');
-    const causesImage = await getUnsplashImage(topic + ' disease');
-    const symptomsImage = await getUnsplashImage('sick animal ' + topic);
-    const treatmentImage = await getUnsplashImage('veterinarian treatment');
-    const preventionImage = await getUnsplashImage('farm biosecurity');
+    const heroImage = await getArticleImage(topic + ' livestock farm');
+    const causesImage = await getArticleImage(topic + ' disease');
+    const symptomsImage = await getArticleImage('sick animal ' + topic);
+    const treatmentImage = await getArticleImage('veterinarian treatment');
+    const preventionImage = await getArticleImage('farm biosecurity');
 
     // =========================
     // IMAGE INJECTION
@@ -281,7 +377,8 @@ RULES:
       metaDescription,
       tags,
       heroImage,
-      seo
+      seo,
+      usedFallback,
     });
 
   } catch (error) {
