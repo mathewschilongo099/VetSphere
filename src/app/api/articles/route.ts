@@ -1,33 +1,36 @@
-import { getAllPosts } from '@/lib/blog';
-import { generateArticleSchema } from '@/lib/seo';
+export const dynamic = 'force-dynamic';
+
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    const posts = getAllPosts();
-    const articles = posts.map((post) => ({
-      slug: post.slug,
-      title: post.title,
-      description: post.description,
-      date: post.date,
-      author: post.author,
-      category: post.category,
-      tags: post.tags,
-      image: post.image,
-      readingTime: post.readingTime,
-      featured: post.featured,
-      url: `/articles/${post.slug}`,
-    }));
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const token = process.env.GITHUB_TOKEN;
 
-    return Response.json({
-      success: true,
-      count: articles.length,
-      articles,
-    });
-  } catch (error) {
-    console.error('Error fetching articles:', error);
-    return Response.json(
-      { success: false, error: 'Failed to fetch articles' },
-      { status: 500 }
+    const res = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/src/content/articles`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
     );
+
+    if (!res.ok) return NextResponse.json({ files: [] });
+    const files = await res.json();
+    if (!Array.isArray(files)) return NextResponse.json({ files: [] });
+
+    const mdFiles = files
+      .filter((f: { name: string }) => f.name.endsWith('.md'))
+      .map((f: { name: string; sha: string }) => ({
+        name: f.name,
+        sha: f.sha,
+      }));
+
+    return NextResponse.json({ files: mdFiles });
+  } catch {
+    return NextResponse.json({ files: [] });
   }
 }
