@@ -36,9 +36,6 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // =========================
-    // SAFE GEMINI INITIALIZATION (FIXED)
-    // =========================
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
@@ -49,15 +46,64 @@ export async function GET(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
     });
 
-    const prompt = `
-You are an expert veterinary SEO content writer.
+    // =========================
+    // SEO KEYWORD ENGINE
+    // =========================
+    const seoPrompt = `
+Return ONLY valid JSON.
 
-Write a 1500+ word SEO-optimized blog about: "${topic}"
+Topic: "${topic}"
+
+{
+  "primary_keyword": "${topic}",
+  "secondary_keywords": ["animal health", "veterinary care"],
+  "long_tail_keywords": [
+    "how to treat ${topic}",
+    "symptoms of ${topic}",
+    "prevention of ${topic}"
+  ],
+  "search_intent": "informational",
+  "questions": [
+    "What causes ${topic}?",
+    "How is ${topic} treated?",
+    "Can ${topic} be prevented?"
+  ]
+}
+`;
+
+    const seoResult = await model.generateContent(seoPrompt);
+    const seoResponse = await seoResult.response;
+    let seoText = seoResponse.text();
+
+    let seo;
+    try {
+      seo = JSON.parse(seoText);
+    } catch {
+      seo = {
+        primary_keyword: topic,
+        secondary_keywords: [],
+        long_tail_keywords: [],
+        search_intent: "informational",
+        questions: []
+      };
+    }
+
+    // =========================
+    // BLOG GENERATION
+    // =========================
+    const prompt = `
+You are an expert veterinary SEO writer.
+
+PRIMARY KEYWORD: ${seo.primary_keyword}
+SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
+LONG TAIL KEYWORDS: ${seo.long_tail_keywords.join(', ')}
+SEARCH INTENT: ${seo.search_intent}
+
+Write a 1500+ word SEO blog about: "${topic}"
 
 STRICT STRUCTURE:
 ## Introduction
@@ -73,11 +119,10 @@ STRICT STRUCTURE:
 
 RULES:
 - Use simple English for farmers and students
-- Make it highly detailed and educational
-- Include at least 5 FAQs at the end
+- Naturally include keywords
+- Include at least 5 FAQs
 - No citations
 - No references section
-- No markdown titles outside the structure
 `;
 
     const result = await model.generateContent(prompt);
@@ -95,9 +140,6 @@ RULES:
     // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
-    const introMatch = plainText.match(/Introduction\s*([\s\S]+)/i);
-    const introText = (introMatch ? introMatch[1] : plainText).trim();
-
     const buildExcerpt = (text: string, maxLength: number): string => {
       const clean = text.replace(/\s+/g, ' ').trim();
       if (clean.length <= maxLength) return clean;
@@ -106,17 +148,13 @@ RULES:
       return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
     };
 
-    const excerpt =
-      buildExcerpt(introText, 155) ||
-      `Learn everything about ${topic} including causes, symptoms, treatment and prevention.`;
+    const excerpt = buildExcerpt(plainText, 155);
 
-    const seoTitle = `${
-      topic.charAt(0).toUpperCase() + topic.slice(1)
-    }: Causes, Symptoms, Treatment and Prevention`;
+    const seoTitle =
+      topic.charAt(0).toUpperCase() + topic.slice(1) +
+      ': Causes, Symptoms, Treatment and Prevention';
 
-    const metaDescription =
-      buildExcerpt(introText, 160) ||
-      `Expert veterinary guide on ${topic}. Learn causes, symptoms, diagnosis, treatment and prevention.`;
+    const metaDescription = buildExcerpt(plainText, 160);
 
     const tags = [
       topic.toLowerCase(),
@@ -130,10 +168,10 @@ RULES:
     // UNSPLASH IMAGES
     // =========================
     const heroImage = await getUnsplashImage(topic + ' livestock farm');
-    const causesImage = await getUnsplashImage(topic + ' disease causes');
+    const causesImage = await getUnsplashImage(topic + ' disease');
     const symptomsImage = await getUnsplashImage('sick animal ' + topic);
-    const treatmentImage = await getUnsplashImage('veterinarian treatment animal');
-    const preventionImage = await getUnsplashImage('farm animal prevention biosecurity');
+    const treatmentImage = await getUnsplashImage('veterinarian treatment');
+    const preventionImage = await getUnsplashImage('farm biosecurity');
 
     // =========================
     // IMAGE INJECTION
@@ -173,9 +211,6 @@ RULES:
       );
     }
 
-    // =========================
-    // RESPONSE
-    // =========================
     return NextResponse.json({
       content,
       title: seoTitle,
@@ -183,7 +218,9 @@ RULES:
       metaDescription,
       tags,
       heroImage,
+      seo
     });
+
   } catch (error) {
     return NextResponse.json(
       { error: 'Generation failed' },
