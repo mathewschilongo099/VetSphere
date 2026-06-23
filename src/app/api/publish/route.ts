@@ -1,67 +1,118 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 
+interface PublishPayload {
+  title: string;
+  content: string;
+  excerpt?: string;
+  metaDescription?: string;
+  tags?: string[];
+  heroImage?: string;
+}
+
+function topicToSlug(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
 export async function POST(request: NextRequest) {
-  const { title, content, excerpt, metaDescription, tags, heroImage } = await request.json();
+  try {
+    const body: PublishPayload = await request.json();
+    const { title, content, metaDescription, tags = [], heroImage } = body;
 
-  const slug = title
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
+    if (!title || !content) {
+      return NextResponse.json({ error: 'title and content are required' }, { status: 400 });
+    }
 
-  const date = new Date().toISOString().split('T')[0];
+    // Defensive: strip a leading H1 if present, since the page template
+    // already renders the title separately from frontmatter — a duplicate
+    // H1 in the body would show the title twice on the page.
+    const cleanedContent = content.replace(/^\s*#\s+.+\n+/, '');
 
-  const markdown = `---
+    const slug = topicToSlug(title);
+    const date = new Date().toISOString().split('T')[0];
+    const safeDescription = (metaDescription || '').replace(/"/g, '\\"').slice(0, 160);
+    const safeTags = tags.length > 0 ? tags : ['animal health', 'veterinary'];
+
+    const markdown = `---
 title: "${title}"
-description: "${metaDescription || excerpt}"
+description: "${safeDescription}"
 date: "${date}"
-author: "Mathews Chilongo"
+author: "VetSphere"
 category: "Animal Health"
-tags: [${(tags || []).map((t: string) => `"${t}"`).join(', ')}]
+tags: [${safeTags.map((t) => `"${t}"`).join(', ')}]
 image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
 imageAlt: "${title}"
 featured: false
 ---
 
-# ${title}
-
-${content}
+${cleanedContent}
 `;
 
-  const fileName = `${slug}.md`;
-  const path = `src/content/articles/${fileName}`;
-  const owner = process.env.GITHUB_OWNER;
-  const repo = process.env.GITHUB_REPO;
-  const token = process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const token = process.env.GITHUB_TOKEN;
 
-  try {
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `Add article: ${title}`,
-          content: Buffer.from(markdown).toString('base64'),
-        }),
+    if (!owner || !repo || !token) {
+      return NextResponse.json({ error: 'Missing GitHub environment variables' }, { status: 500 });
+    }
+
+    const path = `src/content/articles/${slug}.md`;
+    const contentsUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+
+    // Check if a file with this slug already exists, to avoid a 422 conflict
+    // from GitHub when two publishes land on the same topic close together.
+    let existingSha: string | undefined;
+    try {
+      const existingRes = await fetch(contentsUrl, { headers });
+      if (existingRes.ok) {
+        const existingData = await existingRes.json();
+        existingSha = existingData.sha;
       }
-    );
-
-    if (!res.ok) {
-      const err = await res.json();
-      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    } catch {
+      // If this check fails, fall through and attempt a normal create.
     }
 
-    // Trigger Vercel redeploy so article appears immediately
-    if (process.env.VERCEL_DEPLOY_HOOK) {
-      await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
+    if (existingSha) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: `An article already exists at "${path}". Skipping to avoid overwriting.`,
+      });
     }
 
-    return NextResponse.json({ success: true });
+    const githubRes = await fetch(contentsUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        message: `Add article: ${title}`,
+        content: Buffer.from(markdown).toString('base64'),
+      }),
+    });
+
+    if (!githubRes.ok) {
+      const err = await githubRes.json().catch(() => ({ message: 'Unknown GitHub API error' }));
+      console.error('Publish route GitHub PUT failed:', githubRes.status, err);
+      return NextResponse.json(
+        { success: false, error: err.message || 'GitHub publish failed' },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      slug,
+      path,
+      title,
+    });
   } catch (error) {
-    return NextResponse.json({ success: false }, { status: 500 });
+    console.error('Publish route failed:', error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Publish failed' },
+      { status: 500 }
+    );
   }
 }
