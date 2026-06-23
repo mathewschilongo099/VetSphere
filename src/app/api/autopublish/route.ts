@@ -67,6 +67,7 @@ RULES:
 - Include at least 5 FAQs
 - No citations
 - No references section
+- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS
 - Start directly with ## Introduction`,
       research_effort: 'standard',
     }),
@@ -248,12 +249,76 @@ const insertAfterHeading = (
   const match = text.match(headingPattern);
   if (!match) return text;
   const heading = match[0];
-  return text.replace(heading, `${heading}\n\n
-
-![${altText}](${imageUrl})
-
-\n`);
+  // Use HTML img tag instead of markdown to avoid duplication issues
+  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
 };
+
+// =========================
+// CLEAN CONTENT FUNCTION - Removes all unwanted image sections
+// =========================
+function cleanContent(content: string): string {
+  // Remove "## Image 1", "## Image 2", etc. headings and everything until next heading
+  content = content.replace(
+    /##\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
+    ''
+  );
+  
+  // Remove "### Image 1", "### Image 2", etc.
+  content = content.replace(
+    /###\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
+    ''
+  );
+  
+  // Remove image description lines
+  content = content.replace(
+    /-\s+\*\*Image Description\*\*:[^\n]*\n+/gi,
+    ''
+  );
+  
+  // Remove caption lines
+  content = content.replace(
+    /-\s+\*\*Caption\*\*:[^\n]*\n+/gi,
+    ''
+  );
+  
+  // Remove "Photo: ... — via Unsplash" lines
+  content = content.replace(
+    /Photo:[^\n]*via Unsplash[^\n]*\n+/gi,
+    ''
+  );
+  
+  // Remove any standalone markdown images that might have been inserted
+  content = content.replace(
+    /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
+    ''
+  );
+  
+  // Remove "Image 1:", "Image 2:", etc. lines
+  content = content.replace(
+    /^Image\s+\d+:[^\n]*\n+/gim,
+    ''
+  );
+  
+  // Remove "Source: ..." lines that might appear after images
+  content = content.replace(
+    /^Source:[^\n]*\n+/gim,
+    ''
+  );
+  
+  // Remove "Credit: ..." lines
+  content = content.replace(
+    /^Credit:[^\n]*\n+/gim,
+    ''
+  );
+  
+  // Clean up extra newlines (3+ becomes 2)
+  content = content.replace(/\n{3,}/g, '\n\n');
+  
+  // Clean up any trailing whitespace
+  content = content.trim();
+  
+  return content;
+}
 
 export async function GET() {
   try {
@@ -280,8 +345,9 @@ export async function GET() {
     let seo: any;
 
     if (apiKey) {
+      // Fix: Use correct model name
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-3.1-flash-lite' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
       const seoPrompt = `
 Return ONLY valid JSON, no markdown fences.
@@ -325,7 +391,10 @@ RULES:
 - Include keywords naturally
 - Include at least 5 FAQs
 - No citations
-- No references section`;
+- No references section
+- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS
+- NO "Image 1:", "Image 2:", etc.
+- Write only the article content with the specified headings`;
 
       try {
         const result = await model.generateContent(prompt);
@@ -341,8 +410,11 @@ RULES:
     }
 
     // =========================
-    // CLEAN TEXT
+    // CLEAN TEXT - Remove all unwanted image sections
     // =========================
+    content = cleanContent(content);
+    
+    // Remove citation markers like [[1]], [1], etc.
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
@@ -370,9 +442,7 @@ RULES:
     ].slice(0, 6);
 
     // =========================
-    // IMAGES
-    // Hero image shown in page template — do NOT inject at Introduction
-    // to avoid duplicate image at top of article
+    // IMAGES - Fetch and insert
     // =========================
     const heroImage = await getUnsplashImage(topic + ' livestock farm');
     const causesImage = await getUnsplashImage(topic + ' disease');
@@ -380,11 +450,11 @@ RULES:
     const treatmentImage = await getUnsplashImage('veterinarian treatment');
     const preventionImage = await getUnsplashImage('farm biosecurity');
 
-    // ✅ NO image at Introduction — hero already shows above article body
-    content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Prevention.*$/im, preventionImage, `Prevention of ${topic}`);
+    // Insert images after respective headings (using HTML img tags)
+    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
 
     // =========================
     // PUBLISH TO GITHUB
@@ -402,6 +472,7 @@ tags: [${tags.map((t: string) => `"${t}"`).join(', ')}]
 image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
 imageAlt: "${seoTitle}"
 featured: false
+excerpt: "${excerpt.replace(/"/g, '\\"')}"
 ---
 
 ${content}
