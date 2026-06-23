@@ -37,9 +37,19 @@ export async function GET(request: NextRequest) {
 
   try {
     // =========================
-    // 1. GEMINI BLOG GENERATION
+    // SAFE GEMINI INITIALIZATION (FIXED)
     // =========================
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'Missing Gemini API key' },
+        { status: 500 }
+      );
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
     });
@@ -75,13 +85,13 @@ RULES:
     let content = response.text();
 
     // =========================
-    // 2. CLEAN TEXT
+    // CLEAN TEXT
     // =========================
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
     // =========================
-    // 3. EXCERPT + SEO DATA
+    // SEO DATA
     // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
@@ -91,7 +101,7 @@ RULES:
     const buildExcerpt = (text: string, maxLength: number): string => {
       const clean = text.replace(/\s+/g, ' ').trim();
       if (clean.length <= maxLength) return clean;
-      const truncated = clean.substring(0, maxLength);
+      const truncated = text.substring(0, maxLength);
       const lastSpace = truncated.lastIndexOf(' ');
       return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
     };
@@ -117,7 +127,7 @@ RULES:
     ].slice(0, 6);
 
     // =========================
-    // 4. UNSPLASH IMAGES
+    // UNSPLASH IMAGES
     // =========================
     const heroImage = await getUnsplashImage(topic + ' livestock farm');
     const causesImage = await getUnsplashImage(topic + ' disease causes');
@@ -126,7 +136,7 @@ RULES:
     const preventionImage = await getUnsplashImage('farm animal prevention biosecurity');
 
     // =========================
-    // 5. IMAGE INJECTION
+    // IMAGE INJECTION
     // =========================
     if (heroImage) {
       content = content.replace(
@@ -164,7 +174,7 @@ RULES:
     }
 
     // =========================
-    // 6. RESPONSE
+    // RESPONSE
     // =========================
     return NextResponse.json({
       content,
