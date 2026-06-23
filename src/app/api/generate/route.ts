@@ -285,90 +285,48 @@ RULES:
 
     // =========================
     // IMAGES (Pexels primary, Unsplash fallback)
+    // Queries are topic-specific so images actually relate to the disease/
+    // condition being discussed, not generic stock photos.
     // =========================
-    const heroImage = await getArticleImage(topic + ' livestock farm');
-    const causesImage = await getArticleImage(topic + ' disease');
-    const symptomsImage = await getArticleImage('sick animal ' + topic);
-    const treatmentImage = await getArticleImage('veterinarian treatment');
-    const preventionImage = await getArticleImage('farm biosecurity');
+    const heroImage = await getArticleImage(`${topic} livestock farm`);
+    const causesImage = await getArticleImage(`${topic} cause infection`);
+    const symptomsImage = await getArticleImage(`${topic} symptoms sick animal`);
+    const treatmentImage = await getArticleImage(`${topic} veterinarian treatment`);
+    const preventionImage = await getArticleImage(`${topic} prevention vaccine biosecurity`);
 
     // =========================
     // IMAGE INJECTION
+    // Matches on the heading PATTERN (## Causes of ..., ## ...Symptoms...,
+    // etc.) using regex rather than an exact string, since Gemini's actual
+    // heading wording can vary slightly from what was requested in the
+    // prompt — an exact-string match would silently fail to insert the
+    // image with no warning, which is what was happening before.
     // =========================
-    if (heroImage) {
-      content = content.replace(
-        '## Introduction',
-        `## Introduction\n\n
+    const insertAfterHeading = (
+      text: string,
+      headingPattern: RegExp,
+      imageUrl: string,
+      altText: string
+    ): string => {
+      if (!imageUrl) return text;
+      const match = text.match(headingPattern);
+      if (!match) {
+        console.error(`Heading pattern not found for "${altText}" image, skipping insertion`);
+        return text;
+      }
+      const heading = match[0];
+      return text.replace(heading, `${heading}\n\n
 
+![${altText}](${imageUrl})
 
+\n`);
+    };
 
-![${topic}](${heroImage})
-
-
-
-`
-      );
-    }
-
-    if (causesImage) {
-      content = content.replace(
-        `## Causes of ${topic}`,
-        `## Causes of ${topic}\n\n
-
-
-
-![Causes](${causesImage})
-
-
-
-`
-      );
-    }
-
-    if (symptomsImage) {
-      content = content.replace(
-        `## Clinical Signs and Symptoms of ${topic}`,
-        `## Clinical Signs and Symptoms of ${topic}\n\n
-
-
-
-![Symptoms](${symptomsImage})
-
-
-
-`
-      );
-    }
-
-    if (treatmentImage) {
-      content = content.replace(
-        `## Treatment of ${topic}`,
-        `## Treatment of ${topic}\n\n
-
-
-
-![Treatment](${treatmentImage})
-
-
-
-`
-      );
-    }
-
-    if (preventionImage) {
-      content = content.replace(
-        `## Prevention and Control of ${topic}`,
-        `## Prevention and Control of ${topic}\n\n
-
-
-
-![Prevention](${preventionImage})
-
-
-
-`
-      );
-    }
+    content = insertAfterHeading(content, /^##\s*Introduction.*$/im, heroImage, topic);
+    content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Prevention.*$/im, preventionImage, `Prevention of ${topic}`);
 
     return NextResponse.json({
       content,
