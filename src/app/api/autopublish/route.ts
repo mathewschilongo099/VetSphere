@@ -15,33 +15,58 @@ const VETERINARY_KEYWORDS = [
   'calving', 'lambing', 'birthing', 'breeding', 'gestation',
   'rumen', 'abomasum', 'udder', 'mastitis', 'hoof', 'horn',
   'liver', 'kidney', 'heart', 'lung', 'skin', 'coat', 'feather',
-  'beak', 'claw', 'paw', 'tail', 'ear', 'eye', 'nose'
+  'beak', 'claw', 'paw', 'tail', 'ear', 'eye', 'nose',
+  'vaccination', 'deworming', 'antibiotic', 'probiotic',
+  'pregnant', 'newborn', 'calf', 'lamb', 'kid', 'foal', 'puppy', 'kitten',
+  'surgery', 'wound', 'injury', 'fracture', 'poisoning', 'toxin',
+  'bacteria', 'virus', 'fungal', 'protozoa', 'infection',
+  'respiratory', 'digestive', 'reproductive', 'neurological', 'skin',
+  'ruminant', 'monogastric', 'pasture', 'fodder', 'silage', 'hay'
 ];
 
-const HUMAN_MEDICAL_KEYWORDS = [
-  'human', 'patient', 'doctor', 'surgeon', 'hospital', 'clinic',
-  'cardiac', 'heart', 'valve', 'aortic', 'ross', 'procedure',
-  'surgery', 'medical', 'clinical', 'pediatric', 'child', 'infant'
+const NON_VET_KEYWORDS = [
+  'prime day', 'sale', 'discount', 'deal', 'coupon', 'promo',
+  'vacuum', 'cleaner', 'gadget', 'tech', 'electronics',
+  'amazon', 'walmart', 'target', 'shop', 'shopping',
+  'watch', 'movie', 'music', 'video', 'streaming',
+  'politics', 'election', 'government', 'president',
+  'weather', 'storm', 'hurricane', 'tornado', 'earthquake',
+  'stock', 'market', 'investment', 'crypto',
+  'celebrity', 'entertainment', 'fashion'
 ];
 
-// ✅ WORKING FALLBACK IMAGES (guaranteed to work)
 const FALLBACK_IMAGES = [
   'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
   'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
   'https://images.pexels.com/photos/18351947/pexels-photo-18351947/free-photo-of-a-goat-standing-in-a-field.jpeg?w=800&h=400&fit=crop',
   'https://images.pexels.com/photos/18351941/pexels-photo-18351941/free-photo-of-a-veterinarian-examining-a-dog.jpeg?w=800&h=400&fit=crop',
   'https://images.pexels.com/photos/18351938/pexels-photo-18351938/free-photo-of-a-veterinarian-holding-a-cat.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351924/pexels-photo-18351924/free-photo-of-a-veterinarian-examining-a-horse.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351915/pexels-photo-18351915/free-photo-of-a-cow-in-a-field.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351909/pexels-photo-18351909/free-photo-of-a-veterinarian-examining-a-sheep.jpeg?w=800&h=400&fit=crop',
 ];
 
-function isVeterinaryTopic(topic: string): boolean {
+function isValidVeterinaryTopic(topic: string): boolean {
   const lowerTopic = topic.toLowerCase();
-  if (HUMAN_MEDICAL_KEYWORDS.some(kw => lowerTopic.includes(kw))) {
+  
+  for (const keyword of NON_VET_KEYWORDS) {
+    if (lowerTopic.includes(keyword)) {
+      console.log(`❌ Rejected: Contains non-vet keyword "${keyword}"`);
+      return false;
+    }
+  }
+  
+  let matchCount = 0;
+  for (const keyword of VETERINARY_KEYWORDS) {
+    if (lowerTopic.includes(keyword)) {
+      matchCount++;
+    }
+  }
+  
+  if (matchCount < 2) {
+    console.log(`❌ Rejected: Only ${matchCount} veterinary keyword matches (need 2)`);
     return false;
   }
-  return VETERINARY_KEYWORDS.some(kw => lowerTopic.includes(kw));
+  
+  console.log(`✅ Accepted: ${matchCount} veterinary keyword matches`);
+  return true;
 }
 
 async function getUnsplashImage(query: string): Promise<string> {
@@ -55,23 +80,17 @@ async function getUnsplashImage(query: string): Promise<string> {
         },
       }
     );
-    
     if (!res.ok) {
-      console.log('⚠️ Unsplash API error, using fallback');
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const data = await res.json();
     const results = data.results || [];
     if (results.length === 0) {
-      console.log('⚠️ No Unsplash images found, using fallback');
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
-    console.log('⚠️ Unsplash fetch error, using fallback');
     return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   }
 }
@@ -87,29 +106,22 @@ async function getPexelsImage(query: string): Promise<string> {
         },
       }
     );
-    
     if (!res.ok) {
-      console.log('⚠️ Pexels API error, using fallback');
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const data = await res.json();
     const results = data.photos || [];
     if (results.length === 0) {
-      console.log('⚠️ No Pexels images found, using fallback');
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
-    console.log('⚠️ Pexels fetch error, using fallback');
     return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   }
 }
 
 async function getArticleImage(query: string): Promise<string> {
-  // Build better search queries
   const cleanQuery = query
     .toLowerCase()
     .replace(/[^a-z0-9\s]/g, ' ')
@@ -120,33 +132,24 @@ async function getArticleImage(query: string): Promise<string> {
     cleanQuery,
     `${cleanQuery} animal`,
     `${cleanQuery} livestock`,
-    `${cleanQuery} veterinary`,
     'farm animal',
-    'livestock farm',
-    'veterinary care',
-    'animal health'
+    'veterinary care'
   ];
 
-  // Try Pexels with multiple queries
   for (const searchQuery of searchQueries.slice(0, 3)) {
     const pexelsResult = await getPexelsImage(searchQuery);
     if (pexelsResult && !pexelsResult.includes('fallback')) {
-      console.log(`✅ Image found from Pexels: "${searchQuery}"`);
       return pexelsResult;
     }
   }
 
-  // Try Unsplash with multiple queries
   for (const searchQuery of searchQueries.slice(0, 3)) {
     const unsplashResult = await getUnsplashImage(searchQuery);
     if (unsplashResult && !unsplashResult.includes('fallback')) {
-      console.log(`✅ Image found from Unsplash: "${searchQuery}"`);
       return unsplashResult;
     }
   }
 
-  // Final fallback
-  console.log('⚠️ No images found, using fallback');
   return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 }
 
@@ -166,33 +169,34 @@ async function generateWithYouCom(topic: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      input: `You are an expert veterinary SEO writer and affiliate marketer. Write a 1500+ word SEO blog about: "${topic}"
+      input: `You are an expert veterinary SEO writer and content creator. Write a 1500+ word SEO blog about: "${topic}"
 
-Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
+IMPORTANT: Choose the BEST writing style for this topic:
+- For news/breaking topics: Write like a news article
+- For educational topics: Write like a helpful guide
+- For how-to topics: Write a step-by-step guide
+- For general topics: Write an engaging blog post
 
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## When to Call a Veterinarian
-## Conclusion
+DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
+
+STRUCTURE GUIDELINES:
+- Start with a compelling introduction
+- Use clear headings that make sense for the topic
+- Include practical, actionable information
+- Use bullet points and lists where helpful
+- End with a strong conclusion
 
 STYLE RULES:
-- Write like a helpful blog post, not a textbook
-- Use "you" and "your" to speak directly to the reader
-- Include practical tips and advice
-- Suggest products or solutions where relevant
-- End each section with a takeaway tip
+- Write like a helpful expert, not a textbook
+- Use "you" and "your" to speak directly to readers
 - Keep paragraphs short (2-3 sentences)
-- Use simple English for farmers and students
-- Naturally include keywords
+- Use simple, clear English
+- Include relevant keywords naturally
+- Include at least 5 FAQs
 - No citations
 - No references section
-- Write in a clear, helpful tone
-- Do NOT include a "What is..." heading - the introduction paragraph already covers this
-- Do NOT use horizontal lines (---) anywhere in the article
-- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content. SKIP IT COMPLETELY.`,
+- No images or image descriptions
+- No horizontal lines (---)`,
       research_effort: 'standard',
     }),
   });
@@ -213,44 +217,9 @@ STYLE RULES:
 
 async function getTrendingVetTopic(): Promise<string> {
   try {
-    const gnewsKey = process.env.GNEWS_API_KEY;
+    console.log('📡 Fetching veterinary news from Google News RSS...');
     
-    if (gnewsKey) {
-      console.log('📡 Fetching from GNews API...');
-      
-      const gnewsRes = await fetch(
-        `https://gnews.io/api/v4/top-headlines?category=health&lang=en&country=world&apikey=${gnewsKey}&max=10`,
-        { next: { revalidate: 3600 } }
-      );
-      
-      if (gnewsRes.ok) {
-        const gnewsData = await gnewsRes.json();
-        console.log(`✅ GNews found ${gnewsData.articles?.length || 0} articles`);
-        
-        if (gnewsData.articles && gnewsData.articles.length > 0) {
-          const vetArticles = gnewsData.articles.filter((article: any) =>
-            VETERINARY_KEYWORDS.some(keyword =>
-              (article.title + ' ' + (article.description || '')).toLowerCase().includes(keyword)
-            )
-          );
-          
-          if (vetArticles.length > 0) {
-            const randomArticle = vetArticles[Math.floor(Math.random() * vetArticles.length)];
-            console.log(`🩺 Veterinary article found: ${randomArticle.title}`);
-            return randomArticle.title;
-          } else {
-            console.log('No veterinary-specific articles, using first news headline');
-            return gnewsData.articles[0].title;
-          }
-        }
-      } else {
-        console.log('⚠️ GNews API error, falling back to Google News...');
-      }
-    }
-
-    console.log('📡 Fetching from Google News RSS...');
-    
-    const feedUrl = 'https://news.google.com/rss/search?q=veterinary+OR+animal+health+OR+livestock+disease&hl=en-US&gl=US&ceid=US:en';
+    const feedUrl = 'https://news.google.com/rss/search?q=veterinary+OR+livestock+disease+OR+animal+health+OR+cattle+disease+OR+poultry+disease&hl=en-US&gl=US&ceid=US:en';
     const res = await fetch(feedUrl);
     const xml = await res.text();
     
@@ -258,16 +227,16 @@ async function getTrendingVetTopic(): Promise<string> {
       .map(m => m[1])
       .filter(t => t !== 'Google News' && !t.includes(' - Google News'));
     
-    console.log(`✅ Google News found ${titles.length} headlines`);
+    console.log(`✅ Found ${titles.length} news headlines`);
     
-    for (const title of titles.slice(0, 20)) {
-      if (VETERINARY_KEYWORDS.some(kw => title.toLowerCase().includes(kw))) {
-        console.log(`🩺 Veterinary news found: ${title}`);
+    for (const title of titles.slice(0, 30)) {
+      if (isValidVeterinaryTopic(title)) {
+        console.log(`🩺 Valid veterinary topic found: ${title}`);
         return title;
       }
     }
 
-    console.log('📚 No trending news found, using fallback topic list');
+    console.log('📚 No valid trending topic found, using fallback topic list');
     return getFallbackTopic();
     
   } catch (error) {
@@ -281,89 +250,24 @@ function getFallbackTopic(): string {
     'Mastitis in Dairy Cows',
     'Tick Fever in Cattle',
     'East Coast Fever in Cattle',
-    'Blackleg Disease in Cattle',
     'Lumpy Skin Disease in Cattle',
-    'Bovine Respiratory Disease',
-    'Ringworm in Cattle',
-    'Pneumonia in Calves',
     'Anthrax in Livestock',
     'Bloat in Cattle',
     'Foot and Mouth Disease in Cattle',
-    'Milk Fever in Dairy Cows',
-    'Bovine Tuberculosis',
-    'Anaplasmosis in Cattle',
-    'Liver Fluke in Cattle',
-    'Pink Eye in Cattle',
-    'Trypanosomiasis in Cattle',
-    'Worm Infestation in Cattle',
-    'Brucellosis in Livestock',
-    'Johne\'s Disease in Cattle',
     'Newcastle Disease in Poultry',
     'Avian Influenza in Poultry',
     'Coccidiosis in Poultry',
-    'Infectious Bursal Disease in Poultry',
-    'Fowl Pox in Chickens',
-    'Salmonellosis in Poultry',
-    'Marek\'s Disease in Chickens',
-    'Fowl Cholera in Poultry',
-    'Infectious Bronchitis in Chickens',
-    'Mycoplasma Infection in Poultry',
     'Foot Rot in Goats',
     'Peste des Petits Ruminants in Goats',
     'Contagious Caprine Pleuropneumonia in Goats',
-    'Tetanus in Goats',
-    'Goat Pox',
-    'Caseous Lymphadenitis in Goats',
-    'Enterotoxemia in Goats',
     'African Swine Fever',
-    'Porcine Reproductive and Respiratory Syndrome',
-    'Swine Erysipelas',
     'Rabies Prevention in Dogs',
     'Parvovirus in Dogs',
     'Canine Distemper',
-    'Mange in Dogs',
-    'Heartworm Disease in Dogs',
-    'Kennel Cough in Dogs',
-    'How to Keep Your Dog Healthy',
-    'Dog Nutrition and Feeding Guide',
-    'Puppy Care and Vaccination Schedule',
     'Feline Panleukopenia in Cats',
     'Feline Leukemia Virus',
-    'Toxoplasmosis in Cats',
-    'How to Keep Your Cat Healthy',
-    'Cat Vaccination Schedule for Pet Owners',
-    'Mineral Nutrition for Dairy Cattle',
-    'Feeding Dairy Cows for Maximum Milk Production',
-    'Best Feeding Practices for Goats',
-    'Vitamin Deficiencies in Livestock',
-    'How to Feed Calves for Healthy Growth',
-    'Nutrition for Pregnant Cows',
     'Poultry Feed Formulation for Farmers',
     'Biosecurity Measures on Livestock Farms',
-    'How to Set Up a Poultry House',
-    'Record Keeping for Livestock Farmers',
-    'When to Call a Veterinarian',
-    'Water Quality and Animal Health',
-    'Vaccination Programs for Livestock Farmers',
-    'Deworming Programs for Cattle and Goats',
-    'Housing and Shelter for Livestock',
-    'How to Manage a Small Dairy Farm',
-    'Rotational Grazing for Cattle Health',
-    'Cattle Breeding and Reproduction Guide',
-    'Signs of Heat in Dairy Cows',
-    'Artificial Insemination in Cattle',
-    'Pregnancy and Calving Management in Cows',
-    'Common Reproductive Problems in Goats',
-    'Dystocia and Difficult Births in Cattle',
-    'Retained Placenta in Dairy Cows',
-    'How to Do a Body Condition Score in Cattle',
-    'Signs of Pain and Stress in Animals',
-    'Animal Welfare on the Farm',
-    'First Aid for Farm Animals',
-    'Zoonotic Diseases Farmers Should Know',
-    'Heat Stress in Livestock During Summer',
-    'How to Spot a Sick Animal Early',
-    'Importance of Clean Water for Animal Health',
   ];
   
   return fallbackTopics[Math.floor(Math.random() * fallbackTopics.length)];
@@ -446,10 +350,7 @@ const insertAfterHeading = (
 };
 
 function cleanContent(content: string): string {
-  // Remove the first heading (duplicate title)
   content = content.replace(/^# .+?\n/, '');
-  
-  // Remove any FAQ sections
   content = content.replace(
     /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
     ''
@@ -467,64 +368,11 @@ function cleanContent(content: string): string {
     ''
   );
   content = content.replace(
-    /^Here are some common questions.*$/gim,
-    ''
-  );
-  
-  // Remove image-related content
-  content = content.replace(
-    /##\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
-    ''
-  );
-  content = content.replace(
-    /###\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
-    ''
-  );
-  content = content.replace(
-    /-\s+\*\*Image Description\*\*:[^\n]*\n+/gi,
-    ''
-  );
-  content = content.replace(
-    /-\s+\*\*Caption\*\*:[^\n]*\n+/gi,
-    ''
-  );
-  content = content.replace(
-    /\*\*?Photo:[^\n]*via Unsplash[^\n]*\*\*?\n*/gi,
-    ''
-  );
-  content = content.replace(
-    /^Photo:[^\n]*\n+/gim,
-    ''
-  );
-  content = content.replace(
     /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
     ''
   );
-  content = content.replace(
-    /^Image\s+\d+:[^\n]*\n+/gim,
-    ''
-  );
-  content = content.replace(
-    /^Source:[^\n]*\n+/gim,
-    ''
-  );
-  content = content.replace(
-    /^Credit:[^\n]*\n+/gim,
-    ''
-  );
-  content = content.replace(
-    /^Image:[^\n]*\n+/gim,
-    ''
-  );
-  content = content.replace(
-    /!\[[^\]]*\]\([^)]*\)\s*"\s*[^"]*\s*"\s*\n*/g,
-    ''
-  );
-  
-  // Remove extra blank lines
   content = content.replace(/\n{3,}/g, '\n\n');
   content = content.trim();
-  
   return content;
 }
 
@@ -538,7 +386,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const topic = await getTrendingVetTopic();
-    console.log('Auto-publishing topic:', topic);
+    console.log('📝 Auto-publishing topic:', topic);
 
     const existingSlugs = await getExistingSlugs();
     const slug = topicToSlug(topic);
@@ -579,38 +427,40 @@ Topic: "${topic}"
       }
 
       const prompt = `
-You are an expert veterinary SEO writer and affiliate marketer.
+You are an expert veterinary SEO writer and content creator.
 PRIMARY KEYWORD: ${seo.primary_keyword}
 SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
 
 Write a 1500+ word SEO blog about: "${topic}"
 
-Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
+IMPORTANT: Choose the BEST writing style for this topic:
+- For news/breaking topics: Write like a news article with a headline, introduction, key facts, and analysis
+- For educational topics: Write like a helpful guide with clear sections
+- For how-to topics: Write a step-by-step guide
+- For general topics: Write an engaging blog post that informs and helps readers
 
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## When to Call a Veterinarian
-## Conclusion
+DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
+
+STRUCTURE GUIDELINES:
+- Start with a compelling introduction that hooks the reader
+- Use clear headings (## and ###) that make sense for the topic
+- Include practical, actionable information
+- Use bullet points and lists where helpful
+- End with a strong conclusion
 
 STYLE RULES:
-- Write like a helpful blog post, not a textbook
-- Use "you" and "your" to speak directly to the reader
-- Include practical tips and advice they can use
-- Suggest products or solutions where relevant
-- End each section with a takeaway tip
+- Write like a helpful expert, not a textbook
+- Use "you" and "your" to speak directly to readers
 - Keep paragraphs short (2-3 sentences)
-- Simple English for farmers and students
-- Include keywords naturally
+- Use simple, clear English
+- Include relevant keywords naturally
+- Include at least 5 FAQs at the end
 - No citations
 - No references section
-- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS, NO PHOTO CREDITS
-- NO "Image 1:", "Image 2:", etc.
-- NO "Photo: ..." anywhere in the article
-- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content. SKIP IT COMPLETELY.
-- Write only the article content with the specified headings`;
+- No images or image descriptions
+- No horizontal lines (---)
+
+Write only the article content with appropriate headings.`;
 
       try {
         const result = await model.generateContent(prompt);
@@ -625,12 +475,10 @@ STYLE RULES:
       content = await generateWithYouCom(topic);
     }
 
-    // Clean content
     content = cleanContent(content);
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    // Add related articles
     const relatedSlugs = await findRelatedArticles(topic, slug);
     let relatedSection = '';
     if (relatedSlugs.length > 0) {
@@ -668,43 +516,16 @@ STYLE RULES:
       'veterinary',
     ].slice(0, 6);
 
-    // =========================
-    // IMAGES - Improved with better fallback
-    // =========================
-    const isVet = isVeterinaryTopic(topic);
-    console.log(`Topic is veterinary: ${isVet}`);
+    const heroImage = await getArticleImage(topic);
+    const causesImage = await getArticleImage(`${topic} disease`);
+    const symptomsImage = await getArticleImage(`sick animal`);
+    const treatmentImage = await getArticleImage(`veterinarian`);
+    const preventionImage = await getArticleImage(`farm biosecurity`);
 
-    let heroImage = '';
-    let causesImage = '';
-    let symptomsImage = '';
-    let treatmentImage = '';
-    let preventionImage = '';
-
-    if (isVet) {
-      console.log('🩺 Veterinary topic detected - fetching images');
-      
-      // Get hero image
-      heroImage = await getArticleImage(topic);
-      console.log(`Hero image: ${heroImage ? 'Found' : 'Not found'}`);
-      
-      causesImage = await getArticleImage(`${topic} disease infection`);
-      symptomsImage = await getArticleImage(`sick animal ${topic}`);
-      treatmentImage = await getArticleImage(`veterinarian treatment`);
-      preventionImage = await getArticleImage(`farm biosecurity vaccination`);
-
-      content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
-      content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
-      content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
-      content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
-    } else {
-      console.log('⚠️ Non-veterinary topic detected - using fallback image only');
-      heroImage = FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-
-    // If hero image is empty, use fallback
-    if (!heroImage) {
-      heroImage = FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
+    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
 
     const finalSlug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const date = new Date().toISOString().split('T')[0];
