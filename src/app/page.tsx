@@ -9,7 +9,7 @@ export default async function HomePage() {
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
 
       {/* Hero */}
-      <section className="relative bg-gray-900 text-white w-full py-16 sm:py-20 overflow-hidden">
+      <section className="relative bg-gray-900 text-white w-full py-10 sm:py-16 overflow-hidden">
         {/* Subtle ambient texture — radial glow + faint grid, no images needed */}
         <div
           className="absolute inset-0 opacity-40 pointer-events-none"
@@ -29,30 +29,30 @@ export default async function HomePage() {
 
         <div className="relative max-w-4xl mx-auto px-4 flex flex-col items-center">
           <div className="flex-1 text-center">
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-5">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-3">
               Better Animal Health <br className="hidden sm:block" />
               <span className="text-green-400">Starts Here</span>
             </h1>
-            <p className="text-gray-300 text-base sm:text-lg mb-7 max-w-2xl mx-auto leading-relaxed">
-              Practical veterinary guides for livestock farmers, students, and pet owners. Learn animal health, nutrition, disease prevention, and farm management through easy-to-understand articles written by professionals.
+            <p className="text-gray-300 text-sm sm:text-lg mb-4 max-w-2xl mx-auto leading-snug sm:leading-relaxed">
+              Practical veterinary guides for livestock farmers, students, and pet owners.
             </p>
 
             {/* Ask feature — promoted as the primary action, since it's a real, working tool */}
-            <div className="max-w-xl mx-auto mb-6">
-              <div className="bg-white/5 border border-white/15 rounded-2xl p-2 backdrop-blur-sm">
-                <div className="flex items-center gap-2 px-3 pt-2 pb-1">
-                  <span className="text-green-400 text-xs font-bold uppercase tracking-wide">Ask VetSphere</span>
-                  <span className="text-gray-400 text-xs">— get an instant answer</span>
+            <div className="max-w-xl mx-auto mb-4">
+              <div className="bg-white/5 border border-white/15 rounded-2xl p-1.5 backdrop-blur-sm">
+                <div className="flex items-center gap-2 px-2.5 pt-1.5 pb-1">
+                  <span className="text-green-400 text-[11px] font-bold uppercase tracking-wide">Ask VetSphere</span>
+                  <span className="text-gray-400 text-[11px]">— instant answers</span>
                 </div>
                 <AnimalSearch />
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a href="/articles" className="bg-green-600 hover:bg-green-500 text-white font-bold px-8 py-4 rounded-xl transition text-center">
+            <div className="flex flex-col sm:flex-row gap-2.5 justify-center">
+              <a href="/articles" className="bg-green-600 hover:bg-green-500 text-white font-bold px-6 py-3 rounded-xl transition text-center text-sm sm:text-base">
                 Explore Articles
               </a>
-              <a href="/contact" className="bg-white/10 hover:bg-white/20 text-white font-bold px-8 py-4 rounded-xl transition text-center border border-white/20">
+              <a href="/contact" className="bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-3 rounded-xl transition text-center border border-white/20 text-sm sm:text-base">
                 Get in Touch
               </a>
             </div>
@@ -126,4 +126,4 @@ export default async function HomePage() {
 
     </div>
   );
-}
+      }
