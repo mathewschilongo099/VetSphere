@@ -36,6 +36,14 @@ async function getArticleImage(query: string): Promise<string> {
   }
 }
 
+function buildExcerpt(text: string, maxLength: number): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLength) return clean;
+  const truncated = text.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { url, topic } = await request.json();
@@ -141,12 +149,17 @@ Return ONLY the article content in plain text format.
       .replace(/```/g, '')
       .trim();
 
+    // Generate meta description from the content
+    const plainText = cleanContent.replace(/[#*![\]()]/g, '').trim();
+    const metaDescription = buildExcerpt(plainText, 160);
+
     const heroImage = await getArticleImage(`${extractedTitle} veterinary`);
 
     return NextResponse.json({
       success: true,
       title: extractedTitle,
       content: cleanContent,
+      metaDescription: metaDescription,
       sourceUrl: url,
       sourceTitle: extractedTitle,
       heroImage: heroImage,
