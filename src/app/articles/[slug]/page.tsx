@@ -114,7 +114,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
       {/* Tags */}
       {post.tags.length > 0 && (
-        <div className="max-w-3xl mx-auto px-4 mb-8">
+        <div className="max-w-3xl mx-auto px-4 mb-10">
           <div className="flex flex-wrap gap-2">
             {post.tags.map((tag) => (
               <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
@@ -124,29 +124,6 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       )}
-
-      {/* Disclaimer */}
-      <div className="max-w-3xl mx-auto px-4 mb-8">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-xs sm:text-sm text-yellow-800">
-          <strong>Disclaimer:</strong> This article is for informational purposes only. Always consult a qualified veterinarian for specific health concerns.
-        </div>
-      </div>
-
-      {/* Author Bio */}
-      <div className="max-w-3xl mx-auto px-4 mb-10">
-        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
-          <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 border-2 border-green-500">
-            <Image src="/images/articles/mathews.jpg" alt="Mathews Chilongo" fill className="object-cover" />
-          </div>
-          <div>
-            <p className="font-bold text-gray-900 text-sm">Mathews Chilongo</p>
-            <p className="text-green-600 text-xs font-medium mb-1">Veterinary Practitioner & Freelancer</p>
-            <p className="text-gray-500 text-xs leading-relaxed">
-              Passionate about animal health and helping farmers and pet owners worldwide with practical, reliable veterinary knowledge.
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Prev / Next Navigation */}
       {(prev || next) && (
