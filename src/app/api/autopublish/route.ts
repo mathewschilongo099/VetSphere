@@ -302,6 +302,46 @@ function topicToSlug(topic: string): string {
   return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
+// Helper function to find related articles based on keywords
+async function findRelatedArticles(topic: string, currentSlug: string): Promise<string[]> {
+  try {
+    const existingSlugs = await getExistingSlugs();
+    
+    // Get keywords from the topic
+    const keywords = topic.toLowerCase().split(' ');
+    
+    // Score each article based on keyword matches
+    const scored = existingSlugs.map(slug => {
+      if (slug === currentSlug) return { slug, score: 0 };
+      
+      const slugWords = slug.replace(/-/g, ' ').toLowerCase().split(' ');
+      let score = 0;
+      for (const kw of keywords) {
+        if (slugWords.some((sw: string) => sw.includes(kw) || kw.includes(sw))) {
+          score++;
+        }
+      }
+      return { slug, score };
+    });
+    
+    // Sort by score (highest first) and take top 3
+    const sorted = scored.sort((a, b) => b.score - a.score);
+    const top = sorted.filter(s => s.score > 0).slice(0, 3);
+    
+    // If no matches, take 3 random articles
+    if (top.length === 0) {
+      const available = existingSlugs.filter(s => s !== currentSlug);
+      const shuffled = available.sort(() => 0.5 - Math.random());
+      return shuffled.slice(0, 3);
+    }
+    
+    return top.map(s => s.slug);
+    
+  } catch {
+    return [];
+  }
+}
+
 const insertAfterHeading = (
   text: string,
   headingPattern: RegExp,
@@ -382,8 +422,8 @@ export async function GET(request: NextRequest) {
     console.log('Auto-publishing topic:', topic);
 
     const existingSlugs = await getExistingSlugs();
-    const topicSlugPrefix = topicToSlug(topic);
-    const alreadyPublished = existingSlugs.some(slug => slug.startsWith(topicSlugPrefix));
+    const slug = topicToSlug(topic);
+    const alreadyPublished = existingSlugs.some(s => s.startsWith(slug));
 
     if (alreadyPublished) {
       return NextResponse.json({
@@ -471,6 +511,27 @@ STYLE RULES:
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
+    // =========================
+    // ADD RELATED ARTICLES
+    // =========================
+    const relatedSlugs = await findRelatedArticles(topic, slug);
+    let relatedSection = '';
+    if (relatedSlugs.length > 0) {
+      relatedSection = '\n\n## Related Articles\n\n';
+      for (const relatedSlug of relatedSlugs) {
+        const title = relatedSlug.replace(/-/g, ' ');
+        relatedSection += `- [${title}](/articles/${relatedSlug})\n`;
+      }
+    }
+
+    // Insert related section before Conclusion
+    const conclusionIndex = content.indexOf('## Conclusion');
+    if (conclusionIndex !== -1) {
+      content = content.substring(0, conclusionIndex) + relatedSection + '\n\n' + content.substring(conclusionIndex);
+    } else {
+      content = content + relatedSection;
+    }
+
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
@@ -502,7 +563,7 @@ STYLE RULES:
     content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
 
-    const slug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const finalSlug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const date = new Date().toISOString().split('T')[0];
 
     const markdown = `---
@@ -521,7 +582,7 @@ excerpt: "${excerpt.replace(/"/g, '\\"')}"
 ${content}
 `;
 
-    const path = `src/content/articles/${slug}.md`;
+    const path = `src/content/articles/${finalSlug}.md`;
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
     const token = process.env.GITHUB_TOKEN;
