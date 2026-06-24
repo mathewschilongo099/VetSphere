@@ -38,35 +38,19 @@ function FAQAccordion({ content }: { content: string }) {
       }
     }
 
-    // Pattern 2: Q: and A: format
+    // Pattern 2: Q: and A: format (if numbered didn't work)
     if (foundFaqs.length === 0) {
-      const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
-      let match;
-      while ((match = qaRegex.exec(content)) !== null) {
-        const question = match[1].trim();
-        const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-        if (question.length > 5 && answer.length > 10) {
-          foundFaqs.push({ question, answer });
-        }
-      }
-    }
-
-    // Pattern 3: Bold question with ? format
-    if (foundFaqs.length === 0) {
-      const boldRegex = /\*\*(.*?\?)\*\*[\s\S]*?(?=\*\*|$)/gi;
-      let match;
-      while ((match = boldRegex.exec(content)) !== null) {
-        const question = match[1].trim();
-        const remaining = content.substring(match.index + match[0].length);
-        const nextMatch = remaining.match(/\*\*.*?\?/);
-        const answer = nextMatch 
-          ? remaining.substring(0, nextMatch.index).trim()
-          : remaining.trim();
-        if (question.length > 5 && answer.length > 10) {
-          foundFaqs.push({
-            question: question,
-            answer: answer.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
-          });
+      const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
+      if (faqSection) {
+        const faqText = faqSection[1];
+        const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
+        let match;
+        while ((match = qaRegex.exec(faqText)) !== null) {
+          const question = match[1].trim();
+          const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+          if (question.length > 5 && answer.length > 10) {
+            foundFaqs.push({ question, answer });
+          }
         }
       }
     }
@@ -77,27 +61,37 @@ function FAQAccordion({ content }: { content: string }) {
       answer: faq.answer.replace(/^A(?:nswer)?[:.]?\s*/i, '').trim()
     }));
 
-    // Filter out fallback questions and invalid FAQs
+    // Filter out invalid FAQs
     foundFaqs = foundFaqs.filter(faq => 
       faq.question.length > 5 && 
       faq.answer.length > 10 &&
-      !faq.question.toLowerCase().includes('what causes this condition') &&
-      !faq.question.toLowerCase().includes('how is this condition treated') &&
-      !faq.question.toLowerCase().includes('can this condition be prevented') &&
       !faq.question.includes('In this article') &&
       !faq.question.includes('Read more')
     );
 
-    // Only set FAQs if real ones were found
+    // If we found real FAQs, use them; otherwise use fallback
     if (foundFaqs.length > 0) {
       setFaqs(foundFaqs.slice(0, 10));
     } else {
-      // If no real FAQs, show nothing
-      setFaqs([]);
+      // Fallback FAQs (shown when article has no real FAQs)
+      setFaqs([
+        {
+          question: "What causes this condition?",
+          answer: "The exact causes vary depending on the specific condition. Generally, factors include diet, environment, genetics, and infectious agents. Consult your veterinarian for a proper diagnosis."
+        },
+        {
+          question: "How is this condition treated?",
+          answer: "Treatment options depend on the specific diagnosis. Common approaches include medication, dietary changes, supportive care, and in some cases surgery. Always consult a qualified veterinarian."
+        },
+        {
+          question: "Can this condition be prevented?",
+          answer: "Many conditions can be prevented through good management practices, proper nutrition, vaccination programs, and regular veterinary check-ups. Early detection is key."
+        }
+      ]);
     }
   }, [content]);
 
-  // If no FAQs, return nothing (hide the section)
+  // If no FAQs at all (should not happen because fallback is always set), return null
   if (faqs.length === 0) return null;
 
   return (
