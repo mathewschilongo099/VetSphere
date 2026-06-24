@@ -10,35 +10,38 @@ function FAQAccordion({ content }: { content: string }) {
   const [faqs, setFaqs] = useState<{ question: string; answer: string }[]>([]);
 
   useEffect(() => {
-    // Try multiple patterns to extract FAQs
     let foundFaqs: { question: string; answer: string }[] = [];
 
-    // Pattern 1: Numbered questions (1. Question text)
-    const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/gi;
-    let match;
-    while ((match = numberedRegex.exec(content)) !== null) {
-      const answer = content.split(match[0])[1]?.split(/\d+\.\s*\*\*/)[0]?.trim() || '';
-      foundFaqs.push({
-        question: match[2].trim(),
-        answer: answer.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
-      });
-    }
-
-    // Pattern 2: Q: / A: format
-    if (foundFaqs.length === 0) {
-      const qaRegex = /\*\*Q(?:uestion)?[:.]?\s*(.*?)\?\*\*[\s\S]*?\*\*A(?:nswer)?[:.]?\s*(.*?)(?=\*\*Q|\*\*Question|$)/gi;
-      while ((match = qaRegex.exec(content)) !== null) {
+    // Extract the FAQ section
+    const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
+    
+    if (faqSection) {
+      const faqText = faqSection[1];
+      
+      // Pattern for numbered questions: 1. **Question text?** Answer text
+      const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/gi;
+      let match;
+      
+      // Find all questions and their answers
+      while ((match = numberedRegex.exec(faqText)) !== null) {
+        // Find the answer (everything between this question and the next number)
+        const nextMatch = faqText.indexOf(`${parseInt(match[1]) + 1}.`, match.index + match[0].length);
+        const answerText = nextMatch > 0 
+          ? faqText.substring(match.index + match[0].length, nextMatch).trim()
+          : faqText.substring(match.index + match[0].length).trim();
+        
         foundFaqs.push({
-          question: match[1].trim(),
-          answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
+          question: match[2].trim(),
+          answer: answerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
         });
       }
     }
 
-    // Pattern 3: Bold question with ? and bold answer
+    // If no FAQs found with numbers, try Q: A: format
     if (foundFaqs.length === 0) {
-      const altRegex = /\*\*(.*?\?)\*\*[\s\S]*?\*\*(?:Answer|A):?\s*(.*?)(?=\*\*.*?\?|$)/gi;
-      while ((match = altRegex.exec(content)) !== null) {
+      const qaRegex = /\*\*Q(?:uestion)?[:.]?\s*(.*?\?)\*\*[\s\S]*?\*\*A(?:nswer)?[:.]?\s*(.*?)(?=\*\*Q|\*\*Question|$)/gi;
+      let match;
+      while ((match = qaRegex.exec(content)) !== null) {
         foundFaqs.push({
           question: match[1].trim(),
           answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
@@ -55,7 +58,7 @@ function FAQAccordion({ content }: { content: string }) {
     // Filter out empty or invalid FAQs
     foundFaqs = foundFaqs.filter(faq => 
       faq.question.length > 5 && 
-      faq.answer.length > 5 &&
+      faq.answer.length > 10 &&
       !faq.question.includes('In this article') &&
       !faq.question.includes('Read more')
     );
@@ -63,7 +66,7 @@ function FAQAccordion({ content }: { content: string }) {
     if (foundFaqs.length > 0) {
       setFaqs(foundFaqs.slice(0, 10));
     } else {
-      // Fallback hardcoded FAQs if none found
+      // Only show fallback if no FAQs found
       const fallbackFaqs = [
         {
           question: "What causes this condition?",
@@ -128,16 +131,16 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  // STRONGER removal of FAQ section from content
+  // Remove FAQ section from content
   let contentWithoutFAQ = cleanContent;
   
-  // Remove the entire FAQ section including the heading and all numbered questions
+  // Remove the entire FAQ section
   contentWithoutFAQ = contentWithoutFAQ.replace(
     /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i,
     ''
   );
   
-  // Also remove any remaining FAQ patterns
+  // Remove any remaining FAQ patterns
   contentWithoutFAQ = contentWithoutFAQ.replace(
     /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/g,
     ''
