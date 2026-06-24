@@ -1,139 +1,224 @@
-import fs from 'fs';
-import path from 'path';
-import matter from 'gray-matter';
-import MarkdownIt from 'markdown-it';
-import { BlogPost } from '@/types';
+import { getPostBySlug, getAllPosts, getAdjacentPosts, getRelatedPosts } from '@/lib/blog';
+import { notFound } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import type { Metadata } from 'next';
 
-const md = new MarkdownIt({
-  html: true,
-  linkify: true,
-  typographer: true,
-});
-
-const POSTS_DIRECTORY = path.join(process.cwd(), 'src/content/articles');
-
-export function getAllPosts(): BlogPost[] {
-  if (!fs.existsSync(POSTS_DIRECTORY)) {
-    return [];
-  }
-
-  const fileNames = fs.readdirSync(POSTS_DIRECTORY);
-  const posts = fileNames
-    .filter((fileName) => fileName.endsWith('.md'))
-    .map((fileName) => {
-      const slug = fileName.replace(/\.md$/, '');
-      return getPostBySlug(slug);
-    })
-    .filter((post): post is BlogPost => post !== null)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  return posts;
-}
-
-export function getPostBySlug(slug: string): BlogPost | null {
-  try {
-    const realSlug = slug.replace(/\.md$/, '');
-    const fullPath = path.join(POSTS_DIRECTORY, `${realSlug}.md`);
-
-    if (!fs.existsSync(fullPath)) {
-      return null;
-    }
-
-    const fileContents = fs.readFileSync(fullPath, 'utf8');
-    const { data, content } = matter(fileContents);
-    const readingTime = calculateReadingTime(content);
-    const contentHtml = md.render(content);
-
-    return {
-      slug: realSlug,
-      title: data.title || '',
-      description: data.description || '',
-      excerpt: data.description || '',
-      date: data.date || '',
-      author: data.author || 'VetSphere Team',
-      category: data.category || '',
-      tags: data.tags || [],
-      image: data.image || '/images/placeholder.jpg',
-      imageAlt: data.imageAlt || data.title,
-      content: contentHtml,
-      readingTime,
-      readTime: `${readingTime} min read`,
-      featured: data.featured || false,
-    };
-  } catch (error) {
-    console.error(`Error reading post ${slug}:`, error);
-    return null;
-  }
-}
-
-export function getPostsByCategory(category: string): BlogPost[] {
-  return getAllPosts().filter((post) => post.category.toLowerCase() === category.toLowerCase());
-}
-
-export function getPostsByTag(tag: string): BlogPost[] {
-  return getAllPosts().filter((post) =>
-    post.tags.some((t) => t.toLowerCase() === tag.toLowerCase())
-  );
-}
-
-export function getFeaturedPosts(count: number = 3): BlogPost[] {
-  return getAllPosts()
-    .filter((post) => post.featured)
-    .slice(0, count);
-}
-
-export function getRelatedPosts(slug: string, count: number = 3): BlogPost[] {
-  const post = getPostBySlug(slug);
-  if (!post) return [];
-
-  return getAllPosts()
-    .filter(
-      (p) =>
-        p.slug !== slug &&
-        (p.category === post.category || p.tags.some((tag) => post.tags.includes(tag)))
-    )
-    .slice(0, count);
-}
-
-// Finds the previous (older) and next (newer) article relative to the given
-// slug, based on the same date-sorted order used everywhere else (newest
-// first). Used for Prev/Next navigation at the bottom of each article page.
-export function getAdjacentPosts(slug: string): { prev: BlogPost | null; next: BlogPost | null } {
+export async function generateStaticParams() {
   const posts = getAllPosts();
-  const currentIndex = posts.findIndex((p) => p.slug === slug);
-
-  if (currentIndex === -1) {
-    return { prev: null, next: null };
-  }
-
-  const next = currentIndex > 0 ? posts[currentIndex - 1] : null;
-  const prev = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
-
-  return { prev, next };
+  return posts.map((post) => ({ slug: post.slug }));
 }
 
-export function calculateReadingTime(content: string): number {
-  const wordsPerMinute = 200;
-  const wordCount = content.split(/\s+/).length;
-  return Math.ceil(wordCount / wordsPerMinute);
+export async function generateMetadata(
+  { params }: { params: { slug: string } }
+): Promise<Metadata> {
+  const post = getPostBySlug(params.slug);
+  if (!post) return { title: 'Article Not Found | VetSphere' };
+
+  const imageUrl = post.image?.startsWith('http')
+    ? post.image
+    : `https://vet-sphere.vercel.app${post.image}`;
+
+  return {
+    title: `${post.title} | VetSphere`,
+    description: post.description,
+    keywords: post.tags.join(', '),
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      type: 'article',
+      publishedTime: post.date,
+      authors: ['Mathews Chilongo'],
+      url: `https://vet-sphere.vercel.app/articles/${post.slug}`,
+      images: [{ url: imageUrl, alt: post.imageAlt }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: post.title,
+      description: post.description,
+      images: [imageUrl],
+    },
+  };
 }
 
-export function getAllTags(): string[] {
-  const tags = new Set<string>();
-  getAllPosts().forEach((post) => {
-    post.tags.forEach((tag) => tags.add(tag));
-  });
-  return Array.from(tags).sort();
-}
+export default function ArticlePage({ params }: { params: { slug: string } }) {
+  const post = getPostBySlug(params.slug);
+  if (!post) return notFound();
 
-export function getTagCloud(): { tag: string; count: number }[] {
-  const tags: { [key: string]: number } = {};
-  getAllPosts().forEach((post) => {
-    post.tags.forEach((tag) => {
-      tags[tag] = (tags[tag] || 0) + 1;
-    });
-  });
-  return Object.entries(tags)
-    .map(([tag, count]) => ({ tag, count }))
-    .sort((a, b) => b.count - a.count);
+  const { prev, next } = getAdjacentPosts(params.slug);
+  const relatedPosts = getRelatedPosts(params.slug, 3);
+
+  return (
+    <div className="min-h-screen bg-white w-full overflow-x-hidden">
+
+      {/* Hero */}
+      <section className="bg-gray-900 text-white py-10 sm:py-14 w-full">
+        <div className="max-w-3xl mx-auto px-4 text-center">
+          <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">
+            {post.category}
+          </span>
+          <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold leading-snug mb-4">
+            {post.title}
+          </h1>
+          <div className="flex items-center justify-center gap-3 text-gray-400 text-xs sm:text-sm flex-wrap">
+            <span>By Mathews Chilongo</span>
+            <span>•</span>
+            <span>{post.readTime}</span>
+            <span>•</span>
+            <span>{new Date(post.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Featured Image */}
+      {post.image && (
+        <div className="w-full max-w-3xl mx-auto px-4 mt-6">
+          <div className="relative h-52 sm:h-72 rounded-2xl overflow-hidden">
+            <Image
+              src={post.image}
+              alt={post.imageAlt || post.title}
+              fill
+              className="object-cover"
+              priority
+              unoptimized={post.image.startsWith('http')}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Article Content */}
+      <article className="max-w-3xl mx-auto px-4 py-10">
+        <div
+          className="
+            prose prose-sm sm:prose-base max-w-none
+            prose-headings:font-bold prose-headings:text-gray-900
+            prose-h1:hidden
+            prose-h2:text-base sm:prose-h2:text-lg prose-h2:mt-8 prose-h2:mb-3
+            prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-2
+            prose-h3:text-sm sm:prose-h3:text-base prose-h3:mt-6 prose-h3:mb-2
+            prose-p:text-gray-600 prose-p:leading-relaxed prose-p:text-sm sm:prose-p:text-base
+            prose-li:text-gray-600 prose-li:text-sm
+            prose-strong:text-gray-800
+            prose-a:text-green-600 prose-a:no-underline hover:prose-a:underline
+            prose-img:rounded-xl prose-img:my-6 prose-img:w-full
+            prose-table:text-xs sm:prose-table:text-sm
+            prose-th:bg-gray-50 prose-th:p-2 prose-th:font-semibold
+            prose-td:p-2 prose-td:border prose-td:border-gray-100
+            prose-blockquote:border-l-4 prose-blockquote:border-green-400
+            prose-blockquote:bg-green-50 prose-blockquote:px-4 prose-blockquote:py-2
+            prose-blockquote:rounded-r-xl prose-blockquote:not-italic
+          "
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
+      </article>
+
+      {/* Tags */}
+      {post.tags.length > 0 && (
+        <div className="max-w-3xl mx-auto px-4 mb-8">
+          <div className="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <span key={tag} className="bg-gray-100 text-gray-600 text-xs px-3 py-1 rounded-full">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Disclaimer */}
+      <div className="max-w-3xl mx-auto px-4 mb-8">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-xs sm:text-sm text-yellow-800">
+          <strong>Disclaimer:</strong> This article is for informational purposes only. Always consult a qualified veterinarian for specific health concerns.
+        </div>
+      </div>
+
+      {/* Author Bio */}
+      <div className="max-w-3xl mx-auto px-4 mb-10">
+        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
+          <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 border-2 border-green-500">
+            <Image src="/images/articles/mathews.jpg" alt="Mathews Chilongo" fill className="object-cover" />
+          </div>
+          <div>
+            <p className="font-bold text-gray-900 text-sm">Mathews Chilongo</p>
+            <p className="text-green-600 text-xs font-medium mb-1">Veterinary Practitioner & Freelancer</p>
+            <p className="text-gray-500 text-xs leading-relaxed">
+              Passionate about animal health and helping farmers and pet owners worldwide with practical, reliable veterinary knowledge.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Prev / Next Navigation */}
+      {(prev || next) && (
+        <div className="max-w-3xl mx-auto px-4 mb-10">
+          <div className="grid grid-cols-2 gap-3">
+            {prev ? (
+              <Link
+                href={`/articles/${prev.slug}`}
+                className="group bg-gray-50 border border-gray-100 rounded-2xl p-4 hover:shadow-md hover:border-green-200 transition"
+              >
+                <span className="text-xs text-green-600 font-semibold mb-1 block">← Previous</span>
+                <span className="font-bold text-gray-900 text-xs leading-snug line-clamp-2 group-hover:text-green-600 transition-colors block">
+                  {prev.title}
+                </span>
+              </Link>
+            ) : <div />}
+            {next ? (
+              <Link
+                href={`/articles/${next.slug}`}
+                className="group bg-gray-50 border border-gray-100 rounded-2xl p-4 hover:shadow-md hover:border-green-200 transition text-right"
+              >
+                <span className="text-xs text-green-600 font-semibold mb-1 block">Next →</span>
+                <span className="font-bold text-gray-900 text-xs leading-snug line-clamp-2 group-hover:text-green-600 transition-colors block">
+                  {next.title}
+                </span>
+              </Link>
+            ) : <div />}
+          </div>
+        </div>
+      )}
+
+      {/* Related Articles */}
+      {relatedPosts.length > 0 && (
+        <div className="max-w-3xl mx-auto px-4 mb-12">
+          <h2 className="text-base font-bold text-gray-900 mb-4">Related Articles</h2>
+          <div className="space-y-3">
+            {relatedPosts.map((related) => (
+              <Link
+                key={related.slug}
+                href={`/articles/${related.slug}`}
+                className="group flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3 hover:shadow-md hover:border-green-200 transition"
+              >
+                {related.image && (
+                  <div className="relative w-14 h-14 rounded-xl overflow-hidden shrink-0">
+                    <Image
+                      src={related.image}
+                      alt={related.imageAlt || related.title}
+                      fill
+                      className="object-cover"
+                      unoptimized={related.image.startsWith('http')}
+                    />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <span className="font-bold text-gray-900 text-xs leading-snug line-clamp-2 group-hover:text-green-600 transition-colors block">
+                    {related.title}
+                  </span>
+                  <span className="text-gray-400 text-xs">{related.readTime}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Back Link */}
+      <div className="max-w-3xl mx-auto px-4 pb-16">
+        <Link href="/articles" className="inline-flex items-center gap-2 text-green-600 text-sm font-semibold hover:underline">
+          ← Back to Articles
+        </Link>
+      </div>
+
+    </div>
+  );
 }
