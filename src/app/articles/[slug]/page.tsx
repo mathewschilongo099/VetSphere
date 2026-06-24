@@ -1,42 +1,8 @@
-import { getPostBySlug, getAllPosts } from '@/lib/blog';
+import { getPostBySlug, getAllPosts, getAdjacentPosts, getRelatedPosts } from '@/lib/blog';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Metadata } from 'next';
-
-// =========================
-// AGGRESSIVE CLEAN CONTENT FUNCTION
-// Removes duplicated images, captions, and fixes ghost spacing gaps
-// =========================
-function cleanArticleContent(html: string): string {
-  // 1. Bulletproof Multi-line Image Removal (Fixes sneaky duplicate images)
-  html = html.replace(/<img[\s\S]*?>/gi, '');
-  html = html.replace(/!\[[\s\S]*?\]\([\s\S]*?\)/g, '');
-  
-  // 2. Remove any <h2> or <h3> that says "Image" followed by a number
-  html = html.replace(/<h[23][^>]*>Image\s+\d+.*?<\/h[23]>/gi, '');
-  
-  // 3. Remove any paragraph that contains "Photo:" or "via Unsplash" (case insensitive)
-  html = html.replace(/<p[^>]*>.*?Photo:.*?<\/p>/gi, '');
-  html = html.replace(/<p[^>]*>.*?via\s+Unsplash.*?<\/p>/gi, '');
-  html = html.replace(/<p[^>]*>.*?Image\s+Description.*?<\/p>/gi, '');
-  html = html.replace(/<p[^>]*>.*?Caption:.*?<\/p>/gi, '');
-  html = html.replace(/<p[^>]*>.*?Image\s+\d+:.*?<\/p>/gi, '');
-  html = html.replace(/<p[^>]*>.*?Source:.*?<\/p>/gi, '');
-  html = html.replace(/<p[^>]*>.*?Credit:.*?<\/p>/gi, '');
-  
-  // 4. Remove any remaining "Photo:" anywhere (including inside other tags)
-  html = html.replace(/Photo:[^<]*(?:<[^>]+>)*/gi, '');
-  
-  // 5. Wipe out any paragraphs, divs, or figures that are completely empty
-  html = html.replace(/<p[^>]*>(\s|&nbsp;|<br\s*\/?>)*<\/p>/gi, '');
-  html = html.replace(/<div[^>]*>(\s|&nbsp;|<br\s*\/?>)*<\/div>/gi, '');
-  html = html.replace(/<figure[^>]*>(\s|&nbsp;)*<\/figure>/gi, '');
-  
-  // 6. Collapse multiple consecutive line breaks down to a single one
-  html = html.replace(/(<br\s*\/?>\s*){2,}/gi, '');
-  
-  return html.trim();
-}
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -67,9 +33,7 @@ export async function generateMetadata(
       url: `https://vet-sphere.vercel.app/articles/${post.slug}`,
       images: [
         {
-          url: post.image?.startsWith('http')
-            ? post.image
-            : `https://vet-sphere.vercel.app${post.image}`,
+          url: `https://vet-sphere.vercel.app${post.image}`,
           alt: post.imageAlt,
         },
       ],
@@ -78,11 +42,7 @@ export async function generateMetadata(
       card: 'summary_large_image',
       title: post.title,
       description: post.description,
-      images: [
-        post.image?.startsWith('http')
-          ? post.image
-          : `https://vet-sphere.vercel.app${post.image}`,
-      ],
+      images: [`https://vet-sphere.vercel.app${post.image}`],
     },
   };
 }
@@ -92,22 +52,22 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
   if (!post) return notFound();
 
-  // Clean the content aggressively
-  const cleanedContent = cleanArticleContent(post.content);
+  const { prev, next } = getAdjacentPosts(params.slug);
+  const relatedPosts = getRelatedPosts(params.slug, 3);
 
   return (
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
 
       {/* Hero */}
-      <section className="bg-gray-900 text-white py-10 sm:py-14 w-full">
+      <section className="bg-gray-900 text-white py-12 sm:py-16 w-full">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-4 uppercase tracking-widest">
             {post.category}
           </span>
-          <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold leading-snug mb-4">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold sm:font-extrabold leading-snug sm:leading-tight mb-5">
             {post.title}
           </h1>
-          <div className="flex items-center justify-center gap-3 text-gray-400 text-xs sm:text-sm flex-wrap">
+          <div className="flex items-center justify-center gap-4 text-gray-400 text-sm flex-wrap">
             <span>By Mathews Chilongo</span>
             <span>•</span>
             <span>{post.readTime}</span>
@@ -119,49 +79,38 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
       {/* Featured Image */}
       {post.image && (
-        <div className="relative w-full max-w-3xl mx-auto px-4 mt-6">
-          <div className="relative h-52 sm:h-72 rounded-2xl overflow-hidden">
+        <div className="relative w-full max-w-3xl mx-auto px-4 mt-8">
+          <div className="relative h-64 sm:h-80 rounded-2xl overflow-hidden">
             <Image
               src={post.image}
               alt={post.imageAlt || post.title}
               fill
               className="object-cover"
               priority
-              unoptimized={post.image.startsWith('http')}
             />
           </div>
         </div>
       )}
 
       {/* Article Content */}
-      <article className="max-w-3xl mx-auto px-4 py-6">
+      <article className="max-w-3xl mx-auto px-4 py-12">
         <div
-          className="
-            prose prose-sm sm:prose-base max-w-none
-            prose-headings:font-bold prose-headings:text-gray-900
-            prose-h1:hidden
-            
-            /* FORCE SPACING OVERRIDES ON ALL ELEMENTS */
-            [&_p]:text-gray-600 [&_p]:leading-relaxed [&_p]:text-sm sm:[&_p]:text-base [&_p]:my-2
-            [&_h2]:text-base sm:[&_h2]:text-lg [&_h2]:mt-5 [&_h2]:mb-2 [&_h2]:border-b [&_h2]:border-gray-100 [&_h2]:pb-1
-            [&_h3]:text-sm sm:[&_h3]:text-base [&_h3]:mt-4 [&_h3]:mb-1
-            [&_hr]:my-2 [&_hr]:border-gray-100
-            
-            prose-li:text-gray-600 prose-li:text-sm sm:prose-li:text-base
-            prose-strong:text-gray-800
+          className="prose prose-lg max-w-none
+            prose-headings:font-extrabold prose-headings:text-gray-900
+            prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4
+            prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3
+            prose-p:text-gray-600 prose-p:leading-relaxed
+            prose-li:text-gray-600
+            prose-strong:text-gray-900
             prose-a:text-green-600 prose-a:no-underline hover:prose-a:underline
-            prose-table:text-xs sm:prose-table:text-sm
-            prose-th:bg-gray-50 prose-th:p-2 prose-th:font-semibold
-            prose-td:p-2 prose-td:border prose-td:border-gray-100
-            prose-blockquote:border-l-4 prose-blockquote:border-green-400 prose-blockquote:bg-green-50 prose-blockquote:px-4 prose-blockquote:py-2 prose-blockquote:rounded-r-xl
-          "
-          dangerouslySetInnerHTML={{ __html: cleanedContent }}
+            prose-table:text-sm prose-th:bg-gray-100 prose-th:p-2 prose-td:p-2"
+          dangerouslySetInnerHTML={{ __html: post.content }}
         />
       </article>
 
       {/* Tags */}
       {post.tags.length > 0 && (
-        <div className="max-w-3xl mx-auto px-4 mb-8">
+        <div className="max-w-3xl mx-auto px-4 mb-10">
           <div className="flex flex-wrap gap-2">
             {post.tags.map((tag) => (
               <span
@@ -176,16 +125,16 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
       )}
 
       {/* Disclaimer */}
-      <div className="max-w-3xl mx-auto px-4 mb-8">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-xs sm:text-sm text-yellow-800">
+      <div className="max-w-3xl mx-auto px-4 mb-10">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">
           <strong>Disclaimer:</strong> This article is for informational purposes only. Always consult with a qualified veterinarian for specific health concerns regarding your animals.
         </div>
       </div>
 
       {/* Author Bio */}
-      <div className="max-w-3xl mx-auto px-4 mb-12">
-        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
-          <div className="relative w-14 h-14 rounded-full overflow-hidden shrink-0 border-2 border-green-500">
+      <div className="max-w-3xl mx-auto px-4 mb-16">
+        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 flex items-center gap-5">
+          <div className="relative w-16 h-16 rounded-full overflow-hidden shrink-0 border-2 border-green-500">
             <Image
               src="/images/articles/mathews.jpg"
               alt="Mathews Chilongo"
@@ -194,18 +143,85 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             />
           </div>
           <div>
-            <p className="font-bold text-gray-900 text-sm">Mathews Chilongo</p>
+            <p className="font-bold text-gray-900 text-base">Mathews Chilongo</p>
             <p className="text-green-600 text-xs font-medium mb-1">Veterinary Practitioner & Freelancer</p>
-            <p className="text-gray-500 text-xs leading-relaxed">
+            <p className="text-gray-500 text-sm leading-relaxed">
               Passionate about animal health and helping farmers and pet owners worldwide with practical, reliable veterinary knowledge.
             </p>
           </div>
         </div>
       </div>
 
+      {/* Prev / Next Navigation */}
+      {(prev || next) && (
+        <div className="max-w-3xl mx-auto px-4 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {prev ? (
+              <Link
+                href={`/articles/${prev.slug}`}
+                className="group bg-gray-50 border border-gray-100 rounded-2xl p-5 hover:shadow-md hover:border-green-200 transition"
+              >
+                <span className="text-xs text-gray-400 font-medium mb-1 block">← Previous</span>
+                <span className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition-colors">
+                  {prev.title}
+                </span>
+              </Link>
+            ) : (
+              <div />
+            )}
+            {next ? (
+              <Link
+                href={`/articles/${next.slug}`}
+                className="group bg-gray-50 border border-gray-100 rounded-2xl p-5 hover:shadow-md hover:border-green-200 transition text-right"
+              >
+                <span className="text-xs text-gray-400 font-medium mb-1 block">Next →</span>
+                <span className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition-colors">
+                  {next.title}
+                </span>
+              </Link>
+            ) : (
+              <div />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Related Articles */}
+      {relatedPosts.length > 0 && (
+        <div className="max-w-3xl mx-auto px-4 mb-16">
+          <h2 className="text-xl font-extrabold text-gray-900 mb-4">Related Articles</h2>
+          <div className="space-y-3">
+            {relatedPosts.map((related) => (
+              <Link
+                key={related.slug}
+                href={`/articles/${related.slug}`}
+                className="group flex items-center gap-4 bg-gray-50 border border-gray-100 rounded-2xl p-4 hover:shadow-md hover:border-green-200 transition"
+              >
+                {related.image && (
+                  <div className="relative w-16 h-16 rounded-xl overflow-hidden shrink-0">
+                    <Image
+                      src={related.image}
+                      alt={related.imageAlt || related.title}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <span className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition-colors block">
+                    {related.title}
+                  </span>
+                  <span className="text-gray-400 text-xs">{related.readTime}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Back Link */}
       <div className="max-w-3xl mx-auto px-4 pb-16">
-        <a href="/articles" className="inline-flex items-center gap-2 text-green-600 text-sm font-semibold hover:underline">
+        <a href="/articles" className="inline-flex items-center gap-2 text-green-600 font-semibold hover:underline">
           ← Back to Articles
         </a>
       </div>
