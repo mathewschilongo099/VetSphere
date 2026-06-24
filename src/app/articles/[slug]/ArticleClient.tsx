@@ -18,40 +18,62 @@ function FAQAccordion({ content }: { content: string }) {
     if (faqSection) {
       const faqText = faqSection[1];
       
-      // Pattern for numbered questions: 1. **Question text?** Answer text
-      const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/gi;
+      // Pattern 1: Q: and A: format (most common)
+      const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
       let match;
-      
-      // Find all questions and their answers
-      while ((match = numberedRegex.exec(faqText)) !== null) {
-        // Find the answer (everything between this question and the next number)
-        const nextMatch = faqText.indexOf(`${parseInt(match[1]) + 1}.`, match.index + match[0].length);
-        const answerText = nextMatch > 0 
-          ? faqText.substring(match.index + match[0].length, nextMatch).trim()
-          : faqText.substring(match.index + match[0].length).trim();
-        
-        foundFaqs.push({
-          question: match[2].trim(),
-          answer: answerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
-        });
+      while ((match = qaRegex.exec(faqText)) !== null) {
+        const question = match[1].trim();
+        const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+        if (question.length > 5 && answer.length > 10) {
+          foundFaqs.push({ question, answer });
+        }
       }
     }
 
-    // If no FAQs found with numbers, try Q: A: format
+    // Pattern 2: Numbered questions if Q: format didn't work
     if (foundFaqs.length === 0) {
-      const qaRegex = /\*\*Q(?:uestion)?[:.]?\s*(.*?\?)\*\*[\s\S]*?\*\*A(?:nswer)?[:.]?\s*(.*?)(?=\*\*Q|\*\*Question|$)/gi;
-      let match;
-      while ((match = qaRegex.exec(content)) !== null) {
-        foundFaqs.push({
-          question: match[1].trim(),
-          answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
-        });
+      const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
+      if (faqSection) {
+        const faqText = faqSection[1];
+        const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/gi;
+        let match;
+        while ((match = numberedRegex.exec(faqText)) !== null) {
+          const nextMatch = faqText.indexOf(`${parseInt(match[1]) + 1}.`, match.index + match[0].length);
+          const answerText = nextMatch > 0 
+            ? faqText.substring(match.index + match[0].length, nextMatch).trim()
+            : faqText.substring(match.index + match[0].length).trim();
+          
+          foundFaqs.push({
+            question: match[2].trim(),
+            answer: answerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
+          });
+        }
       }
     }
 
-    // Clean up answers
+    // Pattern 3: Bold question with ? format
+    if (foundFaqs.length === 0) {
+      const boldRegex = /\*\*(.*?\?)\*\*[\s\S]*?(?=\*\*|$)/gi;
+      let match;
+      while ((match = boldRegex.exec(content)) !== null) {
+        const question = match[1].trim();
+        const remaining = content.substring(match.index + match[0].length);
+        const nextMatch = remaining.match(/\*\*.*?\?/);
+        const answer = nextMatch 
+          ? remaining.substring(0, nextMatch.index).trim()
+          : remaining.trim();
+        if (question.length > 5 && answer.length > 10) {
+          foundFaqs.push({
+            question: question,
+            answer: answer.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
+          });
+        }
+      }
+    }
+
+    // Clean up any remaining formatting
     foundFaqs = foundFaqs.map(faq => ({
-      question: faq.question.replace(/^Q(?:uestion)?[:.]?\s*/i, '').trim(),
+      question: faq.question.replace(/^Q(?:uestion)?[:.]?\s*/i, '').replace(/^\d+\.\s*/, '').trim(),
       answer: faq.answer.replace(/^A(?:nswer)?[:.]?\s*/i, '').trim()
     }));
 
@@ -60,7 +82,8 @@ function FAQAccordion({ content }: { content: string }) {
       faq.question.length > 5 && 
       faq.answer.length > 10 &&
       !faq.question.includes('In this article') &&
-      !faq.question.includes('Read more')
+      !faq.question.includes('Read more') &&
+      !faq.question.toLowerCase().includes('what causes this condition') // Exclude fallback
     );
 
     if (foundFaqs.length > 0) {
@@ -141,6 +164,11 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
   );
   
   // Remove any remaining FAQ patterns
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /Q(?:uestion)?[:.]?\s*.*?\?\s*A(?:nswer)?[:.]?\s*[\s\S]*?(?=Q(?:uestion)?[:.]|$)/gi,
+    ''
+  );
+  
   contentWithoutFAQ = contentWithoutFAQ.replace(
     /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/g,
     ''
