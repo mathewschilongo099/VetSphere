@@ -1,18 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// =========================
+// FALLBACK IMAGES
+// =========================
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
-  'https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=800',
-  'https://images.unsplash.com/photo-1547592180-85f173990554?w=800',
-  'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800',
-  'https://images.unsplash.com/photo-1594144849889-44d9d9443057?w=800',
+  'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351947/pexels-photo-18351947/free-photo-of-a-goat-standing-in-a-field.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351941/pexels-photo-18351941/free-photo-of-a-veterinarian-examining-a-dog.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351938/pexels-photo-18351938/free-photo-of-a-veterinarian-holding-a-cat.jpeg?w=800&h=400&fit=crop',
 ];
 
-async function getArticleImage(query: string): Promise<string> {
+async function getPexelsImage(query: string): Promise<string> {
   try {
+    const randomPage = Math.floor(Math.random() * 5) + 1;
     const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=5&orientation=landscape`,
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
+      {
+        headers: {
+          Authorization: process.env.PEXELS_API_KEY || '',
+        },
+      }
+    );
+    
+    if (!res.ok) {
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
+    const data = await res.json();
+    const results = data.photos || [];
+    if (results.length === 0) {
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
+    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
+    return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+  } catch {
+    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+  }
+}
+
+async function getUnsplashImage(query: string): Promise<string> {
+  try {
+    const randomPage = Math.floor(Math.random() * 5) + 1;
+    const res = await fetch(
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
       {
         headers: {
           Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
@@ -30,10 +63,28 @@ async function getArticleImage(query: string): Promise<string> {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
     
-    return results[0]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
+    return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
     return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   }
+}
+
+async function getArticleImage(query: string): Promise<string> {
+  // Try Pexels first
+  const pexelsResult = await getPexelsImage(query);
+  if (pexelsResult && !pexelsResult.includes('fallback')) {
+    return pexelsResult;
+  }
+  
+  // Fallback to Unsplash
+  const unsplashResult = await getUnsplashImage(query);
+  if (unsplashResult && !unsplashResult.includes('fallback')) {
+    return unsplashResult;
+  }
+  
+  // Final fallback
+  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 }
 
 function buildExcerpt(text: string, maxLength: number): string {
@@ -44,6 +95,52 @@ function buildExcerpt(text: string, maxLength: number): string {
   return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
 }
 
+// =========================
+// CLEAN CONTENT - Remove FAQ section
+// =========================
+function cleanContent(content: string): string {
+  // Remove any FAQ section
+  content = content.replace(
+    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
+    ''
+  );
+  content = content.replace(
+    /##\s*Frequently Asked Questions.*$/i,
+    ''
+  );
+  content = content.replace(
+    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|##|$)/g,
+    ''
+  );
+  content = content.replace(
+    /^\s*Frequently Asked Questions\s*$/gim,
+    ''
+  );
+  content = content.replace(
+    /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
+    ''
+  );
+  content = content.replace(/\n{3,}/g, '\n\n');
+  content = content.trim();
+  return content;
+}
+
+// =========================
+// INSERT IMAGES AFTER HEADINGS
+// =========================
+const insertAfterHeading = (
+  text: string,
+  headingPattern: RegExp,
+  imageUrl: string,
+  altText: string
+): string => {
+  if (!imageUrl) return text;
+  const match = text.match(headingPattern);
+  if (!match) return text;
+  const heading = match[0];
+  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
+};
+
 export async function POST(request: NextRequest) {
   try {
     const { url, topic } = await request.json();
@@ -52,6 +149,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
+    // Fetch the URL content
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; VetSphereBot/1.0)',
@@ -67,9 +165,11 @@ export async function POST(request: NextRequest) {
 
     const html = await response.text();
 
+    // Extract the article title
     const titleMatch = html.match(/<title>(.*?)<\/title>/i);
-    const extractedTitle = titleMatch ? titleMatch[1].trim() : topic || 'Veterinary Article';
+    const extractedTitle = titleMatch ? titleMatch[1].trim() : topic || 'Article';
 
+    // Extract text content (remove HTML tags)
     const textContent = html
       .replace(/<script[\s\S]*?<\/script>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -85,6 +185,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // =========================
+    // GENERATE CONTENT WITH GEMINI
+    // =========================
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Missing Gemini API key' }, { status: 500 });
@@ -94,7 +197,7 @@ export async function POST(request: NextRequest) {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
-You are an expert veterinary SEO writer and affiliate marketer. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN veterinary blog post.
+You are an expert veterinary SEO writer and affiliate marketer. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN blog post.
 
 Source Title: ${extractedTitle}
 Source Content:
@@ -107,7 +210,6 @@ Create a new article with this structure:
 ## How to Diagnose
 ## Treatment
 ## Prevention and Control
-## Frequently Asked Questions
 ## When to Call a Veterinarian
 ## Conclusion
 
@@ -120,22 +222,23 @@ STYLE RULES:
 - Keep paragraphs short (2-3 sentences)
 - Make it 1500+ words
 - Use simple English for farmers and students
-- Include at least 5 FAQs
 - DO NOT copy sentences directly from the source
 - Rewrite everything in your own words
 - Add new insights and examples where possible
 - Make it SEARCH ENGINE OPTIMIZED
 - Use relevant keywords naturally
-- NO citations
-- NO references section
+- No citations
+- No references section
 - NO images or image descriptions
 - NO markdown formatting except headings
+- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content. SKIP IT COMPLETELY.
+- Write only the article content with the specified headings
 
 Return ONLY the article content in plain text format.
 `;
 
     const result = await model.generateContent(prompt);
-    const content = result.response.text();
+    let content = result.response.text();
 
     if (!content || content.trim().length < 200) {
       return NextResponse.json(
@@ -144,25 +247,44 @@ Return ONLY the article content in plain text format.
       );
     }
 
-    const cleanContent = content
+    // Clean the content
+    content = cleanContent(content)
       .replace(/```markdown/g, '')
       .replace(/```/g, '')
       .trim();
 
-    // Generate meta description from the content
-    const plainText = cleanContent.replace(/[#*![\]()]/g, '').trim();
+    // Generate meta description
+    const plainText = content.replace(/[#*![\]()]/g, '').trim();
     const metaDescription = buildExcerpt(plainText, 160);
 
-    const heroImage = await getArticleImage(`${extractedTitle} veterinary`);
+    // =========================
+    // GENERATE IMAGES
+    // =========================
+    const heroImage = await getArticleImage(extractedTitle);
+    const causesImage = await getArticleImage(`${extractedTitle} cause`);
+    const symptomsImage = await getArticleImage(`${extractedTitle} symptoms`);
+    const treatmentImage = await getArticleImage(`${extractedTitle} treatment`);
+    const preventionImage = await getArticleImage(`${extractedTitle} prevention`);
+
+    // Insert images after headings
+    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${extractedTitle}`);
+    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${extractedTitle}`);
+    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${extractedTitle}`);
+    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${extractedTitle}`);
+
+    // =========================
+    // GENERATE SEO TITLE
+    // =========================
+    const seoTitle = extractedTitle + ': Causes, Symptoms, Treatment and Prevention';
 
     return NextResponse.json({
       success: true,
-      title: extractedTitle,
-      content: cleanContent,
+      title: seoTitle,
+      content: content,
       metaDescription: metaDescription,
+      heroImage: heroImage,
       sourceUrl: url,
       sourceTitle: extractedTitle,
-      heroImage: heroImage,
     });
 
   } catch (error) {
