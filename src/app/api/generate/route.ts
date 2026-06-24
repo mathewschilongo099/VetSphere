@@ -118,7 +118,8 @@ function buildFallbackTags(topic: string): string[] {
     .split(' ')
     .filter((w) => w.length > 3 && !['your', 'this', 'that', 'might', 'could', 'should'].includes(w));
 
-  return [...new Set([topic.toLowerCase(), ...cleaned, 'animal health', 'veterinary'])].slice(0, 6);
+  // FIX: Use Array.from instead of spread on Set to avoid downlevelIteration error
+  return Array.from(new Set([topic.toLowerCase(), ...cleaned, 'animal health', 'veterinary'])).slice(0, 6);
 }
 
 export async function GET(request: NextRequest) {
