@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![Mastitis in Dairy Cows](https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxNYXN0aXRpcyUyMGluJTIwRGFpcnklMjBDb3dzJTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5NTMwMjd8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Mastitis in Dairy Cows — via Unsplash*
-
 
 Mastitis in Dairy Cows is one of the most common and costly diseases in dairy farming worldwide. It is an inflammation of the udder, usually caused by infection, that reduces milk yield, damages udder tissue and can threaten the life of the cow in severe cases.  Both visible (clinical) and hidden (subclinical) forms of mastitis in dairy cows affect milk quality, fertility and farm profit, making early detection, proper treatment and strong prevention programs essential for every herd.  
 
@@ -40,17 +32,9 @@ Economically, mastitis in dairy cows is considered the single most costly diseas
 
 ## Causes of Mastitis in Dairy Cows
 
-
-
-
-
 ![Causes of Mastitis in Dairy Cows](https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxNYXN0aXRpcyUyMGluJTIwRGFpcnklMjBDb3dzJTIwZGlzZWFzZXxlbnwwfDB8fHwxNzgxOTUzMDI3fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 Most cases of mastitis in dairy cows are caused by bacterial infection. The bacteria can be broadly grouped as contagious (spread mainly during milking from cow to cow) and environmental (picked up from bedding, manure, soil and dirty equipment).  Common contagious pathogens include Staphylococcus aureus and other staphylococci, which are major causes of clinical and subclinical mastitis and can persist in udders despite treatment.  Environmental pathogens often include coliforms such as Escherichia coli and other environmental bacteria that enter the teat canal from dirty housing, wet bedding or poor hygiene.  
 
@@ -60,17 +44,9 @@ Management and environmental factors strongly influence the risk of mastitis. Po
 
 ## Clinical Signs and Symptoms of Mastitis in Dairy Cows
 
-
-
-
-
 ![Symptoms of Mastitis in Dairy Cows](https://images.unsplash.com/photo-1580570598977-4b2412d01bbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxNYXN0aXRpcyUyMGluJTIwRGFpcnklMjBDb3dzJTIwc2ljayUyMGFuaW1hbHxlbnwwfDB8fHwxNzgxOTUzMDI3fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 The clinical signs and symptoms of mastitis in dairy cows vary from very mild to life‑threatening. In clinical mastitis, the udder may show swelling, heat, redness, hardness or pain when touched.  Milk from the affected quarter often looks watery or discoloured and may contain clots, flakes or pus. These changes in milk are frequently the first signs noticed in the milking parlour.  
 
@@ -96,17 +72,9 @@ Supportive therapy is vital, especially in moderate and severe cases. Cows with 
 
 ## Prevention and Control of Mastitis in Dairy Cows
 
-
-
-
-
 ![Prevention of Mastitis in Dairy Cows](https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxNYXN0aXRpcyUyMGluJTIwRGFpcnklMjBDb3dzJTIwZmFybSUyMHByZXZlbnRpb258ZW58MHwwfHx8MTc4MTk1MzAyN3ww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 Prevention of mastitis in dairy cows is more effective and cheaper than treatment. Successful control programs are built around hygiene, milking routine, cow environment, dry‑cow management and herd‑level monitoring.  One long‑standing and proven strategy is the “five‑point plan” for mastitis control: recording and treating all clinical cases, post‑milking teat disinfection, dry‑cow therapy at drying off, culling chronically infected cows and regular maintenance of the milking machine.  Many modern control programs build on this foundation.
 
@@ -115,8 +83,6 @@ Milking hygiene is central. Key steps include pre‑milking teat preparation to 
 Housing and bedding management are equally important for prevention of mastitis in dairy cows caused by environmental pathogens. Clean, dry and comfortable bedding, frequent removal of manure, good drainage and ventilation reduce bacterial load around the teat ends.  Overcrowding should be avoided, and sick or high‑cell count cows should be milked last or in a separate group to limit spread.  A balanced diet and good body condition support immune function and udder health, helping cows resist infection.  
 
 Dry‑cow management is a critical period for both treatment and prevention. Selective dry‑cow therapy—using intramammary antibiotics only in quarters or cows known or strongly suspected to be infected, often combined with internal teat sealants—treats existing infections and prevents new ones at the start of the dry period.  Teat sealants protect the teat canal when the natural keratin plug has not yet formed, blocking bacterial entry. Vaccines against some mastitis pathogens are available and may reduce the severity of disease, but they should be used together with, not instead of, good management and hygiene.  Continuous herd monitoring with SCC, milk recording and regular veterinary review turns mastitis control into a proactive, long‑term program. 
-
-## Frequently Asked Questions About Mastitis in Dairy Cows
 
 ### Q: What are the most common symptoms of mastitis in dairy cows?
 
@@ -150,4 +116,4 @@ Mastitis in dairy cows is an inflammation of the udder, usually caused by bacter
 
 Diagnosis relies on careful observation of the udder and milk, regular SCC testing and bacteriological culture to identify the pathogens and guide therapy.  Treatment of mastitis in dairy cows should follow veterinary guidance, increasingly using selective antibiotic therapy based on culture results, along with strong supportive care in severe cases and strict milk withdrawal to protect food safety.  Long‑term success depends on prevention and control: excellent milking hygiene, clean and comfortable housing, well‑designed dry‑cow programs, culling of chronic cases and continuous herd monitoring with veterinary support.  
 
-By applying these evidence‑based strategies, farmers can greatly reduce the incidence of mastitis in dairy cows, improve animal welfare, protect milk quality and strengthen the economic sustainability of their dairy operations. 
+By applying these evidence‑based strategies, farmers can greatly reduce the incidence of mastitis in dairy cows, improve animal welfare, protect milk quality and strengthen the economic sustainability of their dairy operations.
