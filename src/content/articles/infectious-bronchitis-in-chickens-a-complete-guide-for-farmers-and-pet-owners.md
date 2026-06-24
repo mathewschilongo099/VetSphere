@@ -14,13 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
 ![Infectious Bronchitis in Chickens](https://images.unsplash.com/photo-1771253134422-55bee23e30b3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxN3x8SW5mZWN0aW91cyUyMEJyb25jaGl0aXMlMjBpbiUyMENoaWNrZW5zJTIwbGl2ZXN0b2NrJTIwZmFybXxlbnwwfDB8fHwxNzgyMDMyODgyfDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Infectious Bronchitis in Chickens — via Unsplash*
-
 
 Infectious Bronchitis in Chickens is one of the most common and economically important viral diseases in poultry flocks worldwide. It is highly contagious, spreads very quickly through a shed or backyard coop, and can damage both the respiratory system and, in some strains, the kidneys and reproductive tract of birds.  Understanding this disease is essential if you keep layers, broilers, breeders, or small backyard hens. A clear, practical guide to Infectious Bronchitis in Chickens helps you recognize early warning signs, avoid common mistakes, and use vaccination and biosecurity to protect your birds.
 
@@ -28,13 +24,9 @@ This long‑form article is a step‑by‑step guide to Infectious Bronchitis in
 
 ## What is Infectious Bronchitis in Chickens?
 
-
-
 ![Infectious Bronchitis in Chickens](https://images.unsplash.com/photo-1559702944-d306344f214b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxMHx8SW5mZWN0aW91cyUyMEJyb25jaGl0aXMlMjBpbiUyMENoaWNrZW5zJTIwYW5pbWFsfGVufDB8MHx8fDE3ODIwMzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Infectious Bronchitis in Chickens — via Unsplash*
-
 
 Infectious Bronchitis in Chickens (often shortened to IB) is an acute, highly contagious viral disease that mainly affects the upper respiratory tract but can also damage the kidneys and reproductive organs.  The virus responsible is called Infectious Bronchitis Virus (IBV), an avian coronavirus that is specific to birds, particularly chickens.  Because it multiplies rapidly in the respiratory tract, it causes coughing, sneezing, nasal discharge, and noisy breathing.  
 
@@ -52,13 +44,9 @@ Another reason Infectious Bronchitis in Chickens matters is that control is chal
 
 ## Key Facts About Infectious Bronchitis in Chickens
 
-
-
 ![Infectious Bronchitis in Chickens facts](https://images.unsplash.com/photo-1723357018190-c0163698165b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHw0OXx8SW5mZWN0aW91cyUyMEJyb25jaGl0aXMlMjBpbiUyMENoaWNrZW5zJTIwZmFybWVyfGVufDB8MHx8fDE3ODIwMzI4ODJ8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Infectious Bronchitis in Chickens — via Unsplash*
-
 
 Infectious Bronchitis in Chickens is caused by an avian coronavirus, IBV, which primarily infects the respiratory tract but can spread via the blood to other organs such as kidneys and reproductive tissues.  The upper respiratory tract is the principal site of virus replication, and high levels of virus are shed in respiratory secretions and feces.  This extensive shedding explains why the disease is so contagious and can move rapidly through a flock.
 
@@ -68,13 +56,9 @@ Clinical signs of Infectious Bronchitis in Chickens include nasal discharge, wat
 
 ## Practical Guide to Infectious Bronchitis in Chickens
 
-
-
 ![Infectious Bronchitis in Chickens guide](https://images.unsplash.com/photo-1579502576040-9d35c7f67b75?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxNnx8dmV0ZXJpbmFyaWFuJTIwZmFybWVyJTIwdHJlYXRtZW50fGVufDB8MHx8fDE3ODIwMzI4ODF8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Infectious Bronchitis in Chickens — via Unsplash*
-
 
 A practical guide to Infectious Bronchitis in Chickens must cover how to recognize signs early, how to limit spread, and how to plan vaccination and biosecurity. Since there is no antiviral treatment to kill IBV, management focuses on prevention and supportive care.  Understanding how to Infectious Bronchitis in Chickens control on your farm or in your backyard starts with close daily observation of birds and immediate action when respiratory signs appear.
 
@@ -100,21 +84,15 @@ Finally, accurate record‑keeping is crucial in any practical guide to Infectio
 
 ## Common Mistakes to Avoid
 
-
-
 ![Common mistakes](https://images.unsplash.com/photo-1528143582951-ef14e49f4381?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwyOXx8ZmFybSUyMGFuaW1hbCUyMGhlYWx0aHl8ZW58MHwwfHx8MTc4MjAzMjg4Mnww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Farm management — via Unsplash*
-
 
 One of the most common mistakes with Infectious Bronchitis in Chickens is relying on clinical signs alone to make a diagnosis and then choosing vaccines without laboratory confirmation. Because IB symptoms overlap with many other respiratory diseases (such as Newcastle Disease, Avian Influenza, and Infectious Laryngotracheitis), treating “blindly” can lead to poor control and unnecessary antibiotic use.  Always seek lab confirmation where possible, especially in large or valuable flocks.
 
 Another frequent error is assuming that one vaccination, or one vaccine strain, will provide lifelong and complete protection against all forms of Infectious Bronchitis in Chickens. In reality, the virus exists in many serotypes and variants, and immunity is largely strain‑specific, with limited cross‑protection between types.  Flocks can experience outbreaks even though they are “vaccinated” if the chosen vaccine strain does not match the circulating field strain, if administration is incorrect, or if maternal antibodies interfere with early vaccinations.  
 
 A third mistake is neglecting biosecurity because vaccination is in place. Even the best vaccines can be overwhelmed by heavy viral challenge if there is constant introduction of new birds, contaminated equipment, or visitors with poor hygiene.  In backyard settings, mixing purchased adult birds with existing flocks without quarantine is a common source of Infectious Bronchitis in Chickens introduction. Similarly, ignoring rodent control, failing to clean drinkers and feeders, and allowing wet, dirty litter to accumulate all increase risk. 
-
-## Frequently Asked Questions About Infectious Bronchitis in Chickens
 
 ### Q: What causes Infectious Bronchitis in Chickens?
 
