@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![Goat Pox](https://images.unsplash.com/photo-1524024973431-2ad916746881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxHb2F0JTIwUG94JTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5NTMzMDN8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Goat Pox — via Unsplash*
-
 
 Goat Pox is a highly contagious viral disease of goats that causes fever, skin nodules, scabs, and sometimes pneumonia and death. It is a major constraint for goat farmers in many parts of Africa, Asia, and the Middle East, leading to serious economic losses through mortality, weight loss, reduced milk production, and trade restrictions.  Understanding the causes, symptoms of Goat Pox, methods of diagnosis, how to treat Goat Pox, and the prevention of Goat Pox is essential for effective herd health management.
 
@@ -46,17 +38,9 @@ Goat Pox is a notifiable, transboundary animal disease in many countries. Sheepp
 
 ## Causes of Goat Pox
 
-
-
-
-
 ![Causes of Goat Pox](https://images.unsplash.com/photo-1524024973431-2ad916746881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxHb2F0JTIwUG94JTIwZGlzZWFzZXxlbnwwfDB8fHwxNzgxOTUzMzA0fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 The direct cause of Goat Pox is infection with goatpox virus (GTPV), a Capripoxvirus that replicates in skin, respiratory mucosa, and associated lymphoid tissues.  Some strains are relatively host‑specific for goats, while others can infect both sheep and goats, leading to mixed outbreaks in flocks that keep both species.  
 
@@ -85,17 +69,9 @@ In many endemic countries, Goat Pox tends to occur seasonally, often associated 
 
 ## Clinical Signs and Symptoms of Goat Pox
 
-
-
-
-
 ![Symptoms of Goat Pox](https://images.unsplash.com/photo-1624806972468-ea9c923a425e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxHb2F0JTIwUG94JTIwc2ljayUyMGFuaW1hbHxlbnwwfDB8fHwxNzgxOTUzMzA0fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 The incubation period (time from infection to first signs) is usually 4–14 days, depending on the viral strain, dose, and the goat’s immunity.  Clinical signs vary from mild to severe, but typical symptoms of Goat Pox include:
 
@@ -164,17 +140,9 @@ Early and accurate diagnosis of Goat Pox is vital for controlling outbreaks. Bec
 
 ## Treatment of Goat Pox
 
-
-
-
-
 ![Treatment for Goat Pox](https://images.unsplash.com/photo-1524024973431-2ad916746881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxHb2F0JTIwUG94JTIwdmV0ZXJpbmFyeXxlbnwwfDB8fHwxNzgxOTUzMzAzfDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Treatment — via Unsplash*
-
 
 There is no specific antiviral drug that directly kills the goatpox virus. Therefore, the treatment of Goat Pox focuses on supportive care, controlling secondary infections, and good nursing management to improve survival until the animal’s immune system clears the infection.  
 
@@ -206,17 +174,9 @@ Because there is no specific antiviral cure, how to treat Goat Pox is best answe
 
 ## Prevention and Control of Goat Pox
 
-
-
-
-
 ![Prevention of Goat Pox](https://images.unsplash.com/photo-1524024973431-2ad916746881?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxHb2F0JTIwUG94JTIwZmFybSUyMHByZXZlbnRpb258ZW58MHwwfHx8MTc4MTk1MzMwM3ww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 Prevention of Goat Pox relies mainly on vaccination, strong biosecurity, and good herd management. In endemic areas, control programs at national or regional level are often needed to reduce the overall disease burden.  
 
@@ -252,8 +212,6 @@ Prevention of Goat Pox relies mainly on vaccination, strong biosecurity, and goo
 At country level, Goat Pox control strategies may differ depending on whether the disease is absent, sporadic, or endemic. Pox‑free countries focus on strict import controls and quarantine, while endemic countries emphasize mass vaccination and surveillance. 
 
 ---
-
-## Frequently Asked Questions About Goat Pox
 
 ### Q: What is Goat Pox in goats?
 
@@ -301,4 +259,4 @@ Goat Pox is a serious, highly contagious viral disease of goats that causes feve
 
 Because there is no specific antiviral therapy, how to treat Goat Pox centers on supportive care, management of secondary infections, and good nursing. The most effective long‑term strategy is prevention of Goat Pox through vaccination, strong farm biosecurity, and rapid response to suspected cases.  Farmers, students, and goat owners who understand the causes of Goat Pox, recognize the early symptoms of Goat Pox, and work closely with veterinarians on herd health programs can significantly reduce the impact of this disease on animal welfare and farm income.
 
-Prompt recognition, laboratory confirmation, and coordinated control measures at farm and regional levels are essential components of sustainable Goat Pox control. By combining vaccination, surveillance, and improved management, many countries aim to progressively reduce and eventually eliminate Goat Pox as a major constraint to goat production. 
+Prompt recognition, laboratory confirmation, and coordinated control measures at farm and regional levels are essential components of sustainable Goat Pox control. By combining vaccination, surveillance, and improved management, many countries aim to progressively reduce and eventually eliminate Goat Pox as a major constraint to goat production.
