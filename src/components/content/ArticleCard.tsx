@@ -7,14 +7,19 @@ interface ArticleCardProps {
 }
 
 export default function ArticleCard({ post }: ArticleCardProps) {
+  // Truncate excerpt to ~90 characters
+  const truncateText = (text: string, maxLength: number = 90) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
   return (
     <Link
       href={`/articles/${post.slug}`}
-      className="block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border border-gray-100"
+      className="block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border border-gray-100 h-full flex flex-col"
     >
-
-      {/* Image */}
-      <div className="relative h-48 w-full bg-gradient-to-br from-emerald-500 to-teal-600">
+      {/* Image - smaller */}
+      <div className="relative h-40 w-full bg-gradient-to-br from-emerald-500 to-teal-600 overflow-hidden">
         {post.image && (
           <Image
             src={post.image}
@@ -25,28 +30,34 @@ export default function ArticleCard({ post }: ArticleCardProps) {
         )}
       </div>
 
-      {/* Content */}
-      <div className="p-5">
-        <div className="flex items-center gap-2 mb-2.5">
-          <span className="text-[11px] px-2.5 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+      {/* Content - tighter spacing */}
+      <div className="p-4 flex flex-col flex-1">
+        {/* Category & Read Time - one line */}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
             {post.category}
           </span>
-          <span className="text-[11px] text-gray-400">{post.readTime}</span>
+          <span className="text-[10px] text-gray-400">{post.readTime}</span>
         </div>
-        <h3 className="font-bold text-gray-900 visited:text-gray-900 text-base mb-1.5 line-clamp-2 group-hover:text-green-600 transition-colors">
+
+        {/* Title - 2 lines max */}
+        <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition-colors mb-1">
           {post.title}
         </h3>
-        <p className="text-gray-500 text-[13px] line-clamp-3 mb-3 leading-relaxed">
-          {post.excerpt}
+
+        {/* Excerpt - 2 lines max, shorter */}
+        <p className="text-gray-500 text-xs leading-relaxed line-clamp-2 flex-1">
+          {truncateText(post.excerpt || post.description || '')}
         </p>
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] text-gray-400">{post.author}</span>
-          <span className="text-green-600 font-semibold text-[13px] group-hover:underline">
+
+        {/* Author & Date - one line, smaller */}
+        <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-50">
+          <span className="text-[10px] text-gray-400">{post.author || 'Mathews Chilongo'}</span>
+          <span className="text-green-600 font-semibold text-[11px] group-hover:underline">
             Read more →
           </span>
         </div>
       </div>
-
     </Link>
   );
 }
