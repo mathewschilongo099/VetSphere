@@ -18,12 +18,11 @@ function FAQAccordion({ content }: { content: string }) {
     if (faqSection) {
       const faqText = faqSection[1];
       
-      // Pattern 1: Numbered questions like "1. Is my cat's sensitive stomach just a food allergy? Not necessarily..."
+      // Pattern 1: Numbered questions like "1. Question text?"
       const numberedRegex = /(\d+)\.\s*(.*?\?)\s*([\s\S]*?)(?=\d+\.\s|$)/gi;
       let match;
       while ((match = numberedRegex.exec(faqText)) !== null) {
         const question = match[2].trim();
-        // Get the answer (everything after the question until next number or end)
         const answerStart = match.index + match[0].length;
         const nextMatch = faqText.indexOf(`${parseInt(match[1]) + 1}.`, answerStart);
         const answerText = nextMatch > 0 
@@ -39,19 +38,15 @@ function FAQAccordion({ content }: { content: string }) {
       }
     }
 
-    // Pattern 2: Q: and A: format if numbered didn't work
+    // Pattern 2: Q: and A: format
     if (foundFaqs.length === 0) {
-      const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
-      if (faqSection) {
-        const faqText = faqSection[1];
-        const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
-        let match;
-        while ((match = qaRegex.exec(faqText)) !== null) {
-          const question = match[1].trim();
-          const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-          if (question.length > 5 && answer.length > 10) {
-            foundFaqs.push({ question, answer });
-          }
+      const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
+      let match;
+      while ((match = qaRegex.exec(content)) !== null) {
+        const question = match[1].trim();
+        const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+        if (question.length > 5 && answer.length > 10) {
+          foundFaqs.push({ question, answer });
         }
       }
     }
@@ -82,37 +77,27 @@ function FAQAccordion({ content }: { content: string }) {
       answer: faq.answer.replace(/^A(?:nswer)?[:.]?\s*/i, '').trim()
     }));
 
-    // Filter out empty or invalid FAQs
+    // Filter out fallback questions and invalid FAQs
     foundFaqs = foundFaqs.filter(faq => 
       faq.question.length > 5 && 
       faq.answer.length > 10 &&
+      !faq.question.toLowerCase().includes('what causes this condition') &&
+      !faq.question.toLowerCase().includes('how is this condition treated') &&
+      !faq.question.toLowerCase().includes('can this condition be prevented') &&
       !faq.question.includes('In this article') &&
-      !faq.question.includes('Read more') &&
-      !faq.question.toLowerCase().includes('what causes this condition') // Exclude fallback
+      !faq.question.includes('Read more')
     );
 
+    // Only set FAQs if real ones were found
     if (foundFaqs.length > 0) {
       setFaqs(foundFaqs.slice(0, 10));
     } else {
-      // Only show fallback if no FAQs found
-      const fallbackFaqs = [
-        {
-          question: "What causes this condition?",
-          answer: "The exact causes vary depending on the specific condition. Generally, factors include diet, environment, genetics, and infectious agents. Consult your veterinarian for a proper diagnosis."
-        },
-        {
-          question: "How is this condition treated?",
-          answer: "Treatment options depend on the specific diagnosis. Common approaches include medication, dietary changes, supportive care, and in some cases surgery. Always consult a qualified veterinarian."
-        },
-        {
-          question: "Can this condition be prevented?",
-          answer: "Many conditions can be prevented through good management practices, proper nutrition, vaccination programs, and regular veterinary check-ups. Early detection is key."
-        }
-      ];
-      setFaqs(fallbackFaqs);
+      // If no real FAQs, show nothing
+      setFaqs([]);
     }
   }, [content]);
 
+  // If no FAQs, return nothing (hide the section)
   if (faqs.length === 0) return null;
 
   return (
