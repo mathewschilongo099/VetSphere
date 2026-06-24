@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react';
 // Generate FAQs using Gemini based on article content
 async function generateFAQs(content: string, title: string): Promise<{ question: string; answer: string }[]> {
   try {
-    // Extract the main topic from the article (first 500 characters)
     const topic = content.substring(0, 500).replace(/[#*!\[\]]/g, '').trim();
     
     const response = await fetch('/api/generate-faqs', {
@@ -35,7 +34,6 @@ async function generateFAQs(content: string, title: string): Promise<{ question:
   }
 }
 
-// Fallback FAQs if Gemini fails
 function getFallbackFAQs(title: string): { question: string; answer: string }[] {
   return [
     {
@@ -137,20 +135,60 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  // Remove FAQ section from content (so it doesn't appear twice)
+  // =========================
+  // STRONGER FAQ REMOVAL - Remove ALL FAQ sections and content
+  // =========================
   let contentWithoutFAQ = cleanContent;
   
-  // Remove the entire FAQ section
+  // Remove FAQ section with heading - multiple patterns
   contentWithoutFAQ = contentWithoutFAQ.replace(
-    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i,
+    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
     ''
   );
   
+  // Remove any FAQ content after the heading (even if no ## after)
   contentWithoutFAQ = contentWithoutFAQ.replace(
-    /##\s*Frequently Asked Questions.*$/i,
+    /##\s*Frequently Asked Questions[\s\S]*$/i,
     ''
   );
-
+  
+  // Remove numbered FAQ items (1. Question? Answer)
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /\d+\.\s*.*?\?[\s\S]*?(?=\d+\.\s|$)/g,
+    ''
+  );
+  
+  // Remove bold FAQ items (**Question?** Answer)
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /\*\*.*?\?\*\*[\s\S]*?(?=\*\*|$)/g,
+    ''
+  );
+  
+  // Remove Q: A: format
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /Q(?:uestion)?[:.]?\s*.*?\?\s*A(?:nswer)?[:.]?\s*[\s\S]*?(?=Q(?:uestion)?[:.]|$)/gi,
+    ''
+  );
+  
+  // Remove any remaining FAQ patterns
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/g,
+    ''
+  );
+  
+  // Remove "Frequently Asked Questions" alone
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /^\s*Frequently Asked Questions\s*$/gim,
+    ''
+  );
+  
+  // Remove the fallback FAQ section at the end (the one that shows "What causes this condition?")
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /Frequently Asked Questions\s*\n\s*What causes this condition\?[\s\S]*?(?=\n\n|$)/gi,
+    ''
+  );
+  
+  // Clean up extra whitespace
   contentWithoutFAQ = contentWithoutFAQ.replace(/\n{3,}/g, '\n\n').trim();
 
   return (
