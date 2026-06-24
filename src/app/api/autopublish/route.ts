@@ -377,7 +377,6 @@ export async function GET(request: NextRequest) {
 
     if (apiKey) {
       const genAI = new GoogleGenerativeAI(apiKey);
-      // ✅ Updated to Gemini 2.5 Flash
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const seoPrompt = `
