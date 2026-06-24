@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![East Coast Fever in Cattle](https://images.unsplash.com/photo-1565221295449-b192adc999fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxFYXN0JTIwQ29hc3QlMjBGZXZlciUyMGluJTIwQ2F0dGxlJTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5NTMyMTl8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: East Coast Fever in Cattle — via Unsplash*
-
 
 East Coast Fever in Cattle is one of the most devastating tick‑borne diseases affecting herds across eastern, central, and southern Africa, causing major deaths and economic loss for farmers every year.  It mainly affects cattle and occasionally buffalo, and is especially severe in calves and adult cattle that have not been previously exposed. Without fast diagnosis and treatment, this disease can kill up to 90–100% of susceptible animals in some outbreaks.  
 
@@ -44,17 +36,9 @@ East Coast Fever in Cattle occurs mainly in parts of sub‑Saharan Africa where 
 
 ## Causes of East Coast Fever in Cattle
 
-
-
-
-
 ![Causes of East Coast Fever in Cattle](https://images.unsplash.com/photo-1558550122-664eef7d61c1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxFYXN0JTIwQ29hc3QlMjBGZXZlciUyMGluJTIwQ2F0dGxlJTIwZGlzZWFzZXxlbnwwfDB8fHwxNzgxOTUzMjE4fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 The immediate cause of East Coast Fever in Cattle is infection with the protozoan parasite *Theileria parva*. This organism is an obligate intracellular parasite, meaning it must live inside the cells of the host animal to survive and multiply.  After entering via a tick bite, the parasite first infects lymphocytes in local lymph nodes, forming schizonts, and later may appear in red blood cells as piroplasms.  
 
@@ -135,17 +119,9 @@ Treatment is more effective and more economical when animals are treated during 
 
 ## Prevention and Control of East Coast Fever in Cattle
 
-
-
-
-
 ![Prevention of East Coast Fever in Cattle](https://images.unsplash.com/photo-1565221295449-b192adc999fc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxFYXN0JTIwQ29hc3QlMjBGZXZlciUyMGluJTIwQ2F0dGxlJTIwZmFybSUyMHByZXZlbnRpb258ZW58MHwwfHx8MTc4MTk1MzIxOHww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 Prevention of East Coast Fever in Cattle relies on breaking the cycle of transmission between ticks, carrier animals, and susceptible cattle. An integrated approach combining tick control, vaccination, and sound management gives the best long‑term results. 
 
@@ -176,8 +152,6 @@ Other important preventive strategies include:
 An integrated control program that combines regular tick control, targeted use of ITM vaccination, and early treatment can markedly reduce the impact of East Coast Fever in Cattle and improve herd productivity. 
 
 ---
-
-## Frequently Asked Questions About East Coast Fever in Cattle
 
 ### Q: What causes East Coast Fever in Cattle?
 
