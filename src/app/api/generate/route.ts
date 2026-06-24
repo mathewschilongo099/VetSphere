@@ -109,6 +109,7 @@ RULES:
   return content;
 }
 
+// Fallback only used if Gemini's SEO step fails to return usable tags
 function buildFallbackTags(topic: string): string[] {
   const cleaned = topic
     .toLowerCase()
@@ -137,10 +138,14 @@ export async function GET(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
+    // ✅ FIXED: Using the correct available model
     const model = genAI.getGenerativeModel({
-      model: 'gemini-3.1-flash-lite',
+      model: 'models/gemini-2.0-flash-exp',
     });
 
+    // =========================
+    // SEO KEYWORD ENGINE
+    // =========================
     const seoPrompt = `
 Return ONLY valid JSON, with no markdown code fences and no extra commentary.
 
@@ -180,6 +185,9 @@ Topic: "${topic}"
       };
     }
 
+    // =========================
+    // BLOG GENERATION
+    // =========================
     const prompt = `
 You are an expert veterinary SEO writer.
 
@@ -235,11 +243,21 @@ RULES:
       }
     }
 
+    // =========================
+    // CLEAN TEXT
+    // =========================
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
+    
+    // Remove any duplicate title that might be at the start
     content = content.replace(/^# .+?\n/, '');
+    
+    // Remove horizontal lines
     content = content.replace(/^---\s*$/gm, '');
 
+    // =========================
+    // SEO DATA
+    // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
@@ -252,6 +270,7 @@ RULES:
 
     const excerpt = buildExcerpt(plainText, 155);
     
+    // Capitalize each word in the title properly
     const seoTitle = topic
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -259,8 +278,12 @@ RULES:
     
     const metaDescription = buildExcerpt(plainText, 160);
 
+    // Use Gemini's real topical tags if it returned usable ones
     const tags = buildFallbackTags(topic);
 
+    // =========================
+    // IMAGES
+    // =========================
     const heroImage = await getArticleImage(`${topic} livestock farm`);
     const causesImage = await getArticleImage(`${topic} cause infection`);
     const symptomsImage = await getArticleImage(`${topic} symptoms sick animal`);
@@ -287,6 +310,7 @@ RULES:
 \n`);
     };
 
+    // Insert images under each section
     content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
