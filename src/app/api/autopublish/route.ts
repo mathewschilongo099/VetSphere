@@ -1,13 +1,20 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// =========================
+// EXPANDED VETERINARY KEYWORDS
+// =========================
 const VETERINARY_KEYWORDS = [
   'cattle', 'cow', 'dairy', 'livestock', 'poultry', 'chicken', 'goat',
   'sheep', 'pig', 'swine', 'dog', 'cat', 'pet', 'animal', 'veterinary',
   'vet', 'farm', 'disease', 'infection', 'parasite', 'vaccine', 'feeding',
-  'nutrition', 'breeding', 'health', 'treatment', 'prevention'
+  'nutrition', 'breeding', 'health', 'treatment', 'prevention',
+  'zoonotic', 'bovine', 'ovine', 'caprine', 'avian', 'equine', 'canine', 'feline',
+  'herd', 'flock', 'outbreak', 'epidemic', 'biosecurity',
+  'carcass', 'slaughter', 'abattoir', 'meat', 'milk', 'egg',
+  'drought', 'flood', 'fodder', 'pasture', 'grazing', 'supplement'
 ];
 
 async function getUnsplashImage(query: string): Promise<string> {
@@ -87,125 +94,175 @@ RULES:
   return content;
 }
 
+// =========================
+// UPDATED: getTrendingVetTopic() with GNews API
+// =========================
 async function getTrendingVetTopic(): Promise<string> {
   try {
-    const res = await fetch(
-      'https://trends.google.com/trending/rss?geo=ZW&hl=en',
-      { next: { revalidate: 0 } }
-    );
+    // =========================
+    // PRIMARY: GNews API (Global)
+    // =========================
+    const gnewsKey = process.env.GNEWS_API_KEY;
+    
+    if (gnewsKey) {
+      console.log('📡 Fetching from GNews API...');
+      
+      const gnewsRes = await fetch(
+        `https://gnews.io/api/v4/top-headlines?category=health&lang=en&country=world&apikey=${gnewsKey}&max=10`,
+        { next: { revalidate: 3600 } }
+      );
+      
+      if (gnewsRes.ok) {
+        const gnewsData = await gnewsRes.json();
+        console.log(`✅ GNews found ${gnewsData.articles?.length || 0} articles`);
+        
+        if (gnewsData.articles && gnewsData.articles.length > 0) {
+          // Try to find veterinary-specific articles first
+          const vetArticles = gnewsData.articles.filter((article: any) =>
+            VETERINARY_KEYWORDS.some(keyword =>
+              (article.title + ' ' + (article.description || '')).toLowerCase().includes(keyword)
+            )
+          );
+          
+          if (vetArticles.length > 0) {
+            const randomArticle = vetArticles[Math.floor(Math.random() * vetArticles.length)];
+            console.log(`🩺 Veterinary article found: ${randomArticle.title}`);
+            return randomArticle.title;
+          } else {
+            console.log('No veterinary-specific articles, using first news headline');
+            return gnewsData.articles[0].title;
+          }
+        }
+      } else {
+        console.log('⚠️ GNews API error, falling back to Google News...');
+      }
+    }
+
+    // =========================
+    // SECONDARY: Google News RSS (Global)
+    // =========================
+    console.log('📡 Fetching from Google News RSS...');
+    
+    const feedUrl = 'https://news.google.com/rss/search?q=veterinary+OR+animal+health+OR+livestock+disease&hl=en-US&gl=US&ceid=US:en';
+    const res = await fetch(feedUrl);
     const xml = await res.text();
-
-    const titles = Array.from(xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g))
+    
+    const titles = Array.from(xml.matchAll(/<title>(.*?)<\/title>/g))
       .map(m => m[1])
-      .filter(t => t !== 'Google Trends');
+      .filter(t => t !== 'Google News' && !t.includes(' - Google News'));
+    
+    console.log(`✅ Google News found ${titles.length} headlines`);
+    
+    for (const title of titles.slice(0, 20)) {
+      if (VETERINARY_KEYWORDS.some(kw => title.toLowerCase().includes(kw))) {
+        console.log(`🩺 Veterinary news found: ${title}`);
+        return title;
+      }
+    }
 
-    const vetTrend = titles.find(title =>
-      VETERINARY_KEYWORDS.some(keyword =>
-        title.toLowerCase().includes(keyword)
-      )
-    );
-
-    if (vetTrend) return vetTrend;
-
-    const fallbackTopics = [
-      'Mastitis in Dairy Cows',
-      'Tick Fever in Cattle',
-      'East Coast Fever in Cattle',
-      'Blackleg Disease in Cattle',
-      'Lumpy Skin Disease in Cattle',
-      'Bovine Respiratory Disease',
-      'Ringworm in Cattle',
-      'Pneumonia in Calves',
-      'Anthrax in Livestock',
-      'Bloat in Cattle',
-      'Foot and Mouth Disease in Cattle',
-      'Milk Fever in Dairy Cows',
-      'Bovine Tuberculosis',
-      'Anaplasmosis in Cattle',
-      'Liver Fluke in Cattle',
-      'Pink Eye in Cattle',
-      'Trypanosomiasis in Cattle',
-      'Worm Infestation in Cattle',
-      'Brucellosis in Livestock',
-      'Johne\'s Disease in Cattle',
-      'Newcastle Disease in Poultry',
-      'Avian Influenza in Poultry',
-      'Coccidiosis in Poultry',
-      'Infectious Bursal Disease in Poultry',
-      'Fowl Pox in Chickens',
-      'Salmonellosis in Poultry',
-      'Marek\'s Disease in Chickens',
-      'Fowl Cholera in Poultry',
-      'Infectious Bronchitis in Chickens',
-      'Mycoplasma Infection in Poultry',
-      'Foot Rot in Goats',
-      'Peste des Petits Ruminants in Goats',
-      'Contagious Caprine Pleuropneumonia in Goats',
-      'Tetanus in Goats',
-      'Goat Pox',
-      'Caseous Lymphadenitis in Goats',
-      'Enterotoxemia in Goats',
-      'African Swine Fever',
-      'Porcine Reproductive and Respiratory Syndrome',
-      'Swine Erysipelas',
-      'Rabies Prevention in Dogs',
-      'Parvovirus in Dogs',
-      'Canine Distemper',
-      'Mange in Dogs',
-      'Heartworm Disease in Dogs',
-      'Kennel Cough in Dogs',
-      'How to Keep Your Dog Healthy',
-      'Dog Nutrition and Feeding Guide',
-      'Puppy Care and Vaccination Schedule',
-      'Feline Panleukopenia in Cats',
-      'Feline Leukemia Virus',
-      'Toxoplasmosis in Cats',
-      'How to Keep Your Cat Healthy',
-      'Cat Vaccination Schedule for Pet Owners',
-      'Mineral Nutrition for Dairy Cattle',
-      'Feeding Dairy Cows for Maximum Milk Production',
-      'Best Feeding Practices for Goats',
-      'Vitamin Deficiencies in Livestock',
-      'How to Feed Calves for Healthy Growth',
-      'Nutrition for Pregnant Cows',
-      'Poultry Feed Formulation for Farmers',
-      'Biosecurity Measures on Livestock Farms',
-      'How to Set Up a Poultry House',
-      'Record Keeping for Livestock Farmers',
-      'When to Call a Veterinarian',
-      'Water Quality and Animal Health',
-      'Vaccination Programs for Livestock Farmers',
-      'Deworming Programs for Cattle and Goats',
-      'Housing and Shelter for Livestock',
-      'How to Manage a Small Dairy Farm',
-      'Rotational Grazing for Cattle Health',
-      'Cattle Breeding and Reproduction Guide',
-      'Signs of Heat in Dairy Cows',
-      'Artificial Insemination in Cattle',
-      'Pregnancy and Calving Management in Cows',
-      'Common Reproductive Problems in Goats',
-      'Dystocia and Difficult Births in Cattle',
-      'Retained Placenta in Dairy Cows',
-      'How to Do a Body Condition Score in Cattle',
-      'Signs of Pain and Stress in Animals',
-      'Animal Welfare on the Farm',
-      'First Aid for Farm Animals',
-      'Zoonotic Diseases Farmers Should Know',
-      'Heat Stress in Livestock During Summer',
-      'How to Spot a Sick Animal Early',
-      'Importance of Clean Water for Animal Health',
-    ];
-
-    const existingSlugs = await getExistingSlugs();
-    const unusedTopics = fallbackTopics.filter(
-      t => !existingSlugs.some(slug => slug.startsWith(topicToSlug(t)))
-    );
-
-    const pool = unusedTopics.length > 0 ? unusedTopics : fallbackTopics;
-    return pool[Math.floor(Math.random() * pool.length)];
-  } catch {
-    return 'Lumpy Skin Disease in Cattle';
+    // =========================
+    // FALLBACK: Use fallback topic
+    // =========================
+    console.log('📚 No trending news found, using fallback topic list');
+    return getFallbackTopic();
+    
+  } catch (error) {
+    console.error('Error fetching trending topic:', error);
+    return getFallbackTopic();
   }
+}
+
+function getFallbackTopic(): string {
+  const fallbackTopics = [
+    'Mastitis in Dairy Cows',
+    'Tick Fever in Cattle',
+    'East Coast Fever in Cattle',
+    'Blackleg Disease in Cattle',
+    'Lumpy Skin Disease in Cattle',
+    'Bovine Respiratory Disease',
+    'Ringworm in Cattle',
+    'Pneumonia in Calves',
+    'Anthrax in Livestock',
+    'Bloat in Cattle',
+    'Foot and Mouth Disease in Cattle',
+    'Milk Fever in Dairy Cows',
+    'Bovine Tuberculosis',
+    'Anaplasmosis in Cattle',
+    'Liver Fluke in Cattle',
+    'Pink Eye in Cattle',
+    'Trypanosomiasis in Cattle',
+    'Worm Infestation in Cattle',
+    'Brucellosis in Livestock',
+    'Johne\'s Disease in Cattle',
+    'Newcastle Disease in Poultry',
+    'Avian Influenza in Poultry',
+    'Coccidiosis in Poultry',
+    'Infectious Bursal Disease in Poultry',
+    'Fowl Pox in Chickens',
+    'Salmonellosis in Poultry',
+    'Marek\'s Disease in Chickens',
+    'Fowl Cholera in Poultry',
+    'Infectious Bronchitis in Chickens',
+    'Mycoplasma Infection in Poultry',
+    'Foot Rot in Goats',
+    'Peste des Petits Ruminants in Goats',
+    'Contagious Caprine Pleuropneumonia in Goats',
+    'Tetanus in Goats',
+    'Goat Pox',
+    'Caseous Lymphadenitis in Goats',
+    'Enterotoxemia in Goats',
+    'African Swine Fever',
+    'Porcine Reproductive and Respiratory Syndrome',
+    'Swine Erysipelas',
+    'Rabies Prevention in Dogs',
+    'Parvovirus in Dogs',
+    'Canine Distemper',
+    'Mange in Dogs',
+    'Heartworm Disease in Dogs',
+    'Kennel Cough in Dogs',
+    'How to Keep Your Dog Healthy',
+    'Dog Nutrition and Feeding Guide',
+    'Puppy Care and Vaccination Schedule',
+    'Feline Panleukopenia in Cats',
+    'Feline Leukemia Virus',
+    'Toxoplasmosis in Cats',
+    'How to Keep Your Cat Healthy',
+    'Cat Vaccination Schedule for Pet Owners',
+    'Mineral Nutrition for Dairy Cattle',
+    'Feeding Dairy Cows for Maximum Milk Production',
+    'Best Feeding Practices for Goats',
+    'Vitamin Deficiencies in Livestock',
+    'How to Feed Calves for Healthy Growth',
+    'Nutrition for Pregnant Cows',
+    'Poultry Feed Formulation for Farmers',
+    'Biosecurity Measures on Livestock Farms',
+    'How to Set Up a Poultry House',
+    'Record Keeping for Livestock Farmers',
+    'When to Call a Veterinarian',
+    'Water Quality and Animal Health',
+    'Vaccination Programs for Livestock Farmers',
+    'Deworming Programs for Cattle and Goats',
+    'Housing and Shelter for Livestock',
+    'How to Manage a Small Dairy Farm',
+    'Rotational Grazing for Cattle Health',
+    'Cattle Breeding and Reproduction Guide',
+    'Signs of Heat in Dairy Cows',
+    'Artificial Insemination in Cattle',
+    'Pregnancy and Calving Management in Cows',
+    'Common Reproductive Problems in Goats',
+    'Dystocia and Difficult Births in Cattle',
+    'Retained Placenta in Dairy Cows',
+    'How to Do a Body Condition Score in Cattle',
+    'Signs of Pain and Stress in Animals',
+    'Animal Welfare on the Farm',
+    'First Aid for Farm Animals',
+    'Zoonotic Diseases Farmers Should Know',
+    'Heat Stress in Livestock During Summer',
+    'How to Spot a Sick Animal Early',
+    'Importance of Clean Water for Animal Health',
+  ];
+  
+  return fallbackTopics[Math.floor(Math.random() * fallbackTopics.length)];
 }
 
 async function getExistingSlugs(): Promise<string[]> {
@@ -252,92 +309,69 @@ const insertAfterHeading = (
   return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
 };
 
-// =========================
-// CLEAN CONTENT FUNCTION - Removes ALL unwanted image sections
-// =========================
 function cleanContent(content: string): string {
-  // Remove "## Image 1", "## Image 2", etc. headings and everything until next heading
   content = content.replace(
     /##\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
     ''
   );
-  
-  // Remove "### Image 1", "### Image 2", etc.
   content = content.replace(
     /###\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
     ''
   );
-  
-  // Remove image description lines
   content = content.replace(
     /-\s+\*\*Image Description\*\*:[^\n]*\n+/gi,
     ''
   );
-  
-  // Remove caption lines
   content = content.replace(
     /-\s+\*\*Caption\*\*:[^\n]*\n+/gi,
     ''
   );
-  
-  // Remove "Photo: ... — via Unsplash" lines (bold or not)
   content = content.replace(
     /\*\*?Photo:[^\n]*via Unsplash[^\n]*\*\*?\n*/gi,
     ''
   );
-  
-  // Remove "Photo: ..." lines (any variation)
   content = content.replace(
     /^Photo:[^\n]*\n+/gim,
     ''
   );
-  
-  // Remove any standalone markdown images that might have been inserted
   content = content.replace(
     /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
     ''
   );
-  
-  // Remove "Image 1:", "Image 2:", etc. lines
   content = content.replace(
     /^Image\s+\d+:[^\n]*\n+/gim,
     ''
   );
-  
-  // Remove "Source: ..." lines that might appear after images
   content = content.replace(
     /^Source:[^\n]*\n+/gim,
     ''
   );
-  
-  // Remove "Credit: ..." lines
   content = content.replace(
     /^Credit:[^\n]*\n+/gim,
     ''
   );
-  
-  // Remove "Image: ..." lines
   content = content.replace(
     /^Image:[^\n]*\n+/gim,
     ''
   );
-  
-  // Remove markdown image syntax with caption
   content = content.replace(
     /!\[[^\]]*\]\([^)]*\)\s*"\s*[^"]*\s*"\s*\n*/g,
     ''
   );
-  
-  // Clean up extra newlines (3+ becomes 2)
   content = content.replace(/\n{3,}/g, '\n\n');
-  
-  // Clean up any trailing whitespace
   content = content.trim();
-  
   return content;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // Verify CRON_SECRET
+  const authHeader = request.headers.get('authorization');
+  const cronSecret = process.env.CRON_SECRET;
+  
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const topic = await getTrendingVetTopic();
     console.log('Auto-publishing topic:', topic);
@@ -427,11 +461,9 @@ RULES:
     }
 
     // =========================
-    // CLEAN TEXT - Remove all unwanted image sections
+    // CLEAN TEXT
     // =========================
     content = cleanContent(content);
-    
-    // Remove citation markers like [[1]], [1], etc.
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
@@ -459,7 +491,7 @@ RULES:
     ].slice(0, 6);
 
     // =========================
-    // IMAGES - Fetch and insert
+    // IMAGES
     // =========================
     const heroImage = await getUnsplashImage(topic + ' livestock farm');
     const causesImage = await getUnsplashImage(topic + ' disease');
@@ -467,7 +499,6 @@ RULES:
     const treatmentImage = await getUnsplashImage('veterinarian treatment');
     const preventionImage = await getUnsplashImage('farm biosecurity');
 
-    // Insert images after respective headings (using HTML img tags)
     content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
