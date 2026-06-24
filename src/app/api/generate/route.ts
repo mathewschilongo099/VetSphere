@@ -71,9 +71,8 @@ async function generateWithYouCom(topic: string): Promise<string> {
     body: JSON.stringify({
       input: `You are an expert veterinary SEO writer. Write a 1500+ word SEO blog about: "${topic}"
 
-STRICT STRUCTURE:
-## Introduction
-## What is ${topic}?
+Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
+
 ## Causes of ${topic}
 ## Clinical Signs and Symptoms of ${topic}
 ## How to Diagnose ${topic}
@@ -89,7 +88,7 @@ RULES:
 - Include at least 5 FAQs
 - No citations
 - No references section
-- Start directly with ## Introduction`,
+- Write in a clear, helpful tone`,
       research_effort: 'standard',
     }),
   });
@@ -146,9 +145,6 @@ export async function GET(request: NextRequest) {
 
     // =========================
     // SEO KEYWORD ENGINE
-    // Now also generates real topical tags, instead of relying on
-    // mechanically splitting the topic string into word fragments
-    // (which produced junk tags like "#your", "#might", "#stomach").
     // =========================
     const seoPrompt = `
 Return ONLY valid JSON, with no markdown code fences and no extra commentary.
@@ -195,6 +191,7 @@ For "tags": provide 5 short (1-3 word) topical category tags that describe what 
 
     // =========================
     // BLOG GENERATION
+    // Updated: No ## Introduction heading
     // =========================
     const prompt = `
 You are an expert veterinary SEO writer.
@@ -206,9 +203,8 @@ SEARCH INTENT: ${seo.search_intent}
 
 Write a 1500+ word SEO blog about: "${topic}"
 
-STRICT STRUCTURE:
-## Introduction
-## What is ${topic}?
+Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
+
 ## Causes of ${topic}
 ## Clinical Signs and Symptoms of ${topic}
 ## How to Diagnose ${topic}
@@ -224,6 +220,7 @@ RULES:
 - Include at least 5 FAQs
 - No citations
 - No references section
+- Write in a clear, helpful tone
 `;
 
     let content: string;
@@ -270,12 +267,12 @@ RULES:
 
     const excerpt = buildExcerpt(plainText, 155);
     const seoTitle =
-      topic.charAt(0).toUpperCase() + topic.slice(1) +
-      ': Causes, Symptoms, Treatment and Prevention';
+      topic.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') +
+      ': Causes, Symptoms, Treatment & Prevention';
     const metaDescription = buildExcerpt(plainText, 160);
 
     // Use Gemini's real topical tags if it returned usable ones, otherwise
-    // fall back to a cleaner word-filter (still better than the old logic).
+    // fall back to a cleaner word-filter.
     const geminiTags = Array.isArray(seo.tags) ? seo.tags.filter((t: unknown) => typeof t === 'string' && t.trim().length > 0) : [];
     const tags = geminiTags.length >= 3
       ? geminiTags.slice(0, 6)
@@ -283,9 +280,6 @@ RULES:
 
     // =========================
     // IMAGES
-    // Hero image is shown in the page template above the article body,
-    // so we do NOT inject it into ## Introduction to avoid duplication.
-    // Only inject images for Causes, Symptoms, Treatment and Prevention.
     // =========================
     const heroImage = await getArticleImage(`${topic} livestock farm`);
     const causesImage = await getArticleImage(`${topic} cause infection`);
@@ -313,7 +307,7 @@ RULES:
 \n`);
     };
 
-    // ✅ NO image injection at Introduction — hero image already shows above article
+    // Insert images under each section
     content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
