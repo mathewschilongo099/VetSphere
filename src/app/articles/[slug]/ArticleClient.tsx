@@ -5,93 +5,92 @@ import Link from 'next/link';
 import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-function FAQAccordion({ content }: { content: string }) {
+// Generate FAQs using Gemini based on article content
+async function generateFAQs(content: string, title: string): Promise<{ question: string; answer: string }[]> {
+  try {
+    // Extract the main topic from the article (first 500 characters)
+    const topic = content.substring(0, 500).replace(/[#*!\[\]]/g, '').trim();
+    
+    const response = await fetch('/api/generate-faqs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        content: topic,
+        title: title,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      if (data.faqs && data.faqs.length > 0) {
+        return data.faqs;
+      }
+    }
+    return getFallbackFAQs(title);
+  } catch (error) {
+    console.error('Error generating FAQs:', error);
+    return getFallbackFAQs(title);
+  }
+}
+
+// Fallback FAQs if Gemini fails
+function getFallbackFAQs(title: string): { question: string; answer: string }[] {
+  return [
+    {
+      question: `What are the main causes of ${title}?`,
+      answer: `The main causes vary depending on the specific condition. Generally, factors include diet, environment, genetics, and infectious agents. Consult your veterinarian for a proper diagnosis specific to your situation.`
+    },
+    {
+      question: `How is ${title} typically treated?`,
+      answer: `Treatment options depend on the specific diagnosis. Common approaches include medication, dietary changes, supportive care, and in some cases surgery. Always consult a qualified veterinarian for proper treatment.`
+    },
+    {
+      question: `Can ${title} be prevented?`,
+      answer: `Many conditions can be prevented through good management practices, proper nutrition, vaccination programs, and regular veterinary check-ups. Early detection is key to successful prevention.`
+    },
+    {
+      question: `When should I call a veterinarian about ${title}?`,
+      answer: `You should contact a veterinarian immediately if you notice severe symptoms, sudden changes in behavior, loss of appetite, difficulty breathing, or any signs of distress. Early intervention is crucial.`
+    },
+    {
+      question: `Is ${title} common in my area?`,
+      answer: `The prevalence of conditions varies by region. Your local veterinarian will have the best understanding of which conditions are common in your area and can provide specific guidance.`
+    }
+  ];
+}
+
+function FAQAccordion({ content, title }: { content: string; title: string }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [faqs, setFaqs] = useState<{ question: string; answer: string }[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let foundFaqs: { question: string; answer: string }[] = [];
-
-    // Extract the FAQ section
-    const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
-    
-    if (faqSection) {
-      const faqText = faqSection[1];
-      
-      // Pattern 1: Numbered questions like "1. Question text?"
-      const numberedRegex = /(\d+)\.\s*(.*?\?)\s*([\s\S]*?)(?=\d+\.\s|$)/gi;
-      let match;
-      while ((match = numberedRegex.exec(faqText)) !== null) {
-        const question = match[2].trim();
-        const answerStart = match.index + match[0].length;
-        const nextMatch = faqText.indexOf(`${parseInt(match[1]) + 1}.`, answerStart);
-        const answerText = nextMatch > 0 
-          ? faqText.substring(answerStart, nextMatch).trim()
-          : faqText.substring(answerStart).trim();
-        
-        if (question.length > 5 && answerText.length > 10) {
-          foundFaqs.push({
-            question: question,
-            answer: answerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
-          });
-        }
-      }
+    async function loadFAQs() {
+      setLoading(true);
+      const generatedFaqs = await generateFAQs(content, title);
+      setFaqs(generatedFaqs);
+      setLoading(false);
     }
+    loadFAQs();
+  }, [content, title]);
 
-    // Pattern 2: Q: and A: format (if numbered didn't work)
-    if (foundFaqs.length === 0) {
-      const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
-      if (faqSection) {
-        const faqText = faqSection[1];
-        const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
-        let match;
-        while ((match = qaRegex.exec(faqText)) !== null) {
-          const question = match[1].trim();
-          const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-          if (question.length > 5 && answer.length > 10) {
-            foundFaqs.push({ question, answer });
-          }
-        }
-      }
-    }
-
-    // Clean up any remaining formatting
-    foundFaqs = foundFaqs.map(faq => ({
-      question: faq.question.replace(/^Q(?:uestion)?[:.]?\s*/i, '').replace(/^\d+\.\s*/, '').trim(),
-      answer: faq.answer.replace(/^A(?:nswer)?[:.]?\s*/i, '').trim()
-    }));
-
-    // Filter out invalid FAQs
-    foundFaqs = foundFaqs.filter(faq => 
-      faq.question.length > 5 && 
-      faq.answer.length > 10 &&
-      !faq.question.includes('In this article') &&
-      !faq.question.includes('Read more')
+  if (loading) {
+    return (
+      <div className="mt-8">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border border-gray-200 rounded-xl p-4 animate-pulse">
+              <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          ))}
+        </div>
+      </div>
     );
+  }
 
-    // If we found real FAQs, use them; otherwise use fallback
-    if (foundFaqs.length > 0) {
-      setFaqs(foundFaqs.slice(0, 10));
-    } else {
-      // Fallback FAQs (shown when article has no real FAQs)
-      setFaqs([
-        {
-          question: "What causes this condition?",
-          answer: "The exact causes vary depending on the specific condition. Generally, factors include diet, environment, genetics, and infectious agents. Consult your veterinarian for a proper diagnosis."
-        },
-        {
-          question: "How is this condition treated?",
-          answer: "Treatment options depend on the specific diagnosis. Common approaches include medication, dietary changes, supportive care, and in some cases surgery. Always consult a qualified veterinarian."
-        },
-        {
-          question: "Can this condition be prevented?",
-          answer: "Many conditions can be prevented through good management practices, proper nutrition, vaccination programs, and regular veterinary check-ups. Early detection is key."
-        }
-      ]);
-    }
-  }, [content]);
-
-  // If no FAQs at all (should not happen because fallback is always set), return null
   if (faqs.length === 0) return null;
 
   return (
@@ -138,7 +137,7 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  // Remove FAQ section from content
+  // Remove FAQ section from content (so it doesn't appear twice)
   let contentWithoutFAQ = cleanContent;
   
   // Remove the entire FAQ section
@@ -147,29 +146,11 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
     ''
   );
   
-  // Remove any remaining FAQ patterns
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /\d+\.\s*.*?\?[\s\S]*?(?=\d+\.\s|$)/g,
-    ''
-  );
-  
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /Q(?:uestion)?[:.]?\s*.*?\?\s*A(?:nswer)?[:.]?\s*[\s\S]*?(?=Q(?:uestion)?[:.]|$)/gi,
-    ''
-  );
-  
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/g,
-    ''
-  );
-  
-  // Remove the FAQ heading if it somehow remains
   contentWithoutFAQ = contentWithoutFAQ.replace(
     /##\s*Frequently Asked Questions.*$/i,
     ''
   );
 
-  // Clean up extra whitespace
   contentWithoutFAQ = contentWithoutFAQ.replace(/\n{3,}/g, '\n\n').trim();
 
   return (
@@ -252,7 +233,7 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
           dangerouslySetInnerHTML={{ __html: contentWithoutFAQ }}
         />
 
-        <FAQAccordion content={cleanContent} />
+        <FAQAccordion content={cleanContent} title={post.title} />
       </article>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
