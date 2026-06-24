@@ -11,7 +11,17 @@ const VETERINARY_KEYWORDS = [
   'zoonotic', 'bovine', 'ovine', 'caprine', 'avian', 'equine', 'canine', 'feline',
   'herd', 'flock', 'outbreak', 'epidemic', 'biosecurity',
   'carcass', 'slaughter', 'abattoir', 'meat', 'milk', 'egg',
-  'drought', 'flood', 'fodder', 'pasture', 'grazing', 'supplement'
+  'drought', 'flood', 'fodder', 'pasture', 'grazing', 'supplement',
+  'calving', 'lambing', 'birthing', 'breeding', 'gestation',
+  'rumen', 'abomasum', 'udder', 'mastitis', 'hoof', 'horn',
+  'liver', 'kidney', 'heart', 'lung', 'skin', 'coat', 'feather',
+  'beak', 'claw', 'paw', 'tail', 'ear', 'eye', 'nose'
+];
+
+const HUMAN_MEDICAL_KEYWORDS = [
+  'human', 'patient', 'doctor', 'surgeon', 'hospital', 'clinic',
+  'cardiac', 'heart', 'valve', 'aortic', 'ross', 'procedure',
+  'surgery', 'medical', 'clinical', 'pediatric', 'child', 'infant'
 ];
 
 const FALLBACK_IMAGES = [
@@ -21,6 +31,17 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800',
   'https://images.unsplash.com/photo-1594144849889-44d9d9443057?w=800',
 ];
+
+// Check if topic is veterinary-related
+function isVeterinaryTopic(topic: string): boolean {
+  const lowerTopic = topic.toLowerCase();
+  // If it contains human medical keywords, it's likely NOT veterinary
+  if (HUMAN_MEDICAL_KEYWORDS.some(kw => lowerTopic.includes(kw))) {
+    return false;
+  }
+  // Check if it contains veterinary keywords
+  return VETERINARY_KEYWORDS.some(kw => lowerTopic.includes(kw));
+}
 
 async function getUnsplashImage(query: string): Promise<string> {
   try {
@@ -301,16 +322,13 @@ function topicToSlug(topic: string): string {
   return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
-// Helper function to find related articles based on keywords
 async function findRelatedArticles(topic: string, currentSlug: string): Promise<string[]> {
   try {
     const existingSlugs = await getExistingSlugs();
-    
     const keywords = topic.toLowerCase().split(' ');
     
     const scored = existingSlugs.map(slug => {
       if (slug === currentSlug) return { slug, score: 0 };
-      
       const slugWords = slug.replace(/-/g, ' ').toLowerCase().split(' ');
       let score = 0;
       for (const kw of keywords) {
@@ -331,7 +349,6 @@ async function findRelatedArticles(topic: string, currentSlug: string): Promise<
     }
     
     return top.map(s => s.slug);
-    
   } catch {
     return [];
   }
@@ -351,7 +368,6 @@ const insertAfterHeading = (
 };
 
 function cleanContent(content: string): string {
-  // Remove any FAQ section that might have been generated
   content = content.replace(
     /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
     ''
@@ -360,8 +376,6 @@ function cleanContent(content: string): string {
     /##\s*Frequently Asked Questions[\s\S]*?(?=##|$)/gi,
     ''
   );
-  
-  // Remove image-related content
   content = content.replace(
     /##\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
     ''
@@ -512,12 +526,10 @@ STYLE RULES:
       content = await generateWithYouCom(topic);
     }
 
-    // Clean content - remove any FAQ sections
     content = cleanContent(content);
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    // Add related articles
     const relatedSlugs = await findRelatedArticles(topic, slug);
     let relatedSection = '';
     if (relatedSlugs.length > 0) {
@@ -555,16 +567,32 @@ STYLE RULES:
       'veterinary',
     ].slice(0, 6);
 
-    const heroImage = await getUnsplashImage(topic + ' livestock farm');
-    const causesImage = await getUnsplashImage(topic + ' disease');
-    const symptomsImage = await getUnsplashImage('sick animal ' + topic);
-    const treatmentImage = await getUnsplashImage('veterinarian treatment');
-    const preventionImage = await getUnsplashImage('farm biosecurity');
+    // =========================
+    // IMAGES - Only fetch for veterinary topics
+    // =========================
+    const isVet = isVeterinaryTopic(topic);
+    let heroImage = '';
+    let causesImage = '';
+    let symptomsImage = '';
+    let treatmentImage = '';
+    let preventionImage = '';
 
-    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
+    if (isVet) {
+      console.log('🩺 Veterinary topic detected - fetching images');
+      heroImage = await getUnsplashImage(topic + ' livestock farm');
+      causesImage = await getUnsplashImage(topic + ' disease');
+      symptomsImage = await getUnsplashImage('sick animal ' + topic);
+      treatmentImage = await getUnsplashImage('veterinarian treatment');
+      preventionImage = await getUnsplashImage('farm biosecurity');
+
+      content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
+      content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
+      content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
+      content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
+    } else {
+      console.log('⚠️ Non-veterinary topic detected - skipping images');
+      heroImage = FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
 
     const finalSlug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const date = new Date().toISOString().split('T')[0];
