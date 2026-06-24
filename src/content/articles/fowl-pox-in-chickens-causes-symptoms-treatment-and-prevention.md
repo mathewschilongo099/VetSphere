@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![Fowl Pox in Chickens](https://images.unsplash.com/photo-1595173037606-8bcd86b91063?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb3dsJTIwUG94JTIwaW4lMjBDaGlja2VucyUyMGFuaW1hbHxlbnwwfDB8fHwxNzgxOTUzMzkwfDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Fowl Pox in Chickens — via Unsplash*
-
 
 Fowl Pox in Chickens is a common viral disease that affects both backyard flocks and commercial poultry worldwide. It is slow‑spreading but highly contagious within a flock, and it can appear in a mild skin form or a more dangerous form that affects the mouth and airways.  Understanding the causes, symptoms, treatment, and prevention of Fowl Pox in Chickens is essential for farmers, hobby keepers, students of poultry science, and pet chicken owners who want to protect their birds and egg production.
 
@@ -44,17 +36,9 @@ Fowl Pox in Chickens is typically slow to move through a flock compared to some 
 
 ## Causes of Fowl Pox in Chickens
 
-
-
-
-
 ![Causes of Fowl Pox in Chickens](https://images.unsplash.com/photo-1471623817296-aa07ae5c9f47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb3dsJTIwUG94JTIwaW4lMjBDaGlja2VucyUyMGRpc2Vhc2V8ZW58MHwwfHx8MTc4MTk1MzM5MHww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 The primary cause of Fowl Pox in Chickens is infection with avipoxviruses, especially the fowlpox virus that specifically affects domestic chickens and turkeys.  These are large DNA viruses that are very resistant to drying and can survive for months or even years in shed scabs, contaminated litter, dust, and equipment.  Once introduced, the virus can become a long‑term problem on the premises.
 
@@ -68,17 +52,9 @@ Risk factors that increase the chance of Fowl Pox in Chickens include living in 
 
 ## Clinical Signs and Symptoms of Fowl Pox in Chickens
 
-
-
-
-
 ![Symptoms of Fowl Pox in Chickens](https://images.unsplash.com/photo-1595173037606-8bcd86b91063?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb3dsJTIwUG94JTIwaW4lMjBDaGlja2VucyUyMHNpY2slMjBhbmltYWx8ZW58MHwwfHx8MTc4MTk1MzM5MXww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 Recognizing the early symptoms of Fowl Pox in Chickens allows quicker isolation and management, reducing spread. Clinical signs vary between the dry and wet forms, but birds can develop both forms at the same time.
 
@@ -116,17 +92,9 @@ In many backyard and small flocks, a formal lab diagnosis may not always be perf
 
 ## Treatment of Fowl Pox in Chickens
 
-
-
-
-
 ![Treatment for Fowl Pox in Chickens](https://images.unsplash.com/photo-1471623817296-aa07ae5c9f47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb3dsJTIwUG94JTIwaW4lMjBDaGlja2VucyUyMHZldGVyaW5hcnl8ZW58MHwwfHx8MTc4MTk1MzM5MXww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Treatment — via Unsplash*
-
 
 There is **no specific antiviral medication** that directly cures Fowl Pox in Chickens; the virus must run its course while the bird’s immune system responds.  Therefore, treatment focuses on **supportive care**, prevention of secondary infections, and good flock management to reduce stress and spread.
 
@@ -146,17 +114,9 @@ Because Fowl Pox in Chickens is usually self‑limiting, most birds with the dry
 
 ## Prevention and Control of Fowl Pox in Chickens
 
-
-
-
-
 ![Prevention of Fowl Pox in Chickens](https://images.unsplash.com/photo-1471623817296-aa07ae5c9f47?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb3dsJTIwUG94JTIwaW4lMjBDaGlja2VucyUyMGZhcm0lMjBwcmV2ZW50aW9ufGVufDB8MHx8fDE3ODE5NTMzOTB8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 The most effective approach to Fowl Pox in Chickens is **prevention**, since no satisfactory curative treatment exists. Core preventive strategies include vaccination, vector control, biosecurity, and good husbandry.
 
@@ -188,8 +148,6 @@ Strong biosecurity reduces introduction and spread of Fowl Pox in Chickens:
 - Remove and properly dispose of scabs and litter from infected birds to lower environmental virus levels.  
 
 Combining vaccination, mosquito control, and strict biosecurity forms a comprehensive prevention and control program that significantly lowers the risk of serious Fowl Pox outbreaks. 
-
-## Frequently Asked Questions About Fowl Pox in Chickens
 
 ### Q: Is Fowl Pox in Chickens contagious?
 
