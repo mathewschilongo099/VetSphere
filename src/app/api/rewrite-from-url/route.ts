@@ -52,7 +52,8 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Use gemini-1.5-pro which is available
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     const prompt = `
 You are an expert veterinary SEO writer. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN veterinary article.
