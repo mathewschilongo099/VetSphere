@@ -109,7 +109,6 @@ RULES:
   return content;
 }
 
-// Fallback only used if Gemini's SEO step fails to return usable tags
 function buildFallbackTags(topic: string): string[] {
   const cleaned = topic
     .toLowerCase()
@@ -138,9 +137,9 @@ export async function GET(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // ✅ FIXED: Using the correct available model
+    // ✅ Updated to Gemini 2.5 Flash
     const model = genAI.getGenerativeModel({
-      model: 'models/gemini-2.0-flash-exp',
+      model: 'gemini-2.5-flash',
     });
 
     // =========================
@@ -249,10 +248,7 @@ RULES:
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
     
-    // Remove any duplicate title that might be at the start
     content = content.replace(/^# .+?\n/, '');
-    
-    // Remove horizontal lines
     content = content.replace(/^---\s*$/gm, '');
 
     // =========================
@@ -270,7 +266,6 @@ RULES:
 
     const excerpt = buildExcerpt(plainText, 155);
     
-    // Capitalize each word in the title properly
     const seoTitle = topic
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -278,7 +273,6 @@ RULES:
     
     const metaDescription = buildExcerpt(plainText, 160);
 
-    // Use Gemini's real topical tags if it returned usable ones
     const tags = buildFallbackTags(topic);
 
     // =========================
@@ -310,7 +304,6 @@ RULES:
 \n`);
     };
 
-    // Insert images under each section
     content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
