@@ -18,35 +18,40 @@ function FAQAccordion({ content }: { content: string }) {
     if (faqSection) {
       const faqText = faqSection[1];
       
-      // Pattern 1: Q: and A: format (most common)
-      const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
+      // Pattern 1: Numbered questions like "1. Is my cat's sensitive stomach just a food allergy? Not necessarily..."
+      const numberedRegex = /(\d+)\.\s*(.*?\?)\s*([\s\S]*?)(?=\d+\.\s|$)/gi;
       let match;
-      while ((match = qaRegex.exec(faqText)) !== null) {
-        const question = match[1].trim();
-        const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-        if (question.length > 5 && answer.length > 10) {
-          foundFaqs.push({ question, answer });
+      while ((match = numberedRegex.exec(faqText)) !== null) {
+        const question = match[2].trim();
+        // Get the answer (everything after the question until next number or end)
+        const answerStart = match.index + match[0].length;
+        const nextMatch = faqText.indexOf(`${parseInt(match[1]) + 1}.`, answerStart);
+        const answerText = nextMatch > 0 
+          ? faqText.substring(answerStart, nextMatch).trim()
+          : faqText.substring(answerStart).trim();
+        
+        if (question.length > 5 && answerText.length > 10) {
+          foundFaqs.push({
+            question: question,
+            answer: answerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
+          });
         }
       }
     }
 
-    // Pattern 2: Numbered questions if Q: format didn't work
+    // Pattern 2: Q: and A: format if numbered didn't work
     if (foundFaqs.length === 0) {
       const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
       if (faqSection) {
         const faqText = faqSection[1];
-        const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/gi;
+        const qaRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*([\s\S]*?)(?=Q(?:uestion)?[:.]|$)/gi;
         let match;
-        while ((match = numberedRegex.exec(faqText)) !== null) {
-          const nextMatch = faqText.indexOf(`${parseInt(match[1]) + 1}.`, match.index + match[0].length);
-          const answerText = nextMatch > 0 
-            ? faqText.substring(match.index + match[0].length, nextMatch).trim()
-            : faqText.substring(match.index + match[0].length).trim();
-          
-          foundFaqs.push({
-            question: match[2].trim(),
-            answer: answerText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
-          });
+        while ((match = qaRegex.exec(faqText)) !== null) {
+          const question = match[1].trim();
+          const answer = match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+          if (question.length > 5 && answer.length > 10) {
+            foundFaqs.push({ question, answer });
+          }
         }
       }
     }
@@ -164,6 +169,11 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
   );
   
   // Remove any remaining FAQ patterns
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /\d+\.\s*.*?\?[\s\S]*?(?=\d+\.\s|$)/g,
+    ''
+  );
+  
   contentWithoutFAQ = contentWithoutFAQ.replace(
     /Q(?:uestion)?[:.]?\s*.*?\?\s*A(?:nswer)?[:.]?\s*[\s\S]*?(?=Q(?:uestion)?[:.]|$)/gi,
     ''
