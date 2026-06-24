@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![Lumpy Skin Disease in Cattle](https://images.unsplash.com/photo-1599307848808-fb36c798ee87?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxMdW1weSUyMFNraW4lMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBhbmltYWx8ZW58MHwwfHx8MTc4MTk1MzgxMnww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Lumpy Skin Disease in Cattle — via Unsplash*
-
 
 Lumpy Skin Disease in Cattle is an infectious viral disease that has become a major threat to cattle herds in Africa, the Middle East, Asia and parts of Europe. It causes firm skin nodules, fever, swollen lymph nodes, drop in milk yield and sometimes death, leading to serious economic losses for farmers through reduced production, infertility, hide damage and trade restrictions.  Understanding the causes, symptoms, diagnosis, treatment options and prevention strategies for Lumpy Skin Disease in Cattle is essential for anyone managing dairy or beef cattle.
 
@@ -44,17 +36,9 @@ Lumpy Skin Disease in Cattle does not pose a risk to human health. Humans cannot
 
 ## Causes of Lumpy Skin Disease in Cattle
 
-
-
-
-
 ![Causes of Lumpy Skin Disease in Cattle](https://images.unsplash.com/photo-1510874071640-5e609b8d109f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxMdW1weSUyMFNraW4lMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBkaXNlYXNlfGVufDB8MHx8fDE3ODE5NTM4MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 The primary cause of Lumpy Skin Disease in Cattle is infection with Lumpy Skin Disease Virus (LSDV). This virus is highly adapted to bovines and is one of the most important animal poxviruses from an economic standpoint.  Once a herd is exposed, morbidity (the percentage of animals that get sick) can range from about 5–45% in many outbreaks, but under certain conditions nearly 100% of animals can show some signs of infection.  Mortality is usually low (often 1–5%), but can reach higher levels in some severe epidemics, particularly in naïve populations or in certain regions such as parts of India.  
 
@@ -66,17 +50,9 @@ Additional risk factors for severe disease and higher mortality include stress, 
 
 ## Clinical Signs and Symptoms of Lumpy Skin Disease in Cattle
 
-
-
-
-
 ![Symptoms of Lumpy Skin Disease in Cattle](https://images.unsplash.com/photo-1779232348340-4f57abc9e364?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxMdW1weSUyMFNraW4lMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBzaWNrJTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5NTM4MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 The symptoms of Lumpy Skin Disease in Cattle typically start with a fever and general malaise. Affected cattle often become dull, lose appetite and show a sudden drop in milk yield in lactating cows.  Fever may be accompanied by increased tearing (lacrimation) and nasal discharge, as well as salivation. Swelling of superficial lymph nodes, especially those near the shoulders and hindquarters, is commonly noted.  
 
@@ -98,17 +74,9 @@ Definitive diagnosis is usually made by detecting the virus or its genetic mater
 
 ## Treatment of Lumpy Skin Disease in Cattle
 
-
-
-
-
 ![Treatment for Lumpy Skin Disease in Cattle](https://images.unsplash.com/photo-1641062680671-fec389e4eeeb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxMdW1weSUyMFNraW4lMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjB2ZXRlcmluYXJ5fGVufDB8MHx8fDE3ODE5NTM4MTJ8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Treatment — via Unsplash*
-
 
 There is currently no specific antiviral drug that kills the Lumpy Skin Disease Virus in cattle. As a result, treatment of Lumpy Skin Disease in Cattle is mainly supportive and focused on relieving pain, preventing secondary infections and helping the animal recover as quickly as possible.  The severity of clinical signs can vary widely; some animals show only mild skin lesions and recover with minimal intervention, while others require intensive nursing care.
 
@@ -120,17 +88,9 @@ In more severely affected animals, fluid therapy, vitamin supplementation and ca
 
 ## Prevention and Control of Lumpy Skin Disease in Cattle
 
-
-
-
-
 ![Prevention of Lumpy Skin Disease in Cattle](https://images.unsplash.com/photo-1752219406270-e652a9d68994?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxMdW1weSUyMFNraW4lMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBmYXJtJTIwcHJldmVudGlvbnxlbnwwfDB8fHwxNzgxOTUzODEyfDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 The most effective method for prevention of Lumpy Skin Disease in Cattle is vaccination with a high‑quality live attenuated vaccine, ideally before the disease enters a region or before the peak vector season.  Two main vaccine types are used: homologous vaccines based on the LSDV Neethling strain, which have shown high effectiveness in field conditions, and heterologous sheep pox or goat pox vaccines, which can provide cross‑protection but may be less effective and are less well documented in mass eradication programs.  In endemic areas, annual mass vaccination of all eligible cattle is usually recommended, whereas in disease‑free countries vaccination may be applied only in high‑risk zones or during emergency outbreaks.  
 
@@ -139,8 +99,6 @@ Biosecurity and vector control are also crucial components of prevention and con
 During outbreaks, authorities often adopt a combination of zoning, movement restrictions, enhanced surveillance, rapid reporting, stamping‑out (culling) of infected or high‑risk animals, cleaning and disinfection of premises, safe disposal of carcasses, and emergency vaccination of at‑risk herds.  Early detection and rapid implementation of these measures greatly improve the chances of containing and eradicating the disease in a region.  For individual farms, strict attention to farm biosecurity, regular monitoring of animals, good nutrition and stress reduction also support herd resistance and lower the impact of any incursion.
 
 ---
-
-## Frequently Asked Questions About Lumpy Skin Disease in Cattle
 
 ### Q: Is Lumpy Skin Disease in Cattle dangerous to humans?
 
