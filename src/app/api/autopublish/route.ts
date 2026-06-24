@@ -426,8 +426,8 @@ SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
 
 Write a 1500+ word SEO blog about: "${topic}"
 
-STRICT STRUCTURE:
-## Introduction (as a paragraph, not a heading)
+Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
+
 ## Causes of ${topic}
 ## Clinical Signs and Symptoms of ${topic}
 ## How to Diagnose ${topic}
@@ -441,7 +441,7 @@ STYLE RULES:
 - Write like a helpful blog post, not a textbook
 - Use "you" and "your" to speak directly to the reader
 - Include practical tips and advice they can use
-- Suggest products or solutions where relevant (e.g., "a good quality probiotic", "a reliable dewormer")
+- Suggest products or solutions where relevant
 - End each section with a takeaway tip
 - Keep paragraphs short (2-3 sentences)
 - Simple English for farmers and students
