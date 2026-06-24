@@ -95,6 +95,23 @@ export function getRelatedPosts(slug: string, count: number = 3): BlogPost[] {
     .slice(0, count);
 }
 
+// Finds the previous (older) and next (newer) article relative to the given
+// slug, based on the same date-sorted order used everywhere else (newest
+// first). Used for Prev/Next navigation at the bottom of each article page.
+export function getAdjacentPosts(slug: string): { prev: BlogPost | null; next: BlogPost | null } {
+  const posts = getAllPosts();
+  const currentIndex = posts.findIndex((p) => p.slug === slug);
+
+  if (currentIndex === -1) {
+    return { prev: null, next: null };
+  }
+
+  const next = currentIndex > 0 ? posts[currentIndex - 1] : null;
+  const prev = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
+
+  return { prev, next };
+}
+
 export function calculateReadingTime(content: string): number {
   const wordsPerMinute = 200;
   const wordCount = content.split(/\s+/).length;
