@@ -88,7 +88,9 @@ RULES:
 - Include at least 5 FAQs
 - No citations
 - No references section
-- Write in a clear, helpful tone`,
+- Write in a clear, helpful tone
+- Do NOT include a "What is..." heading - the introduction paragraph already covers this
+- Do NOT use horizontal lines (---) anywhere in the article`,
       research_effort: 'standard',
     }),
   });
@@ -107,9 +109,6 @@ RULES:
   return content;
 }
 
-// Fallback only used if Gemini's SEO step fails to return usable tags —
-// produces something better than raw word-splitting, though real topical
-// tags from Gemini are always preferred when available.
 function buildFallbackTags(topic: string): string[] {
   const cleaned = topic
     .toLowerCase()
@@ -142,10 +141,6 @@ export async function GET(request: NextRequest) {
       model: 'gemini-3.1-flash-lite',
     });
 
-    // =========================
-    // SEO KEYWORD ENGINE
-    // Removed "tags" from the JSON response
-    // =========================
     const seoPrompt = `
 Return ONLY valid JSON, with no markdown code fences and no extra commentary.
 
@@ -185,10 +180,6 @@ Topic: "${topic}"
       };
     }
 
-    // =========================
-    // BLOG GENERATION
-    // Updated: No ## Introduction heading
-    // =========================
     const prompt = `
 You are an expert veterinary SEO writer.
 
@@ -217,6 +208,8 @@ RULES:
 - No citations
 - No references section
 - Write in a clear, helpful tone
+- Do NOT include a "What is..." heading - the introduction paragraph already covers this
+- Do NOT use horizontal lines (---) anywhere in the article
 `;
 
     let content: string;
@@ -242,18 +235,11 @@ RULES:
       }
     }
 
-    // =========================
-    // CLEAN TEXT
-    // =========================
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
-    
-    // Remove any duplicate title that might be at the start (first Markdown heading)
     content = content.replace(/^# .+?\n/, '');
+    content = content.replace(/^---\s*$/gm, '');
 
-    // =========================
-    // SEO DATA
-    // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
@@ -266,7 +252,6 @@ RULES:
 
     const excerpt = buildExcerpt(plainText, 155);
     
-    // Capitalize each word in the title properly
     const seoTitle = topic
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -274,12 +259,8 @@ RULES:
     
     const metaDescription = buildExcerpt(plainText, 160);
 
-    // Use fallback tags for SEO purposes only (not displayed on page)
     const tags = buildFallbackTags(topic);
 
-    // =========================
-    // IMAGES
-    // =========================
     const heroImage = await getArticleImage(`${topic} livestock farm`);
     const causesImage = await getArticleImage(`${topic} cause infection`);
     const symptomsImage = await getArticleImage(`${topic} symptoms sick animal`);
@@ -306,7 +287,6 @@ RULES:
 \n`);
     };
 
-    // Insert images under each section
     content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
@@ -317,7 +297,7 @@ RULES:
       title: seoTitle,
       excerpt,
       metaDescription,
-      tags, // Still included for SEO metadata, but not displayed on frontend
+      tags,
       heroImage,
       seo,
       usedFallback,
