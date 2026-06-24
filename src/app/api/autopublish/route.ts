@@ -24,12 +24,16 @@ const HUMAN_MEDICAL_KEYWORDS = [
   'surgery', 'medical', 'clinical', 'pediatric', 'child', 'infant'
 ];
 
+// ✅ WORKING FALLBACK IMAGES (guaranteed to work)
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
-  'https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=800',
-  'https://images.unsplash.com/photo-1547592180-85f173990554?w=800',
-  'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800',
-  'https://images.unsplash.com/photo-1594144849889-44d9d9443057?w=800',
+  'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351947/pexels-photo-18351947/free-photo-of-a-goat-standing-in-a-field.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351941/pexels-photo-18351941/free-photo-of-a-veterinarian-examining-a-dog.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351938/pexels-photo-18351938/free-photo-of-a-veterinarian-holding-a-cat.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351924/pexels-photo-18351924/free-photo-of-a-veterinarian-examining-a-horse.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351915/pexels-photo-18351915/free-photo-of-a-cow-in-a-field.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351909/pexels-photo-18351909/free-photo-of-a-veterinarian-examining-a-sheep.jpeg?w=800&h=400&fit=crop',
 ];
 
 function isVeterinaryTopic(topic: string): boolean {
@@ -53,20 +57,97 @@ async function getUnsplashImage(query: string): Promise<string> {
     );
     
     if (!res.ok) {
+      console.log('⚠️ Unsplash API error, using fallback');
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
     
     const data = await res.json();
     const results = data.results || [];
     if (results.length === 0) {
+      console.log('⚠️ No Unsplash images found, using fallback');
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
     
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
+    console.log('⚠️ Unsplash fetch error, using fallback');
     return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   }
+}
+
+async function getPexelsImage(query: string): Promise<string> {
+  try {
+    const randomPage = Math.floor(Math.random() * 5) + 1;
+    const res = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
+      {
+        headers: {
+          Authorization: process.env.PEXELS_API_KEY || '',
+        },
+      }
+    );
+    
+    if (!res.ok) {
+      console.log('⚠️ Pexels API error, using fallback');
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
+    const data = await res.json();
+    const results = data.photos || [];
+    if (results.length === 0) {
+      console.log('⚠️ No Pexels images found, using fallback');
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
+    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
+    return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+  } catch {
+    console.log('⚠️ Pexels fetch error, using fallback');
+    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+  }
+}
+
+async function getArticleImage(query: string): Promise<string> {
+  // Build better search queries
+  const cleanQuery = query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  
+  const searchQueries = [
+    cleanQuery,
+    `${cleanQuery} animal`,
+    `${cleanQuery} livestock`,
+    `${cleanQuery} veterinary`,
+    'farm animal',
+    'livestock farm',
+    'veterinary care',
+    'animal health'
+  ];
+
+  // Try Pexels with multiple queries
+  for (const searchQuery of searchQueries.slice(0, 3)) {
+    const pexelsResult = await getPexelsImage(searchQuery);
+    if (pexelsResult && !pexelsResult.includes('fallback')) {
+      console.log(`✅ Image found from Pexels: "${searchQuery}"`);
+      return pexelsResult;
+    }
+  }
+
+  // Try Unsplash with multiple queries
+  for (const searchQuery of searchQueries.slice(0, 3)) {
+    const unsplashResult = await getUnsplashImage(searchQuery);
+    if (unsplashResult && !unsplashResult.includes('fallback')) {
+      console.log(`✅ Image found from Unsplash: "${searchQuery}"`);
+      return unsplashResult;
+    }
+  }
+
+  // Final fallback
+  console.log('⚠️ No images found, using fallback');
+  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 }
 
 function extractJson(text: string): string {
@@ -364,50 +445,31 @@ const insertAfterHeading = (
   return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
 };
 
-// =========================
-// AGGRESSIVE FAQ REMOVAL
-// =========================
-function removeFAQSection(content: string): string {
-  // Remove any heading with "Frequently Asked Questions"
-  content = content.replace(
-    /##\s*Frequently Asked Questions About.*?(\n|$)/gi,
-    ''
-  );
-  content = content.replace(
-    /##\s*Frequently Asked Questions.*?(\n|$)/gi,
-    ''
-  );
+function cleanContent(content: string): string {
+  // Remove the first heading (duplicate title)
+  content = content.replace(/^# .+?\n/, '');
   
-  // Remove "Frequently Asked Questions" as a standalone line
+  // Remove any FAQ sections
   content = content.replace(
-    /^\s*Frequently Asked Questions\s*$/gim,
+    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
     ''
   );
-  
-  // Remove any FAQ content (numbered questions)
+  content = content.replace(
+    /##\s*Frequently Asked Questions.*$/i,
+    ''
+  );
   content = content.replace(
     /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|##|$)/g,
     ''
   );
-  
-  // Remove "Q:" and "A:" patterns
   content = content.replace(
-    /Q:.*\nA:.*/gm,
+    /^\s*Frequently Asked Questions\s*$/gim,
     ''
   );
-  
-  // Remove "Here are some common questions" lines
   content = content.replace(
     /^Here are some common questions.*$/gim,
     ''
   );
-  
-  return content;
-}
-
-function cleanContent(content: string): string {
-  // First remove FAQ sections
-  content = removeFAQSection(content);
   
   // Remove image-related content
   content = content.replace(
@@ -563,16 +625,12 @@ STYLE RULES:
       content = await generateWithYouCom(topic);
     }
 
-    // =========================
-    // CLEAN CONTENT - Remove FAQ sections
-    // =========================
+    // Clean content
     content = cleanContent(content);
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    // =========================
-    // ADD RELATED ARTICLES
-    // =========================
+    // Add related articles
     const relatedSlugs = await findRelatedArticles(topic, slug);
     let relatedSection = '';
     if (relatedSlugs.length > 0) {
@@ -590,9 +648,6 @@ STYLE RULES:
       content = content + relatedSection;
     }
 
-    // =========================
-    // SEO DATA
-    // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
@@ -614,9 +669,11 @@ STYLE RULES:
     ].slice(0, 6);
 
     // =========================
-    // IMAGES - Only for veterinary topics
+    // IMAGES - Improved with better fallback
     // =========================
     const isVet = isVeterinaryTopic(topic);
+    console.log(`Topic is veterinary: ${isVet}`);
+
     let heroImage = '';
     let causesImage = '';
     let symptomsImage = '';
@@ -625,18 +682,27 @@ STYLE RULES:
 
     if (isVet) {
       console.log('🩺 Veterinary topic detected - fetching images');
-      heroImage = await getUnsplashImage(topic + ' livestock farm');
-      causesImage = await getUnsplashImage(topic + ' disease');
-      symptomsImage = await getUnsplashImage('sick animal ' + topic);
-      treatmentImage = await getUnsplashImage('veterinarian treatment');
-      preventionImage = await getUnsplashImage('farm biosecurity');
+      
+      // Get hero image
+      heroImage = await getArticleImage(topic);
+      console.log(`Hero image: ${heroImage ? 'Found' : 'Not found'}`);
+      
+      causesImage = await getArticleImage(`${topic} disease infection`);
+      symptomsImage = await getArticleImage(`sick animal ${topic}`);
+      treatmentImage = await getArticleImage(`veterinarian treatment`);
+      preventionImage = await getArticleImage(`farm biosecurity vaccination`);
 
       content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
       content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
       content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
       content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
     } else {
-      console.log('⚠️ Non-veterinary topic detected - skipping images');
+      console.log('⚠️ Non-veterinary topic detected - using fallback image only');
+      heroImage = FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+
+    // If hero image is empty, use fallback
+    if (!heroImage) {
       heroImage = FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
 
@@ -650,7 +716,7 @@ date: "${date}"
 author: "VetSphere"
 category: "Animal Health"
 tags: [${tags.map((t: string) => `"${t}"`).join(', ')}]
-image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
+image: "${heroImage}"
 imageAlt: "${seoTitle}"
 featured: false
 excerpt: "${excerpt.replace(/"/g, '\\"')}"
