@@ -2,8 +2,127 @@ import { getPostBySlug, getAllPosts, getAdjacentPosts, getRelatedPosts } from '@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import type { Metadata } from 'next';
+
+'use client';
+
+import { useState, useEffect } from 'react';
+
+// FAQ Accordion Component
+function FAQAccordion({ content }: { content: string }) {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [faqs, setFaqs] = useState<{ question: string; answer: string }[]>([]);
+
+  useEffect(() => {
+    // Extract FAQ section from content
+    const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
+    if (faqSection) {
+      const faqText = faqSection[1];
+      // Parse Q&A pairs
+      const qaPairs: { question: string; answer: string }[] = [];
+      const lines = faqText.split('\n');
+      let currentQuestion = '';
+      let currentAnswer = '';
+      let isCollectingAnswer = false;
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        
+        // Check if line starts with a question marker
+        if (line.match(/^\*\*Q[:.]?\s*|^Q[:.]?\s*|^\d+\.\s*\*\*/i) || 
+            (line.match(/^\*\*.*\?\*\*$/) && !line.includes('Answer:'))) {
+          // Save previous Q&A if exists
+          if (currentQuestion && currentAnswer) {
+            qaPairs.push({
+              question: currentQuestion.replace(/^\*\*Q[:.]?\s*|^Q[:.]?\s*|^\d+\.\s*\*\*/, '').replace(/\*\*$/, '').trim(),
+              answer: currentAnswer.trim()
+            });
+          }
+          currentQuestion = line;
+          currentAnswer = '';
+          isCollectingAnswer = false;
+        } else if (line.match(/^\*\*Answer[:.]?\s*|^Answer[:.]?\s*/i)) {
+          isCollectingAnswer = true;
+          currentAnswer += line.replace(/^\*\*Answer[:.]?\s*|^Answer[:.]?\s*/i, '').trim() + ' ';
+        } else if (isCollectingAnswer) {
+          currentAnswer += line + ' ';
+        } else if (line && !line.match(/^##/)) {
+          // If no explicit Answer marker, treat as answer
+          if (currentQuestion) {
+            isCollectingAnswer = true;
+            currentAnswer += line + ' ';
+          }
+        }
+      }
+      
+      // Save last Q&A
+      if (currentQuestion && currentAnswer) {
+        qaPairs.push({
+          question: currentQuestion.replace(/^\*\*Q[:.]?\s*|^Q[:.]?\s*|^\d+\.\s*\*\*/, '').replace(/\*\*$/, '').trim(),
+          answer: currentAnswer.trim()
+        });
+      }
+
+      if (qaPairs.length > 0) {
+        setFaqs(qaPairs);
+      } else {
+        // Fallback: try to find Q&A with simple pattern
+        const simpleMatches = faqText.match(/\*\*([^*?]+)\?\*\*([\s\S]*?)(?=\*\*[^*?]+\?\*\*|$)/g);
+        if (simpleMatches) {
+          const parsed = simpleMatches.map(match => {
+            const qMatch = match.match(/\*\*([^*?]+)\?\*\*/);
+            const aMatch = match.match(/\*\*([^*?]+)\?\*\*([\s\S]*?)$/);
+            return {
+              question: qMatch ? qMatch[1].trim() : 'Question',
+              answer: aMatch ? aMatch[2].trim() : 'Answer'
+            };
+          });
+          setFaqs(parsed);
+        }
+      }
+    }
+  }, [content]);
+
+  if (faqs.length === 0) return null;
+
+  return (
+    <div className="mt-8 space-y-3">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+      <div className="space-y-2">
+        {faqs.map((faq, index) => (
+          <div
+            key={index}
+            className="border border-gray-200 rounded-xl overflow-hidden bg-white hover:border-green-200 transition-colors"
+          >
+            <button
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+              className="w-full px-4 py-3 sm:px-5 sm:py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-sm sm:text-base font-medium text-gray-900 pr-4">
+                {faq.question}
+              </span>
+              <span className="shrink-0 text-gray-400">
+                {openIndex === index ? (
+                  <ChevronUp className="w-5 h-5" />
+                ) : (
+                  <ChevronDown className="w-5 h-5" />
+                )}
+              </span>
+            </button>
+            {openIndex === index && (
+              <div className="px-4 pb-4 sm:px-5 sm:pb-5">
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  {faq.answer}
+                </p>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -54,6 +173,12 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
     .replace(/^---\s*$/gm, '') // Remove horizontal lines
     .replace(/\n{3,}/g, '\n\n') // Remove excessive line breaks
     .trim();
+
+  // Remove FAQ section from content (we'll render it separately with accordion)
+  const contentWithoutFAQ = cleanContent.replace(
+    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i,
+    ''
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -141,8 +266,12 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             prose-td:p-2 sm:prose-td:p-3 prose-td:border prose-td:border-gray-200
             prose-hr:hidden
           "
-          dangerouslySetInnerHTML={{ __html: cleanContent }}
+          dangerouslySetInnerHTML={{ __html: contentWithoutFAQ }}
         />
+
+        {/* FAQ Accordion - Only questions visible, answers expand on click */}
+        <FAQAccordion content={cleanContent} />
+
       </article>
 
       {/* Navigation & Related Posts */}
