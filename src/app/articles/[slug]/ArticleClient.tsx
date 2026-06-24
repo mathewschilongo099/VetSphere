@@ -135,60 +135,23 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  // =========================
-  // STRONGER FAQ REMOVAL - Remove ALL FAQ sections and content
-  // =========================
+  // Remove FAQ section from content
   let contentWithoutFAQ = cleanContent;
   
-  // Remove FAQ section with heading - multiple patterns
+  // Remove the entire FAQ section
   contentWithoutFAQ = contentWithoutFAQ.replace(
-    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
+    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i,
+    ''
+  );
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /##\s*Frequently Asked Questions.*$/i,
+    ''
+  );
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /Frequently Asked Questions.*$/i,
     ''
   );
   
-  // Remove any FAQ content after the heading (even if no ## after)
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /##\s*Frequently Asked Questions[\s\S]*$/i,
-    ''
-  );
-  
-  // Remove numbered FAQ items (1. Question? Answer)
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /\d+\.\s*.*?\?[\s\S]*?(?=\d+\.\s|$)/g,
-    ''
-  );
-  
-  // Remove bold FAQ items (**Question?** Answer)
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /\*\*.*?\?\*\*[\s\S]*?(?=\*\*|$)/g,
-    ''
-  );
-  
-  // Remove Q: A: format
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /Q(?:uestion)?[:.]?\s*.*?\?\s*A(?:nswer)?[:.]?\s*[\s\S]*?(?=Q(?:uestion)?[:.]|$)/gi,
-    ''
-  );
-  
-  // Remove any remaining FAQ patterns
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/g,
-    ''
-  );
-  
-  // Remove "Frequently Asked Questions" alone
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /^\s*Frequently Asked Questions\s*$/gim,
-    ''
-  );
-  
-  // Remove the fallback FAQ section at the end (the one that shows "What causes this condition?")
-  contentWithoutFAQ = contentWithoutFAQ.replace(
-    /Frequently Asked Questions\s*\n\s*What causes this condition\?[\s\S]*?(?=\n\n|$)/gi,
-    ''
-  );
-  
-  // Clean up extra whitespace
   contentWithoutFAQ = contentWithoutFAQ.replace(/\n{3,}/g, '\n\n').trim();
 
   return (
@@ -302,9 +265,11 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
           </div>
         )}
 
-        {relatedPosts.length > 0 && (
+        {relatedPosts && relatedPosts.length > 0 && (
           <div>
-            <h2 className="text-base sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Related Articles</h2>
+            <h2 className="text-base sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">
+              You Might Also Like
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               {relatedPosts.map((related: any) => (
                 <Link
@@ -319,7 +284,7 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
                         alt={related.imageAlt || related.title}
                         fill
                         className="object-cover"
-                        unoptimized={related.image.startsWith('http')}
+                        unoptimized={related.image?.startsWith('http')}
                       />
                     </div>
                   )}
@@ -327,7 +292,9 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
                     <h3 className="font-bold text-gray-900 text-xs sm:text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition-colors">
                       {related.title}
                     </h3>
-                    <span className="text-gray-400 text-[10px] sm:text-xs">{related.readTime}</span>
+                    <p className="text-gray-400 text-[10px] sm:text-xs mt-1">
+                      {related.readTime || '5 min read'}
+                    </p>
                   </div>
                 </Link>
               ))}
