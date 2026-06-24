@@ -16,13 +16,9 @@ featured: false
 
 ## Introduction
 
-
-
 ![milk fever in daily cattle](https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxtaWxrJTIwZmV2ZXIlMjBpbiUyMGRhaWx5JTIwY2F0dGxlJTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5NDkwODl8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: milk fever in daily cattle — via Unsplash*
-
 
 Milk fever, also called milk sickness, parturient paresis or periparturient hypocalcemia, is a common and serious metabolic disease of dairy cows that happens around calving. It occurs when the cow’s blood calcium level becomes too low to support normal muscle and nerve function at the start of lactation. High‑yielding, older dairy cows (third lactation and above) are most at risk, and incidence in many herds is around 5–10% each year, with even more cows affected by milder, “subclinical” low calcium.  
 
@@ -32,13 +28,9 @@ Understanding why milk fever happens, how to recognize it early, and how to prev
 
 ## Causes
 
-
-
 ![Causes of milk fever in daily cattle](https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxtaWxrJTIwZmV2ZXIlMjBpbiUyMGRhaWx5JTIwY2F0dGxlJTIwZGlzZWFzZXxlbnwwfDB8fHwxNzgxOTQ5MDg5fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Causes — via Unsplash*
-
 
 Milk fever is caused by a sudden drop in blood calcium concentration around calving. During the dry period, a cow’s daily calcium need is relatively modest and is used mainly for fetal growth and normal losses in urine and feces. At calving, calcium demand rises sharply because colostrum and early milk contain large amounts of calcium, and the udder may draw more than 50 g of calcium per day. If the cow’s body cannot quickly increase calcium absorption from the gut and release calcium from bone, blood levels fall to dangerously low values and clinical milk fever appears.  
 
@@ -48,13 +40,9 @@ Several risk factors increase the chance of milk fever: high milk yield, older a
 
 ## Clinical Signs and Symptoms
 
-
-
 ![Symptoms of milk fever in daily cattle](https://images.unsplash.com/photo-1596733430284-f7437764b1a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxtaWxrJTIwZmV2ZXIlMjBpbiUyMGRhaWx5JTIwY2F0dGxlJTIwc2ljayUyMGFuaW1hbHxlbnwwfDB8fHwxNzgxOTQ5MDg5fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 Most clinical signs are due to poor muscle and nerve function. Signs often develop in three stages, progressing over several hours if untreated. In early (stage I) milk fever, the cow is still standing but shows restlessness, excitability, mild muscle tremors, stiffness, shifting weight, and poor appetite. She may show a slight drop in body temperature and reduced rumen motility. This stage can be subtle and easy to miss in a busy calving pen.  
 
@@ -72,13 +60,9 @@ Definitive diagnosis can be made by measuring blood calcium concentration, but t
 
 ## Treatment
 
-
-
 ![Treatment for milk fever in daily cattle](https://images.unsplash.com/photo-1596733430284-f7437764b1a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxtaWxrJTIwZmV2ZXIlMjBpbiUyMGRhaWx5JTIwY2F0dGxlJTIwdmV0ZXJpbmFyeXxlbnwwfDB8fHwxNzgxOTQ5MDg5fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Treatment — via Unsplash*
-
 
 Milk fever is a true emergency. The main goal of treatment is to restore blood calcium levels quickly and safely. The standard treatment for a recumbent cow with clear signs of milk fever is slow intravenous (IV) administration of a calcium solution, most commonly calcium borogluconate. A typical dose for an adult dairy cow is about 500 ml of a 23% calcium borogluconate solution given slowly IV while listening to the heart, which provides roughly 10–11 g of calcium. A practical rule is approximately 1 ml per kg body weight.  
 
@@ -88,13 +72,9 @@ Most cows respond dramatically within 30 minutes of IV treatment, sitting up, be
 
 ## Prevention and Control
 
-
-
 ![Prevention of milk fever in daily cattle](https://images.unsplash.com/photo-1583095117886-ddb019562ee0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxtaWxrJTIwZmV2ZXIlMjBpbiUyMGRhaWx5JTIwY2F0dGxlJTIwZmFybSUyMHByZXZlbnRpb258ZW58MHwwfHx8MTc4MTk0OTA4OXww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Prevention — via Unsplash*
-
 
 Effective prevention focuses on dry‑period nutrition and close‑up cow management. The aim is to prepare the cow’s calcium regulatory system to respond quickly at calving. One key approach is to feed a properly formulated dry cow diet with controlled calcium and potassium levels and adequate magnesium. Diets that are too high in calcium and potassium before calving can blunt the cow’s PTH response; therefore, many programs reduce dietary calcium and use forages and supplements with lower potassium content.  
 
@@ -114,4 +94,4 @@ Beyond emergency situations, involve your veterinarian in designing and reviewin
 
 Milk fever is a common, largely preventable metabolic disease of dairy cows that occurs around calving due to a sudden fall in blood calcium when milk production begins. It mainly affects older, high‑yielding cows and can lead to weakness, recumbency, and death if not treated promptly. Even when not obvious, low calcium around calving predisposes cows to many other costly disorders of early lactation, reducing milk production, fertility and longevity.  
 
-Accurate recognition of early clinical signs, rapid veterinary treatment with carefully administered calcium solutions, and good nursing care mean that most affected cows can recover fully. However, long‑term control depends on sound dry‑period feeding and management, including appropriate mineral balance, DCAD strategies, and targeted use of oral calcium in high‑risk animals. Monitoring herd performance and working closely with a veterinarian to adjust prevention programs over time offers the best protection for cow welfare and farm profitability. 
+Accurate recognition of early clinical signs, rapid veterinary treatment with carefully administered calcium solutions, and good nursing care mean that most affected cows can recover fully. However, long‑term control depends on sound dry‑period feeding and management, including appropriate mineral balance, DCAD strategies, and targeted use of oral calcium in high‑risk animals. Monitoring herd performance and working closely with a veterinarian to adjust prevention programs over time offers the best protection for cow welfare and farm profitability.
