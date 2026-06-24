@@ -3,13 +3,12 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Fallback images if API fails
 const FALLBACK_IMAGES = [
-  'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
-  'https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=800',
-  'https://images.unsplash.com/photo-1547592180-85f173990554?w=800',
-  'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800',
-  'https://images.unsplash.com/photo-1594144849889-44d9d9443057?w=800',
+  'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351947/pexels-photo-18351947/free-photo-of-a-goat-standing-in-a-field.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351941/pexels-photo-18351941/free-photo-of-a-veterinarian-examining-a-dog.jpeg?w=800&h=400&fit=crop',
+  'https://images.pexels.com/photos/18351938/pexels-photo-18351938/free-photo-of-a-veterinarian-holding-a-cat.jpeg?w=800&h=400&fit=crop',
 ];
 
 async function getUnsplashImage(query: string): Promise<string> {
@@ -23,18 +22,14 @@ async function getUnsplashImage(query: string): Promise<string> {
         },
       }
     );
-    
     if (!res.ok) {
-      console.error(`Unsplash API error: ${res.status}`);
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const data = await res.json();
     const results = data.results || [];
     if (results.length === 0) {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
@@ -53,17 +48,14 @@ async function getPexelsImage(query: string): Promise<string> {
         },
       }
     );
-    
     if (!res.ok) {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const data = await res.json();
     const results = data.photos || [];
     if (results.length === 0) {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
@@ -73,9 +65,13 @@ async function getPexelsImage(query: string): Promise<string> {
 
 async function getArticleImage(query: string): Promise<string> {
   const pexelsResult = await getPexelsImage(query);
-  if (pexelsResult) return pexelsResult;
+  if (pexelsResult && !pexelsResult.includes('fallback')) {
+    return pexelsResult;
+  }
   const unsplashResult = await getUnsplashImage(query);
-  if (unsplashResult) return unsplashResult;
+  if (unsplashResult && !unsplashResult.includes('fallback')) {
+    return unsplashResult;
+  }
   return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 }
 
@@ -95,34 +91,34 @@ async function generateWithYouCom(topic: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      input: `You are an expert veterinary SEO writer and affiliate marketer. Write a 1500+ word SEO blog about: "${topic}"
+      input: `You are an expert veterinary SEO writer and content creator. Write a 1500+ word SEO blog about: "${topic}"
 
-Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
+IMPORTANT: Choose the BEST writing style for this topic:
+- For news/breaking topics: Write like a news article
+- For educational topics: Write like a helpful guide
+- For how-to topics: Write a step-by-step guide
+- For general topics: Write an engaging blog post
 
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
-## When to Call a Veterinarian
-## Conclusion
+DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
+
+STRUCTURE GUIDELINES:
+- Start with a compelling introduction
+- Use clear headings that make sense for the topic
+- Include practical, actionable information
+- Use bullet points and lists where helpful
+- End with a strong conclusion
 
 STYLE RULES:
-- Write like a helpful blog post, not a textbook
-- Use "you" and "your" to speak directly to the reader
-- Include practical tips and advice they can use
-- Suggest products or solutions where relevant (e.g., "a good quality probiotic", "a reliable dewormer")
-- End each section with a takeaway tip
+- Write like a helpful expert, not a textbook
+- Use "you" and "your" to speak directly to readers
 - Keep paragraphs short (2-3 sentences)
-- Use simple English for farmers and students
-- Naturally include keywords
+- Use simple, clear English
+- Include relevant keywords naturally
 - Include at least 5 FAQs
 - No citations
 - No references section
-- Write in a clear, helpful tone
-- Do NOT include a "What is..." heading - the introduction paragraph already covers this
-- Do NOT use horizontal lines (---) anywhere in the article`,
+- No images or image descriptions
+- No horizontal lines (---)`,
       research_effort: 'standard',
     }),
   });
@@ -150,6 +146,46 @@ function buildFallbackTags(topic: string): string[] {
 
   return Array.from(new Set([topic.toLowerCase(), ...cleaned, 'animal health', 'veterinary'])).slice(0, 6);
 }
+
+function cleanContent(content: string): string {
+  content = content.replace(/^# .+?\n/, '');
+  content = content.replace(
+    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
+    ''
+  );
+  content = content.replace(
+    /##\s*Frequently Asked Questions.*$/i,
+    ''
+  );
+  content = content.replace(
+    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|##|$)/g,
+    ''
+  );
+  content = content.replace(
+    /^\s*Frequently Asked Questions\s*$/gim,
+    ''
+  );
+  content = content.replace(
+    /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
+    ''
+  );
+  content = content.replace(/\n{3,}/g, '\n\n');
+  content = content.trim();
+  return content;
+}
+
+const insertAfterHeading = (
+  text: string,
+  headingPattern: RegExp,
+  imageUrl: string,
+  altText: string
+): string => {
+  if (!imageUrl) return text;
+  const match = text.match(headingPattern);
+  if (!match) return text;
+  const heading = match[0];
+  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
+};
 
 export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic');
@@ -213,7 +249,7 @@ Topic: "${topic}"
     }
 
     const prompt = `
-You are an expert veterinary SEO writer and affiliate marketer.
+You are an expert veterinary SEO writer and content creator.
 
 PRIMARY KEYWORD: ${seo.primary_keyword}
 SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
@@ -222,33 +258,34 @@ SEARCH INTENT: ${seo.search_intent}
 
 Write a 1500+ word SEO blog about: "${topic}"
 
-Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
+IMPORTANT: Choose the BEST writing style for this topic:
+- For news/breaking topics: Write like a news article with a headline, introduction, key facts, and analysis
+- For educational topics: Write like a helpful guide with clear sections
+- For how-to topics: Write a step-by-step guide
+- For general topics: Write an engaging blog post that informs and helps readers
 
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
-## When to Call a Veterinarian
-## Conclusion
+DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
+
+STRUCTURE GUIDELINES:
+- Start with a compelling introduction that hooks the reader
+- Use clear headings (## and ###) that make sense for the topic
+- Include practical, actionable information
+- Use bullet points and lists where helpful
+- End with a strong conclusion
 
 STYLE RULES:
-- Write like a helpful blog post, not a textbook
-- Use "you" and "your" to speak directly to the reader
-- Include practical tips and advice they can use
-- Suggest products or solutions where relevant (e.g., "a good quality probiotic", "a reliable dewormer")
-- End each section with a takeaway tip
+- Write like a helpful expert, not a textbook
+- Use "you" and "your" to speak directly to readers
 - Keep paragraphs short (2-3 sentences)
-- Use simple English for farmers and students
-- Naturally include keywords
-- Include at least 5 FAQs
+- Use simple, clear English
+- Include relevant keywords naturally
+- Include at least 5 FAQs at the end
 - No citations
 - No references section
-- Write in a clear, helpful tone
-- Do NOT include a "What is..." heading - the introduction paragraph already covers this
-- Do NOT use horizontal lines (---) anywhere in the article
-`;
+- No images or image descriptions
+- No horizontal lines (---)
+
+Write only the article content with appropriate headings.`;
 
     let content: string;
     let usedFallback = false;
@@ -273,10 +310,9 @@ STYLE RULES:
       }
     }
 
+    content = cleanContent(content);
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
-    content = content.replace(/^# .+?\n/, '');
-    content = content.replace(/^---\s*$/gm, '');
 
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
@@ -302,30 +338,10 @@ STYLE RULES:
     const treatmentImage = await getArticleImage(`${topic} veterinarian treatment`);
     const preventionImage = await getArticleImage(`${topic} prevention vaccine biosecurity`);
 
-    const insertAfterHeading = (
-      text: string,
-      headingPattern: RegExp,
-      imageUrl: string,
-      altText: string
-    ): string => {
-      if (!imageUrl) return text;
-      const match = text.match(headingPattern);
-      if (!match) {
-        console.error(`Heading pattern not found for "${altText}" image, skipping insertion`);
-        return text;
-      }
-      const heading = match[0];
-      return text.replace(heading, `${heading}\n\n
-
-![${altText}](${imageUrl})
-
-\n`);
-    };
-
-    content = insertAfterHeading(content, /^##\s*Causes of.*$/im, causesImage, `Causes of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Clinical Signs.*$/im, symptomsImage, `Symptoms of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Treatment of.*$/im, treatmentImage, `Treatment of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Prevention.*$/im, preventionImage, `Prevention of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
 
     return NextResponse.json({
       content,
