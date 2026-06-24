@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![Feline Leukemia Virus](https://images.unsplash.com/photo-1725409796872-8b41e8eca929?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGZWxpbmUlMjBMZXVrZW1pYSUyMFZpcnVzJTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5NTY5ODR8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Feline Leukemia Virus — via Unsplash*
-
 
 Feline Leukemia Virus is one of the most important infectious diseases of cats worldwide, especially for kittens, outdoor cats and cats living in groups. It attacks the immune system and blood-forming tissues, leading to anemia, cancer and life‑threatening infections.  Because of its impact on cat health and its ease of spread between cats, every owner should understand what Feline Leukemia Virus is, the symptoms to watch for, how it is diagnosed, how to treat Feline Leukemia Virus, and—most importantly—the prevention of Feline Leukemia Virus through testing, vaccination and good management.  
 
@@ -44,17 +36,9 @@ The virus can cause different forms of disease. Some cats develop cancers such a
 
 ## Causes of Feline Leukemia Virus
 
-
-
-
-
 ![Causes of Feline Leukemia Virus](https://images.unsplash.com/photo-1725409796872-8b41e8eca929?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGZWxpbmUlMjBMZXVrZW1pYSUyMFZpcnVzJTIwZGlzZWFzZXxlbnwwfDB8fHwxNzgxOTU2OTg0fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 ### How Feline Leukemia Virus Spreads
 
@@ -72,17 +56,9 @@ Stress, poor nutrition and co‑infections (for example with Feline Immunodefici
 
 ## Clinical Signs and Symptoms of Feline Leukemia Virus
 
-
-
-
-
 ![Symptoms of Feline Leukemia Virus](https://images.unsplash.com/photo-1725409796872-8b41e8eca929?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGZWxpbmUlMjBMZXVrZW1pYSUyMFZpcnVzJTIwc2ljayUyMGFuaW1hbHxlbnwwfDB8fHwxNzgxOTU2OTg0fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 ### General Clinical Signs
 
@@ -118,17 +94,9 @@ Regular re‑testing may be recommended for cats at ongoing risk, such as outdoo
 
 ## Treatment of Feline Leukemia Virus
 
-
-
-
-
 ![Treatment for Feline Leukemia Virus](https://images.unsplash.com/photo-1596272875729-ed2ff7d6d9c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGZWxpbmUlMjBMZXVrZW1pYSUyMFZpcnVzJTIwdmV0ZXJpbmFyeXxlbnwwfDB8fHwxNzgxOTU2OTg0fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Treatment — via Unsplash*
-
 
 ### Is There a Cure for Feline Leukemia Virus?
 
@@ -148,17 +116,9 @@ Good home care is equally important. FeLV‑positive cats should be kept indoors
 
 ## Prevention and Control of Feline Leukemia Virus
 
-
-
-
-
 ![Prevention of Feline Leukemia Virus](https://images.unsplash.com/photo-1596272875729-ed2ff7d6d9c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGZWxpbmUlMjBMZXVrZW1pYSUyMFZpcnVzJTIwZmFybSUyMHByZXZlbnRpb258ZW58MHwwfHx8MTc4MTk1Njk4NHww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 ### Testing, Isolation and Household Management
 
@@ -175,8 +135,6 @@ FeLV vaccines are effective at reducing the risk of disease and clinical illness
 For farm cats and feral colonies, trap‑neuter‑vaccinate‑return programs can lower FeLV prevalence over time by reducing breeding, fighting and uncontrolled mingling of infected and uninfected cats. 
 
 ---
-
-## Frequently Asked Questions About Feline Leukemia Virus
 
 ### Q: What is Feline Leukemia Virus and how dangerous is it?
 
@@ -220,4 +178,4 @@ Feline Leukemia Virus is a major infectious threat to cats, capable of causing c
 
 There is currently no cure for FeLV, but understanding how to treat Feline Leukemia Virus—through aggressive management of infections, careful monitoring, antivirals in selected cases, and high‑quality home care—can extend life and maintain good welfare for many affected cats.  Prevention of Feline Leukemia Virus through testing, vaccination, keeping cats indoors and reducing contact with unknown or feral cats remains the most powerful tool to control this disease on farms, in homes and in communities.  
 
-By combining veterinary guidance with responsible cat ownership, farmers, students and pet guardians can significantly reduce the impact of Feline Leukemia Virus and give both healthy and infected cats the best possible chance for long, comfortable lives. 
+By combining veterinary guidance with responsible cat ownership, farmers, students and pet guardians can significantly reduce the impact of Feline Leukemia Virus and give both healthy and infected cats the best possible chance for long, comfortable lives.
