@@ -58,7 +58,6 @@ While the research is still early, the results in preclinical models suggest tha
 
 <img src="https://images.unsplash.com/photo-1578496779937-3815e442abed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxMHx8R2VuZSUyMHRoZXJhcHklMjBzaG93cyUyMHByb21pc2UlMjBhZ2FpbnN0JTIwZGVhZGx5JTIwY2hpbGRob29kJTIwbGl2ZXIlMjBkaXNlYXNlJTIwZGlzZWFzZXxlbnwwfDB8fHwxNzgyMzE0ODU5fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Causes of Gene therapy shows promise against deadly childhood liver disease" loading="lazy" />
 
-
 The phrase “causes of gene therapy shows promise against deadly childhood liver disease” can be confusing. Gene therapy itself does not cause the disease; instead, the **disease is what gene therapy is trying to treat**.  
 
 The true causes of these deadly childhood liver diseases are usually:
@@ -100,7 +99,6 @@ Because the root cause is written into the child’s genes, standard drugs often
 ## Clinical Signs and Symptoms of Gene therapy shows promise against deadly childhood liver disease
 
 <img src="https://images.unsplash.com/photo-1773242214911-12499a9395e5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwyMHx8c2ljayUyMGFuaW1hbCUyMEdlbmUlMjB0aGVyYXB5JTIwc2hvd3MlMjBwcm9taXNlJTIwYWdhaW5zdCUyMGRlYWRseSUyMGNoaWxkaG9vZCUyMGxpdmVyJTIwZGlzZWFzZXxlbnwwfDB8fHwxNzgyMzE0ODYwfDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Symptoms of Gene therapy shows promise against deadly childhood liver disease" loading="lazy" />
-
 
 When we talk about “clinical signs and symptoms of gene therapy shows promise against deadly childhood liver disease,” we are really talking about **the signs and symptoms of the underlying genetic liver disease** in children.  
 
@@ -205,7 +203,6 @@ Accurate diagnosis is the **foundation** for planning treatment, including any u
 
 <img src="https://images.unsplash.com/photo-1759813641406-980519f58b1c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHw1MHx8dmV0ZXJpbmFyaWFuJTIwdHJlYXRtZW50fGVufDB8MHx8fDE3ODIyNTMwMzl8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Treatment of Gene therapy shows promise against deadly childhood liver disease" loading="lazy" />
 
-
 Treatment for deadly childhood liver disease usually has two levels:
 
 1. **Current standard treatments**  
@@ -260,7 +257,6 @@ At present, gene therapy for deadly childhood liver disease is mainly in **resea
 
 <img src="https://images.unsplash.com/photo-1483871788521-4f224a86e166?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwzfHxmYXJtJTIwYmlvc2VjdXJpdHl8ZW58MHwwfHx8MTc4MjMwOTQyOHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Prevention of Gene therapy shows promise against deadly childhood liver disease" loading="lazy" />
 
-
 Because these diseases are genetic, prevention focuses on **understanding and managing genetic risk** rather than lifestyle alone.
 
 Key strategies:
@@ -296,54 +292,6 @@ Key strategies:
    - Potentially prevent progression to end-stage liver failure  
 
 For now, prevention and control center on genetics, early diagnosis, and careful long-term care.
-
----
-
-## Frequently Asked Questions About Gene therapy shows promise against deadly childhood liver disease
-
-**1. What does “gene therapy shows promise against deadly childhood liver disease” really mean?**  
-It means that in research studies, scientists have used gene therapy to successfully improve or correct a deadly genetic liver disease, at least in early tests (often in animal models). These results suggest that, in the future, similar treatments might help human children with the same or related conditions.
-
----
-
-**2. Is gene therapy already available for my child’s liver disease?**  
-In most cases, no. Right now, gene therapy for deadly childhood liver disease is still in the research and clinical trial stage. Availability depends on:
-- The exact genetic mutation
-- The country and research centers near you
-- Whether clinical trials are open and your child meets the criteria  
-Your child’s liver specialist (hepatologist) can advise you if any trials are appropriate.
-
----
-
-**3. How is gene therapy given for childhood liver disease?**  
-In many studies, gene therapy is given as:
-- An injection into the bloodstream, using a specially designed vector that carries the healthy gene to liver cells  
-The exact method can vary depending on the disease and the type of vector. Treatment is usually done in specialized hospital centers with careful monitoring before and after.
-
----
-
-**4. What are the risks of gene therapy for childhood liver disease?**  
-Possible risks include:
-- Immune reactions against the vector or the new protein
-- Temporary or long-term liver irritation or damage
-- In some early models, an increased risk of liver tumors if the therapy is not well targeted  
-Because of these risks, all gene therapy trials include strict safety checks, long-term follow-up, and careful dose planning.
-
----
-
-**5. Will gene therapy replace liver transplantation?**  
-Not immediately. Liver transplantation is still the main life-saving option for many children with end-stage liver failure. However, if gene therapy continues to show strong results:
-- It might delay the need for a transplant
-- It could reduce the number of children who ever reach end-stage liver disease
-- In some conditions, it may one day replace transplant, but this will require many years of successful research and real-world data
-
----
-
-**6. How can parents stay informed about gene therapy progress?**  
-Parents can:
-- Stay in contact with their child’s liver specialist
-- Ask about clinical trials or research centers focusing on genetic liver disease
-- Follow updates from trusted children’s hospitals, liver foundations, or rare disease organizations  
 
 ---
 
