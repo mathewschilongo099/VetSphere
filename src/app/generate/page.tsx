@@ -4,12 +4,14 @@ import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import Link from 'next/link';
+import { ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react';
 
 export default function GeneratePage() {
   const [topic, setTopic] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,6 +20,7 @@ export default function GeneratePage() {
     setLoading(true);
     setError('');
     setResult(null);
+    setCopied(false);
 
     try {
       const res = await fetch(`/api/generate?topic=${encodeURIComponent(topic.trim())}`);
@@ -35,17 +38,44 @@ export default function GeneratePage() {
     }
   };
 
+  const handleCopy = () => {
+    if (result?.content) {
+      navigator.clipboard.writeText(result.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleViewArticle = () => {
+    if (result?.title) {
+      const slug = result.title
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
+      window.open(`/articles/${slug}`, '_blank');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
 
       {/* Header */}
       <section className="bg-gray-900 text-white py-12 px-4 text-center">
-        <h1 className="text-3xl sm:text-4xl font-extrabold mb-3">
-          Generate <span className="text-green-400">Article</span>
-        </h1>
-        <p className="text-gray-300 text-base max-w-xl mx-auto">
-          Enter a topic and get a complete SEO-optimized veterinary article in seconds.
-        </p>
+        <div className="max-w-3xl mx-auto">
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-white transition text-sm mb-4"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Admin
+          </Link>
+          <h1 className="text-3xl sm:text-4xl font-extrabold mb-3">
+            Generate <span className="text-green-400">Article</span>
+          </h1>
+          <p className="text-gray-300 text-base max-w-xl mx-auto">
+            Enter a topic and get a complete SEO-optimized veterinary article in seconds.
+          </p>
+        </div>
       </section>
 
       <div className="max-w-3xl mx-auto px-4 py-8">
@@ -125,19 +155,59 @@ export default function GeneratePage() {
               </div>
             )}
 
+            {/* Action Buttons */}
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition text-sm font-medium"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-4 h-4 text-green-500" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copy Content
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleViewArticle}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl transition text-sm font-medium"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View Article
+              </button>
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded-xl transition text-sm font-medium"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Admin
+              </Link>
+            </div>
+
             {/* Article Content */}
             <div className="prose prose-sm sm:prose-base max-w-none
               prose-headings:font-bold prose-headings:text-gray-900
-              prose-h2:text-lg sm:prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-3
-              prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-2
-              prose-h3:text-base sm:prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-2
-              prose-p:text-gray-600 prose-p:leading-relaxed
-              prose-strong:text-gray-800
+              prose-h1:text-2xl sm:prose-h1:text-3xl prose-h1:mb-6
+              prose-h2:text-lg sm:prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
+              prose-h2:border-b prose-h2:border-gray-100 prose-h2:pb-3
+              prose-h3:text-base sm:prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3
+              prose-p:text-sm sm:prose-p:text-base prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-5
+              prose-p:first:mt-0
+              prose-strong:text-gray-900 prose-strong:font-semibold
               prose-a:text-green-600 prose-a:no-underline hover:prose-a:underline
               prose-img:rounded-xl prose-img:my-6
-              prose-ul:text-gray-600
-              prose-ol:text-gray-600
-              prose-li:mb-1
+              prose-ul:text-sm sm:prose-ul:text-base prose-ul:text-gray-700 prose-ul:mb-5
+              prose-ol:text-sm sm:prose-ol:text-base prose-ol:text-gray-700 prose-ol:mb-5
+              prose-li:mb-1.5
+              prose-blockquote:border-l-4 prose-blockquote:border-green-500
+              prose-blockquote:bg-green-50 prose-blockquote:px-4 sm:prose-blockquote:px-6 prose-blockquote:py-3
+              prose-blockquote:rounded-r-xl prose-blockquote:not-italic
+              prose-blockquote:text-sm sm:prose-blockquote:text-base
             ">
               <ReactMarkdown>
                 {result.content}
