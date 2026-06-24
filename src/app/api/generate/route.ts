@@ -3,6 +3,15 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// Fallback images if API fails
+const FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=800',
+  'https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?w=800',
+  'https://images.unsplash.com/photo-1547592180-85f173990554?w=800',
+  'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=800',
+  'https://images.unsplash.com/photo-1594144849889-44d9d9443057?w=800',
+];
+
 async function getUnsplashImage(query: string): Promise<string> {
   try {
     const randomPage = Math.floor(Math.random() * 5) + 1;
@@ -14,13 +23,22 @@ async function getUnsplashImage(query: string): Promise<string> {
         },
       }
     );
+    
+    if (!res.ok) {
+      console.error(`Unsplash API error: ${res.status}`);
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
     const data = await res.json();
     const results = data.results || [];
-    if (results.length === 0) return '';
-    const randomIndex = Math.floor(Math.random() * results.length);
-    return results[randomIndex]?.urls?.regular || '';
+    if (results.length === 0) {
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
+    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
+    return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
-    return '';
+    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   }
 }
 
@@ -35,22 +53,30 @@ async function getPexelsImage(query: string): Promise<string> {
         },
       }
     );
-    if (!res.ok) return '';
+    
+    if (!res.ok) {
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
     const data = await res.json();
     const results = data.photos || [];
-    if (results.length === 0) return '';
-    const randomIndex = Math.floor(Math.random() * results.length);
-    return results[randomIndex]?.src?.large || '';
+    if (results.length === 0) {
+      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+    }
+    
+    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
+    return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
-    return '';
+    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   }
 }
 
 async function getArticleImage(query: string): Promise<string> {
   const pexelsResult = await getPexelsImage(query);
   if (pexelsResult) return pexelsResult;
-  console.error(`Pexels returned no image for "${query}", falling back to Unsplash`);
-  return getUnsplashImage(query);
+  const unsplashResult = await getUnsplashImage(query);
+  if (unsplashResult) return unsplashResult;
+  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 }
 
 function extractJson(text: string): string {
@@ -69,7 +95,7 @@ async function generateWithYouCom(topic: string): Promise<string> {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      input: `You are an expert veterinary SEO writer. Write a 1500+ word SEO blog about: "${topic}"
+      input: `You are an expert veterinary SEO writer and affiliate marketer. Write a 1500+ word SEO blog about: "${topic}"
 
 Start with a strong introductory paragraph (do NOT use a heading for the introduction). Then use this strict structure:
 
@@ -82,9 +108,15 @@ Start with a strong introductory paragraph (do NOT use a heading for the introdu
 ## When to Call a Veterinarian
 ## Conclusion
 
-RULES:
+STYLE RULES:
+- Write like a helpful blog post, not a textbook
+- Use "you" and "your" to speak directly to the reader
+- Include practical tips and advice they can use
+- Suggest products or solutions where relevant (e.g., "a good quality probiotic", "a reliable dewormer")
+- End each section with a takeaway tip
+- Keep paragraphs short (2-3 sentences)
 - Use simple English for farmers and students
-- Naturally include keywords related to "${topic}"
+- Naturally include keywords
 - Include at least 5 FAQs
 - No citations
 - No references section
@@ -137,14 +169,10 @@ export async function GET(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // ✅ Updated to Gemini 2.5 Flash
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
     });
 
-    // =========================
-    // SEO KEYWORD ENGINE
-    // =========================
     const seoPrompt = `
 Return ONLY valid JSON, with no markdown code fences and no extra commentary.
 
@@ -184,11 +212,8 @@ Topic: "${topic}"
       };
     }
 
-    // =========================
-    // BLOG GENERATION
-    // =========================
     const prompt = `
-You are an expert veterinary SEO writer.
+You are an expert veterinary SEO writer and affiliate marketer.
 
 PRIMARY KEYWORD: ${seo.primary_keyword}
 SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
@@ -208,7 +233,13 @@ Start with a strong introductory paragraph (do NOT use a heading for the introdu
 ## When to Call a Veterinarian
 ## Conclusion
 
-RULES:
+STYLE RULES:
+- Write like a helpful blog post, not a textbook
+- Use "you" and "your" to speak directly to the reader
+- Include practical tips and advice they can use
+- Suggest products or solutions where relevant (e.g., "a good quality probiotic", "a reliable dewormer")
+- End each section with a takeaway tip
+- Keep paragraphs short (2-3 sentences)
 - Use simple English for farmers and students
 - Naturally include keywords
 - Include at least 5 FAQs
@@ -242,18 +273,11 @@ RULES:
       }
     }
 
-    // =========================
-    // CLEAN TEXT
-    // =========================
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
-    
     content = content.replace(/^# .+?\n/, '');
     content = content.replace(/^---\s*$/gm, '');
 
-    // =========================
-    // SEO DATA
-    // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
@@ -265,19 +289,13 @@ RULES:
     };
 
     const excerpt = buildExcerpt(plainText, 155);
-    
     const seoTitle = topic
       .split(' ')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ') + ': Causes, Symptoms, Treatment & Prevention';
-    
     const metaDescription = buildExcerpt(plainText, 160);
-
     const tags = buildFallbackTags(topic);
 
-    // =========================
-    // IMAGES
-    // =========================
     const heroImage = await getArticleImage(`${topic} livestock farm`);
     const causesImage = await getArticleImage(`${topic} cause infection`);
     const symptomsImage = await getArticleImage(`${topic} symptoms sick animal`);
