@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// =========================
-// FALLBACK IMAGES
-// =========================
 const FALLBACK_IMAGES = [
   'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
   'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
@@ -23,17 +20,14 @@ async function getPexelsImage(query: string): Promise<string> {
         },
       }
     );
-    
     if (!res.ok) {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const data = await res.json();
     const results = data.photos || [];
     if (results.length === 0) {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
@@ -52,17 +46,14 @@ async function getUnsplashImage(query: string): Promise<string> {
         },
       }
     );
-    
     if (!res.ok) {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const data = await res.json();
     const results = data.results || [];
     if (results.length === 0) {
       return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     }
-    
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
@@ -71,19 +62,34 @@ async function getUnsplashImage(query: string): Promise<string> {
 }
 
 async function getArticleImage(query: string): Promise<string> {
-  // Try Pexels first
-  const pexelsResult = await getPexelsImage(query);
-  if (pexelsResult && !pexelsResult.includes('fallback')) {
-    return pexelsResult;
-  }
+  const cleanQuery = query
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
   
-  // Fallback to Unsplash
-  const unsplashResult = await getUnsplashImage(query);
-  if (unsplashResult && !unsplashResult.includes('fallback')) {
-    return unsplashResult;
+  const searchQueries = [
+    cleanQuery,
+    `${cleanQuery} animal`,
+    `${cleanQuery} livestock`,
+    'farm animal',
+    'veterinary care'
+  ];
+
+  for (const searchQuery of searchQueries.slice(0, 3)) {
+    const pexelsResult = await getPexelsImage(searchQuery);
+    if (pexelsResult && !pexelsResult.includes('fallback')) {
+      return pexelsResult;
+    }
   }
-  
-  // Final fallback
+
+  for (const searchQuery of searchQueries.slice(0, 3)) {
+    const unsplashResult = await getUnsplashImage(searchQuery);
+    if (unsplashResult && !unsplashResult.includes('fallback')) {
+      return unsplashResult;
+    }
+  }
+
   return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
 }
 
@@ -95,11 +101,8 @@ function buildExcerpt(text: string, maxLength: number): string {
   return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
 }
 
-// =========================
-// CLEAN CONTENT - Remove FAQ section
-// =========================
 function cleanContent(content: string): string {
-  // Remove any FAQ section
+  content = content.replace(/^# .+?\n/, '');
   content = content.replace(
     /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
     ''
@@ -125,9 +128,6 @@ function cleanContent(content: string): string {
   return content;
 }
 
-// =========================
-// INSERT IMAGES AFTER HEADINGS
-// =========================
 const insertAfterHeading = (
   text: string,
   headingPattern: RegExp,
@@ -149,7 +149,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    // Fetch the URL content
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; VetSphereBot/1.0)',
@@ -165,11 +164,9 @@ export async function POST(request: NextRequest) {
 
     const html = await response.text();
 
-    // Extract the article title
     const titleMatch = html.match(/<title>(.*?)<\/title>/i);
     const extractedTitle = titleMatch ? titleMatch[1].trim() : topic || 'Article';
 
-    // Extract text content (remove HTML tags)
     const textContent = html
       .replace(/<script[\s\S]*?<\/script>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -185,9 +182,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // =========================
-    // GENERATE CONTENT WITH GEMINI
-    // =========================
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Missing Gemini API key' }, { status: 500 });
@@ -197,90 +191,76 @@ export async function POST(request: NextRequest) {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
-You are an expert veterinary SEO writer and affiliate marketer. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN blog post.
+You are an expert veterinary SEO writer and content creator. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN blog post.
 
 Source Title: ${extractedTitle}
 Source Content:
 ${textContent}
 
-Create a new article with this structure:
-## Introduction (as a paragraph, not a heading)
-## Causes
-## Clinical Signs and Symptoms
-## How to Diagnose
-## Treatment
-## Prevention and Control
-## When to Call a Veterinarian
-## Conclusion
+IMPORTANT: Choose the BEST writing style for this topic:
+- For news/breaking topics: Write like a news article with a headline, introduction, key facts, and analysis
+- For educational topics: Write like a helpful guide with clear sections
+- For how-to topics: Write a step-by-step guide
+- For general topics: Write an engaging blog post that informs and helps readers
+
+DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
+
+STRUCTURE GUIDELINES:
+- Start with a compelling introduction that hooks the reader
+- Use clear headings (## and ###) that make sense for the topic
+- Include practical, actionable information
+- Use bullet points and lists where helpful
+- End with a strong conclusion
 
 STYLE RULES:
-- Write like a helpful blog post, not a textbook
-- Use "you" and "your" to speak directly to the reader
-- Include practical tips and advice
-- Suggest products or solutions where relevant
-- End each section with a takeaway tip
+- Write like a helpful expert, not a textbook
+- Use "you" and "your" to speak directly to readers
 - Keep paragraphs short (2-3 sentences)
-- Make it 1500+ words
-- Use simple English for farmers and students
-- DO NOT copy sentences directly from the source
-- Rewrite everything in your own words
-- Add new insights and examples where possible
-- Make it SEARCH ENGINE OPTIMIZED
-- Use relevant keywords naturally
+- Use simple, clear English
+- Include relevant keywords naturally
+- Include at least 5 FAQs at the end
 - No citations
 - No references section
-- NO images or image descriptions
-- NO markdown formatting except headings
-- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content. SKIP IT COMPLETELY.
-- Write only the article content with the specified headings
+- No images or image descriptions
+- DO NOT copy sentences directly from the source
+- Rewrite everything in your own words
 
-Return ONLY the article content in plain text format.
-`;
+Return ONLY the article content in plain text format.`;
 
-    const result = await model.generateContent(prompt);
-    let content = result.response.text();
+    let content = await model.generateContent(prompt);
+    let result = content.response.text();
 
-    if (!content || content.trim().length < 200) {
+    if (!result || result.trim().length < 200) {
       return NextResponse.json(
         { error: 'Generated content is too short. Please try again.' },
         { status: 500 }
       );
     }
 
-    // Clean the content
-    content = cleanContent(content)
+    result = cleanContent(result)
       .replace(/```markdown/g, '')
       .replace(/```/g, '')
       .trim();
 
-    // Generate meta description
-    const plainText = content.replace(/[#*![\]()]/g, '').trim();
+    const plainText = result.replace(/[#*![\]()]/g, '').trim();
     const metaDescription = buildExcerpt(plainText, 160);
+    const seoTitle = extractedTitle + ': Causes, Symptoms, Treatment and Prevention';
 
-    // =========================
-    // GENERATE IMAGES
-    // =========================
     const heroImage = await getArticleImage(extractedTitle);
     const causesImage = await getArticleImage(`${extractedTitle} cause`);
     const symptomsImage = await getArticleImage(`${extractedTitle} symptoms`);
     const treatmentImage = await getArticleImage(`${extractedTitle} treatment`);
     const preventionImage = await getArticleImage(`${extractedTitle} prevention`);
 
-    // Insert images after headings
-    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${extractedTitle}`);
-    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${extractedTitle}`);
-    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${extractedTitle}`);
-    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${extractedTitle}`);
-
-    // =========================
-    // GENERATE SEO TITLE
-    // =========================
-    const seoTitle = extractedTitle + ': Causes, Symptoms, Treatment and Prevention';
+    result = insertAfterHeading(result, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${extractedTitle}`);
+    result = insertAfterHeading(result, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${extractedTitle}`);
+    result = insertAfterHeading(result, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${extractedTitle}`);
+    result = insertAfterHeading(result, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${extractedTitle}`);
 
     return NextResponse.json({
       success: true,
       title: seoTitle,
-      content: content,
+      content: result,
       metaDescription: metaDescription,
       heroImage: heroImage,
       sourceUrl: url,
