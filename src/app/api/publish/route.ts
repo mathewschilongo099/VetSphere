@@ -1,353 +1,106 @@
 export const dynamic = 'force-dynamic';
 
-import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { NextRequest, NextResponse } from 'next/server';
 
-const VETERINARY_KEYWORDS = [
-  'cattle', 'cow', 'dairy', 'livestock', 'poultry', 'chicken', 'goat',
-  'sheep', 'pig', 'swine', 'dog', 'cat', 'pet', 'animal', 'veterinary',
-  'vet', 'farm', 'disease', 'infection', 'parasite', 'vaccine', 'feeding',
-  'nutrition', 'breeding', 'health', 'treatment', 'prevention'
-];
+function topicToSlug(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
 
-async function getUnsplashImage(query: string): Promise<string> {
+export async function POST(request: NextRequest) {
   try {
-    const randomPage = Math.floor(Math.random() * 5) + 1;
-    const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
-      {
-        headers: {
-          Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
-        },
-      }
-    );
-    const data = await res.json();
-    const results = data.results || [];
-    if (results.length === 0) return '';
-    const randomIndex = Math.floor(Math.random() * results.length);
-    return results[randomIndex]?.urls?.regular || '';
-  } catch {
-    return '';
-  }
-}
+    const body = await request.json();
+    const { title, content, metaDescription, tags = [], heroImage } = body;
 
-function extractJson(text: string): string {
-  return text
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/, '')
-    .replace(/```\s*$/, '')
-    .trim();
-}
-
-async function generateWithYouCom(topic: string): Promise<string> {
-  const res = await fetch('https://api.you.com/v1/research', {
-    method: 'POST',
-    headers: {
-      'X-API-Key': process.env.YOU_API_KEY || '',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      input: `You are an expert veterinary SEO writer. Write a 1500+ word SEO blog about: "${topic}"
-
-STRICT STRUCTURE:
-## Introduction
-## What is ${topic}?
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
-## When to Call a Veterinarian
-## Conclusion
-
-RULES:
-- Use simple English for farmers and students
-- Naturally include keywords related to "${topic}"
-- Include at least 5 FAQs
-- No citations
-- No references section
-- Start directly with ## Introduction`,
-      research_effort: 'standard',
-    }),
-  });
-
-  if (!res.ok) throw new Error(`you.com failed with status ${res.status}`);
-  const data = await res.json();
-  const content = data.output?.content || '';
-  if (!content || content.trim().length < 200) throw new Error('you.com returned too-short content');
-  return content;
-}
-
-async function getTrendingVetTopic(): Promise<string> {
-  try {
-    const res = await fetch(
-      'https://trends.google.com/trending/rss?geo=ZW&hl=en',
-      { next: { revalidate: 0 } }
-    );
-    const xml = await res.text();
-    const titles = Array.from(xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g))
-      .map(m => m[1])
-      .filter(t => t !== 'Google Trends');
-    const vetTrend = titles.find(title =>
-      VETERINARY_KEYWORDS.some(keyword => title.toLowerCase().includes(keyword))
-    );
-    if (vetTrend) return vetTrend;
-
-    const fallbackTopics = [
-      'Mastitis in Dairy Cows', 'Tick Fever in Cattle', 'East Coast Fever in Cattle',
-      'Blackleg Disease in Cattle', 'Lumpy Skin Disease in Cattle', 'Bovine Respiratory Disease',
-      'Ringworm in Cattle', 'Pneumonia in Calves', 'Anthrax in Livestock', 'Bloat in Cattle',
-      'Foot and Mouth Disease in Cattle', 'Milk Fever in Dairy Cows', 'Bovine Tuberculosis',
-      'Anaplasmosis in Cattle', 'Liver Fluke in Cattle', 'Pink Eye in Cattle',
-      'Trypanosomiasis in Cattle', 'Worm Infestation in Cattle', 'Brucellosis in Livestock',
-      "Johne's Disease in Cattle", 'Newcastle Disease in Poultry', 'Avian Influenza in Poultry',
-      'Coccidiosis in Poultry', 'Infectious Bursal Disease in Poultry', 'Fowl Pox in Chickens',
-      'Salmonellosis in Poultry', "Marek's Disease in Chickens", 'Fowl Cholera in Poultry',
-      'Infectious Bronchitis in Chickens', 'Mycoplasma Infection in Poultry',
-      'Foot Rot in Goats', 'Peste des Petits Ruminants in Goats',
-      'Contagious Caprine Pleuropneumonia in Goats', 'Tetanus in Goats', 'Goat Pox',
-      'Caseous Lymphadenitis in Goats', 'Enterotoxemia in Goats', 'African Swine Fever',
-      'Porcine Reproductive and Respiratory Syndrome', 'Swine Erysipelas',
-      'Rabies Prevention in Dogs', 'Parvovirus in Dogs', 'Canine Distemper', 'Mange in Dogs',
-      'Heartworm Disease in Dogs', 'Kennel Cough in Dogs', 'How to Keep Your Dog Healthy',
-      'Dog Nutrition and Feeding Guide', 'Puppy Care and Vaccination Schedule',
-      'Feline Panleukopenia in Cats', 'Feline Leukemia Virus', 'Toxoplasmosis in Cats',
-      'How to Keep Your Cat Healthy', 'Cat Vaccination Schedule for Pet Owners',
-      'Mineral Nutrition for Dairy Cattle', 'Feeding Dairy Cows for Maximum Milk Production',
-      'Best Feeding Practices for Goats', 'Vitamin Deficiencies in Livestock',
-      'How to Feed Calves for Healthy Growth', 'Nutrition for Pregnant Cows',
-      'Poultry Feed Formulation for Farmers', 'Biosecurity Measures on Livestock Farms',
-      'How to Set Up a Poultry House', 'Record Keeping for Livestock Farmers',
-      'When to Call a Veterinarian', 'Water Quality and Animal Health',
-      'Vaccination Programs for Livestock Farmers', 'Deworming Programs for Cattle and Goats',
-      'Housing and Shelter for Livestock', 'How to Manage a Small Dairy Farm',
-      'Rotational Grazing for Cattle Health', 'Cattle Breeding and Reproduction Guide',
-      'Signs of Heat in Dairy Cows', 'Artificial Insemination in Cattle',
-      'Pregnancy and Calving Management in Cows', 'Common Reproductive Problems in Goats',
-      'Dystocia and Difficult Births in Cattle', 'Retained Placenta in Dairy Cows',
-      'How to Do a Body Condition Score in Cattle', 'Signs of Pain and Stress in Animals',
-      'Animal Welfare on the Farm', 'First Aid for Farm Animals',
-      'Zoonotic Diseases Farmers Should Know', 'Heat Stress in Livestock During Summer',
-      'How to Spot a Sick Animal Early', 'Importance of Clean Water for Animal Health',
-    ];
-
-    const existingSlugs = await getExistingSlugs();
-    const unusedTopics = fallbackTopics.filter(
-      t => !existingSlugs.some(slug => slug.startsWith(topicToSlug(t)))
-    );
-    const pool = unusedTopics.length > 0 ? unusedTopics : fallbackTopics;
-    return pool[Math.floor(Math.random() * pool.length)];
-  } catch {
-    return 'Lumpy Skin Disease in Cattle';
-  }
-}
-
-async function getExistingSlugs(): Promise<string[]> {
-  try {
-    const owner = process.env.GITHUB_OWNER;
-    const repo = process.env.GITHUB_REPO;
-    const token = process.env.GITHUB_TOKEN;
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/src/content/articles`,
-      { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
-    );
-    if (!res.ok) return [];
-    const files = await res.json();
-    if (!Array.isArray(files)) return [];
-    return files.map((f: { name: string }) => f.name.replace(/\.md$/, '')).filter(Boolean);
-  } catch {
-    return [];
-  }
-}
-
-function topicToSlug(topic: string): string {
-  return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
-const insertAfterHeading = (
-  text: string,
-  headingPattern: RegExp,
-  imageUrl: string,
-  altText: string
-): string => {
-  if (!imageUrl) return text;
-  const match = text.match(headingPattern);
-  if (!match) return text;
-  const heading = match[0];
-  return text.replace(heading, `${heading}\n\n
-
-![${altText}](${imageUrl})
-
-\n`);
-};
-
-export async function GET() {
-  try {
-    const topic = await getTrendingVetTopic();
-    console.log('Auto-publishing topic:', topic);
-
-    const existingSlugs = await getExistingSlugs();
-    const topicSlugPrefix = topicToSlug(topic);
-    const alreadyPublished = existingSlugs.some(slug => slug.startsWith(topicSlugPrefix));
-    if (alreadyPublished) {
-      return NextResponse.json({ success: false, skipped: true, reason: `Topic "${topic}" already published.` });
+    if (!title || !content) {
+      return NextResponse.json({ error: 'title and content are required' }, { status: 400 });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    let content: string;
-    let seo: any;
+    // Strip leading H1 if present to avoid duplicate title on the page
+    const cleanedContent = content.replace(/^\s*#\s+.+\n+/, '');
 
-    if (apiKey) {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const seoPrompt = `Return ONLY valid JSON, no markdown fences.
-Topic: "${topic}"
-{
-  "primary_keyword": "${topic}",
-  "secondary_keywords": ["animal health", "veterinary care"],
-  "long_tail_keywords": ["how to treat ${topic}", "symptoms of ${topic}", "prevention of ${topic}"],
-  "search_intent": "informational",
-  "questions": ["What causes ${topic}?", "How is ${topic} treated?", "Can ${topic} be prevented?"]
-}`;
-
-      try {
-        const seoResult = await model.generateContent(seoPrompt);
-        seo = JSON.parse(extractJson(seoResult.response.text()));
-      } catch {
-        seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
-      }
-
-      const prompt = `You are an expert veterinary SEO writer.
-PRIMARY KEYWORD: ${seo.primary_keyword}
-SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
-
-Write a 1500+ word SEO blog about: "${topic}"
-
-STRICT STRUCTURE:
-## Introduction
-## What is ${topic}?
-## Causes of ${topic}
-## Clinical Signs and Symptoms of ${topic}
-## How to Diagnose ${topic}
-## Treatment of ${topic}
-## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
-## When to Call a Veterinarian
-## Conclusion
-
-RULES:
-- Simple English for farmers and students
-- Include keywords naturally
-- Include at least 5 FAQs
-- No citations
-- No references section
-- Start directly with ## Introduction`;
-
-      try {
-        const result = await model.generateContent(prompt);
-        content = result.response.text();
-        if (!content || content.trim().length < 200) throw new Error('Too short');
-      } catch (genError) {
-        console.error('Gemini failed, falling back to you.com:', genError);
-        content = await generateWithYouCom(topic);
-      }
-    } else {
-      seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
-      content = await generateWithYouCom(topic);
-    }
-
-    // Remove only citation numbers — keep all markdown formatting intact
-    content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
-    content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
-    // Remove any H1 title at top to avoid duplicate
-    content = content.replace(/^\s*#\s+.+\n+/, '');
-
-    const plainText = content.replace(/[#*![\]()]/g, '').trim();
-
-    const buildExcerpt = (text: string, maxLength: number): string => {
-      const clean = text.replace(/\s+/g, ' ').trim();
-      if (clean.length <= maxLength) return clean;
-      const truncated = text.substring(0, maxLength);
-      const lastSpace = truncated.lastIndexOf(' ');
-      return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
-    };
-
-    const excerpt = buildExcerpt(plainText, 155);
-    const seoTitle = topic.charAt(0).toUpperCase() + topic.slice(1) + ': Causes, Symptoms, Treatment and Prevention';
-    const metaDescription = buildExcerpt(plainText, 160);
-    const tags = [
-      topic.toLowerCase(),
-      ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
-      'animal health', 'veterinary',
-    ].slice(0, 6);
-
-    // Hero image shown in page template — do NOT inject at Introduction
-    const heroImage = await getUnsplashImage(topic + ' livestock farm');
-    const causesImage = await getUnsplashImage(topic + ' disease');
-    const symptomsImage = await getUnsplashImage('sick animal ' + topic);
-    const treatmentImage = await getUnsplashImage('veterinarian treatment');
-    const preventionImage = await getUnsplashImage('farm biosecurity');
-
-    // ✅ No image at Introduction to avoid duplicate with hero
-    content = insertAfterHeading(content, /^##\s+Causes of.+$/im, causesImage, `Causes of ${topic}`);
-    content = insertAfterHeading(content, /^##\s+Clinical Signs.+$/im, symptomsImage, `Symptoms of ${topic}`);
-    content = insertAfterHeading(content, /^##\s+Treatment of.+$/im, treatmentImage, `Treatment of ${topic}`);
-    content = insertAfterHeading(content, /^##\s+Prevention.+$/im, preventionImage, `Prevention of ${topic}`);
-
-    const slug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const slug = topicToSlug(title);
     const date = new Date().toISOString().split('T')[0];
+    const safeDescription = (metaDescription || '').replace(/"/g, '\\"').slice(0, 160);
+    const safeTags = tags.length > 0 ? tags : ['animal health', 'veterinary'];
 
     const markdown = `---
-title: "${seoTitle}"
-description: "${metaDescription.replace(/"/g, '\\"')}"
+title: "${title}"
+description: "${safeDescription}"
 date: "${date}"
-author: "VetSphere"
+author: "Mathews Chilongo"
 category: "Animal Health"
-tags: [${tags.map((t: string) => `"${t}"`).join(', ')}]
+tags: [${safeTags.map((t: string) => `"${t}"`).join(', ')}]
 image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
-imageAlt: "${seoTitle}"
+imageAlt: "${title}"
 featured: false
-excerpt: "${excerpt.replace(/"/g, '\\"')}"
 ---
 
-${content}
+${cleanedContent}
 `;
 
-    const path = `src/content/articles/${slug}.md`;
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
     const token = process.env.GITHUB_TOKEN;
 
-    const githubRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: `Auto-publish: ${seoTitle}`,
-          content: Buffer.from(markdown).toString('base64'),
-        }),
-      }
-    );
-
-    if (!githubRes.ok) {
-      const err = await githubRes.json();
-      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    if (!owner || !repo || !token) {
+      return NextResponse.json({ error: 'Missing GitHub environment variables' }, { status: 500 });
     }
 
+    const path = `src/content/articles/${slug}.md`;
+    const contentsUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+    const headers = {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    };
+
+    // Check if file already exists to avoid conflict
+    let existingSha: string | undefined;
+    try {
+      const existingRes = await fetch(contentsUrl, { headers });
+      if (existingRes.ok) {
+        const existingData = await existingRes.json();
+        existingSha = existingData.sha;
+      }
+    } catch {
+      // Fall through and attempt normal create
+    }
+
+    if (existingSha) {
+      return NextResponse.json({
+        success: false,
+        skipped: true,
+        reason: `An article already exists at "${path}". Skipping to avoid overwriting.`,
+      });
+    }
+
+    const githubRes = await fetch(contentsUrl, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify({
+        message: `Add article: ${title}`,
+        content: Buffer.from(markdown).toString('base64'),
+      }),
+    });
+
+    if (!githubRes.ok) {
+      const err = await githubRes.json().catch(() => ({ message: 'Unknown GitHub API error' }));
+      return NextResponse.json(
+        { success: false, error: err.message || 'GitHub publish failed' },
+        { status: 500 }
+      );
+    }
+
+    // Trigger Vercel redeploy so article appears immediately
     if (process.env.VERCEL_DEPLOY_HOOK) {
       try {
         await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
       } catch {
-        // Don't fail if deploy hook fails
+        // Don't fail publish if deploy hook fails
       }
     }
 
-    return NextResponse.json({ success: true, topic, title: seoTitle });
+    return NextResponse.json({ success: true, slug, path, title });
   } catch (error) {
-    console.error('Auto-publish failed:', error);
-    return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
-  }
-}
+    console.error('Publish route failed:', error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error
