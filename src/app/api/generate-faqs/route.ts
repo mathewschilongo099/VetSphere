@@ -11,7 +11,8 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // ✅ Updated to Gemini 2.5 Flash
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
 You are an expert veterinary SEO writer. Based on the following article about "${title}", generate 5 Frequently Asked Questions (FAQs) with answers.
@@ -34,7 +35,6 @@ Rules:
     const response = await result.response;
     let text = response.text().trim();
 
-    // Clean up markdown if present
     text = text.replace(/^```json\s*/i, '');
     text = text.replace(/^```\s*/, '');
     text = text.replace(/```\s*$/, '');
