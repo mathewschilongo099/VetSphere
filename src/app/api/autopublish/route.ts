@@ -402,4 +402,161 @@ export async function GET(request: NextRequest) {
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const seoPrompt = `
-Return ONLY valid JSON, no
+Return ONLY valid JSON, no markdown fences.
+Topic: "${topic}"
+{
+  "primary_keyword": "${topic}",
+  "secondary_keywords": ["animal health", "veterinary care"],
+  "long_tail_keywords": ["how to treat ${topic}", "symptoms of ${topic}", "prevention of ${topic}"],
+  "search_intent": "informational",
+  "questions": ["What causes ${topic}?", "How is ${topic} treated?", "Can ${topic} be prevented?"]
+}`;
+
+      try {
+        const seoResult = await model.generateContent(seoPrompt);
+        seo = JSON.parse(extractJson(seoResult.response.text()));
+      } catch {
+        seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
+      }
+
+      const prompt = `
+You are an expert veterinary SEO writer and affiliate marketer.
+PRIMARY KEYWORD: ${seo.primary_keyword}
+SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
+
+Write a 1500+ word SEO blog about: "${topic}"
+
+STRICT STRUCTURE:
+## Introduction (as a paragraph, not a heading)
+## Causes of ${topic}
+## Clinical Signs and Symptoms of ${topic}
+## How to Diagnose ${topic}
+## Treatment of ${topic}
+## Prevention and Control of ${topic}
+## Frequently Asked Questions About ${topic}
+## When to Call a Veterinarian
+## Conclusion
+
+STYLE RULES:
+- Write like a helpful blog post, not a textbook
+- Use "you" and "your" to speak directly to the reader
+- Include practical tips and advice they can use
+- Suggest products or solutions where relevant (e.g., "a good quality probiotic", "a reliable dewormer")
+- End each section with a takeaway tip
+- Keep paragraphs short (2-3 sentences)
+- Simple English for farmers and students
+- Include keywords naturally
+- Include at least 5 FAQs
+- No citations
+- No references section
+- NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS, NO PHOTO CREDITS
+- NO "Image 1:", "Image 2:", etc.
+- NO "Photo: ..." anywhere in the article
+- Write only the article content with the specified headings`;
+
+      try {
+        const result = await model.generateContent(prompt);
+        content = result.response.text();
+        if (!content || content.trim().length < 200) throw new Error('Too short');
+      } catch (genError) {
+        console.error('Gemini failed, falling back to you.com:', genError);
+        content = await generateWithYouCom(topic);
+      }
+    } else {
+      seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
+      content = await generateWithYouCom(topic);
+    }
+
+    content = cleanContent(content);
+    content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
+    content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
+
+    const plainText = content.replace(/[#*![\]()]/g, '').trim();
+
+    const buildExcerpt = (text: string, maxLength: number): string => {
+      const clean = text.replace(/\s+/g, ' ').trim();
+      if (clean.length <= maxLength) return clean;
+      const truncated = text.substring(0, maxLength);
+      const lastSpace = truncated.lastIndexOf(' ');
+      return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
+    };
+
+    const excerpt = buildExcerpt(plainText, 155);
+    const seoTitle = topic.charAt(0).toUpperCase() + topic.slice(1) + ': Causes, Symptoms, Treatment and Prevention';
+    const metaDescription = buildExcerpt(plainText, 160);
+    const tags = [
+      topic.toLowerCase(),
+      ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
+      'animal health',
+      'veterinary',
+    ].slice(0, 6);
+
+    const heroImage = await getUnsplashImage(topic + ' livestock farm');
+    const causesImage = await getUnsplashImage(topic + ' disease');
+    const symptomsImage = await getUnsplashImage('sick animal ' + topic);
+    const treatmentImage = await getUnsplashImage('veterinarian treatment');
+    const preventionImage = await getUnsplashImage('farm biosecurity');
+
+    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
+    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
+
+    const slug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const date = new Date().toISOString().split('T')[0];
+
+    const markdown = `---
+title: "${seoTitle}"
+description: "${metaDescription.replace(/"/g, '\\"')}"
+date: "${date}"
+author: "VetSphere"
+category: "Animal Health"
+tags: [${tags.map((t: string) => `"${t}"`).join(', ')}]
+image: "${heroImage || '/images/articles/cattle-diseases.jpg'}"
+imageAlt: "${seoTitle}"
+featured: false
+excerpt: "${excerpt.replace(/"/g, '\\"')}"
+---
+
+${content}
+`;
+
+    const path = `src/content/articles/${slug}.md`;
+    const owner = process.env.GITHUB_OWNER;
+    const repo = process.env.GITHUB_REPO;
+    const token = process.env.GITHUB_TOKEN;
+
+    const githubRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: `Auto-publish: ${seoTitle}`,
+          content: Buffer.from(markdown).toString('base64'),
+        }),
+      }
+    );
+
+    if (!githubRes.ok) {
+      const err = await githubRes.json();
+      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    }
+
+    if (process.env.VERCEL_DEPLOY_HOOK) {
+      try {
+        await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
+      } catch {
+        // Don't fail if deploy hook fails
+      }
+    }
+
+    return NextResponse.json({ success: true, topic, title: seoTitle });
+  } catch (error) {
+    console.error('Auto-publish failed:', error);
+    return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
+  }
+}
