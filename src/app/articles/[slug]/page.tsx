@@ -1,13 +1,12 @@
+'use client';
+
 import { getPostBySlug, getAllPosts, getAdjacentPosts, getRelatedPosts } from '@/lib/blog';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ChevronDown, ChevronUp } from 'lucide-react';
-import type { Metadata } from 'next';
-
-'use client';
-
 import { useState, useEffect } from 'react';
+import type { Metadata } from 'next';
 
 // FAQ Accordion Component
 function FAQAccordion({ content }: { content: string }) {
@@ -122,43 +121,6 @@ function FAQAccordion({ content }: { content: string }) {
       </div>
     </div>
   );
-}
-
-export async function generateStaticParams() {
-  const posts = getAllPosts();
-  return posts.map((post) => ({ slug: post.slug }));
-}
-
-export async function generateMetadata(
-  { params }: { params: { slug: string } }
-): Promise<Metadata> {
-  const post = getPostBySlug(params.slug);
-  if (!post) return { title: 'Article Not Found | VetSphere' };
-
-  const imageUrl = post.image?.startsWith('http')
-    ? post.image
-    : `https://vet-sphere.vercel.app${post.image}`;
-
-  return {
-    title: `${post.title} | VetSphere`,
-    description: post.description,
-    keywords: post.tags?.join(', ') || '',
-    openGraph: {
-      title: post.title,
-      description: post.description,
-      type: 'article',
-      publishedTime: post.date,
-      authors: ['Mathews Chilongo'],
-      url: `https://vet-sphere.vercel.app/articles/${post.slug}`,
-      images: [{ url: imageUrl, alt: post.imageAlt || post.title }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: post.title,
-      description: post.description,
-      images: [imageUrl],
-    },
-  };
 }
 
 export default function ArticlePage({ params }: { params: { slug: string } }) {
