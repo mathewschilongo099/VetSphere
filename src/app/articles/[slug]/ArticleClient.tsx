@@ -10,65 +10,124 @@ function FAQAccordion({ content }: { content: string }) {
   const [faqs, setFaqs] = useState<{ question: string; answer: string }[]>([]);
 
   useEffect(() => {
-    const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
-    if (faqSection) {
-      const faqText = faqSection[1];
-      const qaPairs: { question: string; answer: string }[] = [];
-      const lines = faqText.split('\n');
-      let currentQuestion = '';
-      let currentAnswer = '';
-      let isCollectingAnswer = false;
+    // Try multiple patterns to extract FAQs
+    let foundFaqs: { question: string; answer: string }[] = [];
 
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        
-        if (line.match(/^\*\*Q[:.]?\s*|^Q[:.]?\s*|^\d+\.\s*\*\*/i) || 
-            (line.match(/^\*\*.*\?\*\*$/) && !line.includes('Answer:'))) {
-          if (currentQuestion && currentAnswer) {
-            qaPairs.push({
-              question: currentQuestion.replace(/^\*\*Q[:.]?\s*|^Q[:.]?\s*|^\d+\.\s*\*\*/, '').replace(/\*\*$/, '').trim(),
-              answer: currentAnswer.trim()
-            });
-          }
-          currentQuestion = line;
-          currentAnswer = '';
-          isCollectingAnswer = false;
-        } else if (line.match(/^\*\*Answer[:.]?\s*|^Answer[:.]?\s*/i)) {
-          isCollectingAnswer = true;
-          currentAnswer += line.replace(/^\*\*Answer[:.]?\s*|^Answer[:.]?\s*/i, '').trim() + ' ';
-        } else if (isCollectingAnswer) {
-          currentAnswer += line + ' ';
-        } else if (line && !line.match(/^##/)) {
-          if (currentQuestion) {
-            isCollectingAnswer = true;
-            currentAnswer += line + ' ';
-          }
-        }
-      }
-      
-      if (currentQuestion && currentAnswer) {
-        qaPairs.push({
-          question: currentQuestion.replace(/^\*\*Q[:.]?\s*|^Q[:.]?\s*|^\d+\.\s*\*\*/, '').replace(/\*\*$/, '').trim(),
-          answer: currentAnswer.trim()
+    // Pattern 1: Standard Q: / A: format
+    const qaRegex = /\*\*Q(?:uestion)?[:.]?\s*(.*?)\?\*\*[\s\S]*?\*\*A(?:nswer)?[:.]?\s*(.*?)(?=\*\*Q|\*\*Question|$)/gi;
+    let match;
+    while ((match = qaRegex.exec(content)) !== null) {
+      foundFaqs.push({
+        question: match[1].trim(),
+        answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
+      });
+    }
+
+    // Pattern 2: Bold question with ? and bold answer
+    if (foundFaqs.length === 0) {
+      const altRegex = /\*\*(.*?\?)\*\*[\s\S]*?\*\*(?:Answer|A):?\s*(.*?)(?=\*\*.*?\?|$)/gi;
+      while ((match = altRegex.exec(content)) !== null) {
+        foundFaqs.push({
+          question: match[1].trim(),
+          answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
         });
       }
+    }
 
-      if (qaPairs.length > 0) {
-        setFaqs(qaPairs);
-      } else {
-        const simpleMatches = faqText.match(/\*\*([^*?]+)\?\*\*([\s\S]*?)(?=\*\*[^*?]+\?\*\*|$)/g);
-        if (simpleMatches) {
-          const parsed = simpleMatches.map(match => {
-            const qMatch = match.match(/\*\*([^*?]+)\?\*\*/);
-            const aMatch = match.match(/\*\*([^*?]+)\?\*\*([\s\S]*?)$/);
-            return {
-              question: qMatch ? qMatch[1].trim() : 'Question',
-              answer: aMatch ? aMatch[2].trim() : 'Answer'
-            };
+    // Pattern 3: Numbered questions (1. Question text)
+    if (foundFaqs.length === 0) {
+      const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?\*\*(?:Answer|A):?\s*(.*?)(?=\d+\.\s*\*\*|$)/gi;
+      while ((match = numberedRegex.exec(content)) !== null) {
+        foundFaqs.push({
+          question: match[2].trim(),
+          answer: match[3].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
+        });
+      }
+    }
+
+    // Pattern 4: Simple Q: and A: without bold
+    if (foundFaqs.length === 0) {
+      const simpleRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*(.*?)(?=Q(?:uestion)?[:.]|$)/gi;
+      while ((match = simpleRegex.exec(content)) !== null) {
+        foundFaqs.push({
+          question: match[1].trim(),
+          answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
+        });
+      }
+    }
+
+    // Pattern 5: FAQ section with bullet points or line breaks
+    if (foundFaqs.length === 0) {
+      // Try to find FAQ section and parse manually
+      const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
+      if (faqSection) {
+        const text = faqSection[1];
+        // Split by question marks
+        const parts = text.split(/\n\s*\*\*/);
+        let currentQuestion = '';
+        let currentAnswer = '';
+        
+        for (const part of parts) {
+          const trimmed = part.trim();
+          if (!trimmed) continue;
+          
+          if (trimmed.includes('?')) {
+            if (currentQuestion && currentAnswer) {
+              foundFaqs.push({
+                question: currentQuestion.replace(/\*\*/g, '').trim(),
+                answer: currentAnswer.replace(/\*\*/g, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
+              });
+            }
+            const qMatch = trimmed.match(/^([^*]+)\?/);
+            currentQuestion = qMatch ? qMatch[1] + '?' : trimmed.split('?')[0] + '?';
+            currentAnswer = trimmed.replace(/^[^*]+\?/, '');
+          } else {
+            currentAnswer += ' ' + trimmed;
+          }
+        }
+        
+        if (currentQuestion && currentAnswer) {
+          foundFaqs.push({
+            question: currentQuestion.replace(/\*\*/g, '').trim(),
+            answer: currentAnswer.replace(/\*\*/g, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
           });
-          setFaqs(parsed);
         }
       }
+    }
+
+    // Clean up answers
+    foundFaqs = foundFaqs.map(faq => ({
+      question: faq.question.replace(/^Q(?:uestion)?[:.]?\s*/i, '').trim(),
+      answer: faq.answer.replace(/^A(?:nswer)?[:.]?\s*/i, '').trim()
+    }));
+
+    // Filter out empty or invalid FAQs
+    foundFaqs = foundFaqs.filter(faq => 
+      faq.question.length > 5 && 
+      faq.answer.length > 5 &&
+      !faq.question.includes('In this article') &&
+      !faq.question.includes('Read more')
+    );
+
+    if (foundFaqs.length > 0) {
+      setFaqs(foundFaqs.slice(0, 10));
+    } else {
+      // Fallback hardcoded FAQs if none found
+      const fallbackFaqs = [
+        {
+          question: "What causes this condition?",
+          answer: "The exact causes vary depending on the specific condition. Generally, factors include diet, environment, genetics, and infectious agents. Consult your veterinarian for a proper diagnosis."
+        },
+        {
+          question: "How is this condition treated?",
+          answer: "Treatment options depend on the specific diagnosis. Common approaches include medication, dietary changes, supportive care, and in some cases surgery. Always consult a qualified veterinarian."
+        },
+        {
+          question: "Can this condition be prevented?",
+          answer: "Many conditions can be prevented through good management practices, proper nutrition, vaccination programs, and regular veterinary check-ups. Early detection is key."
+        }
+      ];
+      setFaqs(fallbackFaqs);
     }
   }, [content]);
 
