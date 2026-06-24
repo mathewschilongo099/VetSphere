@@ -9,7 +9,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    // Step 1: Fetch the content from the URL
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; VetSphereBot/1.0)',
@@ -25,11 +24,9 @@ export async function POST(request: NextRequest) {
 
     const html = await response.text();
 
-    // Step 2: Extract the article title
     const titleMatch = html.match(/<title>(.*?)<\/title>/i);
     const extractedTitle = titleMatch ? titleMatch[1].trim() : topic || 'Veterinary Article';
 
-    // Step 3: Extract text content (remove HTML tags)
     const textContent = html
       .replace(/<script[\s\S]*?<\/script>/gi, '')
       .replace(/<style[\s\S]*?<\/style>/gi, '')
@@ -45,15 +42,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 4: Use Gemini to rewrite the content
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'Missing Gemini API key' }, { status: 500 });
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Use the latest available model
-    const model = genAI.getGenerativeModel({ model: 'models/gemini-2.0-flash-exp' });
+    // ✅ Updated to Gemini 2.5 Flash
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
 You are an expert veterinary SEO writer. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN veterinary article.
@@ -101,7 +97,6 @@ Return ONLY the article content in plain text format.
       );
     }
 
-    // Step 5: Clean up any markdown that might have been added
     const cleanContent = content
       .replace(/```markdown/g, '')
       .replace(/```/g, '')
