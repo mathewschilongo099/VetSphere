@@ -14,13 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
 ![large animal diseas](https://images.unsplash.com/photo-1606705372333-12530f66e648?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwzOHx8bGFyZ2UlMjBhbmltYWwlMjBkaXNlYXMlMjBsaXZlc3RvY2slMjBmYXJtfGVufDB8MHx8fDE3ODE5Njg5NDN8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: large animal diseas — via Unsplash*
-
 
 Large animal health is the foundation of sustainable livestock farming, food security, and rural livelihoods. When a herd is affected by any large animal diseas, farmers can face sudden deaths, reduced milk or meat production, abortions, trade restrictions, and even human illness in the case of zoonotic infections.  Understanding how these diseases start, how they spread, and how to prevent them is essential for every cattle, sheep, goat, pig, and horse owner.  
 
@@ -36,13 +32,9 @@ Large animal diseas matters because it directly affects productivity and animal 
 
 ## Causes of large animal diseas
 
-
-
 ![Causes of large animal diseas](https://images.unsplash.com/photo-1641810687560-3948419c9644?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxN3x8bGFyZ2UlMjBhbmltYWwlMjBkaXNlYXMlMjBhbmltYWwlMjBkaXNlYXNlfGVufDB8MHx8fDE3ODE5Njg5NDN8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Causes — via Unsplash*
-
 
 The causes of large animal diseas can be grouped into infectious and non‑infectious categories. Infectious diseases are caused by living agents that spread between animals or from the environment.
 
@@ -61,13 +53,9 @@ Non‑infectious causes of large animal diseas include nutritional deficiencies 
 
 ## Clinical Signs and Symptoms of large animal diseas
 
-
-
 ![Symptoms of large animal diseas](https://images.unsplash.com/photo-1604781781921-2d546614b50b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHw0Mnx8c2ljayUyMGxhcmdlJTIwYW5pbWFsJTIwZGlzZWFzJTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5Njg5NDN8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 Recognizing early symptoms of large animal diseas is key to successful treatment and control. In many conditions, general signs such as fever, depression, loss of appetite, and reduced milk production appear before more specific lesions.
 
@@ -93,13 +81,9 @@ Because some large animal diseases are zoonotic or legally reportable, veterinar
 
 ## Treatment of large animal diseas
 
-
-
 ![Treatment for large animal diseas](https://images.unsplash.com/photo-1740578265810-c213da595606?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwyNHx8dmV0ZXJpbmFyaWFuJTIwZmFybWVyJTIwdHJlYXRtZW50fGVufDB8MHx8fDE3ODE5Njg5NDN8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Treatment — via Unsplash*
-
 
 How to treat large animal diseas depends on its exact cause, severity, and whether it is an individual animal problem or a herd outbreak. Standard veterinary medicine emphasizes tailored therapy, combining specific drugs with supportive care and management changes.  
 
@@ -111,13 +95,9 @@ Parasitic and fungal diseases are usually managed with specific antiparasitic or
 
 ## Prevention and Control of large animal diseas
 
-
-
 ![Prevention of large animal diseas](https://images.unsplash.com/photo-1446126102442-f6b2b73257fd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwzOXx8ZmFybSUyMGJpb3NlY3VyaXR5JTIwcHJldmVudGlvbiUyMGFuaW1hbHxlbnwwfDB8fHwxNzgxOTY4OTQzfDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Prevention — via Unsplash*
-
 
 Prevention of large animal diseas is almost always more economical than treatment. Major veterinary and extension sources emphasize good husbandry, proper feeding, vaccination, and biosecurity as the foundation of herd health.  
 
@@ -126,8 +106,6 @@ Vaccination programs are central for many infectious diseases. Regular vaccinati
 Biosecurity measures reduce the introduction and spread of large animal diseas. These include quarantining new or returning animals, controlling farm visitors and vehicles, cleaning and disinfection of housing and equipment, and careful disposal of carcasses, aborted fetuses, and contaminated bedding. For anthrax, authorities strongly advise never opening carcasses of suspected cases and instead notifying a veterinarian immediately.  Control of ticks, flies, and other vectors is crucial to limit diseases such as anaplasmosis and other tick‑borne infections.  Regular deworming and pasture rotation help limit internal parasites and coccidiosis.  
 
 Good nutrition, adequate minerals, and proper housing also help prevent non‑infectious large animal diseas and reduce susceptibility to infections. Extension guides stress that good husbandry, hygiene, and balanced feeding significantly reduce the risk and severity of many common livestock diseases.  Working closely with a veterinarian to design a herd health plan, including routine vaccination, deworming, and reproductive management, is one of the most effective long‑term strategies for prevention of large animal diseas. 
-
-## Frequently Asked Questions About large animal diseas
 
 ### Q: What are the most common large animal diseas on farms?
 
