@@ -13,17 +13,29 @@ function FAQAccordion({ content }: { content: string }) {
     // Try multiple patterns to extract FAQs
     let foundFaqs: { question: string; answer: string }[] = [];
 
-    // Pattern 1: Standard Q: / A: format
-    const qaRegex = /\*\*Q(?:uestion)?[:.]?\s*(.*?)\?\*\*[\s\S]*?\*\*A(?:nswer)?[:.]?\s*(.*?)(?=\*\*Q|\*\*Question|$)/gi;
+    // Pattern 1: Numbered questions (1. Question text)
+    const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/gi;
     let match;
-    while ((match = qaRegex.exec(content)) !== null) {
+    while ((match = numberedRegex.exec(content)) !== null) {
+      const answer = content.split(match[0])[1]?.split(/\d+\.\s*\*\*/)[0]?.trim() || '';
       foundFaqs.push({
-        question: match[1].trim(),
-        answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
+        question: match[2].trim(),
+        answer: answer.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()
       });
     }
 
-    // Pattern 2: Bold question with ? and bold answer
+    // Pattern 2: Q: / A: format
+    if (foundFaqs.length === 0) {
+      const qaRegex = /\*\*Q(?:uestion)?[:.]?\s*(.*?)\?\*\*[\s\S]*?\*\*A(?:nswer)?[:.]?\s*(.*?)(?=\*\*Q|\*\*Question|$)/gi;
+      while ((match = qaRegex.exec(content)) !== null) {
+        foundFaqs.push({
+          question: match[1].trim(),
+          answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
+        });
+      }
+    }
+
+    // Pattern 3: Bold question with ? and bold answer
     if (foundFaqs.length === 0) {
       const altRegex = /\*\*(.*?\?)\*\*[\s\S]*?\*\*(?:Answer|A):?\s*(.*?)(?=\*\*.*?\?|$)/gi;
       while ((match = altRegex.exec(content)) !== null) {
@@ -31,67 +43,6 @@ function FAQAccordion({ content }: { content: string }) {
           question: match[1].trim(),
           answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
         });
-      }
-    }
-
-    // Pattern 3: Numbered questions (1. Question text)
-    if (foundFaqs.length === 0) {
-      const numberedRegex = /(\d+)\.\s*\*\*(.*?\?)\*\*[\s\S]*?\*\*(?:Answer|A):?\s*(.*?)(?=\d+\.\s*\*\*|$)/gi;
-      while ((match = numberedRegex.exec(content)) !== null) {
-        foundFaqs.push({
-          question: match[2].trim(),
-          answer: match[3].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
-        });
-      }
-    }
-
-    // Pattern 4: Simple Q: and A: without bold
-    if (foundFaqs.length === 0) {
-      const simpleRegex = /Q(?:uestion)?[:.]?\s*(.*?\?)\s*A(?:nswer)?[:.]?\s*(.*?)(?=Q(?:uestion)?[:.]|$)/gi;
-      while ((match = simpleRegex.exec(content)) !== null) {
-        foundFaqs.push({
-          question: match[1].trim(),
-          answer: match[2].trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
-        });
-      }
-    }
-
-    // Pattern 5: FAQ section with bullet points or line breaks
-    if (foundFaqs.length === 0) {
-      // Try to find FAQ section and parse manually
-      const faqSection = content.match(/##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i);
-      if (faqSection) {
-        const text = faqSection[1];
-        // Split by question marks
-        const parts = text.split(/\n\s*\*\*/);
-        let currentQuestion = '';
-        let currentAnswer = '';
-        
-        for (const part of parts) {
-          const trimmed = part.trim();
-          if (!trimmed) continue;
-          
-          if (trimmed.includes('?')) {
-            if (currentQuestion && currentAnswer) {
-              foundFaqs.push({
-                question: currentQuestion.replace(/\*\*/g, '').trim(),
-                answer: currentAnswer.replace(/\*\*/g, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
-              });
-            }
-            const qMatch = trimmed.match(/^([^*]+)\?/);
-            currentQuestion = qMatch ? qMatch[1] + '?' : trimmed.split('?')[0] + '?';
-            currentAnswer = trimmed.replace(/^[^*]+\?/, '');
-          } else {
-            currentAnswer += ' ' + trimmed;
-          }
-        }
-        
-        if (currentQuestion && currentAnswer) {
-          foundFaqs.push({
-            question: currentQuestion.replace(/\*\*/g, '').trim(),
-            answer: currentAnswer.replace(/\*\*/g, '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ')
-          });
-        }
       }
     }
 
@@ -177,10 +128,29 @@ export default function ArticleClient({ post, prev, next, relatedPosts }: any) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
-  const contentWithoutFAQ = cleanContent.replace(
+  // STRONGER removal of FAQ section from content
+  let contentWithoutFAQ = cleanContent;
+  
+  // Remove the entire FAQ section including the heading and all numbered questions
+  contentWithoutFAQ = contentWithoutFAQ.replace(
     /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/i,
     ''
   );
+  
+  // Also remove any remaining FAQ patterns
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|$)/g,
+    ''
+  );
+  
+  // Remove the FAQ heading if it somehow remains
+  contentWithoutFAQ = contentWithoutFAQ.replace(
+    /##\s*Frequently Asked Questions.*$/i,
+    ''
+  );
+
+  // Clean up extra whitespace
+  contentWithoutFAQ = contentWithoutFAQ.replace(/\n{3,}/g, '\n\n').trim();
 
   return (
     <div className="min-h-screen bg-white">
