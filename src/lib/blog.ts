@@ -36,7 +36,19 @@ export function getPostBySlug(slug: string): BlogPost | null {
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data, content } = matter(fileContents);
     const readingTime = calculateReadingTime(content);
-    const contentHtml = md.render(content);
+
+    // Remove the first image and its caption from content since the
+    // hero image is already shown above the article body — this fixes
+    // the duplicate image that appears at the top of old articles.
+    const contentWithoutFirstImage = content
+      // Remove markdown image followed by optional Photo: caption line
+      .replace(/!\[[^\]]*\]\([^)]*\)\s*\n*\*?Photo:[^\n]*\n*/g, '')
+      // Remove any remaining standalone Photo: ... via Unsplash lines
+      .replace(/\*Photo:[^\n]*via Unsplash[^\n]*\*\n*/gi, '')
+      .replace(/Photo:[^\n]*via Unsplash[^\n]*\n*/gi, '');
+
+    const contentHtml = md.render(contentWithoutFirstImage);
+
     return {
       slug: realSlug,
       title: data.title || '',
