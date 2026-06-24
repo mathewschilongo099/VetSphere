@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![Foot Rot in Goats](https://images.unsplash.com/photo-1567565932624-df6796fd9342?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb290JTIwUm90JTIwaW4lMjBHb2F0cyUyMGFuaW1hbHxlbnwwfDB8fHwxNzgxOTUyMTA5fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Foot Rot in Goats — via Unsplash*
-
 
 Foot Rot in Goats is one of the most frustrating hoof diseases for goat owners, leading to lameness, weight loss, poor growth, and serious welfare problems if not controlled. This contagious bacterial infection attacks the soft tissues of the hoof and can rapidly spread through a herd, especially in warm, wet and muddy conditions. Understanding the causes, symptoms, diagnosis, treatment, and prevention of Foot Rot in Goats is essential for farmers, students of animal science, and hobby goat keepers who want to protect herd health and avoid economic losses. 
 
@@ -38,17 +30,9 @@ Because the bacteria involved do not survive indefinitely in dry, clean environm
 
 ## Causes of Foot Rot in Goats
 
-
-
-
-
 ![Causes of Foot Rot in Goats](https://images.unsplash.com/photo-1593750439808-958d28558592?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb290JTIwUm90JTIwaW4lMjBHb2F0cyUyMGRpc2Vhc2V8ZW58MHwwfHx8MTc4MTk1MjEwOXww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 The direct causes of Foot Rot in Goats are the bacteria Dichelobacter nodosus and Fusobacterium necrophorum. Dichelobacter nodosus is considered the key contagious agent for true footrot; different strains vary in how aggressive they are, with virulent strains causing deep, destructive lesions and benign strains often producing only mild interdigital dermatitis or “foot scald” under less favorable conditions. Fusobacterium necrophorum is widely present in soil, manure, and the digestive tract of ruminants, and contributes by initiating interdigital skin damage and enhancing tissue destruction with its toxins and enzymes.  
 
@@ -63,17 +47,9 @@ Foot Rot in Goats is usually spread when healthy animals share pasture, pens, or
 
 ## Clinical Signs and Symptoms of Foot Rot in Goats
 
-
-
-
-
 ![Symptoms of Foot Rot in Goats](https://images.unsplash.com/photo-1516160211234-a32007ecfc2d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb290JTIwUm90JTIwaW4lMjBHb2F0cyUyMHNpY2slMjBhbmltYWx8ZW58MHwwfHx8MTc4MTk1MjEwOXww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 Recognizing the early symptoms of Foot Rot in Goats is critical for limiting spread and improving treatment success. One of the first visible signs is lameness: affected goats may limp, spend more time lying down, or walk on their knees to avoid putting weight on painful feet. Mild cases may show only a subtle change in gait or reluctance to walk on rocky or hard ground, while severe cases can become non–weight-bearing on one or more limbs.  
 
@@ -91,17 +67,9 @@ For herd-level control and confirmation, veterinarians may collect swabs from le
 
 ## Treatment of Foot Rot in Goats
 
-
-
-
-
 ![Treatment for Foot Rot in Goats](https://images.unsplash.com/photo-1651900896669-540b33541cd5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb290JTIwUm90JTIwaW4lMjBHb2F0cyUyMHZldGVyaW5hcnl8ZW58MHwwfHx8MTc4MTk1MjEwOXww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Treatment — via Unsplash*
-
 
 Effective treatment of Foot Rot in Goats usually combines careful hoof trimming, topical therapy, systemic antibiotics when indicated, and environmental management. No single step alone is enough in most outbreaks. The goal is to remove diseased tissue, kill bacteria in and on the hoof, relieve pain, and prevent re-infection from the environment or herd mates.  
 
@@ -113,17 +81,9 @@ In more severe cases of Foot Rot in Goats, **systemic antibiotics** prescribed b
 
 ## Prevention and Control of Foot Rot in Goats
 
-
-
-
-
 ![Prevention of Foot Rot in Goats](https://images.unsplash.com/photo-1593750439808-958d28558592?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxGb290JTIwUm90JTIwaW4lMjBHb2F0cyUyMGZhcm0lMjBwcmV2ZW50aW9ufGVufDB8MHx8fDE3ODE5NTIxMDl8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 The most effective approach to Foot Rot in Goats is a strong emphasis on prevention and long-term control. Good hoof care, pasture and pen management, and biosecurity measures greatly reduce the risk of disease. Regular hoof trimming to maintain a correct shape and length helps prevent cracks, pockets, and abnormal pressure points that predispose to infection. Keeping bedding dry and clean, avoiding overcrowded muddy lots, and providing well-drained surfaces in high-traffic areas are key husbandry practices. 
 
@@ -132,8 +92,6 @@ The most effective approach to Foot Rot in Goats is a strong emphasis on prevent
 **Herd management and biosecurity** are vital. New goats entering the herd should be quarantined, have their hooves inspected and trimmed, and may be run through a disinfectant footbath before joining the main group. Infected animals should be separated from healthy ones, treated, and kept on separate, preferably dry pastures until fully recovered. Some control programs emphasize culling animals that persistently suffer from footrot or have poor hoof conformation, while selecting and breeding goats with strong, sound feet and apparent resistance to the disease.  
 
 In some regions, **vaccination** forms part of the prevention of Foot Rot in Goats. Vaccines targeting selected strains of Dichelobacter nodosus can reduce incidence and severity of disease and may support healing in infected feet when used alongside management and treatment measures. However, vaccine availability and strain coverage vary by area, and vaccines are usually not a stand-alone solution. They perform best when incorporated into a comprehensive program that includes trimming, footbaths, environmental hygiene, and strategic culling. 
-
-## Frequently Asked Questions About Foot Rot in Goats
 
 ### Q: What are the first symptoms of Foot Rot in Goats I should look for?
 
@@ -169,4 +127,4 @@ Foot Rot in Goats is a common, painful, and economically significant disease, bu
 
 Successful management combines accurate diagnosis, thorough treatment, and strong preventive strategies. Key elements include regular hoof trimming, appropriate use of topical disinfectants and footbaths, targeted systemic antibiotics when needed, strict biosecurity and quarantine of new stock, and improvements in drainage and hygiene of pens and pastures. In some herds, vaccination against Dichelobacter nodosus and structured eradication programs guided by veterinary advice can significantly reduce the long-term burden of the disease.  
 
-For farmers, students, and goat owners, understanding the causes of Foot Rot in Goats, how to treat Foot Rot in Goats effectively, and the principles behind prevention of Foot Rot in Goats provides the foundation for healthy, productive animals. By acting quickly when lameness appears and by investing in good hoof care and environmental management, it is possible to protect both animal welfare and farm profitability from this challenging but controllable condition. 
+For farmers, students, and goat owners, understanding the causes of Foot Rot in Goats, how to treat Foot Rot in Goats effectively, and the principles behind prevention of Foot Rot in Goats provides the foundation for healthy, productive animals. By acting quickly when lameness appears and by investing in good hoof care and environmental management, it is possible to protect both animal welfare and farm profitability from this challenging but controllable condition.
