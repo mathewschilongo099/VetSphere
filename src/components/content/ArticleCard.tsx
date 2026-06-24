@@ -33,7 +33,7 @@ export default function ArticleCard({ post }: ArticleCardProps) {
           </span>
           <span className="text-[11px] text-gray-400">{post.readTime}</span>
         </div>
-        <h3 className="font-bold text-gray-900 text-base mb-1.5 line-clamp-2 group-hover:text-green-600 transition-colors">
+        <h3 className="font-bold text-gray-900 visited:text-gray-900 text-base mb-1.5 line-clamp-2 group-hover:text-green-600 transition-colors">
           {post.title}
         </h3>
         <p className="text-gray-500 text-[13px] line-clamp-3 mb-3 leading-relaxed">
