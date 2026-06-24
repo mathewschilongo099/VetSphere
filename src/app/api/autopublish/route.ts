@@ -501,4 +501,36 @@ ${content}
     const token = process.env.GITHUB_TOKEN;
 
     const githubRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: `Auto-publish: ${seoTitle}`,
+          content: Buffer.from(markdown).toString('base64'),
+        }),
+      }
+    );
+
+    if (!githubRes.ok) {
+      const err = await githubRes.json();
+      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    }
+
+    if (process.env.VERCEL_DEPLOY_HOOK) {
+      try {
+        await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
+      } catch {
+        // Don't fail if deploy hook fails
+      }
+    }
+
+    return NextResponse.json({ success: true, topic, title: seoTitle });
+  } catch (error) {
+    console.error('Auto-publish failed:', error);
+    return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
+  }
+}
