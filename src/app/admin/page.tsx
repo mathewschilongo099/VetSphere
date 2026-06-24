@@ -7,7 +7,6 @@ import {
   FileText,
   Settings,
   Plus,
-  Clock,
   RefreshCw,
   Trash2,
   Search,
@@ -50,6 +49,7 @@ export default function AdminPage() {
   const [deleting, setDeleting] = useState(false);
   const [deleteMessage, setDeleteMessage] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [processingArticle, setProcessingArticle] = useState<string | null>(null);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -164,6 +164,33 @@ export default function AdminPage() {
       setMessage('❌ Publishing failed. Try again.');
     } finally {
       setPublishing(false);
+    }
+  };
+
+  // ✅ NEW: Remove FAQ from an article
+  const handleRemoveFAQ = async (fileName: string) => {
+    if (!confirm(`Remove FAQ section from "${fileName.replace('.md', '').replace(/-/g, ' ')}"?`)) return;
+    
+    setProcessingArticle(fileName);
+    setDeleteMessage('');
+
+    try {
+      const res = await fetch('/api/remove-faq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDeleteMessage(`✅ FAQ removed successfully from "${fileName}"!`);
+        loadArticles();
+      } else {
+        setDeleteMessage(`❌ Failed to remove FAQ: ${data.error}`);
+      }
+    } catch {
+      setDeleteMessage('❌ Failed to remove FAQ. Try again.');
+    } finally {
+      setProcessingArticle(null);
     }
   };
 
@@ -678,15 +705,25 @@ export default function AdminPage() {
                   {paginatedArticles.map((a) => (
                     <div
                       key={a.name}
-                      onClick={() => toggleSelect(a.name)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition ${a.selected ? 'bg-red-900/50 border border-red-500' : 'bg-gray-800 hover:bg-gray-700'}`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${a.selected ? 'bg-red-900/50 border border-red-500' : 'bg-gray-800 hover:bg-gray-700'}`}
                     >
-                      <div className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 ${a.selected ? 'bg-red-500 border-red-500' : 'border-gray-500'}`}>
+                      <div
+                        onClick={() => toggleSelect(a.name)}
+                        className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer ${a.selected ? 'bg-red-500 border-red-500' : 'border-gray-500'}`}
+                      >
                         {a.selected && <span className="text-white text-xs">✓</span>}
                       </div>
                       <span className="text-sm text-gray-200 truncate flex-1">
                         {a.name.replace('.md', '').replace(/-/g, ' ')}
                       </span>
+                      {/* ✅ NEW: Remove FAQ Button */}
+                      <button
+                        onClick={() => handleRemoveFAQ(a.name)}
+                        disabled={processingArticle === a.name}
+                        className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white px-3 py-1 rounded-xl transition"
+                      >
+                        {processingArticle === a.name ? '...' : 'Remove FAQ'}
+                      </button>
                       <Link
                         href={`/articles/${a.name.replace('.md', '')}`}
                         onClick={(e) => e.stopPropagation()}
