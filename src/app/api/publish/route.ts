@@ -33,8 +33,8 @@ async function getUnsplashImage(query: string): Promise<string> {
 
 function extractJson(text: string): string {
   return text
-    .replace(/^json\s*/i, '')
-    .replace(/^\s*/, '')
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/, '')
     .replace(/```\s*$/, '')
     .trim();
 }
@@ -50,55 +50,32 @@ async function generateWithYouCom(topic: string): Promise<string> {
       input: `You are an expert veterinary SEO writer. Write a 1500+ word SEO blog about: "${topic}"
 
 STRICT STRUCTURE:
-
-Introduction
-
-What is ${topic}?
-
-Causes of ${topic}
-
-Clinical Signs and Symptoms of ${topic}
-
-How to Diagnose ${topic}
-
-Treatment of ${topic}
-
-Prevention and Control of ${topic}
-
-Frequently Asked Questions About ${topic}
-
-When to Call a Veterinarian
-
-Conclusion
+## Introduction
+## What is ${topic}?
+## Causes of ${topic}
+## Clinical Signs and Symptoms of ${topic}
+## How to Diagnose ${topic}
+## Treatment of ${topic}
+## Prevention and Control of ${topic}
+## Frequently Asked Questions About ${topic}
+## When to Call a Veterinarian
+## Conclusion
 
 RULES:
-
-Use simple English for farmers and students
-
-Naturally include keywords related to "${topic}"
-
-Include at least 5 FAQs
-
-No citations
-
-No references section
-
-Start directly with ## Introduction`,
+- Use simple English for farmers and students
+- Naturally include keywords related to "${topic}"
+- Include at least 5 FAQs
+- No citations
+- No references section
+- Start directly with ## Introduction`,
       research_effort: 'standard',
     }),
   });
 
-  if (!res.ok) {
-    throw new Error(`you.com fallback request failed with status ${res.status}`);
-  }
-
+  if (!res.ok) throw new Error(`you.com failed with status ${res.status}`);
   const data = await res.json();
   const content = data.output?.content || '';
-
-  if (!content || content.trim().length < 200) {
-    throw new Error('you.com fallback returned empty or too-short content');
-  }
-
+  if (!content || content.trim().length < 200) throw new Error('you.com returned too-short content');
   return content;
 }
 
@@ -109,106 +86,50 @@ async function getTrendingVetTopic(): Promise<string> {
       { next: { revalidate: 0 } }
     );
     const xml = await res.text();
-
     const titles = Array.from(xml.matchAll(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/g))
       .map(m => m[1])
       .filter(t => t !== 'Google Trends');
-
     const vetTrend = titles.find(title =>
-      VETERINARY_KEYWORDS.some(keyword =>
-        title.toLowerCase().includes(keyword)
-      )
+      VETERINARY_KEYWORDS.some(keyword => title.toLowerCase().includes(keyword))
     );
-
     if (vetTrend) return vetTrend;
 
     const fallbackTopics = [
-      'Mastitis in Dairy Cows',
-      'Tick Fever in Cattle',
-      'East Coast Fever in Cattle',
-      'Blackleg Disease in Cattle',
-      'Lumpy Skin Disease in Cattle',
-      'Bovine Respiratory Disease',
-      'Ringworm in Cattle',
-      'Pneumonia in Calves',
-      'Anthrax in Livestock',
-      'Bloat in Cattle',
-      'Foot and Mouth Disease in Cattle',
-      'Milk Fever in Dairy Cows',
-      'Bovine Tuberculosis',
-      'Anaplasmosis in Cattle',
-      'Liver Fluke in Cattle',
-      'Pink Eye in Cattle',
-      'Trypanosomiasis in Cattle',
-      'Worm Infestation in Cattle',
-      'Brucellosis in Livestock',
-      'Johne\'s Disease in Cattle',
-      'Newcastle Disease in Poultry',
-      'Avian Influenza in Poultry',
-      'Coccidiosis in Poultry',
-      'Infectious Bursal Disease in Poultry',
-      'Fowl Pox in Chickens',
-      'Salmonellosis in Poultry',
-      'Marek\'s Disease in Chickens',
-      'Fowl Cholera in Poultry',
-      'Infectious Bronchitis in Chickens',
-      'Mycoplasma Infection in Poultry',
-      'Foot Rot in Goats',
-      'Peste des Petits Ruminants in Goats',
-      'Contagious Caprine Pleuropneumonia in Goats',
-      'Tetanus in Goats',
-      'Goat Pox',
-      'Caseous Lymphadenitis in Goats',
-      'Enterotoxemia in Goats',
-      'African Swine Fever',
-      'Porcine Reproductive and Respiratory Syndrome',
-      'Swine Erysipelas',
-      'Rabies Prevention in Dogs',
-      'Parvovirus in Dogs',
-      'Canine Distemper',
-      'Mange in Dogs',
-      'Heartworm Disease in Dogs',
-      'Kennel Cough in Dogs',
-      'How to Keep Your Dog Healthy',
-      'Dog Nutrition and Feeding Guide',
-      'Puppy Care and Vaccination Schedule',
-      'Feline Panleukopenia in Cats',
-      'Feline Leukemia Virus',
-      'Toxoplasmosis in Cats',
-      'How to Keep Your Cat Healthy',
-      'Cat Vaccination Schedule for Pet Owners',
-      'Mineral Nutrition for Dairy Cattle',
-      'Feeding Dairy Cows for Maximum Milk Production',
-      'Best Feeding Practices for Goats',
-      'Vitamin Deficiencies in Livestock',
-      'How to Feed Calves for Healthy Growth',
-      'Nutrition for Pregnant Cows',
-      'Poultry Feed Formulation for Farmers',
-      'Biosecurity Measures on Livestock Farms',
-      'How to Set Up a Poultry House',
-      'Record Keeping for Livestock Farmers',
-      'When to Call a Veterinarian',
-      'Water Quality and Animal Health',
-      'Vaccination Programs for Livestock Farmers',
-      'Deworming Programs for Cattle and Goats',
-      'Housing and Shelter for Livestock',
-      'How to Manage a Small Dairy Farm',
-      'Rotational Grazing for Cattle Health',
-      'Cattle Breeding and Reproduction Guide',
-      'Signs of Heat in Dairy Cows',
-      'Artificial Insemination in Cattle',
-      'Pregnancy and Calving Management in Cows',
-      'Common Reproductive Problems in Goats',
-      'Dystocia and Difficult Births in Cattle',
-      'Retained Placenta in Dairy Cows',
-      'How to Do a Body Condition Score in Cattle',
-      'Signs of Pain and Stress in Animals',
-      'Animal Welfare on the Farm',
-      'First Aid for Farm Animals',
-      'Zoonotic Diseases Farmers Should Know',
-      'Heat Stress in Livestock During Summer',
-      'How to Spot a Sick Animal Early',
-      'Importance of Clean Water for Animal Health',
+      'Mastitis in Dairy Cows', 'Tick Fever in Cattle', 'East Coast Fever in Cattle',
+      'Blackleg Disease in Cattle', 'Lumpy Skin Disease in Cattle', 'Bovine Respiratory Disease',
+      'Ringworm in Cattle', 'Pneumonia in Calves', 'Anthrax in Livestock', 'Bloat in Cattle',
+      'Foot and Mouth Disease in Cattle', 'Milk Fever in Dairy Cows', 'Bovine Tuberculosis',
+      'Anaplasmosis in Cattle', 'Liver Fluke in Cattle', 'Pink Eye in Cattle',
+      'Trypanosomiasis in Cattle', 'Worm Infestation in Cattle', 'Brucellosis in Livestock',
+      "Johne's Disease in Cattle", 'Newcastle Disease in Poultry', 'Avian Influenza in Poultry',
+      'Coccidiosis in Poultry', 'Infectious Bursal Disease in Poultry', 'Fowl Pox in Chickens',
+      'Salmonellosis in Poultry', "Marek's Disease in Chickens", 'Fowl Cholera in Poultry',
+      'Infectious Bronchitis in Chickens', 'Mycoplasma Infection in Poultry',
+      'Foot Rot in Goats', 'Peste des Petits Ruminants in Goats',
+      'Contagious Caprine Pleuropneumonia in Goats', 'Tetanus in Goats', 'Goat Pox',
+      'Caseous Lymphadenitis in Goats', 'Enterotoxemia in Goats', 'African Swine Fever',
+      'Porcine Reproductive and Respiratory Syndrome', 'Swine Erysipelas',
+      'Rabies Prevention in Dogs', 'Parvovirus in Dogs', 'Canine Distemper', 'Mange in Dogs',
+      'Heartworm Disease in Dogs', 'Kennel Cough in Dogs', 'How to Keep Your Dog Healthy',
+      'Dog Nutrition and Feeding Guide', 'Puppy Care and Vaccination Schedule',
+      'Feline Panleukopenia in Cats', 'Feline Leukemia Virus', 'Toxoplasmosis in Cats',
+      'How to Keep Your Cat Healthy', 'Cat Vaccination Schedule for Pet Owners',
+      'Mineral Nutrition for Dairy Cattle', 'Feeding Dairy Cows for Maximum Milk Production',
+      'Best Feeding Practices for Goats', 'Vitamin Deficiencies in Livestock',
+      'How to Feed Calves for Healthy Growth', 'Nutrition for Pregnant Cows',
+      'Poultry Feed Formulation for Farmers', 'Biosecurity Measures on Livestock Farms',
+      'How to Set Up a Poultry House', 'Record Keeping for Livestock Farmers',
+      'When to Call a Veterinarian', 'Water Quality and Animal Health',
+      'Vaccination Programs for Livestock Farmers', 'Deworming Programs for Cattle and Goats',
+      'Housing and Shelter for Livestock', 'How to Manage a Small Dairy Farm',
+      'Rotational Grazing for Cattle Health', 'Cattle Breeding and Reproduction Guide',
+      'Signs of Heat in Dairy Cows', 'Artificial Insemination in Cattle',
+      'Pregnancy and Calving Management in Cows', 'Common Reproductive Problems in Goats',
+      'Dystocia and Difficult Births in Cattle', 'Retained Placenta in Dairy Cows',
+      'How to Do a Body Condition Score in Cattle', 'Signs of Pain and Stress in Animals',
+      'Animal Welfare on the Farm', 'First Aid for Farm Animals',
+      'Zoonotic Diseases Farmers Should Know', 'Heat Stress in Livestock During Summer',
+      'How to Spot a Sick Animal Early', 'Importance of Clean Water for Animal Health',
     ];
 
     const existingSlugs = await getExistingSlugs();
@@ -217,7 +138,6 @@ async function getTrendingVetTopic(): Promise<string> {
     );
     const pool = unusedTopics.length > 0 ? unusedTopics : fallbackTopics;
     return pool[Math.floor(Math.random() * pool.length)];
-
   } catch {
     return 'Lumpy Skin Disease in Cattle';
   }
@@ -228,22 +148,14 @@ async function getExistingSlugs(): Promise<string[]> {
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
     const token = process.env.GITHUB_TOKEN;
-
     const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/src/content/articles`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+      { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
     );
     if (!res.ok) return [];
     const files = await res.json();
     if (!Array.isArray(files)) return [];
-    return files
-      .map((f: { name: string }) => f.name.replace(/\.md$/, ''))
-      .filter(Boolean);
+    return files.map((f: { name: string }) => f.name.replace(/\.md$/, '')).filter(Boolean);
   } catch {
     return [];
   }
@@ -263,7 +175,11 @@ const insertAfterHeading = (
   const match = text.match(headingPattern);
   if (!match) return text;
   const heading = match[0];
-  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" />\n`);
+  return text.replace(heading, `${heading}\n\n
+
+![${altText}](${imageUrl})
+
+\n`);
 };
 
 export async function GET() {
@@ -275,16 +191,9 @@ export async function GET() {
     const topicSlugPrefix = topicToSlug(topic);
     const alreadyPublished = existingSlugs.some(slug => slug.startsWith(topicSlugPrefix));
     if (alreadyPublished) {
-      return NextResponse.json({
-        success: false,
-        skipped: true,
-        reason: `Topic "${topic}" already published. Skipping.`,
-      });
+      return NextResponse.json({ success: false, skipped: true, reason: `Topic "${topic}" already published.` });
     }
 
-    // =========================
-    // GEMINI GENERATION
-    // =========================
     const apiKey = process.env.GEMINI_API_KEY;
     let content: string;
     let seo: any;
@@ -293,8 +202,7 @@ export async function GET() {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-      const seoPrompt = `
-Return ONLY valid JSON, no markdown fences.
+      const seoPrompt = `Return ONLY valid JSON, no markdown fences.
 Topic: "${topic}"
 {
   "primary_keyword": "${topic}",
@@ -308,55 +216,34 @@ Topic: "${topic}"
         const seoResult = await model.generateContent(seoPrompt);
         seo = JSON.parse(extractJson(seoResult.response.text()));
       } catch {
-        seo = {
-          primary_keyword: topic,
-          secondary_keywords: [],
-          long_tail_keywords: [],
-          search_intent: 'informational',
-          questions: []
-        };
+        seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
       }
 
-      const prompt = `
-You are an expert veterinary SEO writer.
+      const prompt = `You are an expert veterinary SEO writer.
 PRIMARY KEYWORD: ${seo.primary_keyword}
 SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
 
 Write a 1500+ word SEO blog about: "${topic}"
 
 STRICT STRUCTURE:
-
-Introduction
-
-What is ${topic}?
-
-Causes of ${topic}
-
-Clinical Signs and Symptoms of ${topic}
-
-How to Diagnose ${topic}
-
-Treatment of ${topic}
-
-Prevention and Control of ${topic}
-
-Frequently Asked Questions About ${topic}
-
-When to Call a Veterinarian
-
-Conclusion
+## Introduction
+## What is ${topic}?
+## Causes of ${topic}
+## Clinical Signs and Symptoms of ${topic}
+## How to Diagnose ${topic}
+## Treatment of ${topic}
+## Prevention and Control of ${topic}
+## Frequently Asked Questions About ${topic}
+## When to Call a Veterinarian
+## Conclusion
 
 RULES:
-
-Simple English for farmers and students
-
-Include keywords naturally
-
-Include at least 5 FAQs
-
-No citations
-
-No references section`;
+- Simple English for farmers and students
+- Include keywords naturally
+- Include at least 5 FAQs
+- No citations
+- No references section
+- Start directly with ## Introduction`;
 
       try {
         const result = await model.generateContent(prompt);
@@ -367,41 +254,17 @@ No references section`;
         content = await generateWithYouCom(topic);
       }
     } else {
-      seo = {
-        primary_keyword: topic,
-        secondary_keywords: [],
-        long_tail_keywords: [],
-        search_intent: 'informational',
-        questions: []
-      };
+      seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
       content = await generateWithYouCom(topic);
     }
 
-    // =========================
-    // CLEAN TEXT
-    // =========================
-    content = content.replace(/[#*!`[\]]/g, '');
-    content = content.replace(/<[^>]*>/g, '');
+    // Remove only citation numbers — keep all markdown formatting intact
+    content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
+    content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
+    // Remove any H1 title at top to avoid duplicate
+    content = content.replace(/^\s*#\s+.+\n+/, '');
 
-    // =========================
-    // REMOVE UNWANTED IMAGE AND CAPTION AFTER INTRODUCTION
-    // =========================
-    // This removes: Photo: ... — via Unsplash and the image markdown above it
-    content = content.replace(
-      /(?:^|\n)(!\[[^\]]*\]\([^)]*\)\s*\n*Photo:[^\n]*via Unsplash[^\n]*\n+)/gi,
-      '\n'
-    );
-    
-    // Also remove any standalone Photo: lines with image references
-    content = content.replace(
-      /(?:^|\n)Photo:[^\n]*via Unsplash[^\n]*\n+/gi,
-      '\n'
-    );
-
-    // =========================
-    // SEO DATA
-    // =========================
-    const plainText = content.replace(/[#*!`[\]]/g, '').trim();
+    const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
       const clean = text.replace(/\s+/g, ' ').trim();
@@ -417,27 +280,22 @@ No references section`;
     const tags = [
       topic.toLowerCase(),
       ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
-      'animal health',
-      'veterinary',
+      'animal health', 'veterinary',
     ].slice(0, 6);
 
-    // =========================
-    // IMAGES
-    // =========================
+    // Hero image shown in page template — do NOT inject at Introduction
     const heroImage = await getUnsplashImage(topic + ' livestock farm');
     const causesImage = await getUnsplashImage(topic + ' disease');
     const symptomsImage = await getUnsplashImage('sick animal ' + topic);
     const treatmentImage = await getUnsplashImage('veterinarian treatment');
     const preventionImage = await getUnsplashImage('farm biosecurity');
 
-    content = insertAfterHeading(content, new RegExp(`^##\\s+Causes? of ${topic}\\.?`, 'im'), causesImage, `Causes of ${topic}`);
-    content = insertAfterHeading(content, new RegExp(`^##\\s+Clinical Signs? and Symptoms? of ${topic}\\.?`, 'im'), symptomsImage, `Symptoms of ${topic}`);
-    content = insertAfterHeading(content, new RegExp(`^##\\s+Treatment of ${topic}\\.?`, 'im'), treatmentImage, `Treatment of ${topic}`);
-    content = insertAfterHeading(content, new RegExp(`^##\\s+Prevention and? Control? of ${topic}\\.?`, 'im'), preventionImage, `Prevention of ${topic}`);
+    // ✅ No image at Introduction to avoid duplicate with hero
+    content = insertAfterHeading(content, /^##\s+Causes of.+$/im, causesImage, `Causes of ${topic}`);
+    content = insertAfterHeading(content, /^##\s+Clinical Signs.+$/im, symptomsImage, `Symptoms of ${topic}`);
+    content = insertAfterHeading(content, /^##\s+Treatment of.+$/im, treatmentImage, `Treatment of ${topic}`);
+    content = insertAfterHeading(content, /^##\s+Prevention.+$/im, preventionImage, `Prevention of ${topic}`);
 
-    // =========================
-    // PUBLISH TO GITHUB
-    // =========================
     const slug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const date = new Date().toISOString().split('T')[0];
 
@@ -466,10 +324,7 @@ ${content}
       `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
       {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: `Auto-publish: ${seoTitle}`,
           content: Buffer.from(markdown).toString('base64'),
@@ -482,7 +337,6 @@ ${content}
       return NextResponse.json({ success: false, error: err.message }, { status: 500 });
     }
 
-    // Trigger Vercel redeploy
     if (process.env.VERCEL_DEPLOY_HOOK) {
       try {
         await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
@@ -491,12 +345,7 @@ ${content}
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      topic,
-      title: seoTitle
-    });
-
+    return NextResponse.json({ success: true, topic, title: seoTitle });
   } catch (error) {
     console.error('Auto-publish failed:', error);
     return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
