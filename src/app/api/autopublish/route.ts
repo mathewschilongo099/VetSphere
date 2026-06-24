@@ -76,7 +76,6 @@ Start with a strong introductory paragraph (do NOT use a heading for the introdu
 ## How to Diagnose ${topic}
 ## Treatment of ${topic}
 ## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
 ## When to Call a Veterinarian
 ## Conclusion
 
@@ -89,12 +88,12 @@ STYLE RULES:
 - Keep paragraphs short (2-3 sentences)
 - Use simple English for farmers and students
 - Naturally include keywords
-- Include at least 5 FAQs
 - No citations
 - No references section
 - Write in a clear, helpful tone
 - Do NOT include a "What is..." heading - the introduction paragraph already covers this
-- Do NOT use horizontal lines (---) anywhere in the article`,
+- Do NOT use horizontal lines (---) anywhere in the article
+- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content`,
       research_effort: 'standard',
     }),
   });
@@ -307,10 +306,8 @@ async function findRelatedArticles(topic: string, currentSlug: string): Promise<
   try {
     const existingSlugs = await getExistingSlugs();
     
-    // Get keywords from the topic
     const keywords = topic.toLowerCase().split(' ');
     
-    // Score each article based on keyword matches
     const scored = existingSlugs.map(slug => {
       if (slug === currentSlug) return { slug, score: 0 };
       
@@ -324,11 +321,9 @@ async function findRelatedArticles(topic: string, currentSlug: string): Promise<
       return { slug, score };
     });
     
-    // Sort by score (highest first) and take top 3
     const sorted = scored.sort((a, b) => b.score - a.score);
     const top = sorted.filter(s => s.score > 0).slice(0, 3);
     
-    // If no matches, take 3 random articles
     if (top.length === 0) {
       const available = existingSlugs.filter(s => s !== currentSlug);
       const shuffled = available.sort(() => 0.5 - Math.random());
@@ -356,6 +351,17 @@ const insertAfterHeading = (
 };
 
 function cleanContent(content: string): string {
+  // Remove any FAQ section that might have been generated
+  content = content.replace(
+    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
+    ''
+  );
+  content = content.replace(
+    /##\s*Frequently Asked Questions[\s\S]*?(?=##|$)/gi,
+    ''
+  );
+  
+  // Remove image-related content
   content = content.replace(
     /##\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
     ''
@@ -473,7 +479,6 @@ Start with a strong introductory paragraph (do NOT use a heading for the introdu
 ## How to Diagnose ${topic}
 ## Treatment of ${topic}
 ## Prevention and Control of ${topic}
-## Frequently Asked Questions About ${topic}
 ## When to Call a Veterinarian
 ## Conclusion
 
@@ -486,12 +491,12 @@ STYLE RULES:
 - Keep paragraphs short (2-3 sentences)
 - Simple English for farmers and students
 - Include keywords naturally
-- Include at least 5 FAQs
 - No citations
 - No references section
 - NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS, NO PHOTO CREDITS
 - NO "Image 1:", "Image 2:", etc.
 - NO "Photo: ..." anywhere in the article
+- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content
 - Write only the article content with the specified headings`;
 
       try {
@@ -507,13 +512,12 @@ STYLE RULES:
       content = await generateWithYouCom(topic);
     }
 
+    // Clean content - remove any FAQ sections
     content = cleanContent(content);
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    // =========================
-    // ADD RELATED ARTICLES
-    // =========================
+    // Add related articles
     const relatedSlugs = await findRelatedArticles(topic, slug);
     let relatedSection = '';
     if (relatedSlugs.length > 0) {
@@ -524,7 +528,6 @@ STYLE RULES:
       }
     }
 
-    // Insert related section before Conclusion
     const conclusionIndex = content.indexOf('## Conclusion');
     if (conclusionIndex !== -1) {
       content = content.substring(0, conclusionIndex) + relatedSection + '\n\n' + content.substring(conclusionIndex);
