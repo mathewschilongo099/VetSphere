@@ -135,22 +135,6 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           "
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
-
-        {/* Tags */}
-        {post.tags && post.tags.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              {post.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="bg-gray-100 text-gray-600 text-[10px] sm:text-xs px-2.5 py-1 rounded-full hover:bg-gray-200 transition"
-                >
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
       </article>
 
       {/* Navigation & Related Posts */}
