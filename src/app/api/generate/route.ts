@@ -117,7 +117,6 @@ function buildFallbackTags(topic: string): string[] {
     .split(' ')
     .filter((w) => w.length > 3 && !['your', 'this', 'that', 'might', 'could', 'should'].includes(w));
 
-  // FIX: Use Array.from instead of spread on Set to avoid downlevelIteration error
   return Array.from(new Set([topic.toLowerCase(), ...cleaned, 'animal health', 'veterinary'])).slice(0, 6);
 }
 
@@ -251,6 +250,9 @@ RULES:
     // =========================
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
+    
+    // Remove any duplicate title that might be at the start (first Markdown heading)
+    content = content.replace(/^# .+?\n/, '');
 
     // =========================
     // SEO DATA
@@ -266,9 +268,13 @@ RULES:
     };
 
     const excerpt = buildExcerpt(plainText, 155);
-    const seoTitle =
-      topic.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ') +
-      ': Causes, Symptoms, Treatment & Prevention';
+    
+    // Capitalize each word in the title properly
+    const seoTitle = topic
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ') + ': Causes, Symptoms, Treatment & Prevention';
+    
     const metaDescription = buildExcerpt(plainText, 160);
 
     // Use Gemini's real topical tags if it returned usable ones, otherwise
