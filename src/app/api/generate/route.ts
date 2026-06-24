@@ -108,6 +108,19 @@ RULES:
   return content;
 }
 
+// Fallback only used if Gemini's SEO step fails to return usable tags —
+// produces something better than raw word-splitting, though real topical
+// tags from Gemini are always preferred when available.
+function buildFallbackTags(topic: string): string[] {
+  const cleaned = topic
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .split(' ')
+    .filter((w) => w.length > 3 && !['your', 'this', 'that', 'might', 'could', 'should'].includes(w));
+
+  return [...new Set([topic.toLowerCase(), ...cleaned, 'animal health', 'veterinary'])].slice(0, 6);
+}
+
 export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic');
 
@@ -132,6 +145,9 @@ export async function GET(request: NextRequest) {
 
     // =========================
     // SEO KEYWORD ENGINE
+    // Now also generates real topical tags, instead of relying on
+    // mechanically splitting the topic string into word fragments
+    // (which produced junk tags like "#your", "#might", "#stomach").
     // =========================
     const seoPrompt = `
 Return ONLY valid JSON, with no markdown code fences and no extra commentary.
@@ -151,8 +167,11 @@ Topic: "${topic}"
     "What causes ${topic}?",
     "How is ${topic} treated?",
     "Can ${topic} be prevented?"
-  ]
+  ],
+  "tags": ["short topical tag 1", "short topical tag 2", "short topical tag 3", "short topical tag 4", "short topical tag 5"]
 }
+
+For "tags": provide 5 short (1-3 word) topical category tags that describe what this article is ABOUT — for example the affected animal, body system, or disease type. Do NOT just chop up the topic phrase into individual words. Good examples: "cat health", "gut microbiome", "digestive issues", "feline care", "pet nutrition". Bad examples (do not do this): "your", "might", "stomach", "is".
 `;
 
     let seo;
@@ -169,6 +188,7 @@ Topic: "${topic}"
         long_tail_keywords: [],
         search_intent: 'informational',
         questions: [],
+        tags: [],
       };
     }
 
@@ -252,13 +272,13 @@ RULES:
       topic.charAt(0).toUpperCase() + topic.slice(1) +
       ': Causes, Symptoms, Treatment and Prevention';
     const metaDescription = buildExcerpt(plainText, 160);
-    const tags = [
-      topic.toLowerCase(),
-      ...topic.toLowerCase().split(' ').filter((w: string) => w.length > 3),
-      'animal health',
-      'veterinary',
-      'livestock',
-    ].slice(0, 6);
+
+    // Use Gemini's real topical tags if it returned usable ones, otherwise
+    // fall back to a cleaner word-filter (still better than the old logic).
+    const geminiTags = Array.isArray(seo.tags) ? seo.tags.filter((t: unknown) => typeof t === 'string' && t.trim().length > 0) : [];
+    const tags = geminiTags.length >= 3
+      ? geminiTags.slice(0, 6)
+      : buildFallbackTags(topic);
 
     // =========================
     // IMAGES
