@@ -95,6 +95,7 @@ export default function AdminPage() {
     }
   };
 
+  // ✅ Updated: Fixed heroImage handling
   const handleGenerateFromUrl = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sourceUrl.trim()) return;
@@ -123,6 +124,7 @@ export default function AdminPage() {
       } else {
         setArticle(data.content || '');
         setTitle(data.title || data.sourceTitle || '');
+        setHeroImage(data.heroImage || ''); // ✅ Fixed: Now properly sets hero image
         setSourceTitle(data.sourceTitle || '');
         setMessage('✅ Article generated from URL! Review and edit below.');
       }
