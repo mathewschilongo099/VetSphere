@@ -14,13 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
 ![Mycoplasma Infection in Poultry](https://images.unsplash.com/photo-1776101066456-8c688453ece7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHw0fHxNeWNvcGxhc21hJTIwSW5mZWN0aW9uJTIwaW4lMjBQb3VsdHJ5JTIwbGl2ZXN0b2NrJTIwZmFybXxlbnwwfDB8fHwxNzgyMjA1OTg2fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Mycoplasma Infection in Poultry — via Unsplash*
-
 
 Mycoplasma Infection in Poultry is one of the most common and costly infectious problems seen in chickens, turkeys and other farmed birds worldwide. It affects mainly the respiratory system and joints, causing chronic respiratory disease, lameness, reduced egg production and higher mortality, especially when other infections are present.  For small‑scale keepers and commercial farmers alike, understanding how to prevent, recognize and manage mycoplasma disease in poultry is essential to protect flock health and farm profits.
 
@@ -30,13 +26,9 @@ This practical veterinary guide explains what mycoplasma bacteria in chickens ar
 
 ## What is Mycoplasma Infection in Poultry?
 
-
-
 ![Mycoplasma Infection in Poultry](https://images.unsplash.com/photo-1621270749227-8037bb2a9b3a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxMnx8TXljb3BsYXNtYSUyMEluZmVjdGlvbiUyMGluJTIwUG91bHRyeSUyMGFuaW1hbHxlbnwwfDB8fHwxNzgyMjA1OTg2fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Mycoplasma Infection in Poultry — via Unsplash*
-
 
 Mycoplasmas are a special group of bacteria that lack a normal cell wall, making them very small, fragile in the environment, and naturally resistant to some common antibiotics such as penicillins.  In poultry, more than 20 species of mycoplasma have been described, but only a few cause significant disease: mainly Mycoplasma gallisepticum (MG), Mycoplasma synoviae (MS), M. meleagridis and M. iowae.  Together, these pathogens can severely impact broiler, breeder and layer production.
 
@@ -84,13 +76,9 @@ Control programs focus heavily on preventing introduction into breeder flocks an
 
 ## Practical Guide to Mycoplasma Infection in Poultry
 
-
-
 ![Mycoplasma Infection in Poultry guide](https://images.unsplash.com/photo-1657522936935-58f0c8464bfa?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHw0NHx8dmV0ZXJpbmFyaWFuJTIwZmFybWVyJTIwdHJlYXRtZW50fGVufDB8MHx8fDE3ODIyMDU5ODd8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Mycoplasma Infection in Poultry — via Unsplash*
-
 
 This section provides a step‑by‑step, practical guide to Mycoplasma Infection in Poultry, covering causes, clinical recognition, diagnosis, treatment and prevention.
 
@@ -173,13 +161,9 @@ For small backyard flocks, simple measures such as quarantining all new birds fo
 
 ## Common Mistakes to Avoid
 
-
-
 ![Common mistakes](https://images.unsplash.com/photo-1558603374-cf93af771676?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHw3fHxmYXJtJTIwYW5pbWFsJTIwaGVhbHRoeXxlbnwwfDB8fHwxNzgyMjA1OTg2fDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
 *Photo: Farm management — via Unsplash*
-
 
 Despite good intentions, many keepers make errors that allow mycoplasma infections in chickens to persist or spread.
 
@@ -190,8 +174,6 @@ Another frequent problem is **buying or mixing birds from different, unknown sou
 A further error is **assuming that recovery means the flock is now free of mycoplasma**. In reality, treated or clinically recovered birds often remain carriers and can infect new arrivals or younger stock.  Similarly, skipping regular testing in breeder or layer flocks can allow low‑level infections to persist unnoticed, leading to infected chicks and widespread distribution of mycoplasma‑positive birds. 
 
 ---
-
-## Frequently Asked Questions About Mycoplasma Infection in Poultry
 
 ### Q: What is mycoplasma infection in chickens?
 
@@ -233,4 +215,4 @@ For commercial farms, veterinarians play a key role in designing monitoring prog
 
 Mycoplasma Infection in Poultry is a chronic, contagious disease complex that can severely affect chickens, turkeys and other birds, causing respiratory disease, joint problems, production losses and increased mortality. The main pathogens, Mycoplasma gallisepticum and Mycoplasma synoviae, are widespread and difficult to eradicate because they can be transmitted through eggs and persist in carrier birds even after treatment.  
 
-Effective control depends on a combination of strategies: starting with Mycoplasma‑free breeding stock, applying strict biosecurity, using regular serological and molecular monitoring, considering vaccination where appropriate, and using antibiotics judiciously under veterinary guidance.  Farmers, students and pet owners who follow a structured guide to Mycoplasma Infection in Poultry—focusing on prevention, early diagnosis and integrated control—can significantly reduce the impact of mycoplasma infections in chickens and safeguard the health and productivity of their flocks. 
+Effective control depends on a combination of strategies: starting with Mycoplasma‑free breeding stock, applying strict biosecurity, using regular serological and molecular monitoring, considering vaccination where appropriate, and using antibiotics judiciously under veterinary guidance.  Farmers, students and pet owners who follow a structured guide to Mycoplasma Infection in Poultry—focusing on prevention, early diagnosis and integrated control—can significantly reduce the impact of mycoplasma infections in chickens and safeguard the health and productivity of their flocks.
