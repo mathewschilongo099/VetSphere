@@ -32,14 +32,11 @@ const FALLBACK_IMAGES = [
   'https://images.unsplash.com/photo-1594144849889-44d9d9443057?w=800',
 ];
 
-// Check if topic is veterinary-related
 function isVeterinaryTopic(topic: string): boolean {
   const lowerTopic = topic.toLowerCase();
-  // If it contains human medical keywords, it's likely NOT veterinary
   if (HUMAN_MEDICAL_KEYWORDS.some(kw => lowerTopic.includes(kw))) {
     return false;
   }
-  // Check if it contains veterinary keywords
   return VETERINARY_KEYWORDS.some(kw => lowerTopic.includes(kw));
 }
 
@@ -114,7 +111,7 @@ STYLE RULES:
 - Write in a clear, helpful tone
 - Do NOT include a "What is..." heading - the introduction paragraph already covers this
 - Do NOT use horizontal lines (---) anywhere in the article
-- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content`,
+- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content. SKIP IT COMPLETELY.`,
       research_effort: 'standard',
     }),
   });
@@ -367,15 +364,52 @@ const insertAfterHeading = (
   return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
 };
 
+// =========================
+// AGGRESSIVE FAQ REMOVAL
+// =========================
+function removeFAQSection(content: string): string {
+  // Remove any heading with "Frequently Asked Questions"
+  content = content.replace(
+    /##\s*Frequently Asked Questions About.*?(\n|$)/gi,
+    ''
+  );
+  content = content.replace(
+    /##\s*Frequently Asked Questions.*?(\n|$)/gi,
+    ''
+  );
+  
+  // Remove "Frequently Asked Questions" as a standalone line
+  content = content.replace(
+    /^\s*Frequently Asked Questions\s*$/gim,
+    ''
+  );
+  
+  // Remove any FAQ content (numbered questions)
+  content = content.replace(
+    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|##|$)/g,
+    ''
+  );
+  
+  // Remove "Q:" and "A:" patterns
+  content = content.replace(
+    /Q:.*\nA:.*/gm,
+    ''
+  );
+  
+  // Remove "Here are some common questions" lines
+  content = content.replace(
+    /^Here are some common questions.*$/gim,
+    ''
+  );
+  
+  return content;
+}
+
 function cleanContent(content: string): string {
-  content = content.replace(
-    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
-    ''
-  );
-  content = content.replace(
-    /##\s*Frequently Asked Questions[\s\S]*?(?=##|$)/gi,
-    ''
-  );
+  // First remove FAQ sections
+  content = removeFAQSection(content);
+  
+  // Remove image-related content
   content = content.replace(
     /##\s+Image\s+\d+[^\n]*\n+(?:-\s+\*\*[^*]+\*\*:[^\n]*\n+)*/gi,
     ''
@@ -424,8 +458,11 @@ function cleanContent(content: string): string {
     /!\[[^\]]*\]\([^)]*\)\s*"\s*[^"]*\s*"\s*\n*/g,
     ''
   );
+  
+  // Remove extra blank lines
   content = content.replace(/\n{3,}/g, '\n\n');
   content = content.trim();
+  
   return content;
 }
 
@@ -510,7 +547,7 @@ STYLE RULES:
 - NO IMAGES, NO IMAGE DESCRIPTIONS, NO CAPTIONS, NO PHOTO CREDITS
 - NO "Image 1:", "Image 2:", etc.
 - NO "Photo: ..." anywhere in the article
-- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content
+- IMPORTANT: Do NOT include a "Frequently Asked Questions" section in the article content. SKIP IT COMPLETELY.
 - Write only the article content with the specified headings`;
 
       try {
@@ -526,10 +563,16 @@ STYLE RULES:
       content = await generateWithYouCom(topic);
     }
 
+    // =========================
+    // CLEAN CONTENT - Remove FAQ sections
+    // =========================
     content = cleanContent(content);
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
+    // =========================
+    // ADD RELATED ARTICLES
+    // =========================
     const relatedSlugs = await findRelatedArticles(topic, slug);
     let relatedSection = '';
     if (relatedSlugs.length > 0) {
@@ -547,6 +590,9 @@ STYLE RULES:
       content = content + relatedSection;
     }
 
+    // =========================
+    // SEO DATA
+    // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
@@ -568,7 +614,7 @@ STYLE RULES:
     ].slice(0, 6);
 
     // =========================
-    // IMAGES - Only fetch for veterinary topics
+    // IMAGES - Only for veterinary topics
     // =========================
     const isVet = isVeterinaryTopic(topic);
     let heroImage = '';
