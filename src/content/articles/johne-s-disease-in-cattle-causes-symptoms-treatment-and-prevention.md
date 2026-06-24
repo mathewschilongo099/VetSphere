@@ -14,17 +14,9 @@ featured: false
 
 ## Introduction
 
-
-
-
-
 ![Johne's Disease in Cattle](https://images.unsplash.com/photo-1571846599782-8164c94f5892?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxKb2huZSUyN3MlMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBhbmltYWx8ZW58MHwwfHx8MTc4MTk1Njg5Mnww&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Johne's Disease in Cattle — via Unsplash*
-
 
 Johne's Disease in Cattle is a chronic, debilitating intestinal infection that quietly erodes herd health, milk yield, fertility, and farm profits long before obvious sick cows are seen.  Because the disease progresses slowly and many infected animals look normal, it is often called an “iceberg disease”: the few cows with diarrhea and severe weight loss are just the visible tip of a much larger problem in the herd.  Understanding the causes, symptoms, diagnosis, treatment options, and prevention of Johne's Disease in Cattle is essential for farmers, students, and advisors who want to protect herd productivity and animal welfare.
 
@@ -38,17 +30,9 @@ From a herd perspective, Johne's Disease in Cattle causes more than just obvious
 
 ## Causes of Johne's Disease in Cattle
 
-
-
-
-
 ![Causes of Johne's Disease in Cattle](https://images.unsplash.com/photo-1604578049287-62f9c9d7d7a1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxKb2huZSUyN3MlMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBkaXNlYXNlfGVufDB8MHx8fDE3ODE5NTY4OTJ8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Causes — via Unsplash*
-
 
 The direct cause of Johne’s Disease in Cattle is infection with Mycobacterium avium subspecies paratuberculosis (MAP).  The primary route of infection is fecal–oral: calves or young stock ingest MAP when they consume feed, water, colostrum, or milk contaminated with manure from infected animals.  Because MAP is shed in the feces of infected cattle, any practice that allows manure to contaminate calf housing, feed troughs, waterers, or pasture increases the risk of transmission.
 
@@ -58,17 +42,9 @@ Age at exposure is critical. Calves are most susceptible during the first weeks 
 
 ## Clinical Signs and Symptoms of Johne's Disease in Cattle
 
-
-
-
-
 ![Symptoms of Johne's Disease in Cattle](https://images.unsplash.com/photo-1571846599782-8164c94f5892?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxKb2huZSUyN3MlMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBzaWNrJTIwYW5pbWFsfGVufDB8MHx8fDE3ODE5NTY4OTN8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Clinical Signs — via Unsplash*
-
 
 The symptoms of Johne's Disease in Cattle typically appear in adult animals between 2 and 8 years of age, even though infection usually took place when they were calves.  This long incubation period explains why farmers may not link current clinical cases to management practices that occurred years earlier. Early in the disease, cows may show only vague signs such as reduced milk yield, poorer body condition, and increased susceptibility to other illnesses.  
 
@@ -105,17 +81,9 @@ Because each test has limitations, veterinarians often recommend regular, repeat
 
 ## Treatment of Johne's Disease in Cattle
 
-
-
-
-
 ![Treatment for Johne's Disease in Cattle](https://images.unsplash.com/photo-1571846599782-8164c94f5892?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxKb2huZSUyN3MlMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjB2ZXRlcmluYXJ5fGVufDB8MHx8fDE3ODE5NTY4OTN8MA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Treatment — via Unsplash*
-
 
 When farmers ask how to treat Johne's Disease in Cattle, it is important to emphasize that Johne’s is considered an incurable disease in cattle under field conditions.  There is currently no practical, approved treatment that reliably eliminates MAP infection or reverses the severe intestinal damage in affected animals.
 
@@ -127,17 +95,9 @@ Some countries have or have tested vaccines for Johne’s Disease in Cattle, whi
 
 ## Prevention and Control of Johne's Disease in Cattle
 
-
-
-
-
 ![Prevention of Johne's Disease in Cattle](https://images.unsplash.com/photo-1596733430284-f7437764b1a9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w5ODE1NjV8MHwxfHNlYXJjaHwxfHxKb2huZSUyN3MlMjBEaXNlYXNlJTIwaW4lMjBDYXR0bGUlMjBmYXJtJTIwcHJldmVudGlvbnxlbnwwfDB8fHwxNzgxOTU2ODkyfDA&ixlib=rb-4.1.0&q=80&w=1080)
 
-
-
-
 *Photo: Prevention — via Unsplash*
-
 
 Because cure is not realistic, the prevention and control of Johne's Disease in Cattle rely on two central principles:
 
@@ -159,8 +119,6 @@ In already infected herds, the goal is to reduce spread and gradually lower prev
 - Breeding decisions: Do not keep daughters of known Johne’s-positive cows as replacements, as they are at higher risk of infection. Their calves can often be finished for beef if they remain clinically normal up to slaughter age.  
 
 Johne’s control is a long-term project, usually taking several years of consistent management and testing to see marked reductions in prevalence.  Working closely with your veterinarian and, where available, national or regional Johne’s control schemes will help tailor a plan that is practical for your particular farming system and risk level.
-
-## Frequently Asked Questions About Johne's Disease in Cattle
 
 ### Q: What is Johne’s Disease in Cattle and why is it important?
 
@@ -203,4 +161,4 @@ Veterinary input is vital because diagnosing and controlling Johne’s involves 
 
 Johne's Disease in Cattle is a chronic, contagious intestinal infection caused by Mycobacterium avium subspecies paratuberculosis that undermines herd health, productivity, and profitability worldwide.  The disease is characterised by slow progression, long incubation periods, and a large proportion of subclinical carriers, making it an “iceberg disease” that is often far more widespread than the few obvious clinical cases suggest.  
 
-Because there is no reliable cure, control depends on understanding the causes of Johne's Disease in Cattle, recognising the symptoms of Johne's Disease in Cattle, using appropriate diagnostic tests, and implementing strict prevention of Johne's Disease in Cattle through calf protection, testing, culling, and biosecurity.  Farmers who work closely with their veterinarians and follow structured Johne’s control programs can significantly reduce infection levels over time, protect animal welfare, and improve long-term herd performance. 
+Because there is no reliable cure, control depends on understanding the causes of Johne's Disease in Cattle, recognising the symptoms of Johne's Disease in Cattle, using appropriate diagnostic tests, and implementing strict prevention of Johne's Disease in Cattle through calf protection, testing, culling, and biosecurity.  Farmers who work closely with their veterinarians and follow structured Johne’s control programs can significantly reduce infection levels over time, protect animal welfare, and improve long-term herd performance.
