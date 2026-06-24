@@ -167,7 +167,7 @@ export default function AdminPage() {
     }
   };
 
-  // ✅ NEW: Remove FAQ from an article
+  // ✅ Remove FAQ from an article
   const handleRemoveFAQ = async (fileName: string) => {
     if (!confirm(`Remove FAQ section from "${fileName.replace('.md', '').replace(/-/g, ' ')}"?`)) return;
     
@@ -182,7 +182,7 @@ export default function AdminPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setDeleteMessage(`✅ FAQ removed successfully from "${fileName}"!`);
+        setDeleteMessage(`✅ FAQ removed successfully!`);
         loadArticles();
       } else {
         setDeleteMessage(`❌ Failed to remove FAQ: ${data.error}`);
@@ -716,11 +716,11 @@ export default function AdminPage() {
                       <span className="text-sm text-gray-200 truncate flex-1">
                         {a.name.replace('.md', '').replace(/-/g, ' ')}
                       </span>
-                      {/* ✅ NEW: Remove FAQ Button */}
+                      {/* ✅ Remove FAQ Button */}
                       <button
                         onClick={() => handleRemoveFAQ(a.name)}
                         disabled={processingArticle === a.name}
-                        className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white px-3 py-1 rounded-xl transition"
+                        className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:opacity-50 text-white px-3 py-1 rounded-xl transition whitespace-nowrap"
                       >
                         {processingArticle === a.name ? '...' : 'Remove FAQ'}
                       </button>
