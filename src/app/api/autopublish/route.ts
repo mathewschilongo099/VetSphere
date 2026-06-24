@@ -3,9 +3,6 @@ export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// =========================
-// EXPANDED VETERINARY KEYWORDS
-// =========================
 const VETERINARY_KEYWORDS = [
   'cattle', 'cow', 'dairy', 'livestock', 'poultry', 'chicken', 'goat',
   'sheep', 'pig', 'swine', 'dog', 'cat', 'pet', 'animal', 'veterinary',
@@ -94,14 +91,8 @@ RULES:
   return content;
 }
 
-// =========================
-// UPDATED: getTrendingVetTopic() with GNews API
-// =========================
 async function getTrendingVetTopic(): Promise<string> {
   try {
-    // =========================
-    // PRIMARY: GNews API (Global)
-    // =========================
     const gnewsKey = process.env.GNEWS_API_KEY;
     
     if (gnewsKey) {
@@ -117,7 +108,6 @@ async function getTrendingVetTopic(): Promise<string> {
         console.log(`✅ GNews found ${gnewsData.articles?.length || 0} articles`);
         
         if (gnewsData.articles && gnewsData.articles.length > 0) {
-          // Try to find veterinary-specific articles first
           const vetArticles = gnewsData.articles.filter((article: any) =>
             VETERINARY_KEYWORDS.some(keyword =>
               (article.title + ' ' + (article.description || '')).toLowerCase().includes(keyword)
@@ -138,9 +128,6 @@ async function getTrendingVetTopic(): Promise<string> {
       }
     }
 
-    // =========================
-    // SECONDARY: Google News RSS (Global)
-    // =========================
     console.log('📡 Fetching from Google News RSS...');
     
     const feedUrl = 'https://news.google.com/rss/search?q=veterinary+OR+animal+health+OR+livestock+disease&hl=en-US&gl=US&ceid=US:en';
@@ -160,9 +147,6 @@ async function getTrendingVetTopic(): Promise<string> {
       }
     }
 
-    // =========================
-    // FALLBACK: Use fallback topic
-    // =========================
     console.log('📚 No trending news found, using fallback topic list');
     return getFallbackTopic();
     
@@ -364,7 +348,6 @@ function cleanContent(content: string): string {
 }
 
 export async function GET(request: NextRequest) {
-  // Verify CRON_SECRET
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
   
@@ -388,16 +371,14 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // =========================
-    // GEMINI GENERATION
-    // =========================
     const apiKey = process.env.GEMINI_API_KEY;
     let content: string;
     let seo: any;
 
     if (apiKey) {
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      // ✅ Updated to Gemini 2.5 Flash
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const seoPrompt = `
 Return ONLY valid JSON, no markdown fences.
@@ -460,16 +441,10 @@ RULES:
       content = await generateWithYouCom(topic);
     }
 
-    // =========================
-    // CLEAN TEXT
-    // =========================
     content = cleanContent(content);
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    // =========================
-    // SEO DATA
-    // =========================
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
     const buildExcerpt = (text: string, maxLength: number): string => {
@@ -490,9 +465,6 @@ RULES:
       'veterinary',
     ].slice(0, 6);
 
-    // =========================
-    // IMAGES
-    // =========================
     const heroImage = await getUnsplashImage(topic + ' livestock farm');
     const causesImage = await getUnsplashImage(topic + ' disease');
     const symptomsImage = await getUnsplashImage('sick animal ' + topic);
@@ -504,9 +476,6 @@ RULES:
     content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
 
-    // =========================
-    // PUBLISH TO GITHUB
-    // =========================
     const slug = seoTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const date = new Date().toISOString().split('T')[0];
 
@@ -532,37 +501,4 @@ ${content}
     const token = process.env.GITHUB_TOKEN;
 
     const githubRes = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: `Auto-publish: ${seoTitle}`,
-          content: Buffer.from(markdown).toString('base64'),
-        }),
-      }
-    );
-
-    if (!githubRes.ok) {
-      const err = await githubRes.json();
-      return NextResponse.json({ success: false, error: err.message }, { status: 500 });
-    }
-
-    // Trigger Vercel redeploy
-    if (process.env.VERCEL_DEPLOY_HOOK) {
-      try {
-        await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
-      } catch {
-        // Don't fail if deploy hook fails
-      }
-    }
-
-    return NextResponse.json({ success: true, topic, title: seoTitle });
-  } catch (error) {
-    console.error('Auto-publish failed:', error);
-    return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
-  }
-}
+      `https://api.github.com/repos/${owner}/${repo}/contents/${path
