@@ -69,7 +69,7 @@ ${cleanedContent}
       return NextResponse.json({
         success: false,
         skipped: true,
-        reason: `An article already exists at "${path}". Skipping to avoid overwriting.`,
+        reason: `An article already exists at "${path}". Please use a different title.`,
       });
     }
 
@@ -103,4 +103,8 @@ ${cleanedContent}
   } catch (error) {
     console.error('Publish route failed:', error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error
+      { success: false, error: error instanceof Error ? error.message : 'Publish failed' },
+      { status: 500 }
+    );
+  }
+}
