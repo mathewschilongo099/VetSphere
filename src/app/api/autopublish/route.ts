@@ -12,16 +12,16 @@ const VETERINARY_KEYWORDS = [
   'herd', 'flock', 'outbreak', 'epidemic', 'biosecurity',
   'carcass', 'slaughter', 'abattoir', 'meat', 'milk', 'egg',
   'drought', 'flood', 'fodder', 'pasture', 'grazing', 'supplement',
-  'calving', 'lambing', 'birthing', 'breeding', 'gestation',
+  'calving', 'lambing', 'birthing', 'gestation',
   'rumen', 'abomasum', 'udder', 'mastitis', 'hoof', 'horn',
   'liver', 'kidney', 'heart', 'lung', 'skin', 'coat', 'feather',
   'beak', 'claw', 'paw', 'tail', 'ear', 'eye', 'nose',
   'vaccination', 'deworming', 'antibiotic', 'probiotic',
   'pregnant', 'newborn', 'calf', 'lamb', 'kid', 'foal', 'puppy', 'kitten',
   'surgery', 'wound', 'injury', 'fracture', 'poisoning', 'toxin',
-  'bacteria', 'virus', 'fungal', 'protozoa', 'infection',
-  'respiratory', 'digestive', 'reproductive', 'neurological', 'skin',
-  'ruminant', 'monogastric', 'pasture', 'fodder', 'silage', 'hay'
+  'bacteria', 'virus', 'fungal', 'protozoa',
+  'respiratory', 'digestive', 'reproductive', 'neurological',
+  'ruminant', 'monogastric', 'silage', 'hay'
 ];
 
 const NON_VET_KEYWORDS = [
@@ -45,26 +45,58 @@ const FALLBACK_IMAGES = [
 
 function isValidVeterinaryTopic(topic: string): boolean {
   const lowerTopic = topic.toLowerCase();
-  
+
+  // Reject URLs and domain names
+  if (lowerTopic.includes('.gov')) return false;
+  if (lowerTopic.includes('.com')) return false;
+  if (lowerTopic.includes('.org')) return false;
+  if (lowerTopic.includes('.net')) return false;
+  if (lowerTopic.includes('.edu')) return false;
+
+  // Reject news headlines with pipe characters or dashes
+  if (topic.includes('|')) return false;
+  if (topic.includes(' - ')) return false;
+
+  // Reject topics that are too long (news headlines)
+  if (topic.length > 80) return false;
+
+  // Reject topics with years (news headlines)
+  if (/\b\d{4}\b/.test(topic)) return false;
+
+  // Reject topics mentioning specific organizations or human medicine
+  const orgKeywords = [
+    'aphis', 'usda', 'fda', 'who', 'cdc', 'inspection', 'service',
+    'agency', 'department', 'ministry', 'gene therapy', 'childhood',
+    'human', 'cancer', 'hospital', 'confirmed detections', 'screwworm.gov'
+  ];
+  for (const keyword of orgKeywords) {
+    if (lowerTopic.includes(keyword)) {
+      console.log(`❌ Rejected: Contains org keyword "${keyword}"`);
+      return false;
+    }
+  }
+
+  // Reject non-vet keywords
   for (const keyword of NON_VET_KEYWORDS) {
     if (lowerTopic.includes(keyword)) {
       console.log(`❌ Rejected: Contains non-vet keyword "${keyword}"`);
       return false;
     }
   }
-  
+
+  // Must have at least 2 veterinary keyword matches
   let matchCount = 0;
   for (const keyword of VETERINARY_KEYWORDS) {
     if (lowerTopic.includes(keyword)) {
       matchCount++;
     }
   }
-  
+
   if (matchCount < 2) {
     console.log(`❌ Rejected: Only ${matchCount} veterinary keyword matches (need 2)`);
     return false;
   }
-  
+
   console.log(`✅ Accepted: ${matchCount} veterinary keyword matches`);
   return true;
 }
@@ -74,20 +106,12 @@ async function getUnsplashImage(query: string): Promise<string> {
     const randomPage = Math.floor(Math.random() * 5) + 1;
     const res = await fetch(
       `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
-      {
-        headers: {
-          Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
-        },
-      }
+      { headers: { Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}` } }
     );
-    if (!res.ok) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
+    if (!res.ok) return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     const data = await res.json();
     const results = data.results || [];
-    if (results.length === 0) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
+    if (results.length === 0) return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
@@ -100,20 +124,12 @@ async function getPexelsImage(query: string): Promise<string> {
     const randomPage = Math.floor(Math.random() * 5) + 1;
     const res = await fetch(
       `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
-      {
-        headers: {
-          Authorization: process.env.PEXELS_API_KEY || '',
-        },
-      }
+      { headers: { Authorization: process.env.PEXELS_API_KEY || '' } }
     );
-    if (!res.ok) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
+    if (!res.ok) return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     const data = await res.json();
     const results = data.photos || [];
-    if (results.length === 0) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
+    if (results.length === 0) return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
     const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
     return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
   } catch {
@@ -127,7 +143,7 @@ async function getArticleImage(query: string): Promise<string> {
     .replace(/[^a-z0-9\s]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-  
+
   const searchQueries = [
     cleanQuery,
     `${cleanQuery} animal`,
@@ -138,16 +154,12 @@ async function getArticleImage(query: string): Promise<string> {
 
   for (const searchQuery of searchQueries.slice(0, 3)) {
     const pexelsResult = await getPexelsImage(searchQuery);
-    if (pexelsResult && !pexelsResult.includes('fallback')) {
-      return pexelsResult;
-    }
+    if (pexelsResult && !pexelsResult.includes('fallback')) return pexelsResult;
   }
 
   for (const searchQuery of searchQueries.slice(0, 3)) {
     const unsplashResult = await getUnsplashImage(searchQuery);
-    if (unsplashResult && !unsplashResult.includes('fallback')) {
-      return unsplashResult;
-    }
+    if (unsplashResult && !unsplashResult.includes('fallback')) return unsplashResult;
   }
 
   return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
@@ -177,8 +189,6 @@ IMPORTANT: Choose the BEST writing style for this topic:
 - For how-to topics: Write a step-by-step guide
 - For general topics: Write an engaging blog post
 
-DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
-
 STRUCTURE GUIDELINES:
 - Start with a compelling introduction
 - Use clear headings that make sense for the topic
@@ -201,34 +211,26 @@ STYLE RULES:
     }),
   });
 
-  if (!res.ok) {
-    throw new Error(`you.com fallback request failed with status ${res.status}`);
-  }
-
+  if (!res.ok) throw new Error(`you.com failed with status ${res.status}`);
   const data = await res.json();
   const content = data.output?.content || '';
-
-  if (!content || content.trim().length < 200) {
-    throw new Error('you.com fallback returned empty or too-short content');
-  }
-
+  if (!content || content.trim().length < 200) throw new Error('you.com returned too-short content');
   return content;
 }
 
 async function getTrendingVetTopic(): Promise<string> {
   try {
     console.log('📡 Fetching veterinary news from Google News RSS...');
-    
     const feedUrl = 'https://news.google.com/rss/search?q=veterinary+OR+livestock+disease+OR+animal+health+OR+cattle+disease+OR+poultry+disease&hl=en-US&gl=US&ceid=US:en';
     const res = await fetch(feedUrl);
     const xml = await res.text();
-    
+
     const titles = Array.from(xml.matchAll(/<title>(.*?)<\/title>/g))
       .map(m => m[1])
       .filter(t => t !== 'Google News' && !t.includes(' - Google News'));
-    
+
     console.log(`✅ Found ${titles.length} news headlines`);
-    
+
     for (const title of titles.slice(0, 30)) {
       if (isValidVeterinaryTopic(title)) {
         console.log(`🩺 Valid veterinary topic found: ${title}`);
@@ -238,7 +240,6 @@ async function getTrendingVetTopic(): Promise<string> {
 
     console.log('📚 No valid trending topic found, using fallback topic list');
     return getFallbackTopic();
-    
   } catch (error) {
     console.error('Error fetching trending topic:', error);
     return getFallbackTopic();
@@ -268,8 +269,23 @@ function getFallbackTopic(): string {
     'Feline Leukemia Virus',
     'Poultry Feed Formulation for Farmers',
     'Biosecurity Measures on Livestock Farms',
+    'Milk Fever in Dairy Cows',
+    'Bovine Tuberculosis',
+    'Ringworm in Cattle',
+    'Pneumonia in Calves',
+    'How to Keep Your Dog Healthy',
+    'Puppy Care and Vaccination Schedule',
+    'Cat Vaccination Schedule for Pet Owners',
+    'Nutrition for Pregnant Cows',
+    'Deworming Programs for Cattle and Goats',
+    'Signs of Heat in Dairy Cows',
+    'Dystocia and Difficult Births in Cattle',
+    'Heat Stress in Livestock During Summer',
+    'How to Spot a Sick Animal Early',
+    'Water Quality and Animal Health',
+    'First Aid for Farm Animals',
+    'Zoonotic Diseases Farmers Should Know',
   ];
-  
   return fallbackTopics[Math.floor(Math.random() * fallbackTopics.length)];
 }
 
@@ -278,23 +294,14 @@ async function getExistingSlugs(): Promise<string[]> {
     const owner = process.env.GITHUB_OWNER;
     const repo = process.env.GITHUB_REPO;
     const token = process.env.GITHUB_TOKEN;
-
     const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/src/content/articles`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+      { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
     );
-
     if (!res.ok) return [];
     const files = await res.json();
     if (!Array.isArray(files)) return [];
-    return files
-      .map((f: { name: string }) => f.name.replace(/\.md$/, ''))
-      .filter(Boolean);
+    return files.map((f: { name: string }) => f.name.replace(/\.md$/, '')).filter(Boolean);
   } catch {
     return [];
   }
@@ -308,28 +315,21 @@ async function findRelatedArticles(topic: string, currentSlug: string): Promise<
   try {
     const existingSlugs = await getExistingSlugs();
     const keywords = topic.toLowerCase().split(' ');
-    
     const scored = existingSlugs.map(slug => {
       if (slug === currentSlug) return { slug, score: 0 };
       const slugWords = slug.replace(/-/g, ' ').toLowerCase().split(' ');
       let score = 0;
       for (const kw of keywords) {
-        if (slugWords.some((sw: string) => sw.includes(kw) || kw.includes(sw))) {
-          score++;
-        }
+        if (slugWords.some((sw: string) => sw.includes(kw) || kw.includes(sw))) score++;
       }
       return { slug, score };
     });
-    
     const sorted = scored.sort((a, b) => b.score - a.score);
     const top = sorted.filter(s => s.score > 0).slice(0, 3);
-    
     if (top.length === 0) {
       const available = existingSlugs.filter(s => s !== currentSlug);
-      const shuffled = available.sort(() => 0.5 - Math.random());
-      return shuffled.slice(0, 3);
+      return available.sort(() => 0.5 - Math.random()).slice(0, 3);
     }
-    
     return top.map(s => s.slug);
   } catch {
     return [];
@@ -351,26 +351,7 @@ const insertAfterHeading = (
 
 function cleanContent(content: string): string {
   content = content.replace(/^# .+?\n/, '');
-  content = content.replace(
-    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
-    ''
-  );
-  content = content.replace(
-    /##\s*Frequently Asked Questions.*$/i,
-    ''
-  );
-  content = content.replace(
-    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|##|$)/g,
-    ''
-  );
-  content = content.replace(
-    /^\s*Frequently Asked Questions\s*$/gim,
-    ''
-  );
-  content = content.replace(
-    /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
-    ''
-  );
+  content = content.replace(/!\[[^\]]*\]\([^)]*\)\s*\n*/g, '');
   content = content.replace(/\n{3,}/g, '\n\n');
   content = content.trim();
   return content;
@@ -379,7 +360,7 @@ function cleanContent(content: string): string {
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
-  
+
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -408,8 +389,7 @@ export async function GET(request: NextRequest) {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
-      const seoPrompt = `
-Return ONLY valid JSON, no markdown fences.
+      const seoPrompt = `Return ONLY valid JSON, no markdown fences.
 Topic: "${topic}"
 {
   "primary_keyword": "${topic}",
@@ -426,41 +406,29 @@ Topic: "${topic}"
         seo = { primary_keyword: topic, secondary_keywords: [], long_tail_keywords: [], search_intent: 'informational', questions: [] };
       }
 
-      const prompt = `
-You are an expert veterinary SEO writer and content creator.
+      const prompt = `You are an expert veterinary SEO writer and content creator.
 PRIMARY KEYWORD: ${seo.primary_keyword}
 SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
 
 Write a 1500+ word SEO blog about: "${topic}"
 
-IMPORTANT: Choose the BEST writing style for this topic:
-- For news/breaking topics: Write like a news article with a headline, introduction, key facts, and analysis
-- For educational topics: Write like a helpful guide with clear sections
-- For how-to topics: Write a step-by-step guide
-- For general topics: Write an engaging blog post that informs and helps readers
-
-DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
+IMPORTANT: Choose the BEST writing style for this topic.
+DO NOT use rigid "Causes, Symptoms, Treatment, Prevention" structure unless it fits.
 
 STRUCTURE GUIDELINES:
-- Start with a compelling introduction that hooks the reader
-- Use clear headings (## and ###) that make sense for the topic
+- Start with a compelling introduction
+- Use clear headings (## and ###)
 - Include practical, actionable information
 - Use bullet points and lists where helpful
-- End with a strong conclusion
+- End with a strong conclusion and at least 5 FAQs
 
 STYLE RULES:
-- Write like a helpful expert, not a textbook
-- Use "you" and "your" to speak directly to readers
+- Write like a helpful expert
+- Use "you" and "your"
 - Keep paragraphs short (2-3 sentences)
-- Use simple, clear English
+- Simple, clear English
 - Include relevant keywords naturally
-- Include at least 5 FAQs at the end
-- No citations
-- No references section
-- No images or image descriptions
-- No horizontal lines (---)
-
-Write only the article content with appropriate headings.`;
+- No citations, no references, no images, no horizontal lines`;
 
       try {
         const result = await model.generateContent(prompt);
@@ -518,9 +486,9 @@ Write only the article content with appropriate headings.`;
 
     const heroImage = await getArticleImage(topic);
     const causesImage = await getArticleImage(`${topic} disease`);
-    const symptomsImage = await getArticleImage(`sick animal`);
-    const treatmentImage = await getArticleImage(`veterinarian`);
-    const preventionImage = await getArticleImage(`farm biosecurity`);
+    const symptomsImage = await getArticleImage('sick animal');
+    const treatmentImage = await getArticleImage('veterinarian');
+    const preventionImage = await getArticleImage('farm biosecurity');
 
     content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
     content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
@@ -555,10 +523,7 @@ ${content}
       `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
       {
         method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: `Auto-publish: ${seoTitle}`,
           content: Buffer.from(markdown).toString('base64'),
