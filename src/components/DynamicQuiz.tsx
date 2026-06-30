@@ -18,7 +18,6 @@ export default function DynamicQuiz() {
   const [showResult, setShowResult] = useState(false);
   const [viewReview, setViewReview] = useState(false);
 
-  // 🧠 NEW: message from API
   const [resultMessage, setResultMessage] = useState('');
 
   const [loading, setLoading] = useState(false);
@@ -74,19 +73,16 @@ export default function DynamicQuiz() {
     }
   };
 
-  // 🧠 STORE ANSWERS ONLY
   const handleAnswer = (index: number) => {
     const updated = [...answers];
     updated[currentQuestionIndex] = index;
     setAnswers(updated);
   };
 
-  // ➡ NEXT QUESTION OR FINISH
   const nextQuestion = async () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      // 🧠 FINAL SCORE
       const finalScore = questions.reduce((total, q, i) => {
         return answers[i] === q.correctIndex ? total + 1 : total;
       }, 0);
@@ -103,7 +99,6 @@ export default function DynamicQuiz() {
         });
 
         const data = await res.json();
-
         setResultMessage(data.message || '');
       } catch {
         setResultMessage('');
@@ -115,12 +110,21 @@ export default function DynamicQuiz() {
 
   const currentQuestion = questions[currentQuestionIndex];
 
-  return (
-    <div className="max-w-3xl mx-auto p-8 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
+  const score = questions.reduce((total, q, i) => {
+    return answers[i] === q.correctIndex ? total + 1 : total;
+  }, 0);
 
-      <h2 className="text-3xl font-bold mb-6 text-center">
+  return (
+    <div className="max-w-3xl mx-auto p-5 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
+
+      {/* HEADER */}
+      <h2 className="text-3xl font-bold text-center mb-2">
         Assessment of veterinary knowledge by VetSphere
       </h2>
+
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+        Test your veterinary knowledge
+      </p>
 
       {/* START SCREEN */}
       {!questions.length && !showResult && (
@@ -147,7 +151,7 @@ export default function DynamicQuiz() {
       {/* EXAM SCREEN */}
       {questions.length > 0 && !showResult && currentQuestion && (
         <div>
-          <div className="mb-4">
+          <div className="mb-3">
             Question {currentQuestionIndex + 1} / {questions.length}
           </div>
 
@@ -173,7 +177,7 @@ export default function DynamicQuiz() {
 
           <button
             onClick={nextQuestion}
-            className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full"
+            className="mt-5 bg-blue-600 text-white px-4 py-2 rounded w-full"
           >
             {currentQuestionIndex === questions.length - 1
               ? 'Finish Exam'
@@ -185,21 +189,16 @@ export default function DynamicQuiz() {
       {/* RESULT SCREEN */}
       {showResult && (
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">
+          <h2 className="text-3xl font-bold mb-3">
             Exam Completed 🎓
           </h2>
 
-          <p className="text-2xl mb-4">
-            Score: {
-              questions.reduce((total, q, i) =>
-                answers[i] === q.correctIndex ? total + 1 : total
-              , 0)
-            } / {questions.length}
+          <p className="text-2xl mb-3">
+            Score: {score} / {questions.length}
           </p>
 
-          {/* 🧠 API MESSAGE */}
           {resultMessage && (
-            <p className="text-lg mb-6 text-gray-700 dark:text-gray-300">
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
               {resultMessage}
             </p>
           )}
@@ -228,7 +227,7 @@ export default function DynamicQuiz() {
 
       {/* REVIEW MODE */}
       {viewReview && (
-        <div className="mt-10">
+        <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">
             Review Mistakes
           </h2>
@@ -239,7 +238,7 @@ export default function DynamicQuiz() {
             if (userAnswer === q.correctIndex) return null;
 
             return (
-              <div key={i} className="mb-6 p-4 border rounded">
+              <div key={i} className="mb-5 p-4 border rounded">
                 <p className="font-bold">{q.question}</p>
 
                 <p className="text-red-500">
