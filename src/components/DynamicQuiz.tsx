@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import jsPDF from 'jspdf';
 
 interface Question {
   question: string;
@@ -18,13 +19,14 @@ export default function DynamicQuiz() {
   const [showResult, setShowResult] = useState(false);
   const [viewReview, setViewReview] = useState(false);
 
-  const [resultMessage, setResultMessage] = useState('');
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const [quizCache, setQuizCache] = useState<Record<string, Question[]>>({});
 
+  // -------------------------
+  // 🧠 GENERATE QUIZ
+  // -------------------------
   const generateQuiz = async () => {
     setError('');
 
@@ -34,7 +36,6 @@ export default function DynamicQuiz() {
       setAnswers([]);
       setShowResult(false);
       setViewReview(false);
-      setResultMessage('');
       return;
     }
 
@@ -44,16 +45,12 @@ export default function DynamicQuiz() {
       const response = await fetch('/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          score: 0,
-          total: 0,
-        }),
+        body: JSON.stringify({ topic }),
       });
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error);
+      if (!response.ok) throw new Error(data.error || 'Failed to generate quiz');
 
       setQuizCache((prev) => ({
         ...prev,
@@ -65,7 +62,6 @@ export default function DynamicQuiz() {
       setAnswers([]);
       setShowResult(false);
       setViewReview(false);
-      setResultMessage('');
     } catch (err: any) {
       setError(err.message || 'Failed to generate quiz');
     } finally {
@@ -73,46 +69,66 @@ export default function DynamicQuiz() {
     }
   };
 
+  // -------------------------
+  // 🧠 STORE ANSWER
+  // -------------------------
   const handleAnswer = (index: number) => {
     const updated = [...answers];
     updated[currentQuestionIndex] = index;
     setAnswers(updated);
   };
 
-  const nextQuestion = async () => {
+  // -------------------------
+  // ➡ NEXT / FINISH
+  // -------------------------
+  const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
-      const finalScore = questions.reduce((total, q, i) => {
-        return answers[i] === q.correctIndex ? total + 1 : total;
-      }, 0);
-
-      try {
-        const res = await fetch('/api/quiz', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            topic,
-            score: finalScore,
-            total: questions.length,
-          }),
-        });
-
-        const data = await res.json();
-        setResultMessage(data.message || '');
-      } catch {
-        setResultMessage('');
-      }
-
       setShowResult(true);
     }
   };
 
-  const currentQuestion = questions[currentQuestionIndex];
-
+  // -------------------------
+  // 🧮 SCORE
+  // -------------------------
   const score = questions.reduce((total, q, i) => {
     return answers[i] === q.correctIndex ? total + 1 : total;
   }, 0);
+
+  const perfectScore = questions.length > 0 && score === questions.length;
+
+  // -------------------------
+  // 🎓 CERTIFICATE
+  // -------------------------
+  const downloadCertificate = () => {
+    const doc = new jsPDF();
+
+    const name = prompt('Enter your name') || 'Student';
+
+    doc.setFontSize(20);
+    doc.text('VETSHPERE CERTIFICATE', 20, 30);
+
+    doc.setFontSize(12);
+    doc.text('This certifies that', 20, 50);
+
+    doc.setFontSize(16);
+    doc.text(name, 20, 65);
+
+    doc.setFontSize(12);
+    doc.text('has achieved a PERFECT SCORE in veterinary assessment', 20, 80);
+
+    doc.text(`Topic: ${topic}`, 20, 95);
+    doc.text(`Score: ${score} / ${questions.length}`, 20, 110);
+
+    doc.text('Owner: Mathews Chilongo', 20, 130);
+
+    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 145);
+
+    doc.save('vetsphere-certificate.pdf');
+  };
+
+  const currentQuestion = questions[currentQuestionIndex];
 
   return (
     <div className="max-w-3xl mx-auto p-5 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
@@ -164,10 +180,10 @@ export default function DynamicQuiz() {
               <button
                 key={i}
                 onClick={() => handleAnswer(i)}
-                className={`block w-full p-3 border rounded text-left ${
+                className={`block w-full p-3 border rounded text-left transition ${
                   answers[currentQuestionIndex] === i
                     ? 'bg-blue-200 dark:bg-blue-800'
-                    : ''
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-800'
                 }`}
               >
                 {opt}
@@ -197,31 +213,41 @@ export default function DynamicQuiz() {
             Score: {score} / {questions.length}
           </p>
 
-          {resultMessage && (
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              {resultMessage}
+          {perfectScore && (
+            <p className="text-green-600 font-semibold mb-3">
+              🎉 Excellent! Perfect Score Achieved
             </p>
           )}
 
-          <button
-            onClick={() => setViewReview(true)}
-            className="bg-red-600 text-white px-4 py-2 rounded mr-2"
-          >
-            Review Mistakes
-          </button>
+          {perfectScore && (
+            <button
+              onClick={downloadCertificate}
+              className="bg-purple-600 text-white px-4 py-2 rounded mb-3"
+            >
+              🎓 Download Certificate
+            </button>
+          )}
 
-          <button
-            onClick={() => {
-              setQuestions([]);
-              setCurrentQuestionIndex(0);
-              setAnswers([]);
-              setShowResult(false);
-              setResultMessage('');
-            }}
-            className="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            New Exam
-          </button>
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => setViewReview(true)}
+              className="bg-red-600 text-white px-4 py-2 rounded"
+            >
+              Review Mistakes
+            </button>
+
+            <button
+              onClick={() => {
+                setQuestions([]);
+                setCurrentQuestionIndex(0);
+                setAnswers([]);
+                setShowResult(false);
+              }}
+              className="bg-green-600 text-white px-4 py-2 rounded"
+            >
+              New Exam
+            </button>
+          </div>
         </div>
       )}
 
