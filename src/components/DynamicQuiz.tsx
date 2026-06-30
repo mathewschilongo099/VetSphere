@@ -2,8 +2,6 @@
 
 import React, { useState } from 'react';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-
 interface Question {
   question: string;
   options: string[];
@@ -23,46 +21,32 @@ export default function DynamicQuiz() {
   const [quizCompleted, setQuizCompleted] = useState(false);
 
   const generateQuiz = async () => {
-    if (!GEMINI_API_KEY) {
-      setError('Gemini API key not configured. Check Vercel Environment Variables.');
-      return;
-    }
-
     setLoading(true);
     setError('');
 
     try {
-      const prompt = `Create a 5-question multiple choice veterinary quiz for students about ${topic}. 
-Format your response as a valid JSON array only. Each object should have: 
-"question", "options" (array of 4 strings), "correctIndex" (0-3), "explanation". 
-Make it educational and accurate.`;
-
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      const response = await fetch('/api/quiz', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }]
-        })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ topic }),
       });
 
       const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-      const jsonStart = text.indexOf('[');
-      const jsonEnd = text.lastIndexOf(']') + 1;
-      const jsonString = text.slice(jsonStart, jsonEnd);
-      
-      const parsedQuestions = JSON.parse(jsonString);
-      
-      setQuestions(parsedQuestions);
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to generate quiz');
+      }
+
+      setQuestions(data.questions);
       setCurrentQuestionIndex(0);
       setScore(0);
       setSelectedAnswer(null);
       setShowExplanation(false);
       setQuizCompleted(false);
-    } catch (err) {
-      setError('Failed to generate quiz. Please try again or check your API key.');
-      console.error(err);
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate quiz');
     } finally {
       setLoading(false);
     }
@@ -71,15 +55,17 @@ Make it educational and accurate.`;
   const handleAnswer = (index: number) => {
     setSelectedAnswer(index);
     const currentQ = questions[currentQuestionIndex];
+
     if (index === currentQ.correctIndex) {
-      setScore(prev => prev + 1);
+      setScore((prev) => prev + 1);
     }
+
     setShowExplanation(true);
   };
 
   const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
       setSelectedAnswer(null);
       setShowExplanation(false);
     } else {
@@ -100,7 +86,9 @@ Make it educational and accurate.`;
     <div className="max-w-3xl mx-auto p-8">
       <div className="mb-8 text-center">
         <h2 className="text-4xl font-bold mb-2">VetSphere Quiz Lab</h2>
-        <p className="text-gray-600 dark:text-gray-400">AI-Powered Veterinary Learning for Students</p>
+        <p className="text-gray-600 dark:text-gray-400">
+          AI-Powered Veterinary Learning for Students
+        </p>
       </div>
 
       {!questions.length ? (
@@ -111,36 +99,48 @@ Make it educational and accurate.`;
               type="text"
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500"
+              className="w-full px-4 py-3 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500"
               placeholder="e.g. cattle nutrition, poultry diseases"
             />
           </div>
+
           <button
             onClick={generateQuiz}
             disabled={loading}
             className="w-full py-4 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold rounded-2xl text-lg transition"
           >
-            {loading ? 'Generating Quiz with Gemini...' : 'Generate New Quiz'}
+            {loading ? 'Generating Quiz...' : 'Generate New Quiz'}
           </button>
+
           {error && <p className="text-red-500 text-center mt-4">{error}</p>}
         </div>
       ) : quizCompleted ? (
         <div className="text-center py-12 bg-white dark:bg-gray-900 rounded-3xl shadow-xl">
           <div className="text-6xl mb-4">🎉</div>
           <h3 className="text-3xl font-bold mb-2">Quiz Complete!</h3>
-          <p className="text-5xl font-bold text-green-600 mb-6">{score} / {questions.length}</p>
-          <button onClick={restartQuiz} className="px-8 py-3 bg-green-600 text-white rounded-full hover:bg-green-700">
+          <p className="text-5xl font-bold text-green-600 mb-6">
+            {score} / {questions.length}
+          </p>
+
+          <button
+            onClick={restartQuiz}
+            className="px-8 py-3 bg-green-600 text-white rounded-full hover:bg-green-700"
+          >
             Try Another Quiz
           </button>
         </div>
       ) : currentQuestion ? (
         <div className="bg-white dark:bg-gray-900 p-8 rounded-3xl shadow-xl">
           <div className="flex justify-between mb-6">
-            <span className="text-sm text-gray-500">Question {currentQuestionIndex + 1} of {questions.length}</span>
+            <span className="text-sm text-gray-500">
+              Question {currentQuestionIndex + 1} of {questions.length}
+            </span>
             <span className="text-sm font-medium">Score: {score}</span>
           </div>
 
-          <h3 className="text-2xl font-semibold mb-8 leading-tight">{currentQuestion.question}</h3>
+          <h3 className="text-2xl font-semibold mb-8">
+            {currentQuestion.question}
+          </h3>
 
           <div className="grid gap-3">
             {currentQuestion.options.map((option, index) => (
@@ -148,13 +148,13 @@ Make it educational and accurate.`;
                 key={index}
                 onClick={() => !showExplanation && handleAnswer(index)}
                 disabled={showExplanation}
-                className={`p-5 text-left rounded-2xl border-2 transition-all text-lg font-medium ${
-                  showExplanation 
-                    ? index === currentQuestion.correctIndex 
-                      ? 'border-green-500 bg-green-50' 
-                      : selectedAnswer === index 
-                        ? 'border-red-500 bg-red-50' 
-                        : 'border-gray-200'
+                className={`p-5 text-left rounded-2xl border-2 transition-all ${
+                  showExplanation
+                    ? index === currentQuestion.correctIndex
+                      ? 'border-green-500 bg-green-50'
+                      : selectedAnswer === index
+                      ? 'border-red-500 bg-red-50'
+                      : 'border-gray-200'
                     : 'border-gray-200 hover:border-green-500 hover:bg-green-50'
                 }`}
               >
@@ -164,14 +164,17 @@ Make it educational and accurate.`;
           </div>
 
           {showExplanation && (
-            <div className="mt-8 p-6 bg-amber-50 dark:bg-amber-950 rounded-2xl border border-amber-200">
+            <div className="mt-8 p-6 bg-amber-50 rounded-2xl border">
               <p className="font-semibold mb-2">💡 Explanation:</p>
               <p>{currentQuestion.explanation}</p>
-              <button 
+
+              <button
                 onClick={nextQuestion}
                 className="mt-6 w-full py-3 bg-green-600 text-white rounded-2xl hover:bg-green-700"
               >
-                {currentQuestionIndex === questions.length - 1 ? 'See Results' : 'Next Question'}
+                {currentQuestionIndex === questions.length - 1
+                  ? 'See Results'
+                  : 'Next Question'}
               </button>
             </div>
           )}
