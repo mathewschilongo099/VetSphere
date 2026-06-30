@@ -9,40 +9,64 @@ export async function POST(req: Request) {
 
     if (!apiKey) {
       return NextResponse.json(
-        { error: 'Gemini API key not configured' },
+        { error: 'Missing Gemini API key' },
         { status: 500 }
       );
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+    });
 
     const prompt = `
-Create a 5-question multiple choice veterinary quiz for students about ${topic}.
-Return ONLY valid JSON array.
+You are a veterinary exam generator.
 
-Each object must contain:
-- question (string)
-- options (array of 4 strings)
-- correctIndex (0-3)
-- explanation (string)
+Create 5 MCQ questions about: ${topic}
+
+STRICT RULE:
+Return ONLY valid JSON like this:
+
+[
+  {
+    "question": "...",
+    "options": ["A", "B", "C", "D"],
+    "correctIndex": 0,
+    "explanation": "..."
+  }
+]
+
+No markdown, no text, no explanation outside JSON.
 `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    const jsonStart = text.indexOf('[');
-    const jsonEnd = text.lastIndexOf(']') + 1;
+    console.log('RAW GEMINI RESPONSE:', text);
 
-    const jsonString = text.slice(jsonStart, jsonEnd);
-    const questions = JSON.parse(jsonString);
+    // safer parsing
+    let questions;
+
+    try {
+      questions = JSON.parse(text);
+    } catch (e) {
+      // fallback extraction
+      const match = text.match(/\[[\s\S]*\]/);
+
+      if (!match) {
+        throw new Error('Invalid JSON from Gemini');
+      }
+
+      questions = JSON.parse(match[0]);
+    }
 
     return NextResponse.json({ questions });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error('QUIZ API ERROR:', error);
+
     return NextResponse.json(
-      { error: 'Failed to generate quiz' },
+      { error: error.message || 'Failed to generate quiz' },
       { status: 500 }
     );
   }
