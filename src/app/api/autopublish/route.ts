@@ -46,59 +46,35 @@ const FALLBACK_IMAGES = [
 function isValidVeterinaryTopic(topic: string): boolean {
   const lowerTopic = topic.toLowerCase();
 
-  // Reject URLs and domain names
   if (lowerTopic.includes('.gov')) return false;
   if (lowerTopic.includes('.com')) return false;
   if (lowerTopic.includes('.org')) return false;
   if (lowerTopic.includes('.net')) return false;
   if (lowerTopic.includes('.edu')) return false;
-
-  // Reject news headlines with pipe characters or dashes
   if (topic.includes('|')) return false;
   if (topic.includes(' - ')) return false;
-
-  // Reject topics that are too long (news headlines)
   if (topic.length > 80) return false;
-
-  // Reject topics with years (news headlines)
   if (/\b\d{4}\b/.test(topic)) return false;
 
-  // Reject topics mentioning specific organizations or human medicine
   const orgKeywords = [
     'aphis', 'usda', 'fda', 'who', 'cdc', 'inspection', 'service',
     'agency', 'department', 'ministry', 'gene therapy', 'childhood',
     'human', 'cancer', 'hospital', 'confirmed detections', 'screwworm.gov'
   ];
   for (const keyword of orgKeywords) {
-    if (lowerTopic.includes(keyword)) {
-      console.log(`❌ Rejected: Contains org keyword "${keyword}"`);
-      return false;
-    }
+    if (lowerTopic.includes(keyword)) return false;
   }
 
-  // Reject non-vet keywords
   for (const keyword of NON_VET_KEYWORDS) {
-    if (lowerTopic.includes(keyword)) {
-      console.log(`❌ Rejected: Contains non-vet keyword "${keyword}"`);
-      return false;
-    }
+    if (lowerTopic.includes(keyword)) return false;
   }
 
-  // Must have at least 2 veterinary keyword matches
   let matchCount = 0;
   for (const keyword of VETERINARY_KEYWORDS) {
-    if (lowerTopic.includes(keyword)) {
-      matchCount++;
-    }
+    if (lowerTopic.includes(keyword)) matchCount++;
   }
 
-  if (matchCount < 2) {
-    console.log(`❌ Rejected: Only ${matchCount} veterinary keyword matches (need 2)`);
-    return false;
-  }
-
-  console.log(`✅ Accepted: ${matchCount} veterinary keyword matches`);
-  return true;
+  return matchCount >= 2;
 }
 
 async function getUnsplashImage(query: string): Promise<string> {
@@ -229,16 +205,12 @@ async function getTrendingVetTopic(): Promise<string> {
       .map(m => m[1])
       .filter(t => t !== 'Google News' && !t.includes(' - Google News'));
 
-    console.log(`✅ Found ${titles.length} news headlines`);
-
     for (const title of titles.slice(0, 30)) {
       if (isValidVeterinaryTopic(title)) {
-        console.log(`🩺 Valid veterinary topic found: ${title}`);
         return title;
       }
     }
 
-    console.log('📚 No valid trending topic found, using fallback topic list');
     return getFallbackTopic();
   } catch (error) {
     console.error('Error fetching trending topic:', error);
@@ -367,7 +339,6 @@ export async function GET(request: NextRequest) {
 
   try {
     const topic = await getTrendingVetTopic();
-    console.log('📝 Auto-publishing topic:', topic);
 
     const existingSlugs = await getExistingSlugs();
     const slug = topicToSlug(topic);
@@ -412,12 +383,12 @@ SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
 
 Write a 1500+ word SEO blog about: "${topic}"
 
-IMPORTANT: Choose the BEST writing style for this topic.
-DO NOT use rigid "Causes, Symptoms, Treatment, Prevention" structure unless it fits.
+IMPORTANT: Choose the BEST writing style for this topic — let it flow naturally based on what the topic actually needs.
+DO NOT force a rigid "Causes, Symptoms, Treatment, Prevention" structure unless the topic is genuinely about a disease.
 
 STRUCTURE GUIDELINES:
 - Start with a compelling introduction
-- Use clear headings (## and ###)
+- Use clear headings (## and ###) that fit the topic naturally
 - Include practical, actionable information
 - Use bullet points and lists where helpful
 - End with a strong conclusion and at least 5 FAQs
@@ -475,7 +446,10 @@ STYLE RULES:
     };
 
     const excerpt = buildExcerpt(plainText, 155);
-    const seoTitle = topic.charAt(0).toUpperCase() + topic.slice(1) + ': Causes, Symptoms, Treatment and Prevention';
+
+    // ✅ FIXED — natural title, no forced "Causes, Symptoms, Treatment and Prevention" suffix
+    const seoTitle = topic.charAt(0).toUpperCase() + topic.slice(1);
+
     const metaDescription = buildExcerpt(plainText, 160);
     const tags = [
       topic.toLowerCase(),
