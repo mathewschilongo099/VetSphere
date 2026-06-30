@@ -1,12 +1,24 @@
 'use client';
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { FaClipboardList } from 'react-icons/fa';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+
   const router = useRouter();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -18,7 +30,13 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50 w-full">
+    <header
+      className={`sticky top-0 z-50 w-full transition-all duration-300 border-b ${
+        scrolled
+          ? 'bg-white/90 backdrop-blur-xl shadow-md border-gray-200'
+          : 'bg-white border-gray-100'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
@@ -30,50 +48,50 @@ export default function Header() {
         </a>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
           <a href="/" className="hover:text-green-600 transition">Home</a>
           <a href="/articles" className="hover:text-green-600 transition">Articles</a>
-
-          {/* QUIZ BUTTON */}
-          <a href="/quiz" className="text-green-600 font-semibold hover:text-green-700 transition">
-            🎓 Quiz
-          </a>
-
           <a href="/services" className="hover:text-green-600 transition">Services</a>
           <a href="/about" className="hover:text-green-600 transition">About</a>
-          <a href="/ask" className="hover:text-green-600 transition text-green-600 font-semibold">
-            Ask VetAssist
+
+          {/* QUIZ ICON (NEW FEATURE) */}
+          <a
+            href="/quiz"
+            className="flex items-center gap-1 text-green-600 font-semibold hover:text-green-700 transition"
+          >
+            <FaClipboardList />
+            Quiz
           </a>
         </nav>
 
-        {/* Desktop Right */}
+        {/* Right Side */}
         <div className="hidden md:flex items-center gap-3">
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-600"
+            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-700"
           >
             🔍
           </button>
 
           <a
             href="/contact"
-            className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition"
+            className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition shadow-sm"
           >
-            Contact Us
+            Contact
           </a>
         </div>
 
-        {/* Mobile Right */}
+        {/* Mobile Menu Buttons */}
         <div className="flex md:hidden items-center gap-2">
           <button
             onClick={() => setSearchOpen(!searchOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-600"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-700"
           >
             🔍
           </button>
 
           <button
-            className="p-2 rounded-lg hover:bg-gray-100 transition"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-700"
             onClick={() => setMenuOpen(!menuOpen)}
           >
             ☰
@@ -81,62 +99,48 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Search */}
+      {/* SEARCH */}
       {searchOpen && (
-        <div className="border-t border-gray-100 bg-white px-4 py-3 w-full">
+        <div className="border-t bg-white px-4 py-3">
           <form onSubmit={handleSearch} className="max-w-2xl mx-auto flex gap-2">
             <input
-              type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search articles..."
-              className="flex-1 px-4 py-2.5 border rounded-xl text-sm"
-              autoFocus
+              className="flex-1 px-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-green-500"
             />
-            <button className="bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm">
+            <button className="bg-green-600 text-white px-4 rounded-lg text-sm">
               Search
             </button>
           </form>
         </div>
       )}
 
-      {/* ✅ FIXED MOBILE MENU (DARK + CLEAR + READABLE) */}
+      {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="md:hidden bg-gray-900 text-white border-t border-gray-800">
-          <div className="px-4 py-4 flex flex-col gap-3">
+        <div className="md:hidden bg-white border-t">
+          <div className="px-4 py-3 flex flex-col gap-2 text-gray-700">
+            <a href="/" onClick={() => setMenuOpen(false)}>Home</a>
+            <a href="/articles" onClick={() => setMenuOpen(false)}>Articles</a>
+            <a href="/services" onClick={() => setMenuOpen(false)}>Services</a>
+            <a href="/about" onClick={() => setMenuOpen(false)}>About</a>
 
-            <a href="/" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
-              Home
-            </a>
-
-            <a href="/articles" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
-              Articles
-            </a>
-
-            <a href="/quiz" onClick={() => setMenuOpen(false)} className="text-green-400 font-semibold">
-              🎓 Quiz
-            </a>
-
-            <a href="/services" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
-              Services
-            </a>
-
-            <a href="/about" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
-              About
-            </a>
-
-            <a href="/ask" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
-              Ask VetAssist
+            {/* QUIZ */}
+            <a
+              href="/quiz"
+              className="text-green-600 font-semibold"
+              onClick={() => setMenuOpen(false)}
+            >
+              🧠 Take Quiz
             </a>
 
             <a
               href="/contact"
-              className="mt-3 bg-green-500 hover:bg-green-400 text-black font-bold text-center py-3 rounded-xl"
+              className="bg-green-600 text-white text-center py-2 rounded-lg mt-2"
               onClick={() => setMenuOpen(false)}
             >
-              Contact Us
+              Contact
             </a>
-
           </div>
         </div>
       )}
