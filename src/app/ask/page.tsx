@@ -38,9 +38,8 @@ export default function AskPage() {
     setLoading(true);
 
     try {
-      // ✅ FIXED ROUTE (this is the important change)
       const res = await fetch(
-        `/api/generate?query=${encodeURIComponent(userMessage)}`
+        `/api/search?query=${encodeURIComponent(userMessage)}`
       );
 
       const data = await res.json();
