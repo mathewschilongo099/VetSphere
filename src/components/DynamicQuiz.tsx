@@ -13,25 +13,26 @@ export default function DynamicQuiz() {
   const [topic, setTopic] = useState('livestock diseases');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
-  const [showExplanation, setShowExplanation] = useState(false);
+
+  // 🧠 NEW EXAM STATE
+  const [answers, setAnswers] = useState<(number | null)[]>([]);
+  const [showResult, setShowResult] = useState(false);
+  const [viewReview, setViewReview] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // ✅ NEW: cache stored per topic
   const [quizCache, setQuizCache] = useState<Record<string, Question[]>>({});
 
   const generateQuiz = async () => {
     setError('');
 
-    // 🔥 STEP 1: CHECK CACHE FIRST
     if (quizCache[topic]) {
       setQuestions(quizCache[topic]);
       setCurrentQuestionIndex(0);
-      setScore(0);
-      setSelectedAnswer(null);
-      setShowExplanation(false);
+      setAnswers([]);
+      setShowResult(false);
+      setViewReview(false);
       return;
     }
 
@@ -46,11 +47,8 @@ export default function DynamicQuiz() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to generate quiz');
-      }
+      if (!response.ok) throw new Error(data.error);
 
-      // 🔥 STEP 2: SAVE TO CACHE
       setQuizCache((prev) => ({
         ...prev,
         [topic]: data.questions,
@@ -58,9 +56,9 @@ export default function DynamicQuiz() {
 
       setQuestions(data.questions);
       setCurrentQuestionIndex(0);
-      setScore(0);
-      setSelectedAnswer(null);
-      setShowExplanation(false);
+      setAnswers([]);
+      setShowResult(false);
+      setViewReview(false);
     } catch (err: any) {
       setError(err.message || 'Failed to generate quiz');
     } finally {
@@ -68,45 +66,43 @@ export default function DynamicQuiz() {
     }
   };
 
+  // 🧠 STORE ANSWERS ONLY (NO MARKING YET)
   const handleAnswer = (index: number) => {
-    setSelectedAnswer(index);
-    const currentQ = questions[currentQuestionIndex];
-
-    if (index === currentQ.correctIndex) {
-      setScore((prev) => prev + 1);
-    }
-
-    setShowExplanation(true);
+    const updated = [...answers];
+    updated[currentQuestionIndex] = index;
+    setAnswers(updated);
   };
 
+  // ➡ NEXT QUESTION OR FINISH EXAM
   const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
-      setSelectedAnswer(null);
-      setShowExplanation(false);
+    } else {
+      setShowResult(true);
     }
   };
 
-  const restartQuiz = () => {
-    setQuestions([]);
-    setCurrentQuestionIndex(0);
-    setScore(0);
-  };
+  // 🧠 FINAL SCORE CALCULATION
+  const score = questions.reduce((total, q, i) => {
+    return answers[i] === q.correctIndex ? total + 1 : total;
+  }, 0);
 
   const currentQuestion = questions[currentQuestionIndex];
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
+    <div className="max-w-3xl mx-auto p-8 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
+
       <h2 className="text-3xl font-bold mb-6 text-center">
-        VetSphere Quiz Lab
+        VetSphere Exam Mode
       </h2>
 
-      {!questions.length ? (
+      {/* START SCREEN */}
+      {!questions.length && !showResult && (
         <div className="space-y-4">
           <input
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            className="w-full p-3 border rounded"
+            className="w-full p-3 border rounded text-gray-900"
             placeholder="Enter topic"
           />
 
@@ -115,16 +111,15 @@ export default function DynamicQuiz() {
             disabled={loading}
             className="w-full bg-green-600 text-white p-3 rounded"
           >
-            {loading
-              ? 'Generating...'
-              : quizCache[topic]
-              ? 'Load Cached Quiz'
-              : 'Generate Quiz'}
+            {loading ? 'Generating...' : 'Start Exam'}
           </button>
 
           {error && <p className="text-red-500">{error}</p>}
         </div>
-      ) : (
+      )}
+
+      {/* EXAM SCREEN */}
+      {questions.length > 0 && !showResult && currentQuestion && (
         <div>
           <div className="mb-4">
             Question {currentQuestionIndex + 1} / {questions.length}
@@ -138,31 +133,85 @@ export default function DynamicQuiz() {
             {currentQuestion.options.map((opt, i) => (
               <button
                 key={i}
-                onClick={() => !showExplanation && handleAnswer(i)}
-                className="block w-full p-3 border rounded"
+                onClick={() => handleAnswer(i)}
+                className={`block w-full p-3 border rounded text-left ${
+                  answers[currentQuestionIndex] === i
+                    ? 'bg-blue-200 dark:bg-blue-800'
+                    : ''
+                }`}
               >
                 {opt}
               </button>
             ))}
           </div>
 
-          {showExplanation && (
-            <div className="mt-4">
-              <p className="font-bold">Explanation:</p>
-              <p>{currentQuestion.explanation}</p>
+          <button
+            onClick={nextQuestion}
+            className="mt-6 bg-blue-600 text-white px-4 py-2 rounded w-full"
+          >
+            {currentQuestionIndex === questions.length - 1
+              ? 'Finish Exam'
+              : 'Next Question'}
+          </button>
+        </div>
+      )}
 
-              <button
-                onClick={nextQuestion}
-                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Next
-              </button>
-            </div>
-          )}
+      {/* RESULT SCREEN */}
+      {showResult && (
+        <div className="text-center">
+          <h2 className="text-3xl font-bold mb-4">Exam Completed 🎓</h2>
 
-          <div className="mt-6">
-            Score: {score}
-          </div>
+          <p className="text-2xl mb-6">
+            Score: {score} / {questions.length}
+          </p>
+
+          <button
+            onClick={() => setViewReview(true)}
+            className="bg-red-600 text-white px-4 py-2 rounded mr-2"
+          >
+            Review Mistakes
+          </button>
+
+          <button
+            onClick={() => {
+              setQuestions([]);
+              setCurrentQuestionIndex(0);
+              setAnswers([]);
+              setShowResult(false);
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            New Exam
+          </button>
+        </div>
+      )}
+
+      {/* REVIEW MODE */}
+      {viewReview && (
+        <div className="mt-10">
+          <h2 className="text-2xl font-bold mb-4">Review Mistakes</h2>
+
+          {questions.map((q, i) => {
+            const userAnswer = answers[i];
+
+            if (userAnswer === q.correctIndex) return null;
+
+            return (
+              <div key={i} className="mb-6 p-4 border rounded">
+                <p className="font-bold">{q.question}</p>
+
+                <p className="text-red-500">
+                  Your Answer: {q.options[userAnswer ?? -1]}
+                </p>
+
+                <p className="text-green-600">
+                  Correct: {q.options[q.correctIndex]}
+                </p>
+
+                <p className="mt-2">{q.explanation}</p>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
