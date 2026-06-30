@@ -1,33 +1,16 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import Groq from 'groq-sdk';
 
 export async function POST(req: Request) {
-  try {
-    const { topic } = await req.json();
+  const { topic } = await req.json();
 
-    const apiKey = process.env.GEMINI_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+  const openRouterKey = process.env.OPENROUTER_API_KEY;
 
-    if (!apiKey) {
-      return NextResponse.json(
-        { error: 'Missing Gemini API key' },
-        { status: 500 }
-      );
-    }
+  const prompt = `
+Create 5 multiple choice veterinary questions about "${topic}".
 
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    // ✅ FIXED MODEL (updated from gemini-1.5-flash)
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
-    });
-
-    const prompt = `
-You are a veterinary exam generator.
-
-Create 5 multiple-choice questions about: ${topic}
-
-STRICT RULE:
-Return ONLY valid JSON in this format:
+Return ONLY valid JSON:
 
 [
   {
@@ -38,38 +21,99 @@ Return ONLY valid JSON in this format:
   }
 ]
 
-No markdown, no extra text, only JSON array.
+No markdown. No extra text.
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
+  // -----------------------------
+  // 🧠 1. GROQ (PRIMARY)
+  // -----------------------------
+  try {
+    if (groqKey) {
+      const groq = new Groq({ apiKey: groqKey });
 
-    console.log('RAW GEMINI RESPONSE:', text);
+      const completion = await groq.chat.completions.create({
+        model: 'llama3-8b-8192',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7,
+      });
 
-    let questions;
+      const text = completion.choices[0]?.message?.content || '';
 
-    try {
-      // try direct parsing first
-      questions = JSON.parse(text);
-    } catch (err) {
-      // fallback extraction if Gemini adds extra text
+      const match = text.match(/\[[\s\S]*\]/);
+      if (match) {
+        return NextResponse.json({
+          questions: JSON.parse(match[0]),
+          source: 'groq',
+        });
+      }
+    }
+  } catch (err) {
+    console.log('Groq failed, switching to OpenRouter...');
+  }
+
+  // -----------------------------
+  // 🌐 2. OPENROUTER (FALLBACK)
+  // -----------------------------
+  try {
+    if (openRouterKey) {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${openRouterKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      });
+
+      const data = await res.json();
+      const text = data.choices?.[0]?.message?.content || '';
+
       const match = text.match(/\[[\s\S]*\]/);
 
-      if (!match) {
-        throw new Error('Gemini did not return valid JSON');
+      if (match) {
+        return NextResponse.json({
+          questions: JSON.parse(match[0]),
+          source: 'openrouter',
+        });
       }
-
-      questions = JSON.parse(match[0]);
     }
-
-    return NextResponse.json({ questions });
-  } catch (error: any) {
-    console.error('QUIZ API ERROR:', error);
-
-    return NextResponse.json(
-      { error: error.message || 'Failed to generate quiz' },
-      { status: 500 }
-    );
+  } catch (err) {
+    console.log('OpenRouter failed, using fallback quiz...');
   }
+
+  // -----------------------------
+  // 🧱 3. FINAL FALLBACK (ALWAYS WORKS)
+  // -----------------------------
+  const fallbackQuestions = [
+    {
+      question: `What is a common veterinary concern in ${topic}?`,
+      options: [
+        'Nutritional imbalance',
+        'Infectious disease',
+        'Parasitic infection',
+        'All of the above',
+      ],
+      correctIndex: 3,
+      explanation: 'Most veterinary conditions involve multiple causes.',
+    },
+    {
+      question: `Why is ${topic} important in animal health?`,
+      options: [
+        'Improves productivity',
+        'Only for exams',
+        'No importance',
+        'Only theoretical',
+      ],
+      correctIndex: 0,
+      explanation: 'It directly affects animal health and production.',
+    },
+  ];
+
+  return NextResponse.json({
+    questions: fallbackQuestions,
+    source: 'local-fallback',
+  });
 }
