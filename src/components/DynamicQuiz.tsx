@@ -48,7 +48,6 @@ Make it educational and accurate.`;
       const data = await response.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-      // Safe JSON extraction without regex flag
       const jsonStart = text.indexOf('[');
       const jsonEnd = text.lastIndexOf(']') + 1;
       const jsonString = text.slice(jsonStart, jsonEnd);
