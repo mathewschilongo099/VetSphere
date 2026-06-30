@@ -31,15 +31,11 @@ export default function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-
           <a href="/" className="hover:text-green-600 transition">Home</a>
           <a href="/articles" className="hover:text-green-600 transition">Articles</a>
 
-          {/* ✅ QUIZ BUTTON ADDED HERE */}
-          <a
-            href="/quiz"
-            className="text-green-600 font-semibold hover:text-green-700 transition"
-          >
+          {/* QUIZ BUTTON */}
+          <a href="/quiz" className="text-green-600 font-semibold hover:text-green-700 transition">
             🎓 Quiz
           </a>
 
@@ -50,12 +46,11 @@ export default function Header() {
           </a>
         </nav>
 
-        {/* Right Side */}
+        {/* Desktop Right */}
         <div className="hidden md:flex items-center gap-3">
           <button
             onClick={() => setSearchOpen(!searchOpen)}
             className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-600"
-            aria-label="Search"
           >
             🔍
           </button>
@@ -86,7 +81,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search */}
       {searchOpen && (
         <div className="border-t border-gray-100 bg-white px-4 py-3 w-full">
           <form onSubmit={handleSearch} className="max-w-2xl mx-auto flex gap-2">
@@ -98,44 +93,50 @@ export default function Header() {
               className="flex-1 px-4 py-2.5 border rounded-xl text-sm"
               autoFocus
             />
-            <button
-              type="submit"
-              className="bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm"
-            >
+            <button className="bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm">
               Search
             </button>
           </form>
         </div>
       )}
 
-      {/* Mobile Menu */}
+      {/* ✅ FIXED MOBILE MENU (DARK + CLEAR + READABLE) */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t">
-          <div className="px-4 py-3 flex flex-col gap-2">
+        <div className="md:hidden bg-gray-900 text-white border-t border-gray-800">
+          <div className="px-4 py-4 flex flex-col gap-3">
 
-            <a href="/" onClick={() => setMenuOpen(false)}>Home</a>
-            <a href="/articles" onClick={() => setMenuOpen(false)}>Articles</a>
+            <a href="/" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
+              Home
+            </a>
 
-            {/* ✅ QUIZ MOBILE LINK */}
-            <a
-              href="/quiz"
-              className="text-green-600 font-semibold"
-              onClick={() => setMenuOpen(false)}
-            >
+            <a href="/articles" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
+              Articles
+            </a>
+
+            <a href="/quiz" onClick={() => setMenuOpen(false)} className="text-green-400 font-semibold">
               🎓 Quiz
             </a>
 
-            <a href="/services" onClick={() => setMenuOpen(false)}>Services</a>
-            <a href="/about" onClick={() => setMenuOpen(false)}>About</a>
-            <a href="/ask" onClick={() => setMenuOpen(false)}>Ask VetAssist</a>
+            <a href="/services" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
+              Services
+            </a>
+
+            <a href="/about" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
+              About
+            </a>
+
+            <a href="/ask" onClick={() => setMenuOpen(false)} className="hover:text-green-400">
+              Ask VetAssist
+            </a>
 
             <a
               href="/contact"
-              className="bg-green-600 text-white text-center py-3 rounded-xl mt-2"
+              className="mt-3 bg-green-500 hover:bg-green-400 text-black font-bold text-center py-3 rounded-xl"
               onClick={() => setMenuOpen(false)}
             >
               Contact Us
             </a>
+
           </div>
         </div>
       )}
