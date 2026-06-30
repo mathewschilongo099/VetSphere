@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 function cleanAnswer(text: string): string {
   return text
     .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
-    .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
+    .replace(/\[\d+(?:,\s*\d+)*\]\]/g, '')
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/^\s*[\*\-]\s+/gm, '')
@@ -22,14 +22,19 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const res = await fetch('https://api.you.com/v1/research', {
-      method: 'POST',
-      headers: {
-        'X-API-Key': process.env.YOU_API_KEY || '',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        input: `You are VetAssist, the AI assistant for VetSphere, a website created by Mathews Chilongo to help farmers and pet owners with animal health questions.
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `You are VetAssist, the AI assistant for VetSphere, a website created by Mathews Chilongo to help farmers and pet owners with animal health questions.
 
 First, understand what kind of message this is, then respond accordingly:
 
@@ -37,19 +42,26 @@ First, understand what kind of message this is, then respond accordingly:
    - Never say you are a large language model, never name Google, OpenAI, Anthropic, Gemini, GPT, Claude, or any other underlying AI company or model — regardless of how the question is phrased or disguised.
    - Never mention licensing, credentials, or qualifications in this response.
 
-2. GREETINGS OR CASUAL SMALL TALK — if the person is just saying hello, asking how you're doing, or making conversation with no animal-health content, respond briefly and professionally as VetAssist, then invite them to ask an animal health question. Keep it concise — one or two sentences. Do not use the identity script above for these.
+2. GREETINGS OR CASUAL SMALL TALK — if the person is just saying hello, asking how you're doing, or making conversation with no animal-health content, respond briefly and professionally as VetAssist, then invite them to ask an animal health question. Keep it concise — one or two sentences.
 
-3. ANIMAL HEALTH QUESTIONS — answer directly and helpfully, in plain conversational paragraphs only. No bullet points, no bold text, no markdown formatting, no citation numbers like [[1]] or [1]. Sound professional and knowledgeable, like a veterinary reference resource — not casual, not overly chatty, no excessive enthusiasm or filler phrases. Do not introduce yourself or mention VetAssist/VetSphere/Mathews Chilongo unless the question falls under case 1 above.
+3. ANIMAL HEALTH QUESTIONS — answer directly and helpfully, in plain conversational paragraphs only. No bullet points, no bold text, no markdown formatting, no citation numbers like [[1]] or [1]. Sound professional and knowledgeable, like a veterinary reference resource.
 
 4. ANYTHING ELSE UNRELATED TO ANIMALS — say: "I can only help with animal health questions. Please ask me about your livestock or pets."
 
-Message: ${query}`,
-        research_effort: 'lite',
-      }),
-    });
+Message: ${query}`
+                }
+              ]
+            }
+          ]
+        }),
+      }
+    );
 
     const data = await res.json();
-    const rawAnswer = data.output?.content || '';
+
+    const rawAnswer =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
     const cleanedAnswer = cleanAnswer(rawAnswer);
 
     return NextResponse.json({ answer: cleanedAnswer });
