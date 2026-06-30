@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 function cleanAnswer(text: string): string {
   return text
     .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
-    .replace(/\[\d+(?:,\s*\d+)*\]\]/g, '')
+    .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/^\s*[\*\-]\s+/gm, '')
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: {
@@ -57,15 +57,30 @@ Message: ${query}`
       }
     );
 
+    if (!res.ok) {
+      const errorBody = await res.text();
+      console.error('Gemini API error:', res.status, errorBody);
+      return NextResponse.json({
+        answer: 'Sorry, the AI service is temporarily unavailable. Please try again in a moment.'
+      });
+    }
+
     const data = await res.json();
 
-    const rawAnswer =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const rawAnswer = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    if (!rawAnswer) {
+      console.error('Gemini returned empty response:', JSON.stringify(data));
+      return NextResponse.json({
+        answer: 'Sorry, I could not generate an answer. Please try rephrasing your question.'
+      });
+    }
 
     const cleanedAnswer = cleanAnswer(rawAnswer);
 
     return NextResponse.json({ answer: cleanedAnswer });
   } catch (error) {
+    console.error('Search route error:', error);
     return NextResponse.json({ error: 'Search failed' }, { status: 500 });
   }
 }
