@@ -54,10 +54,10 @@ export default function DynamicQuiz() {
 
       setQuizCache((prev) => ({
         ...prev,
-        [topic]: data.questions,
+        [topic]: data.questions || [],
       }));
 
-      setQuestions(data.questions);
+      setQuestions(data.questions || []);
       setCurrentQuestionIndex(0);
       setAnswers([]);
       setShowResult(false);
@@ -90,11 +90,14 @@ export default function DynamicQuiz() {
   };
 
   // -------------------------
-  // 🧮 SCORE
+  // 🧮 SAFE SCORE
   // -------------------------
-  const score = questions.reduce((total, q, i) => {
-    return answers[i] === q.correctIndex ? total + 1 : total;
-  }, 0);
+  const score =
+    questions.length > 0
+      ? questions.reduce((total, q, i) => {
+          return answers[i] === q.correctIndex ? total + 1 : total;
+        }, 0)
+      : 0;
 
   const perfectScore = questions.length > 0 && score === questions.length;
 
@@ -228,7 +231,7 @@ export default function DynamicQuiz() {
             </button>
           )}
 
-          <div className="flex gap-2 justify-center">
+          <div className="flex gap-2 justify-center flex-wrap">
             <button
               onClick={() => setViewReview(true)}
               className="bg-red-600 text-white px-4 py-2 rounded"
