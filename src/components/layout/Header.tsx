@@ -24,16 +24,30 @@ export default function Header() {
         {/* Logo */}
         <a href="/" className="flex items-center gap-2 shrink-0">
           <span className="text-2xl">🐾</span>
-          <span className="text-xl font-extrabold text-gray-900">Vet<span className="text-green-600">Sphere</span></span>
+          <span className="text-xl font-extrabold text-gray-900">
+            Vet<span className="text-green-600">Sphere</span>
+          </span>
         </a>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
+
           <a href="/" className="hover:text-green-600 transition">Home</a>
           <a href="/articles" className="hover:text-green-600 transition">Articles</a>
+
+          {/* ✅ QUIZ BUTTON ADDED HERE */}
+          <a
+            href="/quiz"
+            className="text-green-600 font-semibold hover:text-green-700 transition"
+          >
+            🎓 Quiz
+          </a>
+
           <a href="/services" className="hover:text-green-600 transition">Services</a>
           <a href="/about" className="hover:text-green-600 transition">About</a>
-          <a href="/ask" className="hover:text-green-600 transition text-green-600 font-semibold">Ask VetAssist</a>
+          <a href="/ask" className="hover:text-green-600 transition text-green-600 font-semibold">
+            Ask VetAssist
+          </a>
         </nav>
 
         {/* Right Side */}
@@ -43,11 +57,13 @@ export default function Header() {
             className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-600"
             aria-label="Search"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            🔍
           </button>
-          <a href="/contact" className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition">
+
+          <a
+            href="/contact"
+            className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition"
+          >
             Contact Us
           </a>
         </div>
@@ -57,26 +73,15 @@ export default function Header() {
           <button
             onClick={() => setSearchOpen(!searchOpen)}
             className="p-2 rounded-lg hover:bg-gray-100 transition text-gray-600"
-            aria-label="Search"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+            🔍
           </button>
+
           <button
             className="p-2 rounded-lg hover:bg-gray-100 transition"
             onClick={() => setMenuOpen(!menuOpen)}
-            aria-label="Toggle menu"
           >
-            {menuOpen ? (
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            )}
+            ☰
           </button>
         </div>
       </div>
@@ -89,13 +94,13 @@ export default function Header() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search articles... e.g. cattle diseases, poultry health"
-              className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+              placeholder="Search articles..."
+              className="flex-1 px-4 py-2.5 border rounded-xl text-sm"
               autoFocus
             />
             <button
               type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition"
+              className="bg-green-600 text-white px-5 py-2.5 rounded-xl text-sm"
             >
               Search
             </button>
@@ -105,27 +110,28 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 w-full">
-          <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1">
-            {[
-              { href: '/', label: 'Home' },
-              { href: '/articles', label: 'Articles' },
-              { href: '/services', label: 'Services' },
-              { href: '/about', label: 'About' },
-              { href: '/ask', label: '🤖 Ask VetAssist' },
-            ].map(({ href, label }) => (
-              <a
-                key={href}
-                href={href}
-                className="py-3 px-2 text-gray-700 font-medium border-b border-gray-50 hover:text-green-600 transition"
-                onClick={() => setMenuOpen(false)}
-              >
-                {label}
-              </a>
-            ))}
+        <div className="md:hidden bg-white border-t">
+          <div className="px-4 py-3 flex flex-col gap-2">
+
+            <a href="/" onClick={() => setMenuOpen(false)}>Home</a>
+            <a href="/articles" onClick={() => setMenuOpen(false)}>Articles</a>
+
+            {/* ✅ QUIZ MOBILE LINK */}
+            <a
+              href="/quiz"
+              className="text-green-600 font-semibold"
+              onClick={() => setMenuOpen(false)}
+            >
+              🎓 Quiz
+            </a>
+
+            <a href="/services" onClick={() => setMenuOpen(false)}>Services</a>
+            <a href="/about" onClick={() => setMenuOpen(false)}>About</a>
+            <a href="/ask" onClick={() => setMenuOpen(false)}>Ask VetAssist</a>
+
             <a
               href="/contact"
-              className="mt-3 mb-2 bg-green-600 text-white text-center font-semibold py-3 rounded-xl hover:bg-green-700 transition"
+              className="bg-green-600 text-white text-center py-3 rounded-xl mt-2"
               onClick={() => setMenuOpen(false)}
             >
               Contact Us
