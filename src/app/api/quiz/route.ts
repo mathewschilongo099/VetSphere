@@ -15,28 +15,30 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
+
+    // ✅ FIXED MODEL (updated from gemini-1.5-flash)
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
     });
 
     const prompt = `
 You are a veterinary exam generator.
 
-Create 5 MCQ questions about: ${topic}
+Create 5 multiple-choice questions about: ${topic}
 
 STRICT RULE:
-Return ONLY valid JSON like this:
+Return ONLY valid JSON in this format:
 
 [
   {
-    "question": "...",
+    "question": "string",
     "options": ["A", "B", "C", "D"],
     "correctIndex": 0,
-    "explanation": "..."
+    "explanation": "string"
   }
 ]
 
-No markdown, no text, no explanation outside JSON.
+No markdown, no extra text, only JSON array.
 `;
 
     const result = await model.generateContent(prompt);
@@ -45,17 +47,17 @@ No markdown, no text, no explanation outside JSON.
 
     console.log('RAW GEMINI RESPONSE:', text);
 
-    // safer parsing
     let questions;
 
     try {
+      // try direct parsing first
       questions = JSON.parse(text);
-    } catch (e) {
-      // fallback extraction
+    } catch (err) {
+      // fallback extraction if Gemini adds extra text
       const match = text.match(/\[[\s\S]*\]/);
 
       if (!match) {
-        throw new Error('Invalid JSON from Gemini');
+        throw new Error('Gemini did not return valid JSON');
       }
 
       questions = JSON.parse(match[0]);
