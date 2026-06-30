@@ -14,10 +14,12 @@ export default function DynamicQuiz() {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
-  // 🧠 NEW EXAM STATE
   const [answers, setAnswers] = useState<(number | null)[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [viewReview, setViewReview] = useState(false);
+
+  // 🧠 NEW: message from API
+  const [resultMessage, setResultMessage] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -33,6 +35,7 @@ export default function DynamicQuiz() {
       setAnswers([]);
       setShowResult(false);
       setViewReview(false);
+      setResultMessage('');
       return;
     }
 
@@ -42,7 +45,11 @@ export default function DynamicQuiz() {
       const response = await fetch('/api/quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify({
+          topic,
+          score: 0,
+          total: 0,
+        }),
       });
 
       const data = await response.json();
@@ -59,6 +66,7 @@ export default function DynamicQuiz() {
       setAnswers([]);
       setShowResult(false);
       setViewReview(false);
+      setResultMessage('');
     } catch (err: any) {
       setError(err.message || 'Failed to generate quiz');
     } finally {
@@ -66,26 +74,44 @@ export default function DynamicQuiz() {
     }
   };
 
-  // 🧠 STORE ANSWERS ONLY (NO MARKING YET)
+  // 🧠 STORE ANSWERS ONLY
   const handleAnswer = (index: number) => {
     const updated = [...answers];
     updated[currentQuestionIndex] = index;
     setAnswers(updated);
   };
 
-  // ➡ NEXT QUESTION OR FINISH EXAM
-  const nextQuestion = () => {
+  // ➡ NEXT QUESTION OR FINISH
+  const nextQuestion = async () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
     } else {
+      // 🧠 FINAL SCORE
+      const finalScore = questions.reduce((total, q, i) => {
+        return answers[i] === q.correctIndex ? total + 1 : total;
+      }, 0);
+
+      try {
+        const res = await fetch('/api/quiz', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            topic,
+            score: finalScore,
+            total: questions.length,
+          }),
+        });
+
+        const data = await res.json();
+
+        setResultMessage(data.message || '');
+      } catch {
+        setResultMessage('');
+      }
+
       setShowResult(true);
     }
   };
-
-  // 🧠 FINAL SCORE CALCULATION
-  const score = questions.reduce((total, q, i) => {
-    return answers[i] === q.correctIndex ? total + 1 : total;
-  }, 0);
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -93,7 +119,7 @@ export default function DynamicQuiz() {
     <div className="max-w-3xl mx-auto p-8 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
 
       <h2 className="text-3xl font-bold mb-6 text-center">
-        VetSphere Exam Mode
+        Assessment of veterinary knowledge by VetSphere
       </h2>
 
       {/* START SCREEN */}
@@ -159,11 +185,24 @@ export default function DynamicQuiz() {
       {/* RESULT SCREEN */}
       {showResult && (
         <div className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Exam Completed 🎓</h2>
+          <h2 className="text-3xl font-bold mb-4">
+            Exam Completed 🎓
+          </h2>
 
-          <p className="text-2xl mb-6">
-            Score: {score} / {questions.length}
+          <p className="text-2xl mb-4">
+            Score: {
+              questions.reduce((total, q, i) =>
+                answers[i] === q.correctIndex ? total + 1 : total
+              , 0)
+            } / {questions.length}
           </p>
+
+          {/* 🧠 API MESSAGE */}
+          {resultMessage && (
+            <p className="text-lg mb-6 text-gray-700 dark:text-gray-300">
+              {resultMessage}
+            </p>
+          )}
 
           <button
             onClick={() => setViewReview(true)}
@@ -178,6 +217,7 @@ export default function DynamicQuiz() {
               setCurrentQuestionIndex(0);
               setAnswers([]);
               setShowResult(false);
+              setResultMessage('');
             }}
             className="bg-green-600 text-white px-4 py-2 rounded"
           >
@@ -189,7 +229,9 @@ export default function DynamicQuiz() {
       {/* REVIEW MODE */}
       {viewReview && (
         <div className="mt-10">
-          <h2 className="text-2xl font-bold mb-4">Review Mistakes</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Review Mistakes
+          </h2>
 
           {questions.map((q, i) => {
             const userAnswer = answers[i];
