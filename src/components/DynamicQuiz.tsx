@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 
-const GEMINI_API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
 interface Question {
   question: string;
@@ -24,7 +24,7 @@ export default function DynamicQuiz() {
 
   const generateQuiz = async () => {
     if (!GEMINI_API_KEY) {
-      setError('Gemini API key not configured. Add NEXT_PUBLIC_GEMINI_API_KEY to .env.local');
+      setError('Gemini API key not configured. Check Vercel Environment Variables.');
       return;
     }
 
