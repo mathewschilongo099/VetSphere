@@ -1,8 +1,26 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
+function getMotivation(score: number, total: number) {
+  const percent = (score / total) * 100;
+
+  if (percent === 100) {
+    return "🎉 Outstanding! Perfect score. You have mastered this topic completely!";
+  }
+
+  if (percent >= 70) {
+    return "👏 Great job! You have a strong understanding. A little more revision will make you excellent.";
+  }
+
+  if (percent >= 40) {
+    return "👍 Good effort! You are improving. Review your mistakes and try again.";
+  }
+
+  return "💪 Keep going! Every attempt improves your knowledge. Don't give up — progress takes time.";
+}
+
 export async function POST(req: Request) {
-  const { topic } = await req.json();
+  const { topic, score = 0, total = 0 } = await req.json();
 
   const groqKey = process.env.GROQ_API_KEY;
   const openRouterKey = process.env.OPENROUTER_API_KEY;
@@ -38,12 +56,13 @@ No markdown. No extra text.
       });
 
       const text = completion.choices[0]?.message?.content || '';
-
       const match = text.match(/\[[\s\S]*\]/);
+
       if (match) {
         return NextResponse.json({
           questions: JSON.parse(match[0]),
           source: 'groq',
+          message: getMotivation(score, total),
         });
       }
     }
@@ -70,13 +89,13 @@ No markdown. No extra text.
 
       const data = await res.json();
       const text = data.choices?.[0]?.message?.content || '';
-
       const match = text.match(/\[[\s\S]*\]/);
 
       if (match) {
         return NextResponse.json({
           questions: JSON.parse(match[0]),
           source: 'openrouter',
+          message: getMotivation(score, total),
         });
       }
     }
@@ -85,7 +104,7 @@ No markdown. No extra text.
   }
 
   // -----------------------------
-  // 🧱 3. FINAL FALLBACK (ALWAYS WORKS)
+  // 🧱 3. FINAL FALLBACK
   // -----------------------------
   const fallbackQuestions = [
     {
@@ -115,5 +134,6 @@ No markdown. No extra text.
   return NextResponse.json({
     questions: fallbackQuestions,
     source: 'local-fallback',
+    message: getMotivation(score, total),
   });
 }
