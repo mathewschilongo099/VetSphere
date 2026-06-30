@@ -19,10 +19,6 @@ export default function AskPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Wait for the new message to fully render and the container to expand
-    // to its final height before scrolling — otherwise scrollIntoView
-    // calculates "bottom" using the old, shorter height and undershoots,
-    // landing above the new response instead of right at it.
     const id = requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         bottomRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
@@ -37,22 +33,34 @@ export default function AskPage() {
 
     const userMessage = query.trim();
     setQuery('');
+
     setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
     setLoading(true);
 
     try {
+      // ✅ FIXED ROUTE (this is the important change)
       const res = await fetch(
-        `/api/search?query=${encodeURIComponent(userMessage)}`
+        `/api/generate?query=${encodeURIComponent(userMessage)}`
       );
+
       const data = await res.json();
+
       setMessages(prev => [
         ...prev,
-        { role: 'ai', text: data.answer || 'Sorry, I could not find an answer. Please try again.' },
+        {
+          role: 'ai',
+          text:
+            data.answer ||
+            'Sorry, I could not find an answer. Please try again.',
+        },
       ]);
     } catch {
       setMessages(prev => [
         ...prev,
-        { role: 'ai', text: 'Something went wrong. Please try again.' },
+        {
+          role: 'ai',
+          text: 'Something went wrong. Please try again.',
+        },
       ]);
     } finally {
       setLoading(false);
@@ -82,7 +90,6 @@ export default function AskPage() {
 
       <div className="max-w-3xl mx-auto px-4 py-8">
 
-        {/* Suggested Questions */}
         {messages.length === 1 && (
           <div className="mb-6">
             <p className="text-gray-500 text-sm mb-3 text-center">Try asking:</p>
@@ -105,13 +112,16 @@ export default function AskPage() {
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex ${
+                msg.role === 'user' ? 'justify-end' : 'justify-start'
+              }`}
             >
               {msg.role === 'ai' && (
                 <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold mr-2 shrink-0 mt-1">
                   VA
                 </div>
               )}
+
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === 'user'
@@ -131,13 +141,14 @@ export default function AskPage() {
               </div>
               <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
                 <div className="flex gap-1 items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" />
                 </div>
               </div>
             </div>
           )}
+
           <div ref={bottomRef} />
         </div>
 
@@ -150,6 +161,7 @@ export default function AskPage() {
             placeholder="Ask any animal health question..."
             className="flex-1 px-5 py-4 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
           />
+
           <button
             type="submit"
             disabled={loading || !query.trim()}
