@@ -52,12 +52,14 @@ export default function DynamicQuiz() {
 
       if (!response.ok) throw new Error(data.error || 'Failed to generate quiz');
 
+      const safeQuestions = data.questions || [];
+
       setQuizCache((prev) => ({
         ...prev,
-        [topic]: data.questions || [],
+        [topic]: safeQuestions,
       }));
 
-      setQuestions(data.questions || []);
+      setQuestions(safeQuestions);
       setCurrentQuestionIndex(0);
       setAnswers([]);
       setShowResult(false);
@@ -79,7 +81,7 @@ export default function DynamicQuiz() {
   };
 
   // -------------------------
-  // ➡ NEXT / FINISH
+  // ➡ NEXT QUESTION
   // -------------------------
   const nextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
@@ -90,7 +92,7 @@ export default function DynamicQuiz() {
   };
 
   // -------------------------
-  // 🧮 SAFE SCORE
+  // 🧮 SCORE
   // -------------------------
   const score =
     questions.length > 0
@@ -99,7 +101,8 @@ export default function DynamicQuiz() {
         }, 0)
       : 0;
 
-  const perfectScore = questions.length > 0 && score === questions.length;
+  const perfectScore =
+    questions.length > 0 && score === questions.length;
 
   // -------------------------
   // 🎓 CERTIFICATE
@@ -108,44 +111,107 @@ export default function DynamicQuiz() {
     const doc = new jsPDF();
 
     const name = prompt('Enter your name') || 'Student';
+    const pageWidth = doc.internal.pageSize.getWidth();
 
+    // BORDER
+    doc.setLineWidth(1.5);
+    doc.rect(10, 10, pageWidth - 20, 270);
+
+    // LOGO
+    doc.addImage(
+      '/images/articles/1782829501575.png',
+      'PNG',
+      pageWidth / 2 - 20,
+      15,
+      40,
+      40
+    );
+
+    // TITLE
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('VETSHPERE CERTIFICATE', pageWidth / 2, 70, {
+      align: 'center',
+    });
+
+    // SUBTITLE
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Awarded to', pageWidth / 2, 85, {
+      align: 'center',
+    });
+
+    // NAME
     doc.setFontSize(20);
-    doc.text('VETSHPERE CERTIFICATE', 20, 30);
+    doc.setFont('helvetica', 'bold');
+    doc.text(name, pageWidth / 2, 105, { align: 'center' });
 
+    // TEXT
     doc.setFontSize(12);
-    doc.text('This certifies that', 20, 50);
+    doc.text(
+      'For completing the VetSphere veterinary assessment test',
+      pageWidth / 2,
+      125,
+      { align: 'center' }
+    );
 
-    doc.setFontSize(16);
-    doc.text(name, 20, 65);
+    // SCORE
+    doc.setFontSize(14);
+    doc.text(
+      `Score: ${score} / ${questions.length}`,
+      pageWidth / 2,
+      145,
+      { align: 'center' }
+    );
 
-    doc.setFontSize(12);
-    doc.text('has achieved a PERFECT SCORE in veterinary assessment', 20, 80);
+    // TOPIC
+    doc.text(`Topic: ${topic}`, pageWidth / 2, 160, {
+      align: 'center',
+    });
 
-    doc.text(`Topic: ${topic}`, 20, 95);
-    doc.text(`Score: ${score} / ${questions.length}`, 20, 110);
+    // OWNER
+    doc.text('Owner: Mathews Chilongo', pageWidth / 2, 190, {
+      align: 'center',
+    });
 
-    doc.text('Owner: Mathews Chilongo', 20, 130);
+    // DATE
+    doc.text(
+      `Date: ${new Date().toLocaleDateString()}`,
+      pageWidth / 2,
+      205,
+      { align: 'center' }
+    );
 
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, 145);
+    // FOOTER
+    doc.setFontSize(10);
+    doc.text(
+      'This certificate is for educational motivation only',
+      pageWidth / 2,
+      250,
+      { align: 'center' }
+    );
 
-    doc.save('vetsphere-certificate.pdf');
+    doc.save(`vetsphere-certificate-${name}.pdf`);
   };
 
   const currentQuestion = questions[currentQuestionIndex];
 
+  // -------------------------
+  // UI
+  // -------------------------
   return (
     <div className="max-w-3xl mx-auto p-5 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
 
       {/* HEADER */}
       <h2 className="text-3xl font-bold text-center mb-2">
-        Assessment of veterinary knowledge by VetSphere
+        Assessment of Veterinary Knowledge by VetSphere
       </h2>
 
       <p className="text-center text-sm text-gray-500 dark:text-gray-400 mb-4">
-        Test your veterinary knowledge
+        Test your understanding
       </p>
 
-      {/* START SCREEN */}
+      {/* START */}
       {!questions.length && !showResult && (
         <div className="space-y-4">
           <input
@@ -163,11 +229,13 @@ export default function DynamicQuiz() {
             {loading ? 'Generating...' : 'Start Exam'}
           </button>
 
-          {error && <p className="text-red-500">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-center">{error}</p>
+          )}
         </div>
       )}
 
-      {/* EXAM SCREEN */}
+      {/* EXAM */}
       {questions.length > 0 && !showResult && currentQuestion && (
         <div>
           <div className="mb-3">
@@ -205,27 +273,28 @@ export default function DynamicQuiz() {
         </div>
       )}
 
-      {/* RESULT SCREEN */}
+      {/* RESULT */}
       {showResult && (
         <div className="text-center">
+
           <h2 className="text-3xl font-bold mb-3">
             Exam Completed 🎓
           </h2>
 
-          <p className="text-2xl mb-3">
+          <p className="text-2xl mb-2">
             Score: {score} / {questions.length}
           </p>
 
           {perfectScore && (
             <p className="text-green-600 font-semibold mb-3">
-              🎉 Excellent! Perfect Score Achieved
+              🎉 Excellent Performance!
             </p>
           )}
 
           {perfectScore && (
             <button
               onClick={downloadCertificate}
-              className="bg-purple-600 text-white px-4 py-2 rounded mb-3"
+              className="bg-purple-600 text-white px-4 py-2 rounded mb-4"
             >
               🎓 Download Certificate
             </button>
@@ -251,10 +320,11 @@ export default function DynamicQuiz() {
               New Exam
             </button>
           </div>
+
         </div>
       )}
 
-      {/* REVIEW MODE */}
+      {/* REVIEW */}
       {viewReview && (
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">
