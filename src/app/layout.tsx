@@ -10,7 +10,9 @@ export const metadata: Metadata = {
   keywords:
     'veterinary, cattle diseases, livestock health, pet care, animal health, poultry farming, goat health, vet articles, livestock farming, dog care, cat care, animal diseases',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
   },
   openGraph: {
     title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
