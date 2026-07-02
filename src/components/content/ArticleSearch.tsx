@@ -23,8 +23,10 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const searchQuery = searchParams?.get('search') ?? '';
-    const categoryQuery = searchParams?.get('category') ?? '';
+    if (!searchParams) return;
+
+    const searchQuery = searchParams.get('search') ?? '';
+    const categoryQuery = searchParams.get('category') ?? '';
 
     setQuery(searchQuery);
     setActiveCategory(categoryQuery);
@@ -36,12 +38,15 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
     if (activeCategory) {
       result = result.filter((post) =>
         post.category.toLowerCase().includes(activeCategory.toLowerCase()) ||
-        post.tags.some((tag) => tag.toLowerCase().includes(activeCategory.toLowerCase()))
+        post.tags.some((tag) =>
+          tag.toLowerCase().includes(activeCategory.toLowerCase())
+        )
       );
     }
 
     if (query.trim()) {
       const q = query.toLowerCase();
+
       result = result.filter(
         (post) =>
           post.title.toLowerCase().includes(q) ||
@@ -64,7 +69,9 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
     if (activeCategory) {
       result = result.filter((post) =>
         post.category.toLowerCase().includes(activeCategory.toLowerCase()) ||
-        post.tags.some((tag) => tag.toLowerCase().includes(activeCategory.toLowerCase()))
+        post.tags.some((tag) =>
+          tag.toLowerCase().includes(activeCategory.toLowerCase())
+        )
       );
     }
 
