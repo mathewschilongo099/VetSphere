@@ -16,14 +16,16 @@ const ARTICLES_PER_PAGE = 9;
 
 function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
   const searchParams = useSearchParams();
+
   const [filtered, setFiltered] = useState<BlogPost[]>(initialPosts);
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const searchQuery = searchParams.get('search') || '';
-    const categoryQuery = searchParams.get('category') || '';
+    const searchQuery = searchParams?.get('search') ?? '';
+    const categoryQuery = searchParams?.get('category') ?? '';
+
     setQuery(searchQuery);
     setActiveCategory(categoryQuery);
   }, [searchParams]);
@@ -50,22 +52,22 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
     }
 
     setFiltered(result);
-    // Reset to page 1 whenever the filter/search criteria changes, so the
-    // person doesn't land on an empty page 5 after a new search returns
-    // fewer results than before.
     setCurrentPage(1);
   }, [initialPosts, query, activeCategory]);
 
   function handleSearch(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+
     const q = query.toLowerCase();
     let result = initialPosts;
+
     if (activeCategory) {
       result = result.filter((post) =>
         post.category.toLowerCase().includes(activeCategory.toLowerCase()) ||
         post.tags.some((tag) => tag.toLowerCase().includes(activeCategory.toLowerCase()))
       );
     }
+
     if (q.trim()) {
       result = result.filter(
         (post) =>
@@ -75,6 +77,7 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
           post.tags.some((tag) => tag.toLowerCase().includes(q))
       );
     }
+
     setFiltered(result);
     setCurrentPage(1);
   }
@@ -87,15 +90,12 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
   const goToPage = (page: number) => {
     const clamped = Math.min(Math.max(1, page), totalPages);
     setCurrentPage(clamped);
-    // Scroll back up to the results header so the person sees the new
-    // page from the top, rather than staying scrolled at the old bottom.
+
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // Build a compact page-number list: always show first, last, current,
-  // and a couple of neighbors, with "..." gaps in between for large counts.
   const getPageNumbers = (): (number | 'ellipsis')[] => {
     const pages: (number | 'ellipsis')[] = [];
     const neighbors = 1;
@@ -103,12 +103,14 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
     for (let p = 1; p <= totalPages; p++) {
       const isEdge = p === 1 || p === totalPages;
       const isNearCurrent = Math.abs(p - safePage) <= neighbors;
+
       if (isEdge || isNearCurrent) {
         pages.push(p);
       } else if (pages[pages.length - 1] !== 'ellipsis') {
         pages.push('ellipsis');
       }
     }
+
     return pages;
   };
 
@@ -137,7 +139,10 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
           {CATEGORIES.map(({ label, value }) => (
             <button
               key={value}
-              onClick={() => { setActiveCategory(value); setQuery(''); }}
+              onClick={() => {
+                setActiveCategory(value);
+                setQuery('');
+              }}
               className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition ${
                 activeCategory === value
                   ? 'bg-green-600 text-white'
@@ -159,8 +164,12 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
                 ? `${filtered.length} article${filtered.length > 1 ? 's' : ''} found`
                 : 'No articles found'}
             </p>
+
             <button
-              onClick={() => { setQuery(''); setActiveCategory(''); }}
+              onClick={() => {
+                setQuery('');
+                setActiveCategory('');
+              }}
               className="text-green-600 text-sm font-semibold hover:underline"
             >
               Clear filters ✕
@@ -189,7 +198,9 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
 
                 {getPageNumbers().map((p, i) =>
                   p === 'ellipsis' ? (
-                    <span key={`ellipsis-${i}`} className="px-2 text-gray-400 text-sm">…</span>
+                    <span key={`ellipsis-${i}`} className="px-2 text-gray-400 text-sm">
+                      …
+                    </span>
                   ) : (
                     <button
                       key={p}
@@ -219,9 +230,15 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
           <div className="text-center py-20">
             <p className="text-4xl mb-4">🔍</p>
             <p className="text-gray-500 text-lg font-medium">No articles found</p>
-            <p className="text-gray-400 text-sm mt-2">Try a different category or search term</p>
+            <p className="text-gray-400 text-sm mt-2">
+              Try a different category or search term
+            </p>
+
             <button
-              onClick={() => { setQuery(''); setActiveCategory(''); }}
+              onClick={() => {
+                setQuery('');
+                setActiveCategory('');
+              }}
               className="mt-6 bg-green-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-green-700 transition"
             >
               View All Articles
@@ -235,13 +252,15 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
 
 export default function ArticleSearch({ initialPosts }: { initialPosts: BlogPost[] }) {
   return (
-    <Suspense fallback={
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 py-16">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-gray-100 rounded-2xl h-72 animate-pulse" />
-        ))}
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 py-16">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-gray-100 rounded-2xl h-72 animate-pulse" />
+          ))}
+        </div>
+      }
+    >
       <SearchContent initialPosts={initialPosts} />
     </Suspense>
   );
