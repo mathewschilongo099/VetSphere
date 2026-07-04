@@ -17,4 +17,4 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     success: false,
     message: 'Wrong password',
   });
-}
+)
