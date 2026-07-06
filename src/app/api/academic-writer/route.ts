@@ -147,40 +147,74 @@ Briefly describe what would be included (e.g. data collection tool, consent form
   ];
 }
 
-async function callGemini(prompt: string, maxOutputTokens: number): Promise<string> {
-  const geminiKey = process.env.GEMINI_API_KEY;
-  if (!geminiKey) return '';
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            temperature: 0.45,
-            maxOutputTokens,
-          },
-        }),
-      }
-    );
-    const data = await response.json();
-    if (data.error) {
-      console.error('Gemini error:', data.error);
-      return '';
-    }
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  } catch (e) {
-    console.error('Gemini fetch error:', e);
-    return '';
-  }
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function callOpenRouter(prompt: string, maxTokens: number): Promise<string> {
+async function callGemini(
+  prompt: string,
+  maxOutputTokens: number,
+  retries = 3
+): Promise<{ text: string; error: string }> {
+  const geminiKey = process.env.GEMINI_API_KEY;
+  if (!geminiKey) return { text: '', error: 'GEMINI_API_KEY is not set' };
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.45,
+              maxOutputTokens,
+            },
+          }),
+        }
+      );
+      const data = await response.json();
+
+      if (data.error) {
+        const status = data.error.code || response.status;
+        const message = data.error.message || JSON.stringify(data.error);
+        console.error(`Gemini error (status ${status}):`, message);
+
+        // 429 = rate limit / quota exceeded. Back off and retry.
+        if ((status === 429 || status === 503) && attempt < retries) {
+          const backoffMs = 2000 * Math.pow(2, attempt); // 2s, 4s, 8s
+          await sleep(backoffMs);
+          continue;
+        }
+        return { text: '', error: `Gemini ${status}: ${message}` };
+      }
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      const finishReason = data.candidates?.[0]?.finishReason;
+      if (!text && finishReason) {
+        return { text: '', error: `Gemini returned no text (finishReason: ${finishReason})` };
+      }
+      return { text, error: '' };
+    } catch (e: any) {
+      console.error('Gemini fetch error:', e);
+      if (attempt < retries) {
+        await sleep(2000 * Math.pow(2, attempt));
+        continue;
+      }
+      return { text: '', error: `Gemini fetch failed: ${e.message || e}` };
+    }
+  }
+  return { text: '', error: 'Gemini failed after retries' };
+}
+
+async function callOpenRouter(
+  prompt: string,
+  maxTokens: number
+): Promise<{ text: string; error: string }> {
   const openRouterKey = process.env.OPENROUTER_API_KEY;
-  if (!openRouterKey) return '';
+  if (!openRouterKey) return { text: '', error: 'OPENROUTER_API_KEY is not set' };
 
   try {
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -199,25 +233,70 @@ async function callOpenRouter(prompt: string, maxTokens: number): Promise<string
       }),
     });
     const data = await response.json();
-    if (data.error || !data.choices) return '';
-    return data.choices[0]?.message?.content || '';
-  } catch (e) {
-    console.error('OpenRouter error:', e);
-    return '';
+    if (data.error || !data.choices) {
+      const message = data.error?.message || 'unknown OpenRouter error';
+      console.error('OpenRouter error:', message);
+      return { text: '', error: `OpenRouter: ${message}` };
+    }
+    return { text: data.choices[0]?.message?.content || '', error: '' };
+  } catch (e: any) {
+    console.error('OpenRouter fetch error:', e);
+    return { text: '', error: `OpenRouter fetch failed: ${e.message || e}` };
+  }
+}
+
+async function callGroq(
+  prompt: string,
+  maxTokens: number
+): Promise<{ text: string; error: string }> {
+  const groqKey = process.env.GROQ_API_KEY;
+  if (!groqKey) return { text: '', error: 'GROQ_API_KEY is not set' };
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${groqKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.45,
+        max_tokens: maxTokens,
+      }),
+    });
+    const data = await response.json();
+    if (data.error || !data.choices) {
+      const message = data.error?.message || 'unknown Groq error';
+      console.error('Groq error:', message);
+      return { text: '', error: `Groq: ${message}` };
+    }
+    return { text: data.choices[0]?.message?.content || '', error: '' };
+  } catch (e: any) {
+    console.error('Groq fetch error:', e);
+    return { text: '', error: `Groq fetch failed: ${e.message || e}` };
   }
 }
 
 async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number
-): Promise<{ text: string; apiUsed: string }> {
-  let text = await callGemini(sectionPrompt, maxOutputTokens);
-  if (text) return { text, apiUsed: 'Gemini' };
+): Promise<{ text: string; apiUsed: string; error: string }> {
+  const gemini = await callGemini(sectionPrompt, maxOutputTokens);
+  if (gemini.text) return { text: gemini.text, apiUsed: 'Gemini', error: '' };
 
-  text = await callOpenRouter(sectionPrompt, maxOutputTokens);
-  if (text) return { text, apiUsed: 'OpenRouter' };
+  const openRouter = await callOpenRouter(sectionPrompt, maxOutputTokens);
+  if (openRouter.text) return { text: openRouter.text, apiUsed: 'OpenRouter', error: '' };
 
-  return { text: '', apiUsed: 'none' };
+  const groq = await callGroq(sectionPrompt, maxOutputTokens);
+  if (groq.text) return { text: groq.text, apiUsed: 'Groq', error: '' };
+
+  return {
+    text: '',
+    apiUsed: 'none',
+    error: `Gemini failed (${gemini.error}); OpenRouter failed (${openRouter.error}); Groq failed (${groq.error})`,
+  };
 }
 
 function cleanText(text: string): string {
@@ -246,7 +325,10 @@ async function generateFullResearchPaper(
   // the full paper every time (which would blow up token usage).
   let rollingSummary = `Research paper topic: "${topic}". Academic level: ${levelInfo.label}.`;
 
-  for (const chapter of chapters) {
+  for (let i = 0; i < chapters.length; i++) {
+    const chapter = chapters[i];
+    // Small gap between calls to reduce the chance of hitting per-minute rate limits.
+    if (i > 0) await sleep(1500);
     const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
 
 TOPIC: "${topic}"
@@ -263,8 +345,8 @@ STYLE RULES (must follow strictly):
 - Do not include any chapter other than the one requested.
 - Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.`;
 
-    const { text, apiUsed } = await generateSection(prompt, 8000);
-    apiUsedList.push(`${chapter.id}: ${apiUsed}`);
+    const { text, apiUsed, error } = await generateSection(prompt, 8000);
+    apiUsedList.push(`${chapter.id}: ${apiUsed}${error ? ` (${error})` : ''}`);
 
     if (text) {
       generatedParts.push(cleanText(text));
@@ -274,7 +356,7 @@ STYLE RULES (must follow strictly):
         .slice(0, 200)}...`;
     } else {
       generatedParts.push(
-        `${chapter.title}\n\n[This section could not be generated — please retry or check API configuration.]`
+        `${chapter.title}\n\n[This section could not be generated. Reason: ${error || 'unknown error'}]`
       );
     }
   }
@@ -308,8 +390,8 @@ STYLE RULES:
 - Justify main body text conceptually (i.e., write in complete, well-organised paragraphs, not bullet fragments), except where a table or list is genuinely clearer.
 - Do not add a preamble — start directly with the Title Page.`;
 
-  const { text, apiUsed } = await generateSection(prompt, 8000);
-  return { content: text ? cleanText(text) : '', apiUsed };
+  const { text, apiUsed, error } = await generateSection(prompt, 8000);
+  return { content: text ? cleanText(text) : '', apiUsed: error ? `${apiUsed} (${error})` : apiUsed };
 }
 
 // ============================================================
