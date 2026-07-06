@@ -20,38 +20,32 @@ export async function POST(request: NextRequest) {
       .replace(/[‎]/g, '')
       .trim();
 
-    const shortTopic = cleanTopic.length > 80 ? cleanTopic.substring(0, 80) + '...' : cleanTopic;
-
-    const levelMap: Record<string, { label: string; wordCount: string; description: string; detail: string }> = {
+    const levelMap: Record<string, { label: string; description: string; detail: string }> = {
       diploma: { 
-        label: 'Diploma',
-        wordCount: '1500-2000 words',
+        label: 'Diploma Level',
         description: 'Foundational understanding with practical applications',
-        detail: 'Include basic concepts, practical procedures, and fundamental knowledge'
+        detail: 'Write comprehensive content appropriate for diploma level. Include basic concepts, practical procedures, and fundamental knowledge. Write in detail but keep explanations accessible.'
       },
       degree: { 
-        label: "Bachelor's Degree",
-        wordCount: '2000-3000 words',
+        label: "Bachelor's Degree Level",
         description: 'Comprehensive analysis with evidence-based approach',
-        detail: 'Include detailed procedures, literature review, critical analysis, and evidence-based recommendations'
+        detail: 'Write detailed, comprehensive content appropriate for bachelor\'s level. Include thorough procedures, literature review, critical analysis, and evidence-based recommendations. Write extensively with proper academic depth.'
       },
       masters: { 
-        label: "Master's Degree",
-        wordCount: '3000-4000 words',
+        label: "Master's Degree Level",
         description: 'Advanced research with critical analysis',
-        detail: 'Include extensive literature review, advanced methodology, critical discussion, and original insights'
+        detail: 'Write extensive, advanced content appropriate for master\'s level. Include comprehensive literature review, advanced methodology, critical discussion, original insights, and in-depth analysis. Write at a high academic level with sophisticated arguments.'
       },
       phd: { 
-        label: 'PhD',
-        wordCount: '4000-5000 words',
+        label: 'PhD Level',
         description: 'Original contribution with extensive literature review',
-        detail: 'Include comprehensive literature review, original research methodology, extensive discussion, and contributions to knowledge'
+        detail: 'Write comprehensive, original content appropriate for PhD level. Include exhaustive literature review, original research methodology, extensive discussion, theoretical contributions, and deep critical analysis. Write at the highest academic level with original insights and contributions to knowledge.'
       }
     };
 
     const typeMap: Record<string, { label: string; format: string }> = {
       essay: { 
-        label: 'Assignment',
+        label: 'Academic Assignment',
         format: 'assignment'
       },
       research: { 
@@ -59,7 +53,7 @@ export async function POST(request: NextRequest) {
         format: 'research'
       },
       report: { 
-        label: 'Report',
+        label: 'Professional Report',
         format: 'report'
       },
       'case-study': { 
@@ -71,161 +65,43 @@ export async function POST(request: NextRequest) {
     const levelInfo = levelMap[level] || levelMap['degree'];
     const typeInfo = typeMap[type] || typeMap['essay'];
 
-    // Build format-specific prompt
+    // Build format-specific structure prompt
     let structurePrompt = '';
 
     if (type === 'research') {
       structurePrompt = `
 1.0 Cover Page
-   - Institution name
-   - Course name and code
-   - Research title
-   - Student name
-   - Student ID
-   - Lecturer's name
-   - Submission date
-
-2.0 Abstract (150-250 words)
-   - Purpose of the research
-   - Methodology used
-   - Key findings
-   - Conclusion and recommendations
-
+2.0 Abstract
 3.0 Table of Contents
-
-4.0 Introduction
-   - 4.1 Background of the study
-   - 4.2 Problem statement
-   - 4.3 Research objectives
-   - 4.4 Research questions
-   - 4.5 Significance of the study
-   - 4.6 Scope and limitations
-
-5.0 Literature Review
-   - 5.1 Theoretical framework
-   - 5.2 Previous studies and findings
-   - 5.3 Knowledge gaps identified
-
-6.0 Methodology
-   - 6.1 Research design
-   - 6.2 Study area
-   - 6.3 Target population
-   - 6.4 Sampling method
-   - 6.5 Data collection methods
-   - 6.6 Data analysis techniques
-   - 6.7 Ethical considerations
-
-7.0 Results/Findings
-   - 7.1 Presentation of findings
-   - 7.2 Data tables and figures
-   - 7.3 Statistical analysis (if applicable)
-
-8.0 Discussion
-   - 8.1 Interpretation of findings
-   - 8.2 Comparison with previous studies
-   - 8.3 Implications of findings
-
-9.0 Conclusion and Recommendations
-   - 9.1 Summary of key findings
-   - 9.2 Recommendations for practice
-   - 9.3 Recommendations for future research
-
-10.0 References (APA 7th Edition format)
-    - At least ${level === 'phd' ? '25' : level === 'masters' ? '20' : '12'} peer-reviewed sources
-
-11.0 Appendices
-    - Appendix A: Data collection instruments
-    - Appendix B: Raw data
-    - Appendix C: Additional materials`;
+4.0 Introduction (Background, Problem Statement, Objectives, Research Questions, Significance, Scope)
+5.0 Literature Review (Theoretical Framework, Previous Studies, Knowledge Gaps)
+6.0 Methodology (Research Design, Study Area, Population, Sampling, Data Collection, Analysis, Ethics)
+7.0 Results/Findings (Presentation, Tables/Figures, Analysis)
+8.0 Discussion (Interpretation, Comparison with Previous Studies, Implications)
+9.0 Conclusion and Recommendations (Summary, Recommendations for Practice, Future Research)
+10.0 References (APA 7th Edition)
+11.0 Appendices`;
     } else if (type === 'case-study') {
       structurePrompt = `
 1.0 Cover Page
-   - Institution name
-   - Course name and code
-   - Case study title
-   - Student name
-   - Student ID
-   - Lecturer's name
-   - Submission date
-
-2.0 Executive Summary (100-150 words)
-   - Brief overview of the case
-   - Key issues identified
-   - Main recommendations
-
-3.0 Introduction
-   - 3.1 Background information
-   - 3.2 Purpose of the case study
-   - 3.3 Scope of the case
-
-4.0 Case Description
-   - 4.1 Description of the subject (patient/farm/organization)
-   - 4.2 History and background
-   - 4.3 Signs and symptoms (if medical/veterinary)
-   - 4.4 Key events and timeline
-
-5.0 Problem Identification
-   - 5.1 Main problems identified
-   - 5.2 Contributing factors
-   - 5.3 Severity and impact
-
-6.0 Analysis
-   - 6.1 Analysis of causes
-   - 6.2 Evidence and literature support
-   - 6.3 Theoretical framework application
-
-7.0 Solutions and Management
-   - 7.1 Possible solutions
-   - 7.2 Chosen solution rationale
-   - 7.3 Implementation plan
-   - 7.4 Expected outcomes
-
-8.0 Outcome (if known)
-   - 8.1 Results of implemented solution
-   - 8.2 Lessons learned
-
+2.0 Executive Summary
+3.0 Introduction (Background, Purpose, Scope)
+4.0 Case Description (Subject Description, History, Signs/Symptoms, Key Events)
+5.0 Problem Identification (Main Problems, Contributing Factors, Impact)
+6.0 Analysis (Causes, Evidence, Theoretical Framework)
+7.0 Solutions and Management (Options, Chosen Solution, Implementation, Expected Outcomes)
+8.0 Outcome (Results, Lessons Learned)
 9.0 Conclusion and Recommendations
-   - 9.1 Summary of key points
-   - 9.2 Recommendations for practice
-   - 9.3 Recommendations for similar cases
-
-10.0 References (APA 7th Edition format)
-
-11.0 Appendices
-    - Supporting documents
-    - Additional data`;
+10.0 References (APA 7th Edition)
+11.0 Appendices`;
     } else {
       structurePrompt = `
 1.0 Cover Page
-   - Institution name
-   - Course name and code
-   - Assignment title
-   - Student name
-   - Student ID
-   - Lecturer's name
-   - Submission date
-
 2.0 Table of Contents
-
-3.0 Introduction
-   - 3.1 Background
-   - 3.2 Purpose of the assignment
-   - 3.3 Objectives
-
-4.0 Main Body (Detailed content on the topic)
-   - 4.1 Topic 1: Key concepts and explanations
-   - 4.2 Topic 2: Supporting evidence and examples
-   - 4.3 Topic 3: Diagrams, tables, or case examples
-   - 4.4 Topic 4: Practical applications
-
-5.0 Conclusion
-   - 5.1 Summary of key points
-   - 5.2 Final remarks
-   - 5.3 Recommendations (if required)
-
-6.0 References (APA 7th Edition format)
-    - At least ${level === 'phd' ? '20' : level === 'masters' ? '15' : '8'} peer-reviewed sources
-
+3.0 Introduction (Background, Purpose, Objectives)
+4.0 Main Body (Detailed content with multiple sections covering all aspects of the topic)
+5.0 Conclusion (Summary, Final Remarks, Recommendations)
+6.0 References (APA 7th Edition)
 7.0 Appendices (if applicable)`;
     }
 
@@ -233,46 +109,48 @@ export async function POST(request: NextRequest) {
 
 "${cleanTopic}"
 
-Academic Level: ${levelInfo.label} (${levelInfo.wordCount})
+Academic Level: ${levelInfo.label}
 Required Depth: ${levelInfo.description}
 Detail Level: ${levelInfo.detail}
+
+IMPORTANT INSTRUCTIONS:
+1. Write as much as needed to fully cover the topic - there is NO word limit
+2. Write extensive, thorough content appropriate for ${levelInfo.label}
+3. Include ALL relevant details, examples, procedures, and explanations
+4. For veterinary topics, include species-specific details where applicable
+5. Use evidence-based approach with proper in-text citations (Author, Year)
+6. Write in full academic paragraphs - NO bullet points
+7. Use numbered headings as specified
+8. DO NOT use markdown symbols (#, *, **, etc.)
+9. Use plain text with proper academic formatting
 
 FORMAT REQUIREMENTS:
 - Font: Times New Roman, 12 pt
 - Line Spacing: 1.5
 - Margins: 1 inch all sides
 - Alignment: Justified
-- Page Numbers: Bottom center
-- No markdown symbols (#, *, **, etc.)
-- Use plain text with numbered headings
 
-STRUCTURE FORMAT:
+STRUCTURE:
 ${structurePrompt}
 
 CONTENT REQUIREMENTS:
-- Write comprehensive, detailed content appropriate for ${levelInfo.label} level
+- Write comprehensive, detailed content appropriate for ${levelInfo.label}
 - Include specific examples, procedures, and practical applications
-- Use evidence-based approach with proper citations
-- For veterinary topics, include species-specific details
-- Include in-text citations throughout (Author, Year)
-- Be thorough and detailed - this should be a complete academic paper
+- Be thorough - cover all aspects of the topic in depth
+- Include proper citations throughout
+- Write enough to fully address the topic at the ${levelInfo.label} level
 
-IMPORTANT: 
-1. Write in full paragraphs with proper academic language
-2. Do NOT use bullet points - use proper paragraphs
-3. Do NOT use markdown symbols
-4. Use proper spacing between sections
-5. Include enough detail to meet the word count requirement
-6. For procedures, provide step-by-step details
-
-Generate a complete, well-structured academic ${typeInfo.label} with proper formatting and citations.`;
+Generate a complete, well-structured, detailed academic ${typeInfo.label} with proper formatting and citations. Write extensively to fully cover the topic.`;
 
     let aiResponse = '';
+    let apiUsed = '';
 
-    // Try Gemini API
+    // PRIMARY: Try Gemini API (Best Quality)
+    console.log('Attempting Gemini API...');
     try {
       const geminiKey = process.env.GEMINI_API_KEY;
       if (geminiKey) {
+        const startTime = Date.now();
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
           {
@@ -282,7 +160,7 @@ Generate a complete, well-structured academic ${typeInfo.label} with proper form
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: { 
                 temperature: 0.7, 
-                maxOutputTokens: 6000 
+                maxOutputTokens: 8000 
               }
             })
           }
@@ -290,17 +168,56 @@ Generate a complete, well-structured academic ${typeInfo.label} with proper form
         const data = await response.json();
         if (!data.error) {
           aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          apiUsed = 'Gemini';
+          console.log(`Gemini API success ✅ (${Date.now() - startTime}ms)`);
         }
       }
     } catch (e) {
       console.error('Gemini error:', e);
     }
 
-    // Fallback to Groq
+    // FALLBACK 1: Try You.com API (Research-focused)
     if (!aiResponse) {
+      console.log('Attempting You.com API...');
+      try {
+        const youKey = process.env.YOU_API_KEY;
+        if (youKey) {
+          const startTime = Date.now();
+          const response = await fetch('https://api.you.com/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${youKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              model: 'you-chat',
+              messages: [
+                { role: 'system', content: 'You are a professional academic writer specializing in veterinary science.' },
+                { role: 'user', content: prompt }
+              ],
+              temperature: 0.7,
+              max_tokens: 8000,
+            })
+          });
+          const data = await response.json();
+          if (!data.error) {
+            aiResponse = data.choices?.[0]?.message?.content || '';
+            apiUsed = 'You.com';
+            console.log(`You.com API success ✅ (${Date.now() - startTime}ms)`);
+          }
+        }
+      } catch (e) {
+        console.error('You.com error:', e);
+      }
+    }
+
+    // FALLBACK 2: Try Groq API (Fast Speed)
+    if (!aiResponse) {
+      console.log('Attempting Groq API (Fast)...');
       try {
         const groqKey = process.env.GROQ_API_KEY;
         if (groqKey) {
+          const startTime = Date.now();
           const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -311,46 +228,22 @@ Generate a complete, well-structured academic ${typeInfo.label} with proper form
               model: 'mixtral-8x7b-32768',
               messages: [{ role: 'user', content: prompt }],
               temperature: 0.7,
-              max_tokens: 6000,
+              max_tokens: 8000,
             })
           });
           const data = await response.json();
-          aiResponse = data.choices?.[0]?.message?.content || '';
+          if (!data.error) {
+            aiResponse = data.choices?.[0]?.message?.content || '';
+            apiUsed = 'Groq (Fast)';
+            console.log(`Groq API success ✅ (${Date.now() - startTime}ms)`);
+          }
         }
       } catch (e) {
         console.error('Groq error:', e);
       }
     }
 
-    // Fallback to OpenRouter
-    if (!aiResponse) {
-      try {
-        const openRouterKey = process.env.OPENROUTER_API_KEY;
-        if (openRouterKey) {
-          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${openRouterKey}`,
-              'Content-Type': 'application/json',
-              'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
-              'X-Title': 'VetSphere Academic Writer'
-            },
-            body: JSON.stringify({
-              model: 'google/gemini-1.5-flash',
-              messages: [{ role: 'user', content: prompt }],
-              temperature: 0.7,
-              max_tokens: 6000,
-            })
-          });
-          const data = await response.json();
-          aiResponse = data.choices?.[0]?.message?.content || '';
-        }
-      } catch (e) {
-        console.error('OpenRouter error:', e);
-      }
-    }
-
-    // Clean the response - remove markdown symbols
+    // Clean the response
     if (aiResponse) {
       aiResponse = aiResponse
         .replace(/\*\*/g, '')
@@ -361,9 +254,132 @@ Generate a complete, well-structured academic ${typeInfo.label} with proper form
         .trim();
     }
 
-    // If still no response, generate a comprehensive fallback
+    // Ultimate fallback if all APIs fail
     if (!aiResponse) {
-      aiResponse = generateFallbackContent(cleanTopic, level, type, levelInfo, typeInfo);
+      const date = new Date().toLocaleDateString();
+      aiResponse = `1.0 Cover Page
+
+University of Veterinary Sciences
+Department of Animal Health
+
+${typeInfo.label}: ${cleanTopic}
+
+Author: VetSphere Academic Writer
+Submission Date: ${date}
+
+2.0 Abstract
+
+This comprehensive ${typeInfo.label.toLowerCase()} examines ${cleanTopic}, providing a thorough analysis of key concepts, procedures, and best practices. The paper synthesizes current knowledge and evidence to present a complete overview of the topic appropriate for ${levelInfo.label}.
+
+3.0 Introduction
+
+3.1 Background
+
+${cleanTopic} represents a critical area of study within veterinary science and animal health. Understanding the procedures, protocols, and best practices related to this topic is essential for veterinary professionals, researchers, and students. The importance of this topic has been increasingly recognized in recent years, with significant advances in knowledge and practice.
+
+3.2 Purpose
+
+The purpose of this ${typeInfo.label.toLowerCase()} is to provide a comprehensive examination of ${cleanTopic}, covering all essential aspects including procedures, protocols, species-specific considerations, and evidence-based recommendations. This paper aims to contribute to the understanding and practice of this important topic.
+
+3.3 Objectives
+
+1. To examine the fundamental concepts and procedures related to ${cleanTopic}
+2. To analyze current best practices and protocols
+3. To identify species-specific considerations and variations
+4. To provide evidence-based recommendations for practice
+5. To identify areas requiring further research
+
+4.0 Main Body
+
+4.1 Key Concepts and Principles
+
+${cleanTopic} involves several key concepts and principles that form the foundation for understanding and practice. The fundamental principles include preparation, execution, evaluation, and documentation. Each of these components requires careful attention to detail and adherence to established protocols.
+
+Preparation involves ensuring that all necessary equipment, materials, and personnel are ready for the procedure. This includes proper sterilization, calibration of equipment, and verification of safety protocols. Research has shown that thorough preparation significantly improves outcomes (Smith, 2020).
+
+Execution involves the step-by-step implementation of the procedure according to established protocols. This requires technical skill, attention to detail, and the ability to adapt to unexpected situations. Veterinary professionals must be trained in the specific techniques required for each procedure (Johnson & Williams, 2022).
+
+Evaluation involves assessing the outcomes of the procedure and identifying areas for improvement. This includes documentation of findings, analysis of results, and implementation of quality assurance measures. Continuous evaluation is essential for maintaining high standards of practice (Anderson, 2023).
+
+4.2 Detailed Procedures and Protocols
+
+The procedures for ${cleanTopic} follow a systematic approach that has been developed based on evidence and best practices. The typical procedure includes several steps, each designed to ensure optimal outcomes. The following is a comprehensive overview of the standard procedures:
+
+1. Preparation: Gather all necessary equipment and materials. Ensure proper sterilization and calibration. Verify that all safety protocols are in place.
+2. Initial Assessment: Evaluate the subject and determine the appropriate approach. Consider species-specific factors and any special considerations.
+3. Implementation: Perform the procedure according to established protocols. Follow each step carefully and document all actions.
+4. Monitoring: Observe the subject throughout the procedure. Identify any complications or unexpected findings.
+5. Documentation: Record all findings, observations, and outcomes. Ensure thorough and accurate documentation.
+6. Follow-up: Conduct any necessary follow-up procedures or assessments. Evaluate the outcomes and identify areas for improvement.
+
+4.3 Species-Specific Considerations
+
+Different species require specific considerations when implementing procedures related to ${cleanTopic}. Research has shown that species-specific factors significantly influence the effectiveness and outcomes of the procedures (Thompson et al., 2021).
+
+Bovine, Caprine, and Ovine: These large ruminants require specific handling and restraint techniques. Procedures must account for their size, anatomy, and behavior. Key considerations include proper positioning, use of appropriate equipment, and understanding of species-specific anatomy (Williams & Brown, 2022).
+
+Equidae: Horses and donkeys present unique challenges due to their size and potential for injury. Special attention must be paid to safety protocols and handling techniques. Procedures should be adapted to account for equine anatomy and behavior.
+
+Porcine: Pigs require specific considerations related to their anatomy and physiology. The thick skin of pigs requires special cutting techniques, and procedures must account for their unique respiratory and cardiovascular systems.
+
+Canine and Feline: Small animals require different approaches compared to large animals. Procedures must be adapted to their smaller size and different anatomy. Key considerations include anesthesia protocols, surgical approaches, and post-operative care.
+
+Poultry: Birds present unique anatomical and physiological considerations. Procedures must account for their smaller size, different organ systems, and specific requirements for handling and restraint.
+
+4.4 Practical Applications and Case Examples
+
+The practical applications of ${cleanTopic} are significant for veterinary practice. Implementing evidence-based procedures can improve outcomes, support animal health and welfare, and contribute to veterinary knowledge.
+
+Case Example 1: A bovine patient requiring the procedure. The veterinary professional follows established protocols, adapts to species-specific considerations, and achieves successful outcomes.
+
+Case Example 2: A poultry flock requiring the procedure. The veterinary team implements evidence-based protocols, considers species-specific factors, and successfully addresses the health issue.
+
+4.5 Challenges and Solutions
+
+Several challenges have been identified in implementing procedures related to ${cleanTopic}. These include species-specific variations, equipment limitations, training requirements, and resource constraints.
+
+Solutions involve the implementation of standardized protocols, comprehensive training programs, quality assurance measures, and ongoing research to develop improved techniques. Collaboration among veterinary professionals and researchers is essential for addressing these challenges (Davis, 2024).
+
+5.0 Conclusion
+
+5.1 Summary
+
+This ${typeInfo.label.toLowerCase()} has examined ${cleanTopic}, providing a comprehensive analysis of procedures, protocols, species-specific considerations, and best practices. The key findings highlight the importance of evidence-based practice, the need for species-specific approaches, and the value of continuous improvement through research and evaluation.
+
+5.2 Final Remarks
+
+${cleanTopic} remains an important area of study and practice in veterinary science. Continued research, education, and quality improvement are essential for advancing knowledge and improving outcomes. Veterinary professionals must stay current with evidence-based practices and adapt to emerging knowledge and technologies.
+
+5.3 Recommendations
+
+1. Implement standardized protocols for ${cleanTopic} across veterinary practices
+2. Provide comprehensive training for veterinary professionals on current best practices
+3. Conduct further research on species-specific variations and outcomes
+4. Develop quality assurance programs for monitoring implementation and outcomes
+5. Promote collaboration and knowledge sharing among veterinary professionals
+6. Invest in continuing education and professional development
+
+6.0 References
+
+Anderson, D.M. (2023). Standardized Protocols in Veterinary Practice. Veterinary Pathology, 56(4), 245-258.
+
+Davis, R.L. (2024). Emerging Trends in Veterinary Procedures. Journal of Veterinary Science, 47(2), 112-128.
+
+Johnson, R.K., & Williams, P.L. (2022). Evidence-Based Veterinary Practice. Veterinary Clinics, 45(3), 89-102.
+
+Smith, J.A. (2020). Foundations of Veterinary Medicine. Veterinary Science Reviews, 38(1), 15-30.
+
+Thompson, M.R., Davis, S.L., & Anderson, P.C. (2021). Procedural Protocols in Veterinary Practice. Journal of Veterinary Medicine, 52(3), 178-195.
+
+Williams, P.C., & Brown, S.L. (2022). Practical Applications in Veterinary Science. Veterinary Research Journal, 40(2), 67-85.
+
+7.0 Appendices
+
+Appendix A: Equipment and Materials Checklist
+Appendix B: Procedural Flowchart
+Appendix C: Sample Documentation Forms
+Appendix D: Safety Protocols and Guidelines
+Appendix E: References and Additional Resources`;
     }
 
     return NextResponse.json({ 
@@ -371,6 +387,7 @@ Generate a complete, well-structured academic ${typeInfo.label} with proper form
       topic: cleanTopic,
       level,
       type,
+      apiUsed,
       generatedAt: new Date().toISOString()
     });
 
@@ -381,275 +398,4 @@ Generate a complete, well-structured academic ${typeInfo.label} with proper form
       { status: 500 }
     );
   }
-}
-
-// Fallback content generator
-function generateFallbackContent(topic: string, level: string, type: string, levelInfo: any, typeInfo: any): string {
-  const date = new Date().toLocaleDateString();
-  
-  if (type === 'research') {
-    return `1.0 Cover Page
-
-University of Veterinary Sciences
-Department of Animal Health
-
-Course: Veterinary Pathology VET-401
-Research Title: ${topic}
-
-Student Name: [Student Name]
-Student ID: [Student ID]
-Lecturer: Professor [Name]
-Submission Date: ${date}
-
-2.0 Abstract
-
-This research paper examines ${topic}, focusing on key aspects and their implications for veterinary practice. The study employs a comprehensive literature review approach, synthesizing findings from peer-reviewed sources published between 2015 and 2025. Key findings reveal significant insights into the procedures and protocols related to ${topic}. The research concludes with evidence-based recommendations for improving veterinary practice and animal health outcomes. Further research is recommended to explore emerging aspects of this important topic.
-
-3.0 Table of Contents
-
-1.0 Cover Page
-2.0 Abstract
-3.0 Table of Contents
-4.0 Introduction
-5.0 Literature Review
-6.0 Methodology
-7.0 Results
-8.0 Discussion
-9.0 Conclusion and Recommendations
-10.0 References
-11.0 Appendices
-
-4.0 Introduction
-
-4.1 Background
-
-${topic} represents a critical area of study within veterinary science. Understanding the procedures and protocols related to this topic is essential for veterinary professionals, researchers, and students. The importance of ${topic} has been increasingly recognized in recent years, with significant advances in knowledge and practice.
-
-4.2 Problem Statement
-
-Despite the importance of ${topic}, there remains a gap in understanding key aspects of the procedures and their practical applications. This research aims to address this gap by providing a comprehensive analysis of current knowledge and practices.
-
-4.3 Research Objectives
-
-1. To examine the current procedures related to ${topic}
-2. To analyze the effectiveness of existing protocols
-3. To identify best practices for implementation
-4. To provide evidence-based recommendations for improvement
-
-4.4 Research Questions
-
-1. What are the current procedures and protocols for ${topic}?
-2. How effective are these procedures in practice?
-3. What are the key challenges in implementing these protocols?
-4. What improvements can be recommended based on current evidence?
-
-4.5 Significance of the Study
-
-This research is significant for veterinary professionals, researchers, and students. The findings will contribute to improved understanding of ${topic} and support evidence-based practice. The study will also identify areas requiring further research and development.
-
-4.6 Scope and Limitations
-
-This study focuses on ${topic} within the context of veterinary practice. The research is limited to available literature and may not cover all aspects of the topic. However, the comprehensive review provides a solid foundation for understanding current knowledge and practices.
-
-5.0 Literature Review
-
-5.1 Theoretical Framework
-
-The theoretical foundation of ${topic} is based on established principles in veterinary science. Key theories and concepts provide the framework for understanding the procedures and protocols related to this topic (Smith, 2020; Johnson et al., 2022).
-
-5.2 Previous Studies
-
-Several studies have examined various aspects of ${topic}. Research by Anderson (2023) focused on the procedural aspects, while Williams and Brown (2022) investigated the practical applications. Thompson et al. (2021) provided valuable insights into the challenges and limitations of current protocols.
-
-5.3 Knowledge Gaps
-
-Despite significant research, there remain gaps in understanding key aspects of ${topic}. Areas requiring further investigation include the optimization of procedures, species-specific variations, and practical implementation strategies (Davis, 2024).
-
-6.0 Methodology
-
-6.1 Research Design
-
-This study employs a comprehensive literature review design, synthesizing findings from peer-reviewed sources. The methodology is appropriate for examining the current state of knowledge on ${topic}.
-
-6.2 Data Collection
-
-Data was collected from peer-reviewed journals, academic books, and reputable online sources published between 2015 and 2025. Keywords used for the search included "${topic}", "procedures", "protocols", and "veterinary practice".
-
-6.3 Data Analysis
-
-The data was analyzed using thematic analysis to identify key themes and patterns. This approach allows for the systematic synthesis of findings from multiple sources.
-
-6.4 Ethical Considerations
-
-This research adheres to ethical guidelines for academic research. All sources are properly cited, and the research was conducted with integrity and objectivity.
-
-7.0 Results
-
-7.1 Key Findings
-
-The analysis reveals several key findings related to ${topic}. The procedures and protocols currently in practice are based on established evidence and best practices. However, there are variations in implementation across different settings and species.
-
-7.2 Detailed Procedures
-
-The procedures for ${topic} involve a systematic approach that includes preparation, execution, and evaluation. Each step requires careful attention to detail and adherence to established protocols (Smith, 2020). Key considerations include equipment preparation, safety measures, and documentation.
-
-7.3 Species-Specific Considerations
-
-Different species require specific considerations when implementing procedures related to ${topic}. Research has shown that species-specific factors significantly influence the effectiveness and outcomes of the procedures (Johnson & Williams, 2022).
-
-8.0 Discussion
-
-8.1 Interpretation of Findings
-
-The findings indicate that ${topic} procedures are well-established but require continued refinement. The evidence suggests that adherence to protocols significantly improves outcomes, but there is room for improvement in implementation and standardization.
-
-8.2 Comparison with Previous Studies
-
-The findings are consistent with previous research, which has highlighted the importance of evidence-based protocols for ${topic} (Anderson, 2023; Thompson et al., 2021). This study extends previous research by providing a comprehensive analysis of current procedures and identifying areas for improvement.
-
-8.3 Implications for Practice
-
-The findings have significant implications for veterinary practice. Implementing standardized protocols for ${topic} can improve outcomes and support evidence-based practice. Veterinary professionals should be trained in the latest procedures and best practices.
-
-9.0 Conclusion and Recommendations
-
-9.1 Summary
-
-This research paper has examined ${topic}, providing a comprehensive analysis of current procedures and protocols. The findings highlight the importance of evidence-based practice and the need for continued refinement of procedures.
-
-9.2 Recommendations
-
-1. Implement standardized protocols for ${topic} across practices
-2. Provide training for veterinary professionals on current best practices
-3. Conduct further research on species-specific variations
-4. Develop quality assurance programs for monitoring implementation
-
-9.3 Future Research
-
-Areas for future research include longitudinal studies on the effectiveness of protocols, investigation of species-specific variations, and development of improved procedures based on new evidence.
-
-10.0 References
-
-Anderson, D.M. (2023). Standardized Protocols in Veterinary Practice. Veterinary Pathology, 56(4), 245-258.
-
-Davis, R.L. (2024). Emerging Trends in Veterinary Procedures. Journal of Veterinary Science, 47(2), 112-128.
-
-Johnson, R.K., & Williams, P.L. (2022). Evidence-Based Veterinary Practice. Veterinary Clinics, 45(3), 89-102.
-
-Smith, J.A. (2020). Foundations of Veterinary Medicine. Veterinary Science Reviews, 38(1), 15-30.
-
-Thompson, M.R., Davis, S.L., & Anderson, P.C. (2021). Procedural Protocols in Veterinary Practice. Journal of Veterinary Medicine, 52(3), 178-195.
-
-Williams, P.C., & Brown, S.L. (2022). Practical Applications in Veterinary Science. Veterinary Research Journal, 40(2), 67-85.
-
-11.0 Appendices
-
-Appendix A: Equipment Checklist
-Appendix B: Procedural Flowchart
-Appendix C: Sample Documentation Forms`;
-  }
-
-  // Default fallback for essay/assignment/case-study
-  return `1.0 Cover Page
-
-University of Veterinary Sciences
-Department of Animal Health
-
-Course: Veterinary Science
-Assignment Title: ${topic}
-
-Student Name: [Student Name]
-Student ID: [Student ID]
-Lecturer: Professor [Name]
-Submission Date: ${date}
-
-2.0 Table of Contents
-
-1.0 Cover Page
-2.0 Table of Contents
-3.0 Introduction
-4.0 Main Body
-5.0 Conclusion
-6.0 References
-7.0 Appendices
-
-3.0 Introduction
-
-3.1 Background
-
-${topic} represents a critical area of study in veterinary science. Understanding the procedures and protocols related to this topic is essential for veterinary professionals, researchers, and students. The importance of ${topic} has been increasingly recognized in recent years, with significant advances in knowledge and practice.
-
-3.2 Purpose of the Assignment
-
-The purpose of this assignment is to examine ${topic} in detail, providing a comprehensive understanding of the procedures, protocols, and best practices. The assignment aims to develop critical thinking and analytical skills through the exploration of this important topic.
-
-3.3 Objectives
-
-1. To understand the fundamental concepts related to ${topic}
-2. To examine the procedures and protocols in practice
-3. To analyze the effectiveness of current approaches
-4. To provide evidence-based recommendations
-
-4.0 Main Body
-
-4.1 Key Concepts
-
-${topic} involves several key concepts that are essential for veterinary practice. Understanding these concepts provides the foundation for effective implementation of procedures and protocols (Smith, 2020). The fundamental principles include preparation, execution, and evaluation, each requiring careful attention to detail.
-
-4.2 Procedures and Protocols
-
-The procedures for ${topic} follow a systematic approach that has been developed based on evidence and best practices. The typical procedure includes several steps, each designed to ensure optimal outcomes. Equipment preparation is essential, as the quality of equipment significantly influences the effectiveness of the procedures (Johnson & Williams, 2022).
-
-Safety measures are also critical, ensuring that the procedures are conducted without risk to the animal, veterinary professional, or environment. Documentation is essential for quality assurance and evaluation of outcomes (Anderson, 2023).
-
-4.3 Species-Specific Considerations
-
-Different species require specific considerations when implementing procedures related to ${topic}. Research has shown that species-specific factors significantly influence the effectiveness and outcomes of the procedures. For example, procedures for bovine species may require different approaches compared to poultry or small animal species (Thompson et al., 2021).
-
-Understanding these species-specific considerations is essential for successful implementation of procedures and protocols.
-
-4.4 Practical Applications
-
-The practical applications of ${topic} are significant for veterinary practice. Implementing evidence-based procedures can improve outcomes, support animal health and welfare, and contribute to veterinary knowledge (Williams & Brown, 2022). Veterinary professionals should be familiar with current best practices and emerging evidence related to ${topic}.
-
-4.5 Challenges and Solutions
-
-Several challenges have been identified in implementing procedures related to ${topic}. These include species-specific variations, equipment limitations, and training requirements. Solutions involve standardized protocols, training programs, and quality assurance measures (Davis, 2024).
-
-5.0 Conclusion
-
-5.1 Summary
-
-This assignment has examined ${topic}, providing a comprehensive understanding of the procedures, protocols, and best practices. The key findings highlight the importance of evidence-based practice, species-specific considerations, and continuous improvement.
-
-5.2 Final Remarks
-
-${topic} remains an important area of study in veterinary science, with significant implications for practice. Continued research and development are essential for advancing knowledge and improving outcomes.
-
-5.3 Recommendations
-
-1. Implement standardized protocols for ${topic}
-2. Provide training for veterinary professionals
-3. Conduct further research on species-specific variations
-4. Develop quality assurance programs
-
-6.0 References
-
-Anderson, D.M. (2023). Standardized Protocols in Veterinary Practice. Veterinary Pathology, 56(4), 245-258.
-
-Davis, R.L. (2024). Emerging Trends in Veterinary Procedures. Journal of Veterinary Science, 47(2), 112-128.
-
-Johnson, R.K., & Williams, P.L. (2022). Evidence-Based Veterinary Practice. Veterinary Clinics, 45(3), 89-102.
-
-Smith, J.A. (2020). Foundations of Veterinary Medicine. Veterinary Science Reviews, 38(1), 15-30.
-
-Thompson, M.R., Davis, S.L., & Anderson, P.C. (2021). Procedural Protocols in Veterinary Practice. Journal of Veterinary Medicine, 52(3), 178-195.
-
-Williams, P.C., & Brown, S.L. (2022). Practical Applications in Veterinary Science. Veterinary Research Journal, 40(2), 67-85.
-
-7.0 Appendices
-
-Appendix A: Procedural Flowchart
-Appendix B: Equipment Checklist
-Appendix C: Additional Resources`;
 }
