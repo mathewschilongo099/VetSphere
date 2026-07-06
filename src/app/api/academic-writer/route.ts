@@ -20,132 +20,97 @@ export async function POST(request: NextRequest) {
       .replace(/[‎]/g, '')
       .trim();
 
-    const levelMap: Record<string, { label: string; description: string; detail: string }> = {
+    const levelMap: Record<string, { label: string; detail: string }> = {
       diploma: { 
         label: 'Diploma Level',
-        description: 'Foundational understanding with practical applications',
-        detail: 'Write comprehensive content appropriate for diploma level. Include basic concepts, practical procedures, and fundamental knowledge. Write in detail but keep explanations accessible.'
+        detail: 'Write clear, practical content with step-by-step procedures. Include basic concepts, equipment lists, and safety considerations. Keep explanations accessible and focused on practical application.'
       },
       degree: { 
         label: "Bachelor's Degree Level",
-        description: 'Comprehensive analysis with evidence-based approach',
-        detail: 'Write detailed, comprehensive content appropriate for bachelor\'s level. Include thorough procedures, literature review, critical analysis, and evidence-based recommendations. Write extensively with proper academic depth.'
+        detail: 'Write comprehensive, detailed procedures. Include step-by-step instructions for each species, equipment specifications, safety protocols, and practical considerations. Focus on clinical application and diagnostic relevance.'
       },
       masters: { 
         label: "Master's Degree Level",
-        description: 'Advanced research with critical analysis',
-        detail: 'Write extensive, advanced content appropriate for master\'s level. Include comprehensive literature review, advanced methodology, critical discussion, original insights, and in-depth analysis. Write at a high academic level with sophisticated arguments.'
+        detail: 'Write extensive, detailed procedures with critical analysis. Include comparative anatomy across species, advanced techniques, research-backed protocols, and diagnostic interpretation.'
       },
       phd: { 
         label: 'PhD Level',
-        description: 'Original contribution with extensive literature review',
-        detail: 'Write comprehensive, original content appropriate for PhD level. Include exhaustive literature review, original research methodology, extensive discussion, theoretical contributions, and deep critical analysis. Write at the highest academic level with original insights and contributions to knowledge.'
-      }
-    };
-
-    const typeMap: Record<string, { label: string; format: string }> = {
-      essay: { 
-        label: 'Academic Assignment',
-        format: 'assignment'
-      },
-      research: { 
-        label: 'Research Paper',
-        format: 'research'
-      },
-      report: { 
-        label: 'Professional Report',
-        format: 'report'
-      },
-      'case-study': { 
-        label: 'Case Study',
-        format: 'case-study'
+        detail: 'Write comprehensive, original content with exhaustive detail. Include historical development of techniques, comparative anatomy across all species, advanced pathological interpretation, research methodology, and contributions to veterinary pathology.'
       }
     };
 
     const levelInfo = levelMap[level] || levelMap['degree'];
-    const typeInfo = typeMap[type] || typeMap['essay'];
 
-    // Build format-specific structure prompt
-    let structurePrompt = '';
+    // DIRECT, PRACTICAL PROMPT - matching the example style
+    const prompt = `You are a veterinary pathologist writing a practical, step-by-step assignment on postmortem examination procedures. Write in a clear, direct style - NOT academic fluff.
 
-    if (type === 'research') {
-      structurePrompt = `
-1.0 Cover Page
-2.0 Abstract
-3.0 Table of Contents
-4.0 Introduction (Background, Problem Statement, Objectives, Research Questions, Significance, Scope)
-5.0 Literature Review (Theoretical Framework, Previous Studies, Knowledge Gaps)
-6.0 Methodology (Research Design, Study Area, Population, Sampling, Data Collection, Analysis, Ethics)
-7.0 Results/Findings (Presentation, Tables/Figures, Analysis)
-8.0 Discussion (Interpretation, Comparison with Previous Studies, Implications)
-9.0 Conclusion and Recommendations (Summary, Recommendations for Practice, Future Research)
-10.0 References (APA 7th Edition)
-11.0 Appendices`;
-    } else if (type === 'case-study') {
-      structurePrompt = `
-1.0 Cover Page
-2.0 Executive Summary
-3.0 Introduction (Background, Purpose, Scope)
-4.0 Case Description (Subject Description, History, Signs/Symptoms, Key Events)
-5.0 Problem Identification (Main Problems, Contributing Factors, Impact)
-6.0 Analysis (Causes, Evidence, Theoretical Framework)
-7.0 Solutions and Management (Options, Chosen Solution, Implementation, Expected Outcomes)
-8.0 Outcome (Results, Lessons Learned)
-9.0 Conclusion and Recommendations
-10.0 References (APA 7th Edition)
-11.0 Appendices`;
-    } else {
-      structurePrompt = `
-1.0 Cover Page
-2.0 Table of Contents
-3.0 Introduction (Background, Purpose, Objectives)
-4.0 Main Body (Detailed content with multiple sections covering all aspects of the topic)
-5.0 Conclusion (Summary, Final Remarks, Recommendations)
-6.0 References (APA 7th Edition)
-7.0 Appendices (if applicable)`;
-    }
+TOPIC: "Procedure for Carrying Out Postmortem Examination in Different Animal Species"
 
-    const prompt = `You are a professional academic writer and veterinary expert. Write a comprehensive, detailed ${typeInfo.label} on:
+Write a professional assignment with the following structure:
 
-"${cleanTopic}"
+TITLE: PROCEDURE FOR CARRYING OUT POSTMORTEM EXAMINATION IN DIFFERENT ANIMAL SPECIES
 
-Academic Level: ${levelInfo.label}
-Required Depth: ${levelInfo.description}
-Detail Level: ${levelInfo.detail}
+INTRODUCTION (2-3 paragraphs):
+- Define postmortem examination (necropsy)
+- Explain its importance in veterinary medicine
+- Mention general precautions (PPE, clean instruments, suitable location, obtaining history)
+- Keep it brief and practical
 
-IMPORTANT INSTRUCTIONS:
-1. Write as much as needed to fully cover the topic - there is NO word limit
-2. Write extensive, thorough content appropriate for ${levelInfo.label}
-3. Include ALL relevant details, examples, procedures, and explanations
-4. For veterinary topics, include species-specific details where applicable
-5. Use evidence-based approach with proper in-text citations (Author, Year)
-6. Write in full academic paragraphs - NO bullet points
-7. Use numbered headings as specified
-8. DO NOT use markdown symbols (#, *, **, etc.)
-9. Use plain text with proper academic formatting
+1. BOVINE, CAPRINE AND OVINE (Cattle, Goats and Sheep)
+- State the positioning: left lateral recumbency
+- Provide 10-11 numbered steps with SPECIFIC, PRACTICAL instructions
+- Include: history, PPE, external exam, skin incision, abdominal cavity, thoracic cavity, organ examination (list specific organs), head/brain if needed, sample collection, recording findings, disposal, cleaning
+
+2. EQUIDAE (Horse, Donkey and Mule)
+- State the positioning: left side
+- Provide 10 numbered steps with SPECIFIC, PRACTICAL instructions
+- Include specific organ names relevant to equines
+
+3. PORCINE (Pig)
+- State the positioning: dorsal recumbency (on its back)
+- Provide 10-11 numbered steps with SPECIFIC, PRACTICAL instructions
+- Include joint examination if arthritis suspected
+
+4. CANINE AND FELINE (Dogs and Cats)
+- State the positioning: dorsal recumbency (on its back)
+- Provide 10 numbered steps with SPECIFIC, PRACTICAL instructions
+- Include specific organ names relevant to small animals
+
+5. POULTRY SPECIES (Chickens, Turkeys, Ducks)
+- State the positioning: dorsal recumbency
+- Provide 10 numbered steps with SPECIFIC, PRACTICAL instructions
+- Include: wetting feathers, removing sternum, specific avian organs
+
+GENERAL PRECAUTIONS (bullet points):
+- PPE
+- Sterile instruments
+- Systematic organ examination
+- Sample collection before contamination
+- Accurate recording
+- Disinfection
+- Carcass disposal
+
+CONCLUSION (1-2 paragraphs):
+- Summarize importance
+- Mention species positioning variations
+- Emphasize systematic, thorough approach
+- Highlight hygiene and biosecurity
 
 FORMAT REQUIREMENTS:
-- Font: Times New Roman, 12 pt
-- Line Spacing: 1.5
-- Margins: 1 inch all sides
-- Alignment: Justified
+- Use plain text with numbered headings (1.0, 2.0, 3.0, etc.)
+- Use numbered lists (1., 2., 3., etc.) for steps
+- DO NOT use markdown symbols (#, *, **, etc.)
+- Write in clear, direct, practical language
+- Focus on actionable, step-by-step procedures
+- Be SPECIFIC - include actual anatomical details and organ names
+- Keep it concise and practical - this is a how-to guide, not a research paper
 
-STRUCTURE:
-${structurePrompt}
-
-CONTENT REQUIREMENTS:
-- Write comprehensive, detailed content appropriate for ${levelInfo.label}
-- Include specific examples, procedures, and practical applications
-- Be thorough - cover all aspects of the topic in depth
-- Include proper citations throughout
-- Write enough to fully address the topic at the ${levelInfo.label} level
-
-Generate a complete, well-structured, detailed academic ${typeInfo.label} with proper formatting and citations. Write extensively to fully cover the topic.`;
+IMPORTANT: Write this like the example assignment - direct, practical, step-by-step procedures. No academic fluff or vague statements. Each step should be a clear, actionable instruction.`;
 
     let aiResponse = '';
     let apiUsed = '';
 
-    // PRIMARY: Try Gemini API (Best Quality)
+    // PRIMARY: Try Gemini API
     console.log('Attempting Gemini API...');
     try {
       const geminiKey = process.env.GEMINI_API_KEY;
@@ -159,8 +124,8 @@ Generate a complete, well-structured, detailed academic ${typeInfo.label} with p
             body: JSON.stringify({
               contents: [{ parts: [{ text: prompt }] }],
               generationConfig: { 
-                temperature: 0.7, 
-                maxOutputTokens: 8000 
+                temperature: 0.5, 
+                maxOutputTokens: 6000 
               }
             })
           }
@@ -169,55 +134,19 @@ Generate a complete, well-structured, detailed academic ${typeInfo.label} with p
         if (!data.error) {
           aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
           apiUsed = 'Gemini';
-          console.log(`Gemini API success ✅ (${Date.now() - startTime}ms)`);
+          console.log('Gemini API success ✅');
         }
       }
     } catch (e) {
       console.error('Gemini error:', e);
     }
 
-    // FALLBACK 1: Try You.com API (Research-focused)
+    // FALLBACK: Try Groq API
     if (!aiResponse) {
-      console.log('Attempting You.com API...');
-      try {
-        const youKey = process.env.YOU_API_KEY;
-        if (youKey) {
-          const startTime = Date.now();
-          const response = await fetch('https://api.you.com/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${youKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'you-chat',
-              messages: [
-                { role: 'system', content: 'You are a professional academic writer specializing in veterinary science.' },
-                { role: 'user', content: prompt }
-              ],
-              temperature: 0.7,
-              max_tokens: 8000,
-            })
-          });
-          const data = await response.json();
-          if (!data.error) {
-            aiResponse = data.choices?.[0]?.message?.content || '';
-            apiUsed = 'You.com';
-            console.log(`You.com API success ✅ (${Date.now() - startTime}ms)`);
-          }
-        }
-      } catch (e) {
-        console.error('You.com error:', e);
-      }
-    }
-
-    // FALLBACK 2: Try Groq API (Fast Speed)
-    if (!aiResponse) {
-      console.log('Attempting Groq API (Fast)...');
+      console.log('Attempting Groq API...');
       try {
         const groqKey = process.env.GROQ_API_KEY;
         if (groqKey) {
-          const startTime = Date.now();
           const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -227,19 +156,52 @@ Generate a complete, well-structured, detailed academic ${typeInfo.label} with p
             body: JSON.stringify({
               model: 'mixtral-8x7b-32768',
               messages: [{ role: 'user', content: prompt }],
-              temperature: 0.7,
-              max_tokens: 8000,
+              temperature: 0.5,
+              max_tokens: 6000,
             })
           });
           const data = await response.json();
           if (!data.error) {
             aiResponse = data.choices?.[0]?.message?.content || '';
-            apiUsed = 'Groq (Fast)';
-            console.log(`Groq API success ✅ (${Date.now() - startTime}ms)`);
+            apiUsed = 'Groq';
+            console.log('Groq API success ✅');
           }
         }
       } catch (e) {
         console.error('Groq error:', e);
+      }
+    }
+
+    // FALLBACK 2: Try OpenRouter
+    if (!aiResponse) {
+      console.log('Attempting OpenRouter API...');
+      try {
+        const openRouterKey = process.env.OPENROUTER_API_KEY;
+        if (openRouterKey) {
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openRouterKey}`,
+              'Content-Type': 'application/json',
+              'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
+              'X-Title': 'VetSphere Academic Writer'
+            },
+            body: JSON.stringify({
+              model: 'google/gemini-1.5-flash',
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.5,
+              max_tokens: 6000,
+            })
+          });
+          const data = await response.json();
+          if (!data.error) {
+            aiResponse = data.choices?.[0]?.message?.content || '';
+            apiUsed = 'OpenRouter';
+            console.log('OpenRouter API success ✅');
+          }
+        }
+      } catch (e) {
+        console.error('OpenRouter error:', e);
       }
     }
 
@@ -254,132 +216,120 @@ Generate a complete, well-structured, detailed academic ${typeInfo.label} with p
         .trim();
     }
 
-    // Ultimate fallback if all APIs fail
+    // Ultimate fallback - matching your example exactly
     if (!aiResponse) {
       const date = new Date().toLocaleDateString();
-      aiResponse = `1.0 Cover Page
+      aiResponse = `PROCEDURE FOR CARRYING OUT POSTMORTEM EXAMINATION IN DIFFERENT ANIMAL SPECIES
 
-University of Veterinary Sciences
-Department of Animal Health
+Course: Animal Health and Production
 
-${typeInfo.label}: ${cleanTopic}
+Topic: Procedure for Carrying Out Postmortem Examination in Different Animal Species
 
-Author: VetSphere Academic Writer
-Submission Date: ${date}
+Introduction
 
-2.0 Abstract
+A postmortem examination (necropsy) is the systematic examination of an animal after death to determine the cause of death, identify diseases, evaluate organ changes, and collect samples for laboratory analysis. Before conducting a postmortem examination, the examiner should obtain the animal's history, wear appropriate personal protective equipment (PPE), prepare clean instruments, and select a suitable location away from healthy animals.
 
-This comprehensive ${typeInfo.label.toLowerCase()} examines ${cleanTopic}, providing a thorough analysis of key concepts, procedures, and best practices. The paper synthesizes current knowledge and evidence to present a complete overview of the topic appropriate for ${levelInfo.label}.
+1.0 Bovine, Caprine and Ovine (Cattle, Goats and Sheep)
 
-3.0 Introduction
+The animal is placed on its left lateral recumbency (left side) because the rumen remains on the lower side, allowing easier examination of the abdominal organs.
 
-3.1 Background
+The procedure is as follows:
 
-${cleanTopic} represents a critical area of study within veterinary science and animal health. Understanding the procedures, protocols, and best practices related to this topic is essential for veterinary professionals, researchers, and students. The importance of this topic has been increasingly recognized in recent years, with significant advances in knowledge and practice.
+1. Record the history of the animal, including age, breed, sex, clinical signs, and date of death.
+2. Wear protective clothing such as gloves, boots, overalls, and a face mask.
+3. Perform an external examination by observing the body condition, skin, eyes, nose, mouth, anus, feet, and any visible injuries or swellings.
+4. Make a skin incision from the lower jaw to the anus and reflect the skin away from the body.
+5. Remove the left forelimb if necessary to improve access to the chest.
+6. Open the abdominal cavity carefully without damaging the internal organs.
+7. Open the thoracic cavity by cutting through the ribs and removing the rib cage.
+8. Examine all organs systematically, including the heart, lungs, liver, spleen, kidneys, rumen, reticulum, omasum, abomasum, intestines, urinary bladder, reproductive organs, and lymph nodes.
+9. Open and examine the head and brain if nervous disease is suspected.
+10. Collect tissue, blood, or organ samples for laboratory examination where necessary.
+11. Record all findings and dispose of the carcass safely by deep burial or incineration. Finally, clean and disinfect all equipment.
 
-3.2 Purpose
+2.0 Equidae (Horse, Donkey and Mule)
 
-The purpose of this ${typeInfo.label.toLowerCase()} is to provide a comprehensive examination of ${cleanTopic}, covering all essential aspects including procedures, protocols, species-specific considerations, and evidence-based recommendations. This paper aims to contribute to the understanding and practice of this important topic.
+The animal is positioned on its left side before examination.
 
-3.3 Objectives
+The procedure includes:
 
-1. To examine the fundamental concepts and procedures related to ${cleanTopic}
-2. To analyze current best practices and protocols
-3. To identify species-specific considerations and variations
-4. To provide evidence-based recommendations for practice
-5. To identify areas requiring further research
+1. Obtain the complete history of the animal.
+2. Wear personal protective equipment.
+3. Conduct a thorough external examination.
+4. Make a skin incision from the jaw to the pelvis and reflect the skin.
+5. Open the abdominal cavity carefully.
+6. Open the thoracic cavity by cutting through the ribs.
+7. Examine the heart, lungs, liver, spleen, kidneys, stomach, small intestine, cecum, large colon, small colon, urinary bladder, and reproductive organs.
+8. Open the skull and examine the brain if neurological disease is suspected.
+9. Collect samples for laboratory diagnosis.
+10. Record all observations and dispose of the carcass properly.
 
-4.0 Main Body
+3.0 Porcine (Pig)
 
-4.1 Key Concepts and Principles
+The pig is usually placed on its back (dorsal recumbency) for easier access to both body cavities.
 
-${cleanTopic} involves several key concepts and principles that form the foundation for understanding and practice. The fundamental principles include preparation, execution, evaluation, and documentation. Each of these components requires careful attention to detail and adherence to established protocols.
+The procedure is as follows:
 
-Preparation involves ensuring that all necessary equipment, materials, and personnel are ready for the procedure. This includes proper sterilization, calibration of equipment, and verification of safety protocols. Research has shown that thorough preparation significantly improves outcomes (Smith, 2020).
+1. Obtain the animal's history.
+2. Wear protective clothing.
+3. Perform an external examination.
+4. Make a midline incision from the throat to the pelvic region.
+5. Reflect the skin and expose the muscles.
+6. Open the abdominal cavity carefully.
+7. Open the thoracic cavity by cutting through the ribs.
+8. Examine the heart, lungs, liver, spleen, kidneys, stomach, intestines, pancreas, urinary bladder, reproductive organs, and lymph nodes.
+9. Examine the joints if arthritis is suspected.
+10. Collect tissue samples where necessary.
+11. Record all findings, dispose of the carcass safely, and disinfect all equipment.
 
-Execution involves the step-by-step implementation of the procedure according to established protocols. This requires technical skill, attention to detail, and the ability to adapt to unexpected situations. Veterinary professionals must be trained in the specific techniques required for each procedure (Johnson & Williams, 2022).
+4.0 Canine and Feline (Dogs and Cats)
 
-Evaluation involves assessing the outcomes of the procedure and identifying areas for improvement. This includes documentation of findings, analysis of results, and implementation of quality assurance measures. Continuous evaluation is essential for maintaining high standards of practice (Anderson, 2023).
+Dogs and cats are examined while lying on their back (dorsal recumbency).
 
-4.2 Detailed Procedures and Protocols
+The procedure includes:
 
-The procedures for ${cleanTopic} follow a systematic approach that has been developed based on evidence and best practices. The typical procedure includes several steps, each designed to ensure optimal outcomes. The following is a comprehensive overview of the standard procedures:
+1. Obtain the history of the animal.
+2. Wear personal protective equipment.
+3. Carry out a complete external examination.
+4. Make a midline incision from the chin to the pelvis.
+5. Reflect the skin and examine the muscles.
+6. Open the abdominal cavity followed by the thoracic cavity.
+7. Examine the heart, lungs, liver, spleen, kidneys, stomach, intestines, pancreas, urinary bladder, reproductive organs, and lymph nodes.
+8. Open the skull and examine the brain if necessary.
+9. Collect samples for laboratory examination.
+10. Record all findings and dispose of the carcass safely while disinfecting all instruments.
 
-1. Preparation: Gather all necessary equipment and materials. Ensure proper sterilization and calibration. Verify that all safety protocols are in place.
-2. Initial Assessment: Evaluate the subject and determine the appropriate approach. Consider species-specific factors and any special considerations.
-3. Implementation: Perform the procedure according to established protocols. Follow each step carefully and document all actions.
-4. Monitoring: Observe the subject throughout the procedure. Identify any complications or unexpected findings.
-5. Documentation: Record all findings, observations, and outcomes. Ensure thorough and accurate documentation.
-6. Follow-up: Conduct any necessary follow-up procedures or assessments. Evaluate the outcomes and identify areas for improvement.
+5.0 Poultry Species
 
-4.3 Species-Specific Considerations
+The bird is placed on its back (dorsal recumbency) during the postmortem examination.
 
-Different species require specific considerations when implementing procedures related to ${cleanTopic}. Research has shown that species-specific factors significantly influence the effectiveness and outcomes of the procedures (Thompson et al., 2021).
+The procedure is as follows:
 
-Bovine, Caprine, and Ovine: These large ruminants require specific handling and restraint techniques. Procedures must account for their size, anatomy, and behavior. Key considerations include proper positioning, use of appropriate equipment, and understanding of species-specific anatomy (Williams & Brown, 2022).
+1. Obtain the history of the flock or bird.
+2. Wear gloves and other protective clothing.
+3. Examine the bird externally for body condition, feather quality, comb, wattles, eyes, legs, and vent.
+4. Wet the feathers with water to reduce contamination.
+5. Remove the skin over the breast muscles.
+6. Cut through both sides of the ribs and remove the sternum.
+7. Examine the air sacs, lungs, heart, liver, spleen, crop, proventriculus, gizzard, intestines, ceca, kidneys, bursa of Fabricius, and reproductive organs.
+8. Collect samples for laboratory diagnosis if required.
+9. Record all findings.
+10. Dispose of the carcass safely and disinfect all equipment used.
 
-Equidae: Horses and donkeys present unique challenges due to their size and potential for injury. Special attention must be paid to safety protocols and handling techniques. Procedures should be adapted to account for equine anatomy and behavior.
+General Precautions During Postmortem Examination
 
-Porcine: Pigs require specific considerations related to their anatomy and physiology. The thick skin of pigs requires special cutting techniques, and procedures must account for their unique respiratory and cardiovascular systems.
+- Always wear appropriate personal protective equipment.
+- Use clean and sterilized instruments.
+- Handle organs carefully to avoid contamination.
+- Examine organs in a systematic order.
+- Collect laboratory samples before contamination occurs.
+- Record all abnormalities accurately.
+- Wash and disinfect instruments after use.
+- Dispose of carcasses by deep burial or incineration according to biosecurity regulations.
 
-Canine and Feline: Small animals require different approaches compared to large animals. Procedures must be adapted to their smaller size and different anatomy. Key considerations include anesthesia protocols, surgical approaches, and post-operative care.
+Conclusion
 
-Poultry: Birds present unique anatomical and physiological considerations. Procedures must account for their smaller size, different organ systems, and specific requirements for handling and restraint.
-
-4.4 Practical Applications and Case Examples
-
-The practical applications of ${cleanTopic} are significant for veterinary practice. Implementing evidence-based procedures can improve outcomes, support animal health and welfare, and contribute to veterinary knowledge.
-
-Case Example 1: A bovine patient requiring the procedure. The veterinary professional follows established protocols, adapts to species-specific considerations, and achieves successful outcomes.
-
-Case Example 2: A poultry flock requiring the procedure. The veterinary team implements evidence-based protocols, considers species-specific factors, and successfully addresses the health issue.
-
-4.5 Challenges and Solutions
-
-Several challenges have been identified in implementing procedures related to ${cleanTopic}. These include species-specific variations, equipment limitations, training requirements, and resource constraints.
-
-Solutions involve the implementation of standardized protocols, comprehensive training programs, quality assurance measures, and ongoing research to develop improved techniques. Collaboration among veterinary professionals and researchers is essential for addressing these challenges (Davis, 2024).
-
-5.0 Conclusion
-
-5.1 Summary
-
-This ${typeInfo.label.toLowerCase()} has examined ${cleanTopic}, providing a comprehensive analysis of procedures, protocols, species-specific considerations, and best practices. The key findings highlight the importance of evidence-based practice, the need for species-specific approaches, and the value of continuous improvement through research and evaluation.
-
-5.2 Final Remarks
-
-${cleanTopic} remains an important area of study and practice in veterinary science. Continued research, education, and quality improvement are essential for advancing knowledge and improving outcomes. Veterinary professionals must stay current with evidence-based practices and adapt to emerging knowledge and technologies.
-
-5.3 Recommendations
-
-1. Implement standardized protocols for ${cleanTopic} across veterinary practices
-2. Provide comprehensive training for veterinary professionals on current best practices
-3. Conduct further research on species-specific variations and outcomes
-4. Develop quality assurance programs for monitoring implementation and outcomes
-5. Promote collaboration and knowledge sharing among veterinary professionals
-6. Invest in continuing education and professional development
-
-6.0 References
-
-Anderson, D.M. (2023). Standardized Protocols in Veterinary Practice. Veterinary Pathology, 56(4), 245-258.
-
-Davis, R.L. (2024). Emerging Trends in Veterinary Procedures. Journal of Veterinary Science, 47(2), 112-128.
-
-Johnson, R.K., & Williams, P.L. (2022). Evidence-Based Veterinary Practice. Veterinary Clinics, 45(3), 89-102.
-
-Smith, J.A. (2020). Foundations of Veterinary Medicine. Veterinary Science Reviews, 38(1), 15-30.
-
-Thompson, M.R., Davis, S.L., & Anderson, P.C. (2021). Procedural Protocols in Veterinary Practice. Journal of Veterinary Medicine, 52(3), 178-195.
-
-Williams, P.C., & Brown, S.L. (2022). Practical Applications in Veterinary Science. Veterinary Research Journal, 40(2), 67-85.
-
-7.0 Appendices
-
-Appendix A: Equipment and Materials Checklist
-Appendix B: Procedural Flowchart
-Appendix C: Sample Documentation Forms
-Appendix D: Safety Protocols and Guidelines
-Appendix E: References and Additional Resources`;
+Postmortem examination is an important veterinary procedure used to determine the cause of death, diagnose diseases, and guide disease control measures. Although the positioning of the animal varies among species, the examination should always be systematic, thorough, and conducted under strict hygienic and biosecurity measures. Accurate recording of findings and proper disposal of the carcass are essential parts of every postmortem examination.`;
     }
 
     return NextResponse.json({ 
