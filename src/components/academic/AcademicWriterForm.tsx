@@ -21,10 +21,10 @@ const typeLabels: Record<DocumentType, string> = {
 };
 
 const levelDescriptions: Record<AcademicLevel, string> = {
-  diploma: '2nd year college, 1500-2000 words',
-  degree: '3rd/4th year, 2000-3000 words',
-  masters: 'Graduate level, 3000-4000 words',
-  phd: 'Doctorate level, 4000-5000 words'
+  diploma: 'Foundational level with practical focus',
+  degree: 'Comprehensive analysis with evidence-based approach',
+  masters: 'Advanced research with critical analysis',
+  phd: 'Original contribution with extensive literature review'
 };
 
 export default function AcademicWriterForm() {
@@ -36,14 +36,22 @@ export default function AcademicWriterForm() {
   const [error, setError] = useState<string | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [showFullPage, setShowFullPage] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setResult(null);
+    setLoadingMessage('⏳ Connecting to Gemini AI...');
 
     try {
+      // Update loading messages
+      setTimeout(() => setLoadingMessage('🧠 Analyzing your topic...'), 2000);
+      setTimeout(() => setLoadingMessage('📝 Generating comprehensive content...'), 4000);
+      setTimeout(() => setLoadingMessage('🔍 Adding citations and references...'), 6000);
+      setTimeout(() => setLoadingMessage('✨ Finalizing your academic paper...'), 8000);
+
       const response = await fetch('/api/academic-writer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -58,8 +66,10 @@ export default function AcademicWriterForm() {
       const words = data.content.split(/\s+/).length;
       setWordCount(words);
       setShowFullPage(true);
+      setLoadingMessage('✅ Done!');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
+      setLoadingMessage('');
     } finally {
       setLoading(false);
     }
@@ -245,7 +255,6 @@ export default function AcademicWriterForm() {
           {cleanResult.split('\n').map((line, i) => {
             if (!line.trim() && i === 0) return null;
             
-            // Title Page
             if (line.match(/^1\.0\s+Cover\s+Page/i)) {
               return (
                 <div key={i} className="text-center my-16">
@@ -256,27 +265,22 @@ export default function AcademicWriterForm() {
               );
             }
             
-            // Main headings
             if (line.match(/^\d+\.0\s/)) {
               return <h2 key={i} className="text-xl font-bold mt-6 mb-3">{line}</h2>;
             }
             
-            // Subheadings
             if (line.match(/^\d+\.\d+\s/)) {
               return <h3 key={i} className="text-lg font-bold mt-4 mb-2">{line}</h3>;
             }
             
-            // Abstract
             if (line.toLowerCase().includes('abstract') && line.length < 30) {
               return <div key={i} className="italic mt-4 mb-2"><strong>Abstract</strong><br />{line.replace(/Abstract/i, '').trim()}</div>;
             }
             
-            // References
             if (line.match(/^References/i)) {
               return <h2 key={i} className="text-xl font-bold mt-8 mb-4">{line}</h2>;
             }
             
-            // Regular paragraphs
             if (line.trim()) {
               return <p key={i} className="mb-2 leading-relaxed text-justify">{line}</p>;
             }
@@ -309,7 +313,7 @@ export default function AcademicWriterForm() {
             style={{ color: '#1a1a1a', backgroundColor: '#ffffff' }}
           />
           <p className="text-sm text-gray-500 mt-1">
-            Be specific for better results
+            Be specific for better results - the AI will write as much as needed
           </p>
         </div>
 
@@ -363,15 +367,22 @@ export default function AcademicWriterForm() {
         <button
           type="submit"
           disabled={loading || !topic.trim()}
-          className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-200"
+          className={`w-full font-bold py-4 rounded-xl transition shadow-lg ${
+            loading 
+              ? 'bg-gradient-to-r from-green-600 to-green-700 text-white' 
+              : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Generating your academic paper...
+            <span className="flex flex-col items-center gap-2">
+              <span className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                {loadingMessage}
+              </span>
+              <span className="text-xs text-green-100">This may take a moment for comprehensive content</span>
             </span>
           ) : (
             '📝 Generate Academic Paper'
