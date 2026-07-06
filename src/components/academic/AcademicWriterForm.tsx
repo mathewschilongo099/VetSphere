@@ -1,7 +1,7 @@
 // src/components/academic/AcademicWriterForm.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 type AcademicLevel = 'diploma' | 'degree' | 'masters' | 'phd';
 type DocumentType = 'essay' | 'research' | 'report' | 'case-study';
@@ -36,12 +36,24 @@ export default function AcademicWriterForm() {
   const [error, setError] = useState<string | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [displayContent, setDisplayContent] = useState<string[]>([]);
+
+  // Process content for display when result changes
+  useEffect(() => {
+    if (result) {
+      const lines = result.split('\n');
+      setDisplayContent(lines);
+      const words = result.split(/\s+/).length;
+      setWordCount(words);
+    }
+  }, [result]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setResult(null);
+    setDisplayContent([]);
     setLoadingMessage('⏳ Connecting to Gemini AI...');
 
     try {
@@ -61,8 +73,6 @@ export default function AcademicWriterForm() {
       if (!response.ok) throw new Error(data.error || 'Failed to generate');
       
       setResult(data.content);
-      const words = data.content.split(/\s+/).length;
-      setWordCount(words);
       setLoadingMessage('✅ Done!');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -74,22 +84,14 @@ export default function AcademicWriterForm() {
 
   const copyToClipboard = () => {
     if (result) {
-      const cleanResult = result
-        .replace(/\*\*/g, '')
-        .replace(/\*/g, '')
-        .replace(/#{1,6}\s/g, '');
-      navigator.clipboard.writeText(cleanResult);
+      navigator.clipboard.writeText(result);
       alert('✅ Content copied to clipboard!');
     }
   };
 
   const downloadAsTXT = () => {
     if (result) {
-      const cleanResult = result
-        .replace(/\*\*/g, '')
-        .replace(/\*/g, '')
-        .replace(/#{1,6}\s/g, '');
-      const blob = new Blob([cleanResult], { type: 'text/plain;charset=utf-8' });
+      const blob = new Blob([result], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -101,11 +103,6 @@ export default function AcademicWriterForm() {
 
   const downloadAsPDF = () => {
     if (result) {
-      const cleanResult = result
-        .replace(/\*\*/g, '')
-        .replace(/\*/g, '')
-        .replace(/#{1,6}\s/g, '');
-      
       const printWindow = window.open('', '_blank', 'width=900,height=700');
       if (printWindow) {
         printWindow.document.write(`
@@ -123,11 +120,6 @@ export default function AcademicWriterForm() {
                   max-width: 8.5in;
                   margin-left: auto;
                   margin-right: auto;
-                }
-                h1, h2, h3, h4, h5, h6 {
-                  font-family: 'Times New Roman', Times, serif;
-                  margin-top: 12pt;
-                  margin-bottom: 6pt;
                 }
                 h1 { font-size: 14pt; font-weight: bold; text-align: center; }
                 h2 { font-size: 13pt; font-weight: bold; margin-top: 12pt; margin-bottom: 6pt; }
@@ -150,23 +142,6 @@ export default function AcademicWriterForm() {
                   text-align: center;
                   margin-bottom: 4pt;
                 }
-                .abstract {
-                  margin-bottom: 12pt;
-                }
-                .abstract strong {
-                  font-weight: bold;
-                }
-                .references {
-                  margin-top: 12pt;
-                }
-                .references p {
-                  text-indent: -0.5in;
-                  padding-left: 0.5in;
-                  margin-bottom: 4pt;
-                }
-                .section {
-                  margin-bottom: 8pt;
-                }
                 .page-number {
                   text-align: center;
                   margin-top: 12pt;
@@ -175,21 +150,12 @@ export default function AcademicWriterForm() {
               </style>
             </head>
             <body>
-              ${cleanResult.split('\n').map(line => {
-                if (line.match(/^1\.0\s+Cover\s+Page/i)) {
-                  return `<div class="title-page"><h1>${cleanResult.split('\n').find(l => l.trim() && !l.match(/^\d+\./)) || 'Academic Paper'}</h1><p>VetSphere Academic Writer</p><p>${new Date().toLocaleDateString()}</p></div>`;
-                }
+              ${result.split('\n').map(line => {
                 if (line.match(/^\d+\.0\s/)) {
-                  return `<h2 class="section">${line}</h2>`;
+                  return `<h2>${line}</h2>`;
                 }
                 if (line.match(/^\d+\.\d+\s/)) {
-                  return `<h3 class="section">${line}</h3>`;
-                }
-                if (line.toLowerCase().includes('abstract') && line.length < 30) {
-                  return `<div class="abstract"><strong>Abstract</strong><br>${line.replace(/Abstract/i, '').trim()}</div>`;
-                }
-                if (line.match(/^References/i)) {
-                  return `<h2 class="references">${line}</h2>`;
+                  return `<h3>${line}</h3>`;
                 }
                 if (line.trim()) {
                   return `<p>${line}</p>`;
@@ -209,12 +175,42 @@ export default function AcademicWriterForm() {
     }
   };
 
+  // Render a line with proper formatting
+  const renderLine = (line: string, index: number) => {
+    if (!line.trim()) {
+      return <br key={index} />;
+    }
+
+    // Main headings (1.0, 2.0, etc.)
+    if (line.match(/^\d+\.0\s/)) {
+      return <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-gray-900">{line}</h2>;
+    }
+
+    // Subheadings (1.1, 1.2, etc.)
+    if (line.match(/^\d+\.\d+\s/)) {
+      return <h3 key={index} className="text-lg font-bold mt-4 mb-2 text-gray-800">{line}</h3>;
+    }
+
+    // Numbered list items (1., 2., 3., etc.)
+    if (line.match(/^\d+\.\s/)) {
+      return <p key={index} className="mb-2 leading-relaxed text-justify pl-6">{line}</p>;
+    }
+
+    // Bullet points
+    if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+      return <p key={index} className="mb-1 leading-relaxed text-justify pl-6">{line}</p>;
+    }
+
+    // Regular paragraphs
+    return <p key={index} className="mb-2 leading-relaxed text-justify">{line}</p>;
+  };
+
   return (
     <div>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block font-semibold text-gray-700 mb-2">
-            What's your topic or research question?
+            What is your topic or research question?
           </label>
           <textarea
             value={topic}
@@ -226,7 +222,7 @@ export default function AcademicWriterForm() {
             style={{ color: '#1a1a1a', backgroundColor: '#ffffff' }}
           />
           <p className="text-sm text-gray-500 mt-1">
-            Be specific for better results - the AI will write as much as needed
+            Be specific for better results — the AI will write comprehensive content
           </p>
         </div>
 
@@ -314,7 +310,7 @@ export default function AcademicWriterForm() {
       )}
 
       {/* RESULTS - Displayed inline on the same page */}
-      {result && (
+      {result && displayContent.length > 0 && (
         <div className="mt-8 border-t pt-8">
           <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
             <div>
@@ -345,25 +341,10 @@ export default function AcademicWriterForm() {
             </div>
           </div>
 
-          {/* Content displayed inline */}
+          {/* Content displayed inline with proper formatting */}
           <div className="bg-gray-50 border rounded-xl p-6 max-h-[600px] overflow-y-auto">
             <div style={{ fontFamily: 'Times New Roman, Times, serif', fontSize: '12pt', lineHeight: '1.5' }}>
-              {result.split('\n').map((line, i) => {
-                if (!line.trim()) return <br key={i} />;
-                
-                // Main headings (1.0, 2.0, etc.)
-                if (line.match(/^\d+\.0\s/)) {
-                  return <h2 key={i} className="text-xl font-bold mt-4 mb-2">{line}</h2>;
-                }
-                
-                // Subheadings (1.1, 1.2, etc.)
-                if (line.match(/^\d+\.\d+\s/)) {
-                  return <h3 key={i} className="text-lg font-bold mt-3 mb-1">{line}</h3>;
-                }
-                
-                // Regular paragraphs
-                return <p key={i} className="mb-1 leading-relaxed text-justify">{line}</p>;
-              })}
+              {displayContent.map((line, index) => renderLine(line, index))}
             </div>
           </div>
 
