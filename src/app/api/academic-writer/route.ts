@@ -304,14 +304,56 @@ async function callGroq(
   }
 }
 
+async function callCerebras(
+  prompt: string,
+  maxTokens: number
+): Promise<{ text: string; error: string }> {
+  const cerebrasKey = process.env.CEREBRAS_API_KEY;
+  if (!cerebrasKey) return { text: '', error: 'CEREBRAS_API_KEY is not set' };
+
+  try {
+    const response = await fetchWithTimeout(
+      'https://api.cerebras.ai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${cerebrasKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.45,
+          max_completion_tokens: maxTokens,
+        }),
+      },
+      45000
+    );
+    const data = await response.json();
+    if (data.error || !data.choices) {
+      const message = data.error?.message || 'unknown Cerebras error';
+      console.error('Cerebras error:', message);
+      return { text: '', error: `Cerebras: ${message}` };
+    }
+    return { text: data.choices[0]?.message?.content || '', error: '' };
+  } catch (e: any) {
+    const isAbort = e?.name === 'AbortError';
+    console.error('Cerebras fetch error:', e);
+    return { text: '', error: isAbort ? 'Cerebras timed out' : `Cerebras fetch failed: ${e.message || e}` };
+  }
+}
+
 async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number
 ): Promise<{ text: string; apiUsed: string; error: string }> {
-  // Groq first: best free RPM/RPD budget and fastest. OpenRouter next. Gemini
-  // last, since its free tier is capped at ~20 requests/day and is shared
-  // with the autopublish workflow — it runs out fastest, so save it as the
-  // last resort rather than hammering it first.
+  // Cerebras first: 1M tokens/day free, by far the most generous quota.
+  // Groq next: solid but shares a per-key daily token budget with other
+  // VetSphere features. OpenRouter next (shared/flaky free routing).
+  // Gemini last: only ~20 requests/day and shared with autopublish.
+  const cerebras = await callCerebras(sectionPrompt, maxOutputTokens);
+  if (cerebras.text) return { text: cerebras.text, apiUsed: 'Cerebras', error: '' };
+
   const groq = await callGroq(sectionPrompt, maxOutputTokens);
   if (groq.text) return { text: groq.text, apiUsed: 'Groq', error: '' };
 
@@ -324,7 +366,7 @@ async function generateSection(
   return {
     text: '',
     apiUsed: 'none',
-    error: `Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); Gemini failed (${gemini.error})`,
+    error: `Cerebras failed (${cerebras.error}); Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); Gemini failed (${gemini.error})`,
   };
 }
 
