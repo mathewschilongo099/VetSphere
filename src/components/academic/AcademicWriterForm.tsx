@@ -14,7 +14,7 @@ const levelLabels: Record<AcademicLevel, string> = {
 };
 
 const typeLabels: Record<DocumentType, string> = {
-  essay: 'Essay',
+  essay: 'Assignment',
   research: 'Research Paper',
   report: 'Report',
   'case-study': 'Case Study'
@@ -116,36 +116,13 @@ export default function AcademicWriterForm() {
                   margin-left: auto;
                   margin-right: auto;
                 }
-                h1, h2, h3, h4, h5, h6 {
-                  font-family: 'Times New Roman', Times, serif;
-                  margin-top: 12pt;
-                  margin-bottom: 6pt;
-                }
-                h1 { font-size: 14pt; font-weight: bold; }
-                h2 { font-size: 13pt; font-weight: bold; }
-                h3 { font-size: 12pt; font-weight: bold; }
+                h1 { font-size: 14pt; font-weight: bold; text-align: center; }
+                h2 { font-size: 13pt; font-weight: bold; margin-top: 12pt; margin-bottom: 6pt; }
+                h3 { font-size: 12pt; font-weight: bold; margin-top: 8pt; margin-bottom: 4pt; }
                 p {
-                  margin-bottom: 6pt;
-                  text-align: justify;
-                }
-                .page-number {
-                  text-align: center;
-                  margin-top: 12pt;
-                  font-size: 10pt;
-                }
-                .references {
-                  margin-top: 12pt;
-                  text-indent: -0.5in;
-                  padding-left: 0.5in;
-                }
-                .references p {
                   margin-bottom: 4pt;
-                  text-indent: -0.5in;
-                  padding-left: 0.5in;
-                }
-                .abstract {
-                  font-style: italic;
-                  margin-bottom: 12pt;
+                  text-align: justify;
+                  line-height: 1.5;
                 }
                 .title-page {
                   text-align: center;
@@ -156,41 +133,55 @@ export default function AcademicWriterForm() {
                   font-size: 18pt;
                   margin-bottom: 12pt;
                 }
-                .title-page .author {
-                  font-size: 14pt;
-                  margin-bottom: 6pt;
+                .title-page p {
+                  text-align: center;
+                  margin-bottom: 4pt;
                 }
-                .title-page .date {
-                  font-size: 12pt;
+                .abstract {
+                  margin-bottom: 12pt;
                 }
-                .section-number {
+                .abstract strong {
                   font-weight: bold;
+                }
+                .references {
+                  margin-top: 12pt;
+                }
+                .references p {
+                  text-indent: -0.5in;
+                  padding-left: 0.5in;
+                  margin-bottom: 4pt;
+                }
+                .section {
+                  margin-bottom: 8pt;
+                }
+                .page-number {
+                  text-align: center;
+                  margin-top: 12pt;
+                  font-size: 10pt;
                 }
               </style>
             </head>
             <body>
-              <div class="title-page">
-                <h1>${cleanResult.split('\n').find(line => line.trim()) || 'Academic Paper'}</h1>
-                <div class="author">VetSphere Academic Writer</div>
-                <div class="date">${new Date().toLocaleDateString()}</div>
-              </div>
-              <div style="page-break-before: always;"></div>
               ${cleanResult.split('\n').map(line => {
-                if (line.toLowerCase().includes('abstract') && line.length < 50) {
-                  return `<div class="abstract"><strong>Abstract</strong><br>${line.replace(/Abstract/i, '').trim()}</div>`;
-                } else if (line.match(/^\d+\.\d+\s/)) {
-                  return `<h3>${line}</h3>`;
-                } else if (line.match(/^\d+\.\s/)) {
-                  return `<h2>${line}</h2>`;
-                } else if (line.match(/^References|^Bibliography/i)) {
-                  return `<h2>${line}</h2><div class="references">`;
-                } else if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
-                  return `<p style="padding-left: 0.5in;">${line}</p>`;
-                } else if (line.trim()) {
-                  return `<p>${line}</p>`;
-                } else {
-                  return '<br>';
+                if (line.match(/^1\.0\s+Cover\s+Page/i)) {
+                  return `<div class="title-page"><h1>${cleanResult.split('\n').find(l => l.trim() && !l.match(/^\d+\./)) || 'Academic Paper'}</h1><p>VetSphere Academic Writer</p><p>${new Date().toLocaleDateString()}</p></div>`;
                 }
+                if (line.match(/^\d+\.0\s/)) {
+                  return `<h2 class="section">${line}</h2>`;
+                }
+                if (line.match(/^\d+\.\d+\s/)) {
+                  return `<h3 class="section">${line}</h3>`;
+                }
+                if (line.toLowerCase().includes('abstract') && line.length < 30) {
+                  return `<div class="abstract"><strong>Abstract</strong><br>${line.replace(/Abstract/i, '').trim()}</div>`;
+                }
+                if (line.match(/^References/i)) {
+                  return `<h2 class="references">${line}</h2>`;
+                }
+                if (line.trim()) {
+                  return `<p>${line}</p>`;
+                }
+                return '<br>';
               }).join('')}
               <div class="page-number">${new Date().getFullYear()} | Page 1</div>
             </body>
@@ -251,47 +242,47 @@ export default function AcademicWriterForm() {
 
         {/* Full page content */}
         <div className="max-w-4xl mx-auto px-8 py-12">
-          <div className="prose prose-sm max-w-none" style={{ fontFamily: 'Times New Roman, Times, serif', fontSize: '12pt', lineHeight: '1.5', textAlign: 'justify' }}>
-            {cleanResult.split('\n').map((line, i) => {
-              if (!line.trim() && i === 0) return null;
-              
-              if (line.match(/^\d+\.0\s+Title\s+Page/i)) {
-                return (
-                  <div key={i} className="text-center my-16">
-                    <h1 className="text-3xl font-bold mb-4">{cleanResult.split('\n').find(l => l.trim() && !l.match(/^\d+\./)) || 'Academic Paper'}</h1>
-                    <p className="text-xl mb-2">VetSphere Academic Writer</p>
-                    <p>{new Date().toLocaleDateString()}</p>
-                  </div>
-                );
-              }
-              
-              if (line.match(/^\d+\.0\s/)) {
-                return <h2 key={i} className="text-xl font-bold mt-6 mb-3">{line}</h2>;
-              }
-              
-              if (line.match(/^\d+\.\d+\s/)) {
-                return <h3 key={i} className="text-lg font-bold mt-4 mb-2">{line}</h3>;
-              }
-              
-              if (line.toLowerCase().includes('abstract') && line.length < 50) {
-                return <div key={i} className="italic mt-4 mb-2"><strong>Abstract</strong><br />{line.replace(/Abstract/i, '').trim()}</div>;
-              }
-              
-              if (line.match(/^References/i)) {
-                return <h2 key={i} className="text-xl font-bold mt-8 mb-4">{line}</h2>;
-              }
-              
-              if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
-                return <p key={i} className="pl-6 mb-1">{line}</p>;
-              }
-              
-              if (line.trim()) {
-                return <p key={i} className="mb-2">{line}</p>;
-              }
-              
-              return <br key={i} />;
-            })}
-          </div>
+          {cleanResult.split('\n').map((line, i) => {
+            if (!line.trim() && i === 0) return null;
+            
+            // Title Page
+            if (line.match(/^1\.0\s+Cover\s+Page/i)) {
+              return (
+                <div key={i} className="text-center my-16">
+                  <h1 className="text-2xl font-bold mb-2">{cleanResult.split('\n').find(l => l.trim() && !l.match(/^\d+\./)) || 'Academic Paper'}</h1>
+                  <p className="text-lg mb-1">VetSphere Academic Writer</p>
+                  <p className="text-base">{new Date().toLocaleDateString()}</p>
+                </div>
+              );
+            }
+            
+            // Main headings
+            if (line.match(/^\d+\.0\s/)) {
+              return <h2 key={i} className="text-xl font-bold mt-6 mb-3">{line}</h2>;
+            }
+            
+            // Subheadings
+            if (line.match(/^\d+\.\d+\s/)) {
+              return <h3 key={i} className="text-lg font-bold mt-4 mb-2">{line}</h3>;
+            }
+            
+            // Abstract
+            if (line.toLowerCase().includes('abstract') && line.length < 30) {
+              return <div key={i} className="italic mt-4 mb-2"><strong>Abstract</strong><br />{line.replace(/Abstract/i, '').trim()}</div>;
+            }
+            
+            // References
+            if (line.match(/^References/i)) {
+              return <h2 key={i} className="text-xl font-bold mt-8 mb-4">{line}</h2>;
+            }
+            
+            // Regular paragraphs
+            if (line.trim()) {
+              return <p key={i} className="mb-2 leading-relaxed text-justify">{line}</p>;
+            }
+            
+            return <br key={i} />;
+          })}
           
           <div className="text-center text-sm text-gray-500 mt-12 pt-4 border-t">
             Generated by VetSphere Academic Writer • {new Date().toLocaleDateString()}
