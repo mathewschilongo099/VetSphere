@@ -1,7 +1,7 @@
 // src/components/academic/AcademicWriterForm.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 type AcademicLevel = 'diploma' | 'degree' | 'masters' | 'phd';
 type DocumentType = 'essay' | 'research' | 'report' | 'case-study';
@@ -36,24 +36,12 @@ export default function AcademicWriterForm() {
   const [error, setError] = useState<string | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
-  const [displayContent, setDisplayContent] = useState<string[]>([]);
-
-  // Process content for display when result changes
-  useEffect(() => {
-    if (result) {
-      const lines = result.split('\n');
-      setDisplayContent(lines);
-      const words = result.split(/\s+/).length;
-      setWordCount(words);
-    }
-  }, [result]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setResult(null);
-    setDisplayContent([]);
     setLoadingMessage('⏳ Connecting to Gemini AI...');
 
     try {
@@ -73,6 +61,8 @@ export default function AcademicWriterForm() {
       if (!response.ok) throw new Error(data.error || 'Failed to generate');
       
       setResult(data.content);
+      const words = data.content.split(/\s+/).length;
+      setWordCount(words);
       setLoadingMessage('✅ Done!');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -147,6 +137,11 @@ export default function AcademicWriterForm() {
                   margin-top: 12pt;
                   font-size: 10pt;
                 }
+                .procedure-step {
+                  margin-bottom: 2pt;
+                  padding-left: 20pt;
+                  text-indent: -20pt;
+                }
               </style>
             </head>
             <body>
@@ -156,6 +151,9 @@ export default function AcademicWriterForm() {
                 }
                 if (line.match(/^\d+\.\d+\s/)) {
                   return `<h3>${line}</h3>`;
+                }
+                if (line.match(/^\d+\.\s/)) {
+                  return `<p class="procedure-step">${line}</p>`;
                 }
                 if (line.trim()) {
                   return `<p>${line}</p>`;
@@ -175,34 +173,68 @@ export default function AcademicWriterForm() {
     }
   };
 
-  // Render a line with proper formatting
-  const renderLine = (line: string, index: number) => {
-    if (!line.trim()) {
-      return <br key={index} />;
-    }
+  // Helper function to render content with proper formatting
+  const renderContent = () => {
+    if (!result) return null;
 
-    // Main headings (1.0, 2.0, etc.)
-    if (line.match(/^\d+\.0\s/)) {
-      return <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-gray-900">{line}</h2>;
-    }
+    const lines = result.split('\n');
+    const elements: JSX.Element[] = [];
 
-    // Subheadings (1.1, 1.2, etc.)
-    if (line.match(/^\d+\.\d+\s/)) {
-      return <h3 key={index} className="text-lg font-bold mt-4 mb-2 text-gray-800">{line}</h3>;
-    }
+    lines.forEach((line, index) => {
+      if (!line.trim()) {
+        elements.push(<br key={`br-${index}`} />);
+        return;
+      }
 
-    // Numbered list items (1., 2., 3., etc.)
-    if (line.match(/^\d+\.\s/)) {
-      return <p key={index} className="mb-2 leading-relaxed text-justify pl-6">{line}</p>;
-    }
+      // Main headings (1.0, 2.0, etc.)
+      if (line.match(/^\d+\.0\s/)) {
+        elements.push(
+          <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-gray-900">
+            {line}
+          </h2>
+        );
+        return;
+      }
 
-    // Bullet points
-    if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
-      return <p key={index} className="mb-1 leading-relaxed text-justify pl-6">{line}</p>;
-    }
+      // Subheadings (1.1, 1.2, etc.)
+      if (line.match(/^\d+\.\d+\s/)) {
+        elements.push(
+          <h3 key={index} className="text-lg font-bold mt-4 mb-2 text-gray-800">
+            {line}
+          </h3>
+        );
+        return;
+      }
 
-    // Regular paragraphs
-    return <p key={index} className="mb-2 leading-relaxed text-justify">{line}</p>;
+      // Numbered steps (1., 2., 3., etc.)
+      if (line.match(/^\d+\.\s/)) {
+        elements.push(
+          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt', textIndent: '-20pt' }}>
+            {line}
+          </p>
+        );
+        return;
+      }
+
+      // Bullet points
+      if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
+        elements.push(
+          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt' }}>
+            {line}
+          </p>
+        );
+        return;
+      }
+
+      // Regular paragraphs
+      elements.push(
+        <p key={index} className="mb-2 leading-relaxed text-justify">
+          {line}
+        </p>
+      );
+    });
+
+    return elements;
   };
 
   return (
@@ -309,9 +341,9 @@ export default function AcademicWriterForm() {
         </div>
       )}
 
-      {/* RESULTS - Displayed inline on the same page */}
-      {result && displayContent.length > 0 && (
-        <div className="mt-8 border-t pt-8">
+      {/* RESULTS - Displayed directly below the button, no box */}
+      {result && (
+        <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
             <div>
               <h3 className="font-bold text-lg text-gray-900">📄 Generated {typeLabels[type]}</h3>
@@ -341,14 +373,12 @@ export default function AcademicWriterForm() {
             </div>
           </div>
 
-          {/* Content displayed inline with proper formatting */}
-          <div className="bg-gray-50 border rounded-xl p-6 max-h-[600px] overflow-y-auto">
-            <div style={{ fontFamily: 'Times New Roman, Times, serif', fontSize: '12pt', lineHeight: '1.5' }}>
-              {displayContent.map((line, index) => renderLine(line, index))}
-            </div>
+          {/* Content displayed directly - NO BOX, just clean text */}
+          <div style={{ fontFamily: 'Times New Roman, Times, serif', fontSize: '12pt', lineHeight: '1.5' }}>
+            {renderContent()}
           </div>
 
-          <div className="text-center text-sm text-gray-500 mt-4 pt-2 border-t">
+          <div className="text-center text-sm text-gray-500 mt-6 pt-4 border-t border-gray-200">
             Generated by VetSphere Academic Writer • {new Date().toLocaleDateString()}
           </div>
         </div>
