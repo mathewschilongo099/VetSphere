@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer';
 export const metadata: Metadata = {
   title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
   description:
-    'Free expert veterinary articles for farmers and pet owners worldwide. Learn about cattle diseases, livestock management, poultry health, dog and cat care — practical, reliable and completely free.',
+    'Expert veterinary articles for farmers and pet owners. Learn about cattle diseases, livestock management, poultry health, dog and cat care — practical, reliable and free.',
   keywords:
     'veterinary, cattle diseases, livestock health, pet care, animal health, poultry farming, goat health, vet articles, livestock farming, dog care, cat care, animal diseases',
   icons: {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
     description:
-      'Free expert veterinary articles for farmers and pet owners worldwide. Practical, reliable and completely free.',
+      'Expert veterinary articles for farmers and pet owners. Practical, reliable and free.',
     url: 'https://vet-sphere.vercel.app',
     siteName: 'VetSphere',
     type: 'website',
