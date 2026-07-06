@@ -254,8 +254,9 @@ async function callOpenRouter(
     const data = await response.json();
     if (data.error || !data.choices) {
       const message = data.error?.message || 'unknown OpenRouter error';
-      console.error('OpenRouter error:', message);
-      return { text: '', error: `OpenRouter: ${message}` };
+      const metadata = data.error?.metadata ? ` | ${JSON.stringify(data.error.metadata)}` : '';
+      console.error('OpenRouter error:', message, metadata);
+      return { text: '', error: `OpenRouter: ${message}${metadata}` };
     }
     return { text: data.choices[0]?.message?.content || '', error: '' };
   } catch (e: any) {
@@ -330,8 +331,11 @@ async function callCerebras(
       45000
     );
     const data = await response.json();
-    if (data.error || !data.choices) {
-      const message = data.error?.message || 'unknown Cerebras error';
+    if (!response.ok || data.error || !data.choices) {
+      // Cerebras returns errors as a flat object: {"message": "...", "type": "...", "code": "..."}
+      // — not nested under `data.error` like OpenAI/Gemini/Groq — so check both shapes.
+      const message =
+        data.error?.message || data.message || `HTTP ${response.status}: ${JSON.stringify(data)}`;
       console.error('Cerebras error:', message);
       return { text: '', error: `Cerebras: ${message}` };
     }
