@@ -60,6 +60,7 @@ export default function AcademicWriterForm() {
       
       if (!response.ok) throw new Error(data.error || 'Failed to generate');
       
+      console.log('Content received:', data.content.substring(0, 200)); // Debug log
       setResult(data.content);
       const words = data.content.split(/\s+/).length;
       setWordCount(words);
@@ -110,6 +111,11 @@ export default function AcademicWriterForm() {
                   max-width: 8.5in;
                   margin-left: auto;
                   margin-right: auto;
+                  color: #000000;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                  font-family: 'Times New Roman', Times, serif;
+                  color: #000000;
                 }
                 h1 { font-size: 14pt; font-weight: bold; text-align: center; }
                 h2 { font-size: 13pt; font-weight: bold; margin-top: 12pt; margin-bottom: 6pt; }
@@ -118,6 +124,7 @@ export default function AcademicWriterForm() {
                   margin-bottom: 4pt;
                   text-align: justify;
                   line-height: 1.5;
+                  color: #000000;
                 }
                 .title-page {
                   text-align: center;
@@ -173,14 +180,17 @@ export default function AcademicWriterForm() {
     }
   };
 
-  // Helper function to render content with proper formatting
+  // Helper function to render content with proper formatting - FIXED with explicit colors
   const renderContent = () => {
     if (!result) return null;
+
+    console.log('Rendering content, length:', result.length); // Debug log
 
     const lines = result.split('\n');
     const elements: JSX.Element[] = [];
 
     lines.forEach((line, index) => {
+      // Skip empty lines but add spacing
       if (!line.trim()) {
         elements.push(<br key={`br-${index}`} />);
         return;
@@ -189,7 +199,7 @@ export default function AcademicWriterForm() {
       // Main headings (1.0, 2.0, etc.)
       if (line.match(/^\d+\.0\s/)) {
         elements.push(
-          <h2 key={index} className="text-xl font-bold mt-6 mb-3 text-gray-900">
+          <h2 key={index} className="text-xl font-bold mt-6 mb-3" style={{ color: '#1a1a1a' }}>
             {line}
           </h2>
         );
@@ -199,7 +209,7 @@ export default function AcademicWriterForm() {
       // Subheadings (1.1, 1.2, etc.)
       if (line.match(/^\d+\.\d+\s/)) {
         elements.push(
-          <h3 key={index} className="text-lg font-bold mt-4 mb-2 text-gray-800">
+          <h3 key={index} className="text-lg font-bold mt-4 mb-2" style={{ color: '#2d2d2d' }}>
             {line}
           </h3>
         );
@@ -209,7 +219,7 @@ export default function AcademicWriterForm() {
       // Numbered steps (1., 2., 3., etc.)
       if (line.match(/^\d+\.\s/)) {
         elements.push(
-          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt', textIndent: '-20pt' }}>
+          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt', textIndent: '-20pt', color: '#1a1a1a' }}>
             {line}
           </p>
         );
@@ -219,16 +229,16 @@ export default function AcademicWriterForm() {
       // Bullet points
       if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
         elements.push(
-          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt' }}>
+          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt', color: '#1a1a1a' }}>
             {line}
           </p>
         );
         return;
       }
 
-      // Regular paragraphs
+      // Regular paragraphs - with explicit color
       elements.push(
-        <p key={index} className="mb-2 leading-relaxed text-justify">
+        <p key={index} className="mb-2 leading-relaxed text-justify" style={{ color: '#1a1a1a' }}>
           {line}
         </p>
       );
@@ -341,7 +351,7 @@ export default function AcademicWriterForm() {
         </div>
       )}
 
-      {/* RESULTS - Displayed directly below the button, no box */}
+      {/* RESULTS - Displayed directly below the button with visible text */}
       {result && (
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
@@ -373,8 +383,14 @@ export default function AcademicWriterForm() {
             </div>
           </div>
 
-          {/* Content displayed directly - NO BOX, just clean text */}
-          <div style={{ fontFamily: 'Times New Roman, Times, serif', fontSize: '12pt', lineHeight: '1.5' }}>
+          {/* Content displayed directly - NO BOX, with visible text */}
+          <div style={{ 
+            fontFamily: 'Times New Roman, Times, serif', 
+            fontSize: '12pt', 
+            lineHeight: '1.5',
+            color: '#1a1a1a',
+            backgroundColor: '#ffffff'
+          }}>
             {renderContent()}
           </div>
 
