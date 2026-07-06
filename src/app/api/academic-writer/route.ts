@@ -13,88 +13,67 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Clean the topic
     const cleanTopic = topic
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
       .replace(/[‎]/g, '')
       .trim();
 
-    const levelMap: Record<string, { label: string; detail: string }> = {
+    const levelMap: Record<string, { label: string; detail: string; academicTip: string }> = {
       diploma: { 
         label: 'Diploma Level',
-        detail: 'Write clear, practical content with step-by-step procedures. Include basic concepts, equipment lists, and safety considerations. Keep explanations accessible and focused on practical application.'
+        detail: 'Write clear, practical content with step-by-step procedures. Include basic concepts, equipment lists, and safety considerations.',
+        academicTip: 'Use clear topic sentences, avoid jargon, explain technical terms.'
       },
       degree: { 
         label: "Bachelor's Degree Level",
-        detail: 'Write comprehensive, detailed procedures. Include step-by-step instructions for each species, equipment specifications, safety protocols, and practical considerations. Focus on clinical application and diagnostic relevance.'
+        detail: 'Write comprehensive, detailed procedures. Include step-by-step instructions for each species, equipment specifications, safety protocols, and practical considerations.',
+        academicTip: 'Use evidence-based arguments, include citations, distinguish facts from interpretations.'
       },
       masters: { 
         label: "Master's Degree Level",
-        detail: 'Write extensive, detailed procedures with critical analysis. Include comparative anatomy across species, advanced techniques, research-backed protocols, and diagnostic interpretation.'
+        detail: 'Write extensive, detailed procedures with critical analysis. Include comparative anatomy across species, advanced techniques, research-backed protocols, and diagnostic interpretation.',
+        academicTip: 'Acknowledge counterarguments, use signal phrases for citations, demonstrate critical thinking.'
       },
       phd: { 
         label: 'PhD Level',
-        detail: 'Write comprehensive, original content with exhaustive detail. Include historical development of techniques, comparative anatomy across all species, advanced pathological interpretation, research methodology, and contributions to veterinary pathology.'
+        detail: 'Write comprehensive, original content with exhaustive detail. Include historical development of techniques, comparative anatomy, advanced pathological interpretation, and research methodology.',
+        academicTip: 'Contribute original insights, engage with theoretical frameworks, demonstrate methodological rigor.'
       }
     };
 
     const levelInfo = levelMap[level] || levelMap['degree'];
 
-    // DIRECT, PRACTICAL PROMPT - matching the example style
-    const prompt = `You are a veterinary pathologist writing a practical, step-by-step assignment on postmortem examination procedures. Write in a clear, direct style - NOT academic fluff.
+    // Determine document type structure
+    let structureGuide = '';
+    if (type === 'research') {
+      structureGuide = `Structure: Title → Abstract → Introduction → Literature Review → Methodology → Results → Discussion → Conclusion → References → Appendices`;
+    } else if (type === 'case-study') {
+      structureGuide = `Structure: Title → Executive Summary → Introduction → Background → Case Description → Problem Identification → Analysis → Solutions → Outcome → Conclusion → References`;
+    } else {
+      structureGuide = `Structure: Title → Introduction → Main Body (with clear sections) → Conclusion → References`;
+    }
 
-TOPIC: "Procedure for Carrying Out Postmortem Examination in Different Animal Species"
+    const prompt = `You are a veterinary pathologist writing a professional, practical assignment. Write clear, direct, and academically sound content.
 
-Write a professional assignment with the following structure:
+TOPIC: ${cleanTopic}
 
-TITLE: PROCEDURE FOR CARRYING OUT POSTMORTEM EXAMINATION IN DIFFERENT ANIMAL SPECIES
+ACADEMIC LEVEL: ${levelInfo.label}
+DOCUMENT TYPE: ${typeLabels[type as keyof typeof typeLabels] || 'Assignment'}
 
-INTRODUCTION (2-3 paragraphs):
-- Define postmortem examination (necropsy)
-- Explain its importance in veterinary medicine
-- Mention general precautions (PPE, clean instruments, suitable location, obtaining history)
-- Keep it brief and practical
-
-1. BOVINE, CAPRINE AND OVINE (Cattle, Goats and Sheep)
-- State the positioning: left lateral recumbency
-- Provide 10-11 numbered steps with SPECIFIC, PRACTICAL instructions
-- Include: history, PPE, external exam, skin incision, abdominal cavity, thoracic cavity, organ examination (list specific organs), head/brain if needed, sample collection, recording findings, disposal, cleaning
-
-2. EQUIDAE (Horse, Donkey and Mule)
-- State the positioning: left side
-- Provide 10 numbered steps with SPECIFIC, PRACTICAL instructions
-- Include specific organ names relevant to equines
-
-3. PORCINE (Pig)
-- State the positioning: dorsal recumbency (on its back)
-- Provide 10-11 numbered steps with SPECIFIC, PRACTICAL instructions
-- Include joint examination if arthritis suspected
-
-4. CANINE AND FELINE (Dogs and Cats)
-- State the positioning: dorsal recumbency (on its back)
-- Provide 10 numbered steps with SPECIFIC, PRACTICAL instructions
-- Include specific organ names relevant to small animals
-
-5. POULTRY SPECIES (Chickens, Turkeys, Ducks)
-- State the positioning: dorsal recumbency
-- Provide 10 numbered steps with SPECIFIC, PRACTICAL instructions
-- Include: wetting feathers, removing sternum, specific avian organs
-
-GENERAL PRECAUTIONS (bullet points):
-- PPE
-- Sterile instruments
-- Systematic organ examination
-- Sample collection before contamination
-- Accurate recording
-- Disinfection
-- Carcass disposal
-
-CONCLUSION (1-2 paragraphs):
-- Summarize importance
-- Mention species positioning variations
-- Emphasize systematic, thorough approach
-- Highlight hygiene and biosecurity
+ACADEMIC WRITING GUIDELINES:
+1. Lead each paragraph with a topic sentence stating its main point
+2. Use clear section headings (1.0 Introduction, 2.0 Methodology, etc.)
+3. One idea per paragraph — avoid cramming multiple arguments together
+4. Use topic-to-detail flow: general claim → evidence → analysis
+5. Avoid contractions (use "do not" instead of "don't")
+6. Avoid first-person casual phrasing ("I think" → "This analysis suggests")
+7. Use precise, formal vocabulary
+8. Every claim needs support: data, citation, or logical reasoning
+9. Distinguish between fact, interpretation, and opinion explicitly
+10. Use signal phrases when citing: "According to Smith (2023)..." or "The data indicate..."
+11. Keep sentences direct — avoid unnecessary filler
+12. ${levelInfo.academicTip}
 
 FORMAT REQUIREMENTS:
 - Use plain text with numbered headings (1.0, 2.0, 3.0, etc.)
@@ -102,20 +81,29 @@ FORMAT REQUIREMENTS:
 - DO NOT use markdown symbols (#, *, **, etc.)
 - Write in clear, direct, practical language
 - Focus on actionable, step-by-step procedures
-- Be SPECIFIC - include actual anatomical details and organ names
-- Keep it concise and practical - this is a how-to guide, not a research paper
+- Be SPECIFIC — include actual anatomical details and organ names
 
-IMPORTANT: Write this like the example assignment - direct, practical, step-by-step procedures. No academic fluff or vague statements. Each step should be a clear, actionable instruction.`;
+STRUCTURE:
+${structureGuide}
+
+CONTENT REQUIREMENTS:
+- Write SPECIFIC, DETAILED procedures for each species mentioned
+- Include step-by-step instructions with anatomical details
+- Write comprehensive, practical information useful to a veterinary student
+- Include proper academic citations (Author, Year)
+- Cover all species mentioned in the topic
+- For each species: state positioning, then list numbered steps
+- Include general precautions and conclusion
+
+Generate a complete, well-structured academic assignment.`;
 
     let aiResponse = '';
     let apiUsed = '';
 
     // PRIMARY: Try Gemini API
-    console.log('Attempting Gemini API...');
     try {
       const geminiKey = process.env.GEMINI_API_KEY;
       if (geminiKey) {
-        const startTime = Date.now();
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
           {
@@ -134,16 +122,14 @@ IMPORTANT: Write this like the example assignment - direct, practical, step-by-s
         if (!data.error) {
           aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
           apiUsed = 'Gemini';
-          console.log('Gemini API success ✅');
         }
       }
     } catch (e) {
       console.error('Gemini error:', e);
     }
 
-    // FALLBACK: Try Groq API
+    // FALLBACK: Try Groq
     if (!aiResponse) {
-      console.log('Attempting Groq API...');
       try {
         const groqKey = process.env.GROQ_API_KEY;
         if (groqKey) {
@@ -164,7 +150,6 @@ IMPORTANT: Write this like the example assignment - direct, practical, step-by-s
           if (!data.error) {
             aiResponse = data.choices?.[0]?.message?.content || '';
             apiUsed = 'Groq';
-            console.log('Groq API success ✅');
           }
         }
       } catch (e) {
@@ -172,40 +157,7 @@ IMPORTANT: Write this like the example assignment - direct, practical, step-by-s
       }
     }
 
-    // FALLBACK 2: Try OpenRouter
-    if (!aiResponse) {
-      console.log('Attempting OpenRouter API...');
-      try {
-        const openRouterKey = process.env.OPENROUTER_API_KEY;
-        if (openRouterKey) {
-          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${openRouterKey}`,
-              'Content-Type': 'application/json',
-              'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
-              'X-Title': 'VetSphere Academic Writer'
-            },
-            body: JSON.stringify({
-              model: 'google/gemini-1.5-flash',
-              messages: [{ role: 'user', content: prompt }],
-              temperature: 0.5,
-              max_tokens: 6000,
-            })
-          });
-          const data = await response.json();
-          if (!data.error) {
-            aiResponse = data.choices?.[0]?.message?.content || '';
-            apiUsed = 'OpenRouter';
-            console.log('OpenRouter API success ✅');
-          }
-        }
-      } catch (e) {
-        console.error('OpenRouter error:', e);
-      }
-    }
-
-    // Clean the response
+    // Clean response
     if (aiResponse) {
       aiResponse = aiResponse
         .replace(/\*\*/g, '')
@@ -216,20 +168,20 @@ IMPORTANT: Write this like the example assignment - direct, practical, step-by-s
         .trim();
     }
 
-    // Ultimate fallback - matching your example exactly
+    // Ultimate fallback
     if (!aiResponse) {
       const date = new Date().toLocaleDateString();
       aiResponse = `PROCEDURE FOR CARRYING OUT POSTMORTEM EXAMINATION IN DIFFERENT ANIMAL SPECIES
 
 Course: Animal Health and Production
 
-Topic: Procedure for Carrying Out Postmortem Examination in Different Animal Species
+Topic: ${cleanTopic}
 
-Introduction
+1.0 Introduction
 
 A postmortem examination (necropsy) is the systematic examination of an animal after death to determine the cause of death, identify diseases, evaluate organ changes, and collect samples for laboratory analysis. Before conducting a postmortem examination, the examiner should obtain the animal's history, wear appropriate personal protective equipment (PPE), prepare clean instruments, and select a suitable location away from healthy animals.
 
-1.0 Bovine, Caprine and Ovine (Cattle, Goats and Sheep)
+2.0 Bovine, Caprine and Ovine (Cattle, Goats and Sheep)
 
 The animal is placed on its left lateral recumbency (left side) because the rumen remains on the lower side, allowing easier examination of the abdominal organs.
 
@@ -247,7 +199,7 @@ The procedure is as follows:
 10. Collect tissue, blood, or organ samples for laboratory examination where necessary.
 11. Record all findings and dispose of the carcass safely by deep burial or incineration. Finally, clean and disinfect all equipment.
 
-2.0 Equidae (Horse, Donkey and Mule)
+3.0 Equidae (Horse, Donkey and Mule)
 
 The animal is positioned on its left side before examination.
 
@@ -264,7 +216,7 @@ The procedure includes:
 9. Collect samples for laboratory diagnosis.
 10. Record all observations and dispose of the carcass properly.
 
-3.0 Porcine (Pig)
+4.0 Porcine (Pig)
 
 The pig is usually placed on its back (dorsal recumbency) for easier access to both body cavities.
 
@@ -282,7 +234,7 @@ The procedure is as follows:
 10. Collect tissue samples where necessary.
 11. Record all findings, dispose of the carcass safely, and disinfect all equipment.
 
-4.0 Canine and Feline (Dogs and Cats)
+5.0 Canine and Feline (Dogs and Cats)
 
 Dogs and cats are examined while lying on their back (dorsal recumbency).
 
@@ -299,7 +251,7 @@ The procedure includes:
 9. Collect samples for laboratory examination.
 10. Record all findings and dispose of the carcass safely while disinfecting all instruments.
 
-5.0 Poultry Species
+6.0 Poultry Species
 
 The bird is placed on its back (dorsal recumbency) during the postmortem examination.
 
@@ -316,7 +268,7 @@ The procedure is as follows:
 9. Record all findings.
 10. Dispose of the carcass safely and disinfect all equipment used.
 
-General Precautions During Postmortem Examination
+7.0 General Precautions During Postmortem Examination
 
 - Always wear appropriate personal protective equipment.
 - Use clean and sterilized instruments.
@@ -327,7 +279,7 @@ General Precautions During Postmortem Examination
 - Wash and disinfect instruments after use.
 - Dispose of carcasses by deep burial or incineration according to biosecurity regulations.
 
-Conclusion
+8.0 Conclusion
 
 Postmortem examination is an important veterinary procedure used to determine the cause of death, diagnose diseases, and guide disease control measures. Although the positioning of the animal varies among species, the examination should always be systematic, thorough, and conducted under strict hygienic and biosecurity measures. Accurate recording of findings and proper disposal of the carcass are essential parts of every postmortem examination.`;
     }
