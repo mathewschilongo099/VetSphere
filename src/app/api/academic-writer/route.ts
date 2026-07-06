@@ -19,6 +19,14 @@ export async function POST(request: NextRequest) {
       .replace(/[‎]/g, '')
       .trim();
 
+    // Define typeLabels here
+    const typeLabels: Record<string, string> = {
+      essay: 'Assignment',
+      research: 'Research Paper',
+      report: 'Report',
+      'case-study': 'Case Study'
+    };
+
     const levelMap: Record<string, { label: string; detail: string; academicTip: string }> = {
       diploma: { 
         label: 'Diploma Level',
@@ -43,6 +51,7 @@ export async function POST(request: NextRequest) {
     };
 
     const levelInfo = levelMap[level] || levelMap['degree'];
+    const typeLabel = typeLabels[type] || 'Assignment';
 
     // Determine document type structure
     let structureGuide = '';
@@ -59,7 +68,7 @@ export async function POST(request: NextRequest) {
 TOPIC: ${cleanTopic}
 
 ACADEMIC LEVEL: ${levelInfo.label}
-DOCUMENT TYPE: ${typeLabels[type as keyof typeof typeLabels] || 'Assignment'}
+DOCUMENT TYPE: ${typeLabel}
 
 ACADEMIC WRITING GUIDELINES:
 1. Lead each paragraph with a topic sentence stating its main point
@@ -154,6 +163,37 @@ Generate a complete, well-structured academic assignment.`;
         }
       } catch (e) {
         console.error('Groq error:', e);
+      }
+    }
+
+    // FALLBACK 2: Try OpenRouter
+    if (!aiResponse) {
+      try {
+        const openRouterKey = process.env.OPENROUTER_API_KEY;
+        if (openRouterKey) {
+          const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${openRouterKey}`,
+              'Content-Type': 'application/json',
+              'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
+              'X-Title': 'VetSphere Academic Writer'
+            },
+            body: JSON.stringify({
+              model: 'google/gemini-1.5-flash',
+              messages: [{ role: 'user', content: prompt }],
+              temperature: 0.5,
+              max_tokens: 6000,
+            })
+          });
+          const data = await response.json();
+          if (!data.error) {
+            aiResponse = data.choices?.[0]?.message?.content || '';
+            apiUsed = 'OpenRouter';
+          }
+        }
+      } catch (e) {
+        console.error('OpenRouter error:', e);
       }
     }
 
