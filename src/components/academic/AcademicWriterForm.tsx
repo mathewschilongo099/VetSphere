@@ -35,6 +35,7 @@ export default function AcademicWriterForm() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [wordCount, setWordCount] = useState(0);
+  const [showFullPage, setShowFullPage] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +57,7 @@ export default function AcademicWriterForm() {
       setResult(data.content);
       const words = data.content.split(/\s+/).length;
       setWordCount(words);
+      setShowFullPage(true);
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
     } finally {
@@ -65,18 +67,26 @@ export default function AcademicWriterForm() {
 
   const copyToClipboard = () => {
     if (result) {
-      navigator.clipboard.writeText(result);
+      const cleanResult = result
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/#{1,6}\s/g, '');
+      navigator.clipboard.writeText(cleanResult);
       alert('✅ Content copied to clipboard!');
     }
   };
 
-  const downloadAsMarkdown = () => {
+  const downloadAsTXT = () => {
     if (result) {
-      const blob = new Blob([result], { type: 'text/markdown;charset=utf-8' });
+      const cleanResult = result
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/#{1,6}\s/g, '');
+      const blob = new Blob([cleanResult], { type: 'text/plain;charset=utf-8' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${topic.toLowerCase().replace(/\s+/g, '-')}-${level}.md`;
+      a.download = `${topic.toLowerCase().replace(/\s+/g, '-')}-${level}.txt`;
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -84,28 +94,216 @@ export default function AcademicWriterForm() {
 
   const downloadAsPDF = () => {
     if (result) {
-      const printWindow = window.open('', '_blank');
+      const cleanResult = result
+        .replace(/\*\*/g, '')
+        .replace(/\*/g, '')
+        .replace(/#{1,6}\s/g, '');
+      
+      const printWindow = window.open('', '_blank', 'width=900,height=700');
       if (printWindow) {
         printWindow.document.write(`
           <html>
-            <head><title>Academic Paper</title></head>
-            <body style="font-family: Times New Roman, serif; padding: 1in; line-height: 1.6;">
-              <pre style="white-space: pre-wrap; font-family: Times New Roman, serif; font-size: 12pt;">${result}</pre>
-              <script>
-                window.onload = function() { window.print(); }
-              <\/script>
+            <head>
+              <title>Academic Paper</title>
+              <style>
+                body {
+                  font-family: 'Times New Roman', Times, serif;
+                  font-size: 12pt;
+                  line-height: 1.5;
+                  margin: 1in;
+                  text-align: justify;
+                  max-width: 8.5in;
+                  margin-left: auto;
+                  margin-right: auto;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                  font-family: 'Times New Roman', Times, serif;
+                  margin-top: 12pt;
+                  margin-bottom: 6pt;
+                }
+                h1 { font-size: 14pt; font-weight: bold; }
+                h2 { font-size: 13pt; font-weight: bold; }
+                h3 { font-size: 12pt; font-weight: bold; }
+                p {
+                  margin-bottom: 6pt;
+                  text-align: justify;
+                }
+                .page-number {
+                  text-align: center;
+                  margin-top: 12pt;
+                  font-size: 10pt;
+                }
+                .references {
+                  margin-top: 12pt;
+                  text-indent: -0.5in;
+                  padding-left: 0.5in;
+                }
+                .references p {
+                  margin-bottom: 4pt;
+                  text-indent: -0.5in;
+                  padding-left: 0.5in;
+                }
+                .abstract {
+                  font-style: italic;
+                  margin-bottom: 12pt;
+                }
+                .title-page {
+                  text-align: center;
+                  margin-top: 2in;
+                  margin-bottom: 2in;
+                }
+                .title-page h1 {
+                  font-size: 18pt;
+                  margin-bottom: 12pt;
+                }
+                .title-page .author {
+                  font-size: 14pt;
+                  margin-bottom: 6pt;
+                }
+                .title-page .date {
+                  font-size: 12pt;
+                }
+                .section-number {
+                  font-weight: bold;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="title-page">
+                <h1>${cleanResult.split('\n').find(line => line.trim()) || 'Academic Paper'}</h1>
+                <div class="author">VetSphere Academic Writer</div>
+                <div class="date">${new Date().toLocaleDateString()}</div>
+              </div>
+              <div style="page-break-before: always;"></div>
+              ${cleanResult.split('\n').map(line => {
+                if (line.toLowerCase().includes('abstract') && line.length < 50) {
+                  return `<div class="abstract"><strong>Abstract</strong><br>${line.replace(/Abstract/i, '').trim()}</div>`;
+                } else if (line.match(/^\d+\.\d+\s/)) {
+                  return `<h3>${line}</h3>`;
+                } else if (line.match(/^\d+\.\s/)) {
+                  return `<h2>${line}</h2>`;
+                } else if (line.match(/^References|^Bibliography/i)) {
+                  return `<h2>${line}</h2><div class="references">`;
+                } else if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
+                  return `<p style="padding-left: 0.5in;">${line}</p>`;
+                } else if (line.trim()) {
+                  return `<p>${line}</p>`;
+                } else {
+                  return '<br>';
+                }
+              }).join('')}
+              <div class="page-number">${new Date().getFullYear()} | Page 1</div>
             </body>
           </html>
         `);
         printWindow.document.close();
+        setTimeout(() => {
+          printWindow.print();
+        }, 1000);
       }
     }
   };
 
+  // Full page view
+  if (showFullPage && result) {
+    const cleanResult = result
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/#{1,6}\s/g, '');
+
+    return (
+      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
+        {/* Header with controls */}
+        <div className="sticky top-0 bg-white border-b shadow-sm z-10 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-bold text-lg text-gray-900">📄 Generated {typeLabels[type]}</h2>
+            <div className="text-sm text-gray-500">
+              {levelLabels[level]} • {wordCount} words
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowFullPage(false)}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
+            >
+              ✕ Close
+            </button>
+            <button
+              onClick={copyToClipboard}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
+            >
+              📋 Copy
+            </button>
+            <button
+              onClick={downloadAsTXT}
+              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
+            >
+              ⬇️ TXT
+            </button>
+            <button
+              onClick={downloadAsPDF}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
+            >
+              📄 Download PDF
+            </button>
+          </div>
+        </div>
+
+        {/* Full page content */}
+        <div className="max-w-4xl mx-auto px-8 py-12">
+          <div className="prose prose-sm max-w-none" style={{ fontFamily: 'Times New Roman, Times, serif', fontSize: '12pt', lineHeight: '1.5', textAlign: 'justify' }}>
+            {cleanResult.split('\n').map((line, i) => {
+              if (!line.trim() && i === 0) return null;
+              
+              if (line.match(/^\d+\.0\s+Title\s+Page/i)) {
+                return (
+                  <div key={i} className="text-center my-16">
+                    <h1 className="text-3xl font-bold mb-4">{cleanResult.split('\n').find(l => l.trim() && !l.match(/^\d+\./)) || 'Academic Paper'}</h1>
+                    <p className="text-xl mb-2">VetSphere Academic Writer</p>
+                    <p>{new Date().toLocaleDateString()}</p>
+                  </div>
+                );
+              }
+              
+              if (line.match(/^\d+\.0\s/)) {
+                return <h2 key={i} className="text-xl font-bold mt-6 mb-3">{line}</h2>;
+              }
+              
+              if (line.match(/^\d+\.\d+\s/)) {
+                return <h3 key={i} className="text-lg font-bold mt-4 mb-2">{line}</h3>;
+              }
+              
+              if (line.toLowerCase().includes('abstract') && line.length < 50) {
+                return <div key={i} className="italic mt-4 mb-2"><strong>Abstract</strong><br />{line.replace(/Abstract/i, '').trim()}</div>;
+              }
+              
+              if (line.match(/^References/i)) {
+                return <h2 key={i} className="text-xl font-bold mt-8 mb-4">{line}</h2>;
+              }
+              
+              if (line.trim().startsWith('•') || line.trim().startsWith('-')) {
+                return <p key={i} className="pl-6 mb-1">{line}</p>;
+              }
+              
+              if (line.trim()) {
+                return <p key={i} className="mb-2">{line}</p>;
+              }
+              
+              return <br key={i} />;
+            })}
+          </div>
+          
+          <div className="text-center text-sm text-gray-500 mt-12 pt-4 border-t">
+            Generated by VetSphere Academic Writer • {new Date().toLocaleDateString()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Topic Input */}
         <div>
           <label className="block font-semibold text-gray-700 mb-2">
             What's your topic or research question?
@@ -114,16 +312,16 @@ export default function AcademicWriterForm() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             required
-            placeholder="e.g., The impact of climate change on livestock farming in Sub-Saharan Africa"
-            rows={3}
-            className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
+            placeholder="e.g., Procedure for postmortem examination in bovine, caprine, ovine, equine, porcine, canine, feline, and poultry"
+            rows={4}
+            className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
+            style={{ color: '#1a1a1a', backgroundColor: '#ffffff' }}
           />
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             Be specific for better results
           </p>
         </div>
 
-        {/* Academic Level */}
         <div>
           <label className="block font-semibold text-gray-700 mb-2">
             Academic Level
@@ -149,7 +347,6 @@ export default function AcademicWriterForm() {
           </div>
         </div>
 
-        {/* Document Type */}
         <div>
           <label className="block font-semibold text-gray-700 mb-2">
             Document Type
@@ -172,7 +369,6 @@ export default function AcademicWriterForm() {
           </div>
         </div>
 
-        {/* Submit */}
         <button
           type="submit"
           disabled={loading || !topic.trim()}
@@ -192,52 +388,12 @@ export default function AcademicWriterForm() {
         </button>
       </form>
 
-      {/* Error */}
       {error && (
         <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
           <div className="font-semibold">Error:</div>
           {error}
           <div className="text-sm mt-2 text-red-600">
             Tip: Try refreshing or using a different topic.
-          </div>
-        </div>
-      )}
-
-      {/* Result */}
-      {result && (
-        <div className="mt-8">
-          <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
-            <div>
-              <h3 className="font-bold text-lg">📄 Generated {typeLabels[type]}</h3>
-              <div className="text-sm text-gray-500">
-                {levelLabels[level]} • {wordCount} words
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={copyToClipboard}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
-              >
-                📋 Copy
-              </button>
-              <button
-                onClick={downloadAsMarkdown}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
-              >
-                ⬇️ MD
-              </button>
-              <button
-                onClick={downloadAsPDF}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
-              >
-                📄 PDF
-              </button>
-            </div>
-          </div>
-          <div className="bg-white border rounded-xl p-6 max-h-[600px] overflow-y-auto prose prose-sm max-w-none shadow-inner">
-            {result.split('\n').map((line, i) => (
-              <p key={i} className="mb-2 leading-relaxed">{line}</p>
-            ))}
           </div>
         </div>
       )}
