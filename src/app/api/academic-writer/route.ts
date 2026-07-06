@@ -243,7 +243,7 @@ async function callOpenRouter(
           'X-Title': 'VetSphere Academic Writer',
         },
         body: JSON.stringify({
-          model: 'meta-llama/llama-3.3-70b-instruct:free',
+          model: 'meta-llama/llama-3.1-8b-instruct:free',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.45,
           max_tokens: maxTokens,
@@ -305,6 +305,11 @@ async function callGroq(
   }
 }
 
+// Not every free Cerebras account has access to every model — llama-3.3-70b in
+// particular can require separate approval. llama3.1-8b is the one reliably
+// available on every free account, so it's the last resort in this list.
+const CEREBRAS_MODEL_CANDIDATES = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
+
 async function callCerebras(
   prompt: string,
   maxTokens: number
@@ -312,39 +317,48 @@ async function callCerebras(
   const cerebrasKey = process.env.CEREBRAS_API_KEY;
   if (!cerebrasKey) return { text: '', error: 'CEREBRAS_API_KEY is not set' };
 
-  try {
-    const response = await fetchWithTimeout(
-      'https://api.cerebras.ai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${cerebrasKey}`,
-          'Content-Type': 'application/json',
+  const errors: string[] = [];
+
+  for (const model of CEREBRAS_MODEL_CANDIDATES) {
+    try {
+      const response = await fetchWithTimeout(
+        'https://api.cerebras.ai/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${cerebrasKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.45,
+            max_completion_tokens: maxTokens,
+          }),
         },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.45,
-          max_completion_tokens: maxTokens,
-        }),
-      },
-      45000
-    );
-    const data = await response.json();
-    if (!response.ok || data.error || !data.choices) {
-      // Cerebras returns errors as a flat object: {"message": "...", "type": "...", "code": "..."}
-      // — not nested under `data.error` like OpenAI/Gemini/Groq — so check both shapes.
-      const message =
-        data.error?.message || data.message || `HTTP ${response.status}: ${JSON.stringify(data)}`;
-      console.error('Cerebras error:', message);
-      return { text: '', error: `Cerebras: ${message}` };
+        45000
+      );
+      const data = await response.json();
+      if (!response.ok || data.error || !data.choices) {
+        // Cerebras returns errors as a flat object: {"message": "...", "type": "...", "code": "..."}
+        // — not nested under `data.error` like OpenAI/Gemini/Groq — so check both shapes.
+        const message =
+          data.error?.message || data.message || `HTTP ${response.status}: ${JSON.stringify(data)}`;
+        console.error(`Cerebras error (model ${model}):`, message);
+        errors.push(`${model}: ${message}`);
+        // "does not exist or you do not have access" means try the next model.
+        // Anything else (rate limit, server error) also just moves on to the next candidate.
+        continue;
+      }
+      return { text: data.choices[0]?.message?.content || '', error: '' };
+    } catch (e: any) {
+      const isAbort = e?.name === 'AbortError';
+      console.error(`Cerebras fetch error (model ${model}):`, e);
+      errors.push(`${model}: ${isAbort ? 'timed out' : e.message || e}`);
     }
-    return { text: data.choices[0]?.message?.content || '', error: '' };
-  } catch (e: any) {
-    const isAbort = e?.name === 'AbortError';
-    console.error('Cerebras fetch error:', e);
-    return { text: '', error: isAbort ? 'Cerebras timed out' : `Cerebras fetch failed: ${e.message || e}` };
   }
+
+  return { text: '', error: `Cerebras: ${errors.join(' | ')}` };
 }
 
 async function generateSection(
