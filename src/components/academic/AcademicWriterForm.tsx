@@ -35,7 +35,6 @@ export default function AcademicWriterForm() {
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [wordCount, setWordCount] = useState(0);
-  const [showFullPage, setShowFullPage] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,7 +45,6 @@ export default function AcademicWriterForm() {
     setLoadingMessage('⏳ Connecting to Gemini AI...');
 
     try {
-      // Update loading messages
       setTimeout(() => setLoadingMessage('🧠 Analyzing your topic...'), 2000);
       setTimeout(() => setLoadingMessage('📝 Generating comprehensive content...'), 4000);
       setTimeout(() => setLoadingMessage('🔍 Adding citations and references...'), 6000);
@@ -65,7 +63,6 @@ export default function AcademicWriterForm() {
       setResult(data.content);
       const words = data.content.split(/\s+/).length;
       setWordCount(words);
-      setShowFullPage(true);
       setLoadingMessage('✅ Done!');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -112,6 +109,7 @@ export default function AcademicWriterForm() {
       const printWindow = window.open('', '_blank', 'width=900,height=700');
       if (printWindow) {
         printWindow.document.write(`
+          <!DOCTYPE html>
           <html>
             <head>
               <title>Academic Paper</title>
@@ -125,6 +123,11 @@ export default function AcademicWriterForm() {
                   max-width: 8.5in;
                   margin-left: auto;
                   margin-right: auto;
+                }
+                h1, h2, h3, h4, h5, h6 {
+                  font-family: 'Times New Roman', Times, serif;
+                  margin-top: 12pt;
+                  margin-bottom: 6pt;
                 }
                 h1 { font-size: 14pt; font-weight: bold; text-align: center; }
                 h2 { font-size: 13pt; font-weight: bold; margin-top: 12pt; margin-bottom: 6pt; }
@@ -199,102 +202,12 @@ export default function AcademicWriterForm() {
         `);
         printWindow.document.close();
         setTimeout(() => {
+          printWindow.focus();
           printWindow.print();
         }, 1000);
       }
     }
   };
-
-  // Full page view
-  if (showFullPage && result) {
-    const cleanResult = result
-      .replace(/\*\*/g, '')
-      .replace(/\*/g, '')
-      .replace(/#{1,6}\s/g, '');
-
-    return (
-      <div className="fixed inset-0 z-50 bg-white overflow-y-auto">
-        {/* Header with controls */}
-        <div className="sticky top-0 bg-white border-b shadow-sm z-10 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-bold text-lg text-gray-900">📄 Generated {typeLabels[type]}</h2>
-            <div className="text-sm text-gray-500">
-              {levelLabels[level]} • {wordCount} words
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setShowFullPage(false)}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
-            >
-              ✕ Close
-            </button>
-            <button
-              onClick={copyToClipboard}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
-            >
-              📋 Copy
-            </button>
-            <button
-              onClick={downloadAsTXT}
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
-            >
-              ⬇️ TXT
-            </button>
-            <button
-              onClick={downloadAsPDF}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
-            >
-              📄 Download PDF
-            </button>
-          </div>
-        </div>
-
-        {/* Full page content */}
-        <div className="max-w-4xl mx-auto px-8 py-12">
-          {cleanResult.split('\n').map((line, i) => {
-            if (!line.trim() && i === 0) return null;
-            
-            if (line.match(/^1\.0\s+Cover\s+Page/i)) {
-              return (
-                <div key={i} className="text-center my-16">
-                  <h1 className="text-2xl font-bold mb-2">{cleanResult.split('\n').find(l => l.trim() && !l.match(/^\d+\./)) || 'Academic Paper'}</h1>
-                  <p className="text-lg mb-1">VetSphere Academic Writer</p>
-                  <p className="text-base">{new Date().toLocaleDateString()}</p>
-                </div>
-              );
-            }
-            
-            if (line.match(/^\d+\.0\s/)) {
-              return <h2 key={i} className="text-xl font-bold mt-6 mb-3">{line}</h2>;
-            }
-            
-            if (line.match(/^\d+\.\d+\s/)) {
-              return <h3 key={i} className="text-lg font-bold mt-4 mb-2">{line}</h3>;
-            }
-            
-            if (line.toLowerCase().includes('abstract') && line.length < 30) {
-              return <div key={i} className="italic mt-4 mb-2"><strong>Abstract</strong><br />{line.replace(/Abstract/i, '').trim()}</div>;
-            }
-            
-            if (line.match(/^References/i)) {
-              return <h2 key={i} className="text-xl font-bold mt-8 mb-4">{line}</h2>;
-            }
-            
-            if (line.trim()) {
-              return <p key={i} className="mb-2 leading-relaxed text-justify">{line}</p>;
-            }
-            
-            return <br key={i} />;
-          })}
-          
-          <div className="text-center text-sm text-gray-500 mt-12 pt-4 border-t">
-            Generated by VetSphere Academic Writer • {new Date().toLocaleDateString()}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -396,6 +309,66 @@ export default function AcademicWriterForm() {
           {error}
           <div className="text-sm mt-2 text-red-600">
             Tip: Try refreshing or using a different topic.
+          </div>
+        </div>
+      )}
+
+      {/* RESULTS - Displayed inline on the same page */}
+      {result && (
+        <div className="mt-8 border-t pt-8">
+          <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
+            <div>
+              <h3 className="font-bold text-lg text-gray-900">📄 Generated {typeLabels[type]}</h3>
+              <div className="text-sm text-gray-500">
+                {levelLabels[level]} • {wordCount} words
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={copyToClipboard}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
+              >
+                📋 Copy
+              </button>
+              <button
+                onClick={downloadAsTXT}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
+              >
+                ⬇️ TXT
+              </button>
+              <button
+                onClick={downloadAsPDF}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
+              >
+                📄 Download PDF
+              </button>
+            </div>
+          </div>
+
+          {/* Content displayed inline */}
+          <div className="bg-gray-50 border rounded-xl p-6 max-h-[600px] overflow-y-auto">
+            <div style={{ fontFamily: 'Times New Roman, Times, serif', fontSize: '12pt', lineHeight: '1.5' }}>
+              {result.split('\n').map((line, i) => {
+                if (!line.trim()) return <br key={i} />;
+                
+                // Main headings (1.0, 2.0, etc.)
+                if (line.match(/^\d+\.0\s/)) {
+                  return <h2 key={i} className="text-xl font-bold mt-4 mb-2">{line}</h2>;
+                }
+                
+                // Subheadings (1.1, 1.2, etc.)
+                if (line.match(/^\d+\.\d+\s/)) {
+                  return <h3 key={i} className="text-lg font-bold mt-3 mb-1">{line}</h3>;
+                }
+                
+                // Regular paragraphs
+                return <p key={i} className="mb-1 leading-relaxed text-justify">{line}</p>;
+              })}
+            </div>
+          </div>
+
+          <div className="text-center text-sm text-gray-500 mt-4 pt-2 border-t">
+            Generated by VetSphere Academic Writer • {new Date().toLocaleDateString()}
           </div>
         </div>
       )}
