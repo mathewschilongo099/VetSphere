@@ -243,7 +243,7 @@ async function callOpenRouter(
           'X-Title': 'VetSphere Academic Writer',
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.0-flash-001',
+          model: 'meta-llama/llama-3.3-70b-instruct:free',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.45,
           max_tokens: maxTokens,
@@ -308,19 +308,23 @@ async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number
 ): Promise<{ text: string; apiUsed: string; error: string }> {
-  const gemini = await callGemini(sectionPrompt, maxOutputTokens);
-  if (gemini.text) return { text: gemini.text, apiUsed: 'Gemini', error: '' };
+  // Groq first: best free RPM/RPD budget and fastest. OpenRouter next. Gemini
+  // last, since its free tier is capped at ~20 requests/day and is shared
+  // with the autopublish workflow — it runs out fastest, so save it as the
+  // last resort rather than hammering it first.
+  const groq = await callGroq(sectionPrompt, maxOutputTokens);
+  if (groq.text) return { text: groq.text, apiUsed: 'Groq', error: '' };
 
   const openRouter = await callOpenRouter(sectionPrompt, maxOutputTokens);
   if (openRouter.text) return { text: openRouter.text, apiUsed: 'OpenRouter', error: '' };
 
-  const groq = await callGroq(sectionPrompt, maxOutputTokens);
-  if (groq.text) return { text: groq.text, apiUsed: 'Groq', error: '' };
+  const gemini = await callGemini(sectionPrompt, maxOutputTokens);
+  if (gemini.text) return { text: gemini.text, apiUsed: 'Gemini', error: '' };
 
   return {
     text: '',
     apiUsed: 'none',
-    error: `Gemini failed (${gemini.error}); OpenRouter failed (${openRouter.error}); Groq failed (${groq.error})`,
+    error: `Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); Gemini failed (${gemini.error})`,
   };
 }
 
@@ -342,19 +346,22 @@ async function generateFullResearchPaper(
   levelInfo: { label: string; pageCount: string; depth: string }
 ): Promise<{ content: string; apiUsedList: string[] }> {
   const chapters = buildChapterSpecs(topic);
+  const generatedParts: string[] = [];
+  const apiUsedList: string[] = [];
 
-  // Chapters are generated CONCURRENTLY. Each prompt is self-contained (topic +
-  // level + its own section instructions), so they don't need each other's
-  // actual output to stay on-topic. This keeps total wall-clock time bounded
-  // by the slowest single chapter (~45s) instead of the sum of all 7
-  // (which was blowing past Vercel's execution limit and causing "Failed to
-  // fetch" on the client). Calls are staggered slightly so they don't all
-  // hit the same provider in the same instant.
-  const results = await Promise.all(
-    chapters.map(async (chapter, i) => {
-      if (i > 0) await sleep(i * 400);
+  // Sequential, not parallel: free-tier providers (Groq TPM, Gemini RPD,
+  // OpenRouter RPM) are shared per-key limits, so firing 6-7 chapters at once
+  // instantly exhausts them (this is what caused every chapter to fail at
+  // once). ~3000 tokens is a realistic, well-developed chapter length and
+  // keeps each single request safely under Groq's per-minute token budget.
+  // A short gap between chapters keeps us under per-minute request limits too.
+  const TOKENS_PER_CHAPTER = 3000;
 
-      const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
+  for (let i = 0; i < chapters.length; i++) {
+    const chapter = chapters[i];
+    if (i > 0) await sleep(4000);
+
+    const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
 
 TOPIC: "${topic}"
 
@@ -367,16 +374,9 @@ STYLE RULES (must follow strictly):
 - Do not include any chapter other than the one requested.
 - Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.`;
 
-      const { text, apiUsed, error } = await generateSection(prompt, 8000);
-      return { chapter, text, apiUsed, error };
-    })
-  );
-
-  const generatedParts: string[] = [];
-  const apiUsedList: string[] = [];
-
-  for (const { chapter, text, apiUsed, error } of results) {
+    const { text, apiUsed, error } = await generateSection(prompt, TOKENS_PER_CHAPTER);
     apiUsedList.push(`${chapter.id}: ${apiUsed}${error ? ` (${error})` : ''}`);
+
     if (text) {
       generatedParts.push(cleanText(text));
     } else {
@@ -415,7 +415,7 @@ STYLE RULES:
 - Justify main body text conceptually (i.e., write in complete, well-organised paragraphs, not bullet fragments), except where a table or list is genuinely clearer.
 - Do not add a preamble — start directly with the Title Page.`;
 
-  const { text, apiUsed, error } = await generateSection(prompt, 8000);
+  const { text, apiUsed, error } = await generateSection(prompt, 4000);
   return { content: text ? cleanText(text) : '', apiUsed: error ? `${apiUsed} (${error})` : apiUsed };
 }
 
