@@ -52,6 +52,7 @@ export default function Header() {
           <a href="/about">About</a>
           <a href="/ask" className="text-green-600 font-semibold">Ask VetAssist</a>
           <a href="/quiz" className="text-blue-600 font-semibold">Quiz</a>
+          <a href="/academic-writer" className="text-purple-600 font-semibold">✍️ Academic Writer</a> {/* NEW */}
         </nav>
 
         {/* DESKTOP RIGHT */}
@@ -119,17 +120,22 @@ export default function Header() {
             <a href="/services" onClick={() => setMenuOpen(false)}>🧰 Services</a>
             <a href="/about" onClick={() => setMenuOpen(false)}>ℹ️ About</a>
 
-            <a href="/ask" className="text-green-600 font-semibold">
+            <a href="/ask" className="text-green-600 font-semibold" onClick={() => setMenuOpen(false)}>
               🤖 Ask VetAssist
             </a>
 
-            <a href="/quiz" className="text-blue-600 font-semibold">
+            <a href="/quiz" className="text-blue-600 font-semibold" onClick={() => setMenuOpen(false)}>
               🧠 Quiz
             </a>
+
+            <a href="/academic-writer" className="text-purple-600 font-semibold" onClick={() => setMenuOpen(false)}>
+              ✍️ Academic Writer
+            </a> {/* NEW */}
 
             <a
               href="/contact"
               className="bg-green-600 text-white text-center py-3 rounded-lg mt-2"
+              onClick={() => setMenuOpen(false)}
             >
               Contact Us
             </a>
