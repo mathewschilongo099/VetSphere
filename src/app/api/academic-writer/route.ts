@@ -26,30 +26,26 @@ export async function POST(request: NextRequest) {
       'case-study': 'Case Study'
     };
 
-    const levelMap: Record<string, { label: string; detail: string; academicTip: string; pageCount: string }> = {
+    const levelMap: Record<string, { label: string; pageCount: string; detail: string }> = {
       diploma: { 
         label: 'Diploma Level',
-        detail: 'Write clear, practical content with step-by-step procedures. Include basic concepts, equipment lists, and safety considerations.',
-        academicTip: 'Use clear topic sentences, avoid jargon, explain technical terms.',
-        pageCount: '5-8 pages'
+        pageCount: '20-30 pages',
+        detail: 'Write comprehensive research with clear structure, practical applications, and foundational literature review.'
       },
       degree: { 
         label: "Bachelor's Degree Level",
-        detail: 'Write comprehensive, detailed procedures. Include step-by-step instructions for each species, equipment specifications, safety protocols, and practical considerations.',
-        academicTip: 'Use evidence-based arguments, include citations, distinguish facts from interpretations.',
-        pageCount: '10-15 pages'
+        pageCount: '30-45 pages',
+        detail: 'Write extensive research with comprehensive literature review, detailed methodology, thorough results, and in-depth discussion.'
       },
       masters: { 
         label: "Master's Degree Level",
-        detail: 'Write extensive, detailed procedures with critical analysis. Include comparative anatomy across species, advanced techniques, research-backed protocols, and diagnostic interpretation.',
-        academicTip: 'Acknowledge counterarguments, use signal phrases for citations, demonstrate critical thinking.',
-        pageCount: '15-25 pages'
+        pageCount: '40-60 pages',
+        detail: 'Write advanced research with exhaustive literature review, sophisticated methodology, complex data analysis, and critical discussion with theoretical contributions.'
       },
       phd: { 
         label: 'PhD Level',
-        detail: 'Write comprehensive, original content with exhaustive detail. Include historical development of techniques, comparative anatomy, advanced pathological interpretation, and research methodology.',
-        academicTip: 'Contribute original insights, engage with theoretical frameworks, demonstrate methodological rigor.',
-        pageCount: '25-40 pages'
+        pageCount: '50-80 pages',
+        detail: 'Write doctoral-level research with original contribution, comprehensive theoretical framework, advanced methodology, extensive data analysis, and significant contribution to knowledge.'
       }
     };
 
@@ -63,78 +59,75 @@ export async function POST(request: NextRequest) {
     // RESEARCH PAPER - Use You.com API for deep research
     // ============================================================
     if (type === 'research') {
-      console.log('🔬 RESEARCH PAPER: Attempting You.com API...');
+      console.log('🔬 RESEARCH PAPER: Generating comprehensive research paper...');
 
-      const researchPrompt = `You are a veterinary researcher writing a COMPREHENSIVE research paper for ${levelInfo.label}. This should be EXTENSIVE - approximately ${levelInfo.pageCount} of detailed content.
+      const researchPrompt = `You are a veterinary researcher writing a COMPLETE research paper for ${levelInfo.label}. This should be a FULL research paper of ${levelInfo.pageCount}.
 
 RESEARCH TOPIC: "${cleanTopic}"
 
-Write a COMPLETE research paper with ALL these sections. Each section must have 4-6 detailed paragraphs with specific information, examples, and evidence:
+Write a COMPLETE research paper with ALL these sections. Each section must have 5-8 detailed paragraphs with specific information, examples, evidence, and citations:
 
 1.0 Title Page
-2.0 Abstract (250-300 words)
-3.0 Table of Contents
+2.0 Abstract (250-350 words)
+3.0 Table of Contents (with page numbers)
 4.0 Introduction
    - 4.1 Background and Context (detailed history and importance)
    - 4.2 Problem Statement (specific issues being addressed)
-   - 4.3 Research Questions (4-5 specific questions)
-   - 4.4 Objectives (4-5 specific objectives)
-   - 4.5 Significance of the Study (why this matters)
-   - 4.6 Scope and Limitations (what is and isn't covered)
-5.0 Literature Review (EXTENSIVE - 25-40 citations)
-   - 5.1 Theoretical Framework (key theories and concepts)
-   - 5.2 Historical Development (how practices evolved)
-   - 5.3 Current Research and Findings (recent studies with details)
-   - 5.4 Knowledge Gaps (what's missing in current knowledge)
-   - 5.5 Conceptual Framework (how this study fits in)
+   - 4.3 Research Questions (5-6 specific questions)
+   - 4.4 Objectives (5-6 specific objectives)
+   - 4.5 Significance of the Study
+   - 4.6 Scope and Limitations
+5.0 Literature Review (EXTENSIVE - 30-50 citations)
+   - 5.1 Theoretical Framework
+   - 5.2 Historical Development
+   - 5.3 Current Research and Findings
+   - 5.4 Knowledge Gaps
+   - 5.5 Conceptual Framework
 6.0 Methodology
-   - 6.1 Research Design (why this approach)
-   - 6.2 Study Area/Location (where applicable)
-   - 6.3 Target Population (who/what was studied)
-   - 6.4 Sampling Method (how samples were selected)
-   - 6.5 Data Collection Methods (specific techniques used)
-   - 6.6 Data Analysis Techniques (how data was analyzed)
-   - 6.7 Ethical Considerations (ethical protocols followed)
+   - 6.1 Research Approach
+   - 6.2 Research Design
+   - 6.3 Study Location
+   - 6.4 Target Population and Sample
+   - 6.5 Sampling Strategy
+   - 6.6 Data Collection Instruments and Procedures
+   - 6.7 Data Analysis Plan
+   - 6.8 Rigour and Trustworthiness
+   - 6.9 Ethical Considerations
 7.0 Results/Findings
-   - 7.1 Presentation of Data (detailed findings)
-   - 7.2 Data Tables and Figures (describe what was found)
-   - 7.3 Statistical Analysis (if applicable)
-   - 7.4 Summary of Findings (key results)
+   - 7.1 Descriptive Statistics
+   - 7.2 Univariate Analysis
+   - 7.3 Multivariable Analysis
+   - 7.4 Summary of Findings
 8.0 Discussion
-   - 8.1 Interpretation of Findings (what the results mean)
-   - 8.2 Comparison with Previous Studies (how this compares)
-   - 8.3 Implications of Findings (what this means for practice)
-   - 8.4 Theoretical Contributions (how knowledge is advanced)
-   - 8.5 Practical Applications (how to use these findings)
+   - 8.1 Interpretation of Findings
+   - 8.2 Comparison with Previous Studies
+   - 8.3 Implications for Practice
+   - 8.4 Limitations of the Study
 9.0 Conclusion and Recommendations
-   - 9.1 Summary of Key Findings (main takeaways)
-   - 9.2 Contribution to Knowledge (what was learned)
-   - 9.3 Recommendations for Practice (what to do differently)
-   - 9.4 Recommendations for Future Research (what to study next)
-10.0 References (APA 7th Edition - 25-40 sources)
-11.0 Appendices
+   - 9.1 Summary of Key Findings
+   - 9.2 Recommendations for Practice
+   - 9.3 Recommendations for Future Research
+10.0 References (APA 7th Edition - 30-50 sources)
+11.0 Appendices (Questionnaire, Interview Guide, Consent Forms)
 
 WRITING REQUIREMENTS:
-- Write EXTENSIVELY - each section needs 4-6 detailed paragraphs
-- Include specific species details for bovine, caprine, ovine, equine, porcine, canine, feline, poultry
-- Include proper in-text citations throughout
-- Use formal academic language
+- Write EXTENSIVELY - each section needs 5-8 detailed paragraphs
+- Include specific examples, data, and evidence
+- Use formal academic language with proper citations
 - DO NOT use markdown symbols
 - Use numbered headings (1.0, 2.0, etc.)
-- Be SPECIFIC and DETAILED
-- This is a FULL research paper
+- Include in-text citations throughout (Author, Year)
+- This is a FULL research paper of ${levelInfo.pageCount}
 
-Generate the complete research paper now with extensive content.`;
+Generate the complete research paper now.`;
 
-      // Try You.com API first for research
+      // Try You.com API first
       try {
         const youKey = process.env.YOU_API_KEY;
         console.log('You.com API Key exists:', !!youKey);
         
         if (youKey) {
           const startTime = Date.now();
-          
-          // You.com API call with correct format
           const response = await fetch('https://api.you.com/api/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -146,40 +139,33 @@ Generate the complete research paper now with extensive content.`;
               messages: [
                 { 
                   role: 'system', 
-                  content: 'You are a veterinary researcher and academic writer. Write comprehensive, well-researched papers with extensive detail, proper citations, and academic rigor. Write extensively with 4-6 paragraphs per section.' 
+                  content: 'You are a veterinary researcher and academic writer. Write comprehensive, well-researched papers with extensive detail, proper citations, and academic rigor. Each section should have 5-8 detailed paragraphs.' 
                 },
                 { 
                   role: 'user', 
                   content: researchPrompt 
                 }
               ],
-              temperature: 0.5,
-              max_tokens: 12000, // Increased for longer content
+              temperature: 0.4,
+              max_tokens: 16000,
             })
           });
 
-          console.log('You.com API response status:', response.status);
-          
           const data = await response.json();
-          console.log('You.com API response keys:', Object.keys(data));
+          console.log('You.com response status:', response.status);
           
           if (!data.error && data.choices && data.choices.length > 0) {
             aiResponse = data.choices[0]?.message?.content || '';
             apiUsed = 'You.com (Research)';
-            console.log(`You.com API success ✅ (${Date.now() - startTime}ms) - Length: ${aiResponse.length} characters`);
-          } else {
-            console.log('You.com API returned error or empty:', data);
+            console.log(`You.com API success ✅ - Length: ${aiResponse.length} characters`);
           }
-        } else {
-          console.log('⚠️ YOU_API_KEY not found in environment');
         }
       } catch (e) {
-        console.error('You.com API error:', e);
+        console.error('You.com error:', e);
       }
 
-      // If You.com fails, try OpenRouter as fallback (has more research capability)
+      // Fallback to OpenRouter
       if (!aiResponse) {
-        console.log('⚠️ You.com failed, trying OpenRouter...');
         try {
           const openRouterKey = process.env.OPENROUTER_API_KEY;
           if (openRouterKey) {
@@ -192,13 +178,10 @@ Generate the complete research paper now with extensive content.`;
                 'X-Title': 'VetSphere Academic Writer'
               },
               body: JSON.stringify({
-                model: 'google/gemini-1.5-pro', // Using Pro for better research
-                messages: [
-                  { role: 'system', content: 'You are a veterinary researcher writing comprehensive research papers with extensive detail.' },
-                  { role: 'user', content: researchPrompt }
-                ],
-                temperature: 0.5,
-                max_tokens: 12000,
+                model: 'google/gemini-1.5-pro',
+                messages: [{ role: 'user', content: researchPrompt }],
+                temperature: 0.4,
+                max_tokens: 16000,
               })
             });
             const data = await response.json();
@@ -213,84 +196,42 @@ Generate the complete research paper now with extensive content.`;
         }
       }
 
-      // Final fallback to Gemini Pro
+      // Final fallback - generate comprehensive research paper
       if (!aiResponse) {
-        console.log('⚠️ OpenRouter failed, trying Gemini...');
-        try {
-          const geminiKey = process.env.GEMINI_API_KEY;
-          if (geminiKey) {
-            const response = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=${geminiKey}`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  contents: [{ parts: [{ text: researchPrompt }] }],
-                  generationConfig: { 
-                    temperature: 0.5, 
-                    maxOutputTokens: 12000 
-                  }
-                })
-              }
-            );
-            const data = await response.json();
-            if (!data.error) {
-              aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-              apiUsed = 'Gemini Pro (Research)';
-              console.log(`Gemini Pro API success ✅ - Length: ${aiResponse.length} characters`);
-            }
-          }
-        } catch (e) {
-          console.error('Gemini error:', e);
-        }
+        console.log('⚠️ All APIs failed, using comprehensive fallback...');
+        aiResponse = generateComprehensiveResearchPaper(cleanTopic, levelInfo);
+        apiUsed = 'Fallback (Comprehensive)';
       }
     }
 
     // ============================================================
-    // ASSIGNMENT / REPORT / CASE STUDY - Use Gemini or Groq
+    // ASSIGNMENT / REPORT / CASE STUDY
     // ============================================================
     else {
-      console.log(`📝 ${typeLabel}: Using Gemini/Groq for practical content...`);
+      console.log(`📝 ${typeLabel}: Generating practical content...`);
 
-      const assignmentPrompt = `You are a veterinary pathologist writing a professional, practical ${typeLabel} for ${levelInfo.label}.
+      const assignmentPrompt = `You are a veterinary professional writing a detailed, practical ${typeLabel} for ${levelInfo.label}.
 
 TOPIC: "${cleanTopic}"
 
-Write a DETAILED, practical ${typeLabel} with the following structure:
+Write a DETAILED, practical ${typeLabel} with:
 
 1.0 Title Page
-2.0 Introduction
-   - Background and importance
-   - Purpose of the ${typeLabel}
-   - Objectives
+2.0 Introduction (Background, Purpose, Objectives)
 3.0 Main Body (Detailed practical content with clear sections)
    - For each species: state positioning, then list numbered steps
    - Include specific anatomical details
    - Include equipment and safety considerations
-4.0 Conclusion
-   - Summary of key points
-   - Final remarks
-   - Recommendations
-5.0 References (APA 7th Edition - 8-15 sources)
+4.0 Conclusion (Summary, Final Remarks, Recommendations)
+5.0 References (APA 7th Edition - 10-20 sources)
 6.0 Appendices (if applicable)
 
-WRITING REQUIREMENTS:
-- Write practical, step-by-step content
-- Include specific examples and procedures
-- Use clear, direct academic language
-- Include proper citations
-- Each section should have 3-5 detailed paragraphs
-- Be SPECIFIC with anatomical details
-- DO NOT use markdown symbols
-- Use numbered headings
+Write 3-5 detailed paragraphs per section with specific examples.`;
 
-Generate a comprehensive, practical ${typeLabel}.`;
-
-      // Try Gemini first
+      // Try Gemini
       try {
         const geminiKey = process.env.GEMINI_API_KEY;
         if (geminiKey) {
-          const startTime = Date.now();
           const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
             {
@@ -309,7 +250,6 @@ Generate a comprehensive, practical ${typeLabel}.`;
           if (!data.error) {
             aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
             apiUsed = 'Gemini (Assignment)';
-            console.log(`Gemini API success ✅ (${Date.now() - startTime}ms)`);
           }
         }
       } catch (e) {
@@ -338,12 +278,17 @@ Generate a comprehensive, practical ${typeLabel}.`;
             if (!data.error) {
               aiResponse = data.choices?.[0]?.message?.content || '';
               apiUsed = 'Groq (Assignment)';
-              console.log(`Groq API success ✅`);
             }
           }
         } catch (e) {
           console.error('Groq error:', e);
         }
+      }
+
+      // Ultimate fallback for assignment
+      if (!aiResponse) {
+        aiResponse = generateDetailedAssignment(cleanTopic);
+        apiUsed = 'Fallback (Assignment)';
       }
     }
 
@@ -356,18 +301,6 @@ Generate a comprehensive, practical ${typeLabel}.`;
         .replace(/`/g, '')
         .replace(/\n{3,}/g, '\n\n')
         .trim();
-    }
-
-    // Ultimate fallback with detailed content
-    if (!aiResponse) {
-      const date = new Date().toLocaleDateString();
-      
-      if (type === 'research') {
-        aiResponse = generateDetailedResearchPaper(cleanTopic, levelInfo, date);
-      } else {
-        aiResponse = generateDetailedAssignment(cleanTopic, levelInfo, date);
-      }
-      apiUsed = 'Fallback (Built-in)';
     }
 
     return NextResponse.json({ 
@@ -389,19 +322,26 @@ Generate a comprehensive, practical ${typeLabel}.`;
   }
 }
 
-// Detailed research paper generator
-function generateDetailedResearchPaper(topic: string, levelInfo: any, date: string): string {
+// ============================================================
+// COMPREHENSIVE RESEARCH PAPER GENERATOR
+// ============================================================
+function generateComprehensiveResearchPaper(topic: string, levelInfo: any): string {
+  const date = new Date().toLocaleDateString();
+  
   return `1.0 Title Page
 
-Comprehensive Postmortem Examination Procedures in Veterinary Species: A Research Analysis
+${topic}: A Comprehensive Research Analysis
 
 Author: VetSphere Academic Writer
 Date: ${date}
 Institution: University of Veterinary Sciences
+Degree Level: ${levelInfo.label}
 
 2.0 Abstract
 
-This comprehensive research paper provides an in-depth analysis of postmortem examination procedures across multiple veterinary species, including bovine, caprine, ovine, equine, porcine, canine, feline, and poultry. The study systematically examines the standard protocols, species-specific considerations, equipment requirements, and diagnostic approaches essential for effective necropsy. A thorough literature review was conducted, synthesizing findings from peer-reviewed sources published between 2015 and 2025. The research methodology incorporates detailed procedural analysis, comparative anatomy considerations, and diagnostic protocol evaluation. Key findings reveal significant species-specific variations in positioning requirements, anatomical approaches, and procedural steps. The research identifies that while general principles apply across species, each species requires specific adaptations based on anatomical and physiological differences. The study concludes with evidence-based recommendations for improving postmortem examination practices, standardizing protocols across veterinary practices, and enhancing the role of necropsy in disease surveillance and veterinary diagnostics. This research contributes to the advancement of veterinary pathology and supports evidence-based practice in veterinary medicine.
+This comprehensive research paper provides an in-depth analysis of ${topic}, examining the procedures, protocols, species-specific considerations, and evidence-based best practices essential for effective implementation in veterinary medicine. The study employs a systematic literature review methodology, synthesizing findings from peer-reviewed sources published between 2015 and 2025. The research encompasses multiple species including bovine, caprine, ovine, equine, porcine, canine, feline, and poultry, with detailed attention to species-specific anatomical and physiological variations. Key findings reveal significant species-specific differences in procedural approaches, positioning requirements, and diagnostic protocols. The research identifies that while general principles apply across species, each species requires specific adaptations based on unique anatomical and physiological characteristics. The study concludes with evidence-based recommendations for standardizing protocols, enhancing diagnostic accuracy, and improving veterinary practice outcomes. This research contributes to the advancement of veterinary pathology and supports evidence-based practice in animal health management.
+
+Keywords: postmortem examination, necropsy, veterinary pathology, species-specific protocols, diagnostic procedures, animal health
 
 3.0 Table of Contents
 
@@ -422,10 +362,11 @@ This comprehensive research paper provides an in-depth analysis of postmortem ex
    5.4 Knowledge Gaps
    5.5 Conceptual Framework
 6.0 Methodology
-   6.1 Research Design
-   6.2 Data Collection Methods
-   6.3 Data Analysis Techniques
-   6.4 Ethical Considerations
+   6.1 Research Approach
+   6.2 Research Design
+   6.3 Data Collection Methods
+   6.4 Data Analysis Techniques
+   6.5 Ethical Considerations
 7.0 Results/Findings
    7.1 General Postmortem Examination Protocols
    7.2 Species-Specific Protocols
@@ -435,7 +376,7 @@ This comprehensive research paper provides an in-depth analysis of postmortem ex
    8.1 Interpretation of Findings
    8.2 Comparison with Previous Studies
    8.3 Implications for Practice
-   8.4 Theoretical Contributions
+   8.4 Limitations of the Study
 9.0 Conclusion and Recommendations
    9.1 Summary of Key Findings
    9.2 Recommendations for Practice
@@ -453,13 +394,13 @@ The importance of postmortem examination cannot be overstated in the context of 
 
 Furthermore, postmortem examination plays a crucial role in veterinary public health and food safety. The identification of zoonotic diseases, foodborne pathogens, and emerging infectious diseases often relies heavily on necropsy findings and subsequent laboratory testing. During disease outbreaks, rapid and accurate postmortem examinations are essential for implementing appropriate control measures and preventing further spread of disease (Anderson, 2023).
 
+The historical development of postmortem examination techniques reflects the broader evolution of veterinary medicine and pathology. Early approaches were largely descriptive, focusing on gross examination of organs and identification of obvious lesions that could be seen with the naked eye. The development of histopathology in the 19th century provided a more detailed understanding of disease processes at the cellular level, revolutionizing veterinary pathology and diagnostic medicine (Smith, 2020).
+
 4.2 Problem Statement
 
 Despite the established importance of postmortem examination in veterinary medicine, there remains significant variation in procedural approaches, quality standards, and documentation practices across different veterinary practices, institutions, and regions. This variation can lead to inconsistent diagnostic outcomes, missed diagnoses, incomplete disease surveillance data, and reduced effectiveness of epidemiological investigations.
 
-Several factors contribute to this problem. First, the lack of standardized protocols across all veterinary species means that practitioners may use different approaches depending on their training, experience, and institutional guidelines. Second, the increasing recognition of emerging diseases and the need for rapid diagnostic response has highlighted the importance of standardized, evidence-based protocols that can be consistently applied across different settings (Johnson & Williams, 2022). Third, the growing demand for veterinary services and the pressure to conduct postmortem examinations efficiently may compromise the quality and thoroughness of the procedures. Finally, the limited availability of training and continuing education opportunities in necropsy techniques may result in practitioners being unfamiliar with current best practices and evidence-based recommendations.
-
-This variation in procedural approaches has significant implications for veterinary practice, disease surveillance, and public health. Inconsistent protocols may lead to inaccurate diagnoses, incomplete disease reporting, and missed opportunities for disease prevention and control.
+Several factors contribute to this problem. First, the lack of standardized protocols across all veterinary species means that practitioners may use different approaches depending on their training, experience, and institutional guidelines. Second, the increasing recognition of emerging diseases and the need for rapid diagnostic response has highlighted the importance of standardized, evidence-based protocols that can be consistently applied across different settings (Johnson & Williams, 2022). Third, the growing demand for veterinary services and the pressure to conduct postmortem examinations efficiently may compromise the quality and thoroughness of the procedures.
 
 4.3 Research Questions
 
@@ -551,8 +492,6 @@ Despite significant research, there remain important gaps in knowledge regarding
 
 6. The development of quality assurance programs and standardized protocols for postmortem examination across different veterinary settings.
 
-7. The economic evaluation of postmortem examination programs and their contribution to veterinary practice and public health.
-
 5.5 Conceptual Framework
 
 This research is guided by a conceptual framework that integrates comparative anatomy, pathology, and evidence-based practice. The framework emphasizes the importance of systematic examination, species-specific approaches, and the integration of clinical and pathological findings.
@@ -565,17 +504,17 @@ The conceptual framework recognizes that effective postmortem examination requir
 5. Integration of clinical history and laboratory findings
 6. Evidence-based practice and continuous quality improvement
 
-This framework provides the foundation for the methodology, analysis, and recommendations presented in this research.
-
 6.0 Methodology
 
-6.1 Research Design
+6.1 Research Approach
 
-This study employs a comprehensive literature review design, synthesizing findings from peer-reviewed sources to examine postmortem examination procedures across veterinary species. The methodology is appropriate for examining the current state of knowledge on this topic and identifying best practices, species-specific considerations, and areas requiring further research.
+This study employs a comprehensive literature review approach, synthesizing findings from peer-reviewed sources to examine postmortem examination procedures across veterinary species. The methodology is appropriate for examining the current state of knowledge on this topic and identifying best practices, species-specific considerations, and areas requiring further research.
 
-The literature review approach allows for the systematic synthesis of findings from multiple sources, providing a comprehensive overview of the current evidence base. This approach is particularly appropriate for examining a well-established but evolving field such as postmortem examination, where a substantial body of literature exists.
+6.2 Research Design
 
-6.2 Data Collection Methods
+The research uses a systematic literature review design, following established guidelines for conducting comprehensive reviews of veterinary and medical literature. This approach allows for the systematic identification, evaluation, and synthesis of relevant studies and publications.
+
+6.3 Data Collection Methods
 
 Data was collected from several sources to ensure comprehensive coverage of the topic:
 
@@ -589,9 +528,7 @@ Data was collected from several sources to ensure comprehensive coverage of the 
 
 5. Systematic reviews and meta-analyses on postmortem examination protocols and practices.
 
-6. Government and regulatory agency guidelines on postmortem examination and disease surveillance.
-
-6.3 Data Analysis Techniques
+6.4 Data Analysis Techniques
 
 Data was analyzed using thematic analysis to identify key themes and patterns across the literature. The analysis focused on:
 
@@ -602,11 +539,9 @@ Data was analyzed using thematic analysis to identify key themes and patterns ac
 5. Documentation and reporting requirements
 6. Quality assurance and improvement programs
 
-The findings were synthesized to provide a comprehensive overview of current knowledge, identify best practices, and highlight areas requiring further research. The analysis incorporated both qualitative and quantitative findings from the literature, including procedural descriptions, recommended practices, and evidence-based recommendations.
+6.5 Ethical Considerations
 
-6.4 Ethical Considerations
-
-This research adheres to ethical guidelines for academic research. All sources are properly cited, and the research was conducted with integrity and objectivity. No animal subjects were used in this study, as it is a literature review synthesizing existing knowledge and evidence.
+This research adheres to ethical guidelines for academic research. All sources are properly cited, and the research was conducted with integrity and objectivity. No animal subjects were used in this study, as it is a literature review.
 
 7.0 Results/Findings
 
@@ -826,8 +761,6 @@ The findings are consistent with previous research that has emphasized the impor
 
 Previous studies have highlighted the challenges of standardizing postmortem examination protocols across different veterinary settings (Anderson, 2023). This study contributes to addressing these challenges by providing detailed, evidence-based recommendations that can be adapted for different practice settings and species.
 
-The research also aligns with previous studies that have emphasized the importance of postmortem examination in disease surveillance and veterinary public health (Thompson et al., 2021). The findings highlight the critical role of standardized, systematic examination in identifying emerging diseases, investigating outbreaks, and implementing effective control measures.
-
 8.3 Implications for Practice
 
 The findings have significant implications for veterinary practice, education, and disease surveillance:
@@ -840,19 +773,15 @@ The findings have significant implications for veterinary practice, education, a
 
 4. Disease surveillance programs should integrate postmortem examination findings with other data sources to improve the detection and monitoring of diseases. This will enhance the effectiveness of disease control and prevention efforts.
 
-5. Continuing education and professional development opportunities should be provided to help veterinary professionals maintain and enhance their necropsy skills. This is particularly important given the evolving nature of veterinary practice and the emergence of new diseases.
+8.4 Limitations of the Study
 
-8.4 Theoretical Contributions
-
-This research contributes to the theoretical understanding of postmortem examination by integrating knowledge from multiple species and providing a framework for evidence-based practice. The research demonstrates the importance of systematic, species-specific approaches to necropsy and highlights the integration of clinical, pathological, and epidemiological findings.
-
-The conceptual framework developed in this research emphasizes the interconnectedness of anatomy, pathology, and clinical medicine in the context of postmortem examination. This framework can guide future research and practice in veterinary pathology and diagnostic medicine.
+This research has several limitations that should be considered when interpreting the findings. First, the literature review may not include all emerging techniques or species-specific variations that have been described. Second, the research primarily focuses on traditional necropsy techniques and may not fully address the potential applications of new technologies. Third, the geographic scope may not fully represent the diversity of practice across different regions.
 
 9.0 Conclusion and Recommendations
 
 9.1 Summary of Key Findings
 
-This comprehensive research paper has examined postmortem examination procedures across multiple veterinary species, providing a detailed analysis of protocols, species-specific considerations, and evidence-based recommendations. The key findings of this research include:
+This comprehensive research paper has examined postmortem examination procedures across multiple veterinary species, providing a detailed analysis of protocols, species-specific considerations, and evidence-based recommendations. The key findings include:
 
 1. Postmortem examination requires systematic, species-specific approaches that account for the unique anatomical and physiological characteristics of each species.
 
@@ -864,11 +793,9 @@ This comprehensive research paper has examined postmortem examination procedures
 
 5. Postmortem examination plays a vital role in disease surveillance, outbreak investigation, and veterinary public health.
 
-6. Quality assurance and continuous improvement are essential for maintaining high standards of necropsy practice.
-
 9.2 Recommendations for Practice
 
-Based on the findings of this research, the following recommendations are made for veterinary practice:
+Based on the findings, the following recommendations are made:
 
 1. Implement standardized protocols for postmortem examination across veterinary practices, with species-specific adaptations as needed.
 
@@ -879,10 +806,6 @@ Based on the findings of this research, the following recommendations are made f
 4. Invest in continuing education and professional development opportunities in necropsy techniques and veterinary pathology.
 
 5. Promote collaboration and knowledge sharing among veterinary professionals, pathologists, and researchers.
-
-6. Develop and maintain comprehensive documentation systems for postmortem findings to support epidemiological investigation and disease surveillance.
-
-7. Ensure that appropriate equipment and facilities are available for conducting high-quality postmortem examinations.
 
 9.3 Recommendations for Future Research
 
@@ -898,23 +821,13 @@ Areas requiring further research include:
 
 5. Economic evaluations of postmortem examination programs and their contribution to veterinary practice and public health.
 
-6. Research on the integration of advanced imaging techniques with traditional necropsy approaches.
-
-7. Studies on the role of postmortem examination in emerging disease detection and surveillance.
-
 10.0 References
 
 Anderson, D.M. (2023). Standardized Necropsy Protocols for Veterinary Practice. Veterinary Pathology, 56(4), 245-258.
 
 Brown, S.L., & Williams, P.C. (2022). Comparative Anatomy in Veterinary Practice. Veterinary Anatomy Journal, 45(3), 112-128.
 
-Davis, R.L. (2024). Emerging Trends in Veterinary Pathology. Journal of Veterinary Medicine, 47(2), 89-105.
-
 Johnson, R.K., & Williams, P.L. (2022). Postmortem Examination in Large Animals: A Practical Guide. Journal of Veterinary Science, 45(2), 89-102.
-
-Martinez, C.A., & Thompson, M.R. (2023). Avian Necropsy Techniques and Protocols. Avian Diseases, 67(2), 156-172.
-
-Miller, S.J. (2021). Quality Assurance in Veterinary Pathology. Veterinary Quality Review, 38(4), 201-218.
 
 Smith, J.A. (2020). History and Evolution of Veterinary Pathology. Veterinary Clinics, 38(3), 412-425.
 
@@ -922,79 +835,19 @@ Thompson, M.R., Davis, S.L., & Anderson, P.C. (2021). Avian Necropsy Techniques:
 
 Williams, P.C., & Brown, S.L. (2022). Comparative Veterinary Pathology: Species-Specific Considerations. Veterinary Science Reviews, 48(5), 178-195.
 
-Wilson, E.J. (2023). Ethical Considerations in Veterinary Pathology. Journal of Veterinary Ethics, 12(3), 89-104.
-
 11.0 Appendices
 
 Appendix A: Equipment and Materials Checklist
-
-Essential Equipment for Postmortem Examination:
-- Scalpels and blades (various sizes)
-- Scissors (straight and curved)
-- Forceps (tissue and dressing)
-- Rib cutters and bone saws
-- Measuring tape and rulers
-- Scales for weighing organs
-- Sample collection containers (formalin, sterile)
-- Personal Protective Equipment (PPE)
-- Disinfectants and cleaning supplies
-
-Appendix B: Sample Documentation Form
-
-Patient Information:
-- Animal ID:
-- Species:
-- Breed:
-- Age:
-- Sex:
-- Date of Examination:
-- Examiner:
-
-History:
-- Clinical Signs:
-- Duration of Illness:
-- Treatment History:
-- Date of Death:
-
-External Examination:
-- Body Condition Score:
-- Skin and Coat:
-- Visible Lesions:
-- Other Observations:
-
-Internal Examination:
-- Thoracic Cavity:
-- Abdominal Cavity:
-- Organ Findings:
-- Sample Collection:
-
-Diagnosis:
-- Preliminary Diagnosis:
-- Laboratory Samples Submitted:
-- Final Diagnosis:
-
+Appendix B: Sample Documentation Forms
 Appendix C: Safety Protocol Checklist
-
-Before Examination:
-- [ ] PPE worn
-- [ ] Area prepared and cleaned
-- [ ] Equipment sterilized
-- [ ] History obtained
-
-During Examination:
-- [ ] Biosafety protocols followed
-- [ ] Samples collected properly
-- [ ] Findings documented
-
-After Examination:
-- [ ] Carcass disposed properly
-- [ ] Equipment cleaned and disinfected
-- [ ] Area decontaminated
-- [ ] Documentation completed`;
+Appendix D: Sample Collection Guidelines
+Appendix E: Reference List of Key Publications`;
 }
 
-// Detailed assignment generator
-function generateDetailedAssignment(topic: string, levelInfo: any, date: string): string {
+// ============================================================
+// DETAILED ASSIGNMENT GENERATOR
+// ============================================================
+function generateDetailedAssignment(topic: string): string {
   return `PROCEDURE FOR CARRYING OUT POSTMORTEM EXAMINATION IN DIFFERENT ANIMAL SPECIES
 
 Course: Animal Health and Production
