@@ -151,17 +151,31 @@ function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs: number
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function callGemini(
   prompt: string,
   maxOutputTokens: number,
-  retries = 3
+  retries = 1
 ): Promise<{ text: string; error: string }> {
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) return { text: '', error: 'GEMINI_API_KEY is not set' };
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${geminiKey}`,
         {
           method: 'POST',
@@ -173,7 +187,8 @@ async function callGemini(
               maxOutputTokens,
             },
           }),
-        }
+        },
+        45000
       );
       const data = await response.json();
 
@@ -182,10 +197,9 @@ async function callGemini(
         const message = data.error.message || JSON.stringify(data.error);
         console.error(`Gemini error (status ${status}):`, message);
 
-        // 429 = rate limit / quota exceeded. Back off and retry.
+        // 429 = rate limit / quota exceeded. Back off and retry once.
         if ((status === 429 || status === 503) && attempt < retries) {
-          const backoffMs = 2000 * Math.pow(2, attempt); // 2s, 4s, 8s
-          await sleep(backoffMs);
+          await sleep(1500);
           continue;
         }
         return { text: '', error: `Gemini ${status}: ${message}` };
@@ -198,12 +212,13 @@ async function callGemini(
       }
       return { text, error: '' };
     } catch (e: any) {
+      const isAbort = e?.name === 'AbortError';
       console.error('Gemini fetch error:', e);
-      if (attempt < retries) {
-        await sleep(2000 * Math.pow(2, attempt));
+      if (attempt < retries && !isAbort) {
+        await sleep(1500);
         continue;
       }
-      return { text: '', error: `Gemini fetch failed: ${e.message || e}` };
+      return { text: '', error: isAbort ? 'Gemini timed out' : `Gemini fetch failed: ${e.message || e}` };
     }
   }
   return { text: '', error: 'Gemini failed after retries' };
@@ -217,21 +232,25 @@ async function callOpenRouter(
   if (!openRouterKey) return { text: '', error: 'OPENROUTER_API_KEY is not set' };
 
   try {
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${openRouterKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
-        'X-Title': 'VetSphere Academic Writer',
+    const response = await fetchWithTimeout(
+      'https://openrouter.ai/api/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${openRouterKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
+          'X-Title': 'VetSphere Academic Writer',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.0-flash-001',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.45,
+          max_tokens: maxTokens,
+        }),
       },
-      body: JSON.stringify({
-        model: 'google/gemini-2.0-flash-001',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.45,
-        max_tokens: maxTokens,
-      }),
-    });
+      45000
+    );
     const data = await response.json();
     if (data.error || !data.choices) {
       const message = data.error?.message || 'unknown OpenRouter error';
@@ -240,8 +259,9 @@ async function callOpenRouter(
     }
     return { text: data.choices[0]?.message?.content || '', error: '' };
   } catch (e: any) {
+    const isAbort = e?.name === 'AbortError';
     console.error('OpenRouter fetch error:', e);
-    return { text: '', error: `OpenRouter fetch failed: ${e.message || e}` };
+    return { text: '', error: isAbort ? 'OpenRouter timed out' : `OpenRouter fetch failed: ${e.message || e}` };
   }
 }
 
@@ -253,19 +273,23 @@ async function callGroq(
   if (!groqKey) return { text: '', error: 'GROQ_API_KEY is not set' };
 
   try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${groqKey}`,
-        'Content-Type': 'application/json',
+    const response = await fetchWithTimeout(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${groqKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.45,
+          max_tokens: maxTokens,
+        }),
       },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.45,
-        max_tokens: maxTokens,
-      }),
-    });
+      45000
+    );
     const data = await response.json();
     if (data.error || !data.choices) {
       const message = data.error?.message || 'unknown Groq error';
@@ -274,8 +298,9 @@ async function callGroq(
     }
     return { text: data.choices[0]?.message?.content || '', error: '' };
   } catch (e: any) {
+    const isAbort = e?.name === 'AbortError';
     console.error('Groq fetch error:', e);
-    return { text: '', error: `Groq fetch failed: ${e.message || e}` };
+    return { text: '', error: isAbort ? 'Groq timed out' : `Groq fetch failed: ${e.message || e}` };
   }
 }
 
@@ -317,23 +342,21 @@ async function generateFullResearchPaper(
   levelInfo: { label: string; pageCount: string; depth: string }
 ): Promise<{ content: string; apiUsedList: string[] }> {
   const chapters = buildChapterSpecs(topic);
-  const generatedParts: string[] = [];
-  const apiUsedList: string[] = [];
 
-  // Rolling context so each chapter stays consistent with what came before
-  // (objectives raised in Ch.1 get answered in Ch.4-6, etc.) without resending
-  // the full paper every time (which would blow up token usage).
-  let rollingSummary = `Research paper topic: "${topic}". Academic level: ${levelInfo.label}.`;
+  // Chapters are generated CONCURRENTLY. Each prompt is self-contained (topic +
+  // level + its own section instructions), so they don't need each other's
+  // actual output to stay on-topic. This keeps total wall-clock time bounded
+  // by the slowest single chapter (~45s) instead of the sum of all 7
+  // (which was blowing past Vercel's execution limit and causing "Failed to
+  // fetch" on the client). Calls are staggered slightly so they don't all
+  // hit the same provider in the same instant.
+  const results = await Promise.all(
+    chapters.map(async (chapter, i) => {
+      if (i > 0) await sleep(i * 400);
 
-  for (let i = 0; i < chapters.length; i++) {
-    const chapter = chapters[i];
-    // Small gap between calls to reduce the chance of hitting per-minute rate limits.
-    if (i > 0) await sleep(1500);
-    const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
+      const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
 
 TOPIC: "${topic}"
-
-CONTEXT SO FAR: ${rollingSummary}
 
 TASK: ${chapter.instructions}
 
@@ -341,19 +364,21 @@ STYLE RULES (must follow strictly):
 - Simple, formal academic English. No slang, emojis, or informal language.
 - One idea per paragraph. Avoid long unbroken blocks of text.
 - Use clear numbered headings and subheadings exactly as specified above.
-- Do not repeat content already covered in earlier chapters (see context above).
 - Do not include any chapter other than the one requested.
 - Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.`;
 
-    const { text, apiUsed, error } = await generateSection(prompt, 8000);
-    apiUsedList.push(`${chapter.id}: ${apiUsed}${error ? ` (${error})` : ''}`);
+      const { text, apiUsed, error } = await generateSection(prompt, 8000);
+      return { chapter, text, apiUsed, error };
+    })
+  );
 
+  const generatedParts: string[] = [];
+  const apiUsedList: string[] = [];
+
+  for (const { chapter, text, apiUsed, error } of results) {
+    apiUsedList.push(`${chapter.id}: ${apiUsed}${error ? ` (${error})` : ''}`);
     if (text) {
       generatedParts.push(cleanText(text));
-      // Keep the rolling context short: summarise what this chapter covered.
-      rollingSummary += ` ${chapter.title} has been written, covering: ${chapter.instructions
-        .split('\n')[0]
-        .slice(0, 200)}...`;
     } else {
       generatedParts.push(
         `${chapter.title}\n\n[This section could not be generated. Reason: ${error || 'unknown error'}]`
