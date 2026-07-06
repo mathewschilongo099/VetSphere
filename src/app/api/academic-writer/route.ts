@@ -113,20 +113,12 @@ Write a COMPLETE research paper with ALL these sections. Each section must have 
 14.0 REFERENCES (APA 7th Edition - 30-50 sources)
 15.0 APPENDICES
 
-IMPORTANT FORMATTING:
-- Use proper academic language throughout
-- Include in-text citations (Author, Year)
-- Each section must have 5-8 detailed paragraphs
-- Table of Contents must show indented subheadings with page numbers
-- Include all front matter (Declaration, Dedication, Acknowledgements)
-
 Generate the complete research paper now with all sections.`;
 
-      // Try Gemini first (most reliable)
+      // Try Gemini first
       try {
         const geminiKey = process.env.GEMINI_API_KEY;
         if (geminiKey) {
-          const startTime = Date.now();
           const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
             {
@@ -145,7 +137,6 @@ Generate the complete research paper now with all sections.`;
           if (!data.error) {
             aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
             apiUsed = 'Gemini (Research)';
-            console.log(`Gemini API success ✅ (${Date.now() - startTime}ms) - Length: ${aiResponse.length} characters`);
           }
         }
       } catch (e) {
@@ -176,7 +167,6 @@ Generate the complete research paper now with all sections.`;
             if (!data.error && data.choices) {
               aiResponse = data.choices[0]?.message?.content || '';
               apiUsed = 'OpenRouter (Research)';
-              console.log(`OpenRouter API success ✅ - Length: ${aiResponse.length} characters`);
             }
           }
         } catch (e) {
@@ -184,9 +174,8 @@ Generate the complete research paper now with all sections.`;
         }
       }
 
-      // Ultimate fallback - generate comprehensive research paper
+      // Ultimate fallback
       if (!aiResponse) {
-        console.log('⚠️ All APIs failed, using comprehensive fallback...');
         aiResponse = generateFullResearchPaper(cleanTopic, levelInfo);
         apiUsed = 'Fallback (Comprehensive)';
       }
@@ -196,27 +185,18 @@ Generate the complete research paper now with all sections.`;
     // ASSIGNMENT / REPORT / CASE STUDY
     // ============================================================
     else {
-      console.log(`📝 ${typeLabel}: Generating practical content...`);
-
       const assignmentPrompt = `You are a veterinary professional writing a detailed, practical ${typeLabel} for ${levelInfo.label}.
 
 TOPIC: "${cleanTopic}"
 
 Write a DETAILED, practical ${typeLabel} with:
-
 1.0 Title Page
-2.0 Introduction (Background, Purpose, Objectives)
+2.0 Introduction
 3.0 Main Body (Detailed practical content with clear sections)
-   - For each species: state positioning, then list numbered steps
-   - Include specific anatomical details
-   - Include equipment and safety considerations
-4.0 Conclusion (Summary, Final Remarks, Recommendations)
+4.0 Conclusion
 5.0 References (APA 7th Edition - 10-20 sources)
-6.0 Appendices (if applicable)
+6.0 Appendices`;
 
-Write 3-5 detailed paragraphs per section with specific examples.`;
-
-      // Try Gemini
       try {
         const geminiKey = process.env.GEMINI_API_KEY;
         if (geminiKey) {
@@ -244,43 +224,12 @@ Write 3-5 detailed paragraphs per section with specific examples.`;
         console.error('Gemini error:', e);
       }
 
-      // Fallback to Groq
-      if (!aiResponse) {
-        try {
-          const groqKey = process.env.GROQ_API_KEY;
-          if (groqKey) {
-            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${groqKey}`,
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                model: 'mixtral-8x7b-32768',
-                messages: [{ role: 'user', content: assignmentPrompt }],
-                temperature: 0.5,
-                max_tokens: 8000,
-              })
-            });
-            const data = await response.json();
-            if (!data.error) {
-              aiResponse = data.choices?.[0]?.message?.content || '';
-              apiUsed = 'Groq (Assignment)';
-            }
-          }
-        } catch (e) {
-          console.error('Groq error:', e);
-        }
-      }
-
-      // Ultimate fallback for assignment
       if (!aiResponse) {
         aiResponse = generateDetailedAssignment(cleanTopic);
         apiUsed = 'Fallback (Assignment)';
       }
     }
 
-    // Clean response
     if (aiResponse) {
       aiResponse = aiResponse
         .replace(/\*\*/g, '')
@@ -311,7 +260,7 @@ Write 3-5 detailed paragraphs per section with specific examples.`;
 }
 
 // ============================================================
-// FULL RESEARCH PAPER GENERATOR (Complete structure)
+// GENERATE FULL RESEARCH PAPER
 // ============================================================
 function generateFullResearchPaper(topic: string, levelInfo: any): string {
   const date = new Date().toLocaleDateString();
@@ -358,8 +307,6 @@ I wish to express my deepest appreciation and gratitude to all those who have gi
    8.2 Background of the Study ......................................... 1
    8.3 Statement of the Problem ........................................ 3
    8.4 Research Objectives ............................................. 4
-   8.4.1 General Objective ............................................. 4
-   8.4.2 Specific Objectives .......................................... 4
    8.5 Research Questions .............................................. 4
    8.6 Significance of the Study ....................................... 5
    8.7 Scope of Study .................................................. 5
@@ -367,9 +314,6 @@ I wish to express my deepest appreciation and gratitude to all those who have gi
 9.0 CHAPTER TWO: LITERATURE REVIEW .................................... 6
    9.1 Introduction .................................................... 6
    9.2 Empirical Review ................................................ 6
-   9.2.1 Prevalence of the Condition ................................... 6
-   9.2.2 Demographic and Socio behavioural Predictors .................. 7
-   9.2.3 Clinical Predictors ........................................... 8
    9.3 Theoretical Framework ........................................... 10
    9.4 Conceptual Framework ............................................ 10
 10.0 CHAPTER THREE: RESEARCH METHODOLOGY .............................. 12
@@ -398,13 +342,8 @@ I wish to express my deepest appreciation and gratitude to all those who have gi
 13.0 CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS ..................... 31
     13.1 Conclusions ................................................... 31
     13.2 Recommendations ............................................... 32
-    13.2.1 Recommendations to Management ............................... 32
-    13.2.2 Recommendations to Clinical Staff ........................... 33
-    13.2.3 Recommendations for Future Research ......................... 34
 14.0 REFERENCES ........................................................ 35
 15.0 APPENDICES ........................................................ 38
-    Appendix A: Data Collection Instrument ............................. 38
-    Appendix B: Informed Consent Form ................................. 39
 
 6.0 Abstract
 
@@ -442,10 +381,6 @@ The importance of ${topic} cannot be overstated in the context of veterinary med
 Furthermore, ${topic} plays a crucial role in veterinary public health and food safety. The identification of zoonotic diseases, foodborne pathogens, and emerging infectious diseases often relies heavily on necropsy findings and subsequent laboratory testing. During disease outbreaks, rapid and accurate postmortem examinations are essential for implementing appropriate control measures and preventing further spread of disease (Anderson, 2023).
 
 The historical development of ${topic} techniques reflects the broader evolution of veterinary medicine and pathology. Early approaches were largely descriptive, focusing on gross examination of organs and identification of obvious lesions that could be seen with the naked eye. The development of histopathology in the 19th century provided a more detailed understanding of disease processes at the cellular level, revolutionizing veterinary pathology and diagnostic medicine (Smith, 2020).
-
-The 20th century saw the establishment of standardized protocols for ${topic}, driven by the need for consistent disease surveillance, the growing recognition of zoonotic diseases, and the development of veterinary public health programs. Organizations such as the World Organisation for Animal Health (WOAH) and the American College of Veterinary Pathologists (ACVP) have contributed to the standardization of protocols and the promotion of evidence-based practice.
-
-Recent advances in diagnostic imaging, molecular biology, and laboratory techniques have further enhanced the capabilities and applications of ${topic}. Advanced imaging modalities such as computed tomography (CT) and magnetic resonance imaging (MRI) are increasingly used to supplement traditional necropsy approaches, providing detailed anatomical information and facilitating the identification of subtle lesions (Thompson et al., 2021).
 
 8.3 Statement of the Problem
 
@@ -487,25 +422,15 @@ This research is significant for several important reasons. First, it provides a
 
 Second, the research highlights the importance of species-specific approaches, emphasizing that effective ${topic} requires detailed knowledge of comparative anatomy, pathology, and disease processes across different species. Third, the study contributes to the growing body of evidence supporting evidence-based veterinary practice and quality improvement in veterinary pathology and diagnostics.
 
-Fourth, the findings support the broader goals of disease surveillance, epidemiological investigation, and veterinary public health by promoting standardized, consistent approaches to ${topic}. Finally, the research identifies important knowledge gaps and areas requiring further investigation, providing direction for future research in this critical area of veterinary medicine.
-
 8.7 Scope of Study
 
 This research focuses on the major veterinary species commonly encountered in veterinary practice and livestock production: bovine, caprine, ovine, equine, porcine, canine, feline, and poultry. The scope includes both livestock and companion animals, providing comprehensive coverage of the most frequently examined species.
-
-While the research is based on an extensive literature review and synthesis of current evidence, there are several limitations to consider. First, the review may not include all emerging techniques, advanced imaging modalities, or species-specific variations that have been described in the literature. Second, the research primarily focuses on traditional techniques and may not fully address the potential applications of new technologies and diagnostic approaches. Third, the geographic scope of the literature reviewed may not fully represent the diversity of practice across different regions and countries.
 
 8.8 Operational Definitions
 
 Postmortem Examination (Necropsy): The systematic examination of an animal after death to determine cause of death, identify diseases, evaluate pathological changes, and collect samples for laboratory analysis.
 
 Species-Specific Protocol: A standardized set of procedures adapted for a particular species based on its unique anatomical and physiological characteristics.
-
-Evidence-Based Practice: Clinical decision-making that integrates the best available research evidence with clinical expertise and patient values.
-
-Biosecurity: Measures taken to prevent the introduction and spread of infectious diseases in animal populations.
-
-Zoonotic Disease: A disease that can be transmitted between animals and humans.
 
 9.0 CHAPTER TWO: LITERATURE REVIEW
 
@@ -515,43 +440,19 @@ This chapter reviews existing empirical literature on ${topic}, organised around
 
 9.2 Empirical Review
 
-9.2.1 Prevalence and Importance of the Topic
-
-A substantial body of research has examined the importance and prevalence of ${topic} across different health systems and veterinary settings. Studies have consistently demonstrated that ${topic} is essential for accurate diagnosis, disease surveillance, and the advancement of veterinary knowledge.
-
-Research has shown that ${topic} provides invaluable information for determining cause of death, identifying subclinical diseases, and evaluating pathological changes (Smith, 2020). The procedure is particularly important in cases where clinical diagnosis was inconclusive or where disease surveillance requires pathological confirmation.
-
-The prevalence of ${topic} in veterinary practice varies depending on the setting, with referral hospitals and academic institutions conducting more examinations than primary care practices. However, the importance of ${topic} is universally recognized across all levels of veterinary practice (Anderson, 2023).
-
-9.2.2 Species-Specific Considerations
+Research has consistently demonstrated that ${topic} is essential for accurate diagnosis, disease surveillance, and the advancement of veterinary knowledge. Studies have shown that ${topic} provides invaluable information for determining cause of death, identifying subclinical diseases, and evaluating pathological changes (Smith, 2020).
 
 Research has highlighted the importance of species-specific considerations in ${topic}. Different species have unique anatomical features, disease susceptibilities, and procedural requirements that must be addressed for effective examination (Williams & Brown, 2022). Understanding these species-specific factors is essential for accurate diagnosis and effective disease surveillance.
 
-Studies have examined the specific positioning requirements, incision techniques, and organ examination protocols for different species. The variation in positioning requirements across species reflects the unique anatomical characteristics and body plans of each species (Johnson & Williams, 2022).
-
-9.2.3 Clinical and Diagnostic Predictors
-
 Recent research has focused on identifying clinical and diagnostic predictors of outcomes related to ${topic}. Studies have examined the use of advanced imaging techniques, standardized sampling protocols, and quality assurance programs to enhance the quality and value of findings (Thompson et al., 2021).
-
-The role of ${topic} in disease surveillance and outbreak investigation has been a particular focus of recent research. Studies have highlighted the importance of rapid, standardized protocols for identifying emerging diseases, investigating disease outbreaks, and implementing control measures (Anderson, 2023).
 
 9.3 Theoretical Framework
 
 This research is guided by established theoretical frameworks in veterinary pathology and diagnostic medicine. The systematic approach to ${topic} is grounded in the understanding of normal anatomy, pathophysiology, and disease processes across different species. This theoretical framework provides the basis for examining organs, identifying lesions, interpreting pathological findings, and establishing the cause of death.
 
-The principles of gross pathology, histopathology, and clinical pathology inform the approach to ${topic}. Gross pathology involves the macroscopic examination of organs and tissues, looking for abnormalities in size, color, consistency, and structure. Histopathology involves the microscopic examination of tissues to identify cellular changes, inflammatory patterns, and pathological processes that may not be visible on gross examination (Smith, 2020).
-
 9.4 Conceptual Framework
 
 This research is guided by a conceptual framework that integrates comparative anatomy, pathology, and evidence-based practice. The framework emphasizes the importance of systematic examination, species-specific approaches, and the integration of clinical and pathological findings.
-
-The conceptual framework recognizes that effective ${topic} requires:
-1. Detailed knowledge of normal and abnormal anatomy across species
-2. Understanding of disease processes and their pathological manifestations
-3. Systematic approaches to examination and documentation
-4. Species-specific adaptations based on anatomical and physiological differences
-5. Integration of clinical history and laboratory findings
-6. Evidence-based practice and continuous quality improvement
 
 10.0 CHAPTER THREE: RESEARCH METHODOLOGY
 
@@ -561,209 +462,236 @@ This chapter describes the research approach and design, the study location, the
 
 10.2 Research Approach
 
-This study employs a comprehensive literature review approach, synthesizing findings from peer-reviewed sources to examine ${topic} procedures across veterinary species. The methodology is appropriate for examining the current state of knowledge on this topic and identifying best practices, species-specific considerations, and areas requiring further research.
+This study employs a comprehensive literature review approach, synthesizing findings from peer-reviewed sources to examine ${topic} procedures across veterinary species.
 
 10.3 Research Design
 
-The research uses a systematic literature review design, following established guidelines for conducting comprehensive reviews of veterinary and medical literature. This approach allows for the systematic identification, evaluation, and synthesis of relevant studies and publications.
+The research uses a systematic literature review design, following established guidelines for conducting comprehensive reviews of veterinary and medical literature.
 
 10.4 Study Location
 
-The research covers veterinary species globally, with a focus on the major species of veterinary importance. The geographic scope includes research from North America, Europe, Australia, and other regions with significant veterinary research contributions.
+The research covers veterinary species globally, with a focus on the major species of veterinary importance.
 
 10.5 Target Population
 
-The target population includes all veterinary species for which ${topic} is commonly performed. This includes domestic livestock (bovine, caprine, ovine, equine, porcine), companion animals (canine, feline), and poultry.
+The target population includes all veterinary species for which ${topic} is commonly performed.
 
 10.6 Sample Size
 
-This is a literature review, so sample size refers to the number of studies and publications included in the review. A comprehensive search strategy was employed to identify all relevant studies, ensuring adequate coverage of the topic.
+A comprehensive search strategy was employed to identify all relevant studies, ensuring adequate coverage of the topic.
 
 10.7 Data Collection Instruments and Procedures
 
-Data was collected from several sources to ensure comprehensive coverage of the topic:
-
-1. Peer-reviewed journals in veterinary pathology, veterinary medicine, and comparative anatomy published between 2015 and 2025.
-
-2. Textbooks on veterinary pathology, necropsy techniques, and comparative anatomy.
-
-3. Guidelines and recommendations from professional organizations such as the World Organisation for Animal Health (WOAH), American College of Veterinary Pathologists (ACVP), and European College of Veterinary Pathologists (ECVP).
-
-4. Conference proceedings and research reports from veterinary pathology and diagnostic medicine conferences.
-
-5. Systematic reviews and meta-analyses on ${topic} protocols and practices.
+Data was collected from peer-reviewed journals, textbooks, guidelines from professional organizations, conference proceedings, and systematic reviews.
 
 10.8 Data Analysis Plan
 
-Data was analyzed using thematic analysis to identify key themes and patterns across the literature. The analysis focused on:
-
-1. General procedural protocols for ${topic}
-2. Species-specific positioning and procedural requirements
-3. Equipment and safety requirements
-4. Sample collection and preservation methods
-5. Documentation and reporting requirements
-6. Quality assurance and improvement programs
+Data was analyzed using thematic analysis to identify key themes and patterns across the literature.
 
 10.9 Reliability and Validity
 
-Reliability was supported through the use of a systematic search strategy and standardized data extraction procedures. Validity was supported by including only peer-reviewed sources and aligning variable definitions with internationally recognised clinical definitions.
+Reliability was supported through the use of a systematic search strategy and standardized data extraction procedures.
 
 10.10 Ethical Considerations
 
-This research adheres to ethical guidelines for academic research. All sources are properly cited, and the research was conducted with integrity and objectivity. No animal subjects were used in this study, as it is a literature review.
+This research adheres to ethical guidelines for academic research. All sources are properly cited, and the research was conducted with integrity and objectivity.
 
 11.0 CHAPTER FOUR: PRESENTATION OF FINDINGS
 
 11.1 Introduction
 
-This chapter presents the findings of the analysis, organized according to the specific objectives of the study. The chapter begins with descriptive findings, followed by detailed procedures for each species, and concludes with a summary of key findings.
+This chapter presents the findings of the analysis, organized according to the specific objectives of the study.
 
 11.2 Descriptive Results
 
-The analysis reveals that ${topic} protocols across veterinary species share several common principles while requiring species-specific adaptations. The general protocol includes obtaining history, wearing PPE, conducting external examination, positioning the animal appropriately, making systematic incisions, examining organs in standardized order, collecting samples, documenting findings, and disposing of the carcass properly.
+The analysis reveals that ${topic} protocols across veterinary species share several common principles while requiring species-specific adaptations.
 
 11.3 Species-Specific Protocols
 
-11.3.1 Bovine, Caprine, and Ovine (Cattle, Goats, and Sheep)
+Bovine, Caprine, Ovine: Left lateral recumbency. Steps include external examination, skin incision, opening abdominal and thoracic cavities, organ examination, and sample collection.
 
-Positioning: Left lateral recumbency (lying on the left side). This position is preferred because the rumen remains on the lower side, allowing easier examination of the abdominal organs.
+Equidae: Left side recumbency. Steps include external examination, skin incision, organ examination, and sample collection.
 
-Procedure Steps:
+Porcine: Dorsal recumbency. Steps include midline incision, organ examination, and sample collection.
 
-1. Record the complete history of the animal, including age, breed, sex, clinical signs, duration of illness, treatment history, and date of death.
+Canine and Feline: Dorsal recumbency. Steps include midline incision, organ examination, and sample collection.
 
-2. Wear appropriate personal protective equipment (PPE), including gloves, boots, overalls, face mask, and safety goggles.
-
-3. Perform a thorough external examination, observing body condition score, skin lesions, eyes, nose, mouth, anus, feet, and any visible injuries or swellings.
-
-4. Make a skin incision from the lower jaw to the anus, following the midline. Reflect the skin away from the body to expose the underlying muscles and tissues.
-
-5. Remove the left forelimb if necessary to improve access to the chest cavity.
-
-6. Open the abdominal cavity carefully, avoiding damage to internal organs.
-
-7. Open the thoracic cavity by cutting through the ribs and removing the rib cage.
-
-8. Examine all organs systematically, including the heart, lungs, liver, spleen, kidneys, rumen, reticulum, omasum, abomasum, intestines, urinary bladder, reproductive organs, and lymph nodes.
-
-9. Open and examine the head and brain if nervous disease is suspected.
-
-10. Collect tissue, blood, or organ samples for laboratory examination where necessary.
-
-11. Record all findings in detail and dispose of the carcass safely by deep burial or incineration according to biosecurity regulations.
-
-11.3.2 Equidae (Horses, Donkeys, and Mules)
-
-Positioning: Left side recumbency (lying on the left side). This position provides appropriate access to both the thoracic and abdominal cavities.
-
-Procedure Steps:
-
-1. Obtain the complete history of the animal.
-
-2. Wear appropriate personal protective equipment.
-
-3. Conduct a thorough external examination.
-
-4. Make a skin incision from the jaw to the pelvis and reflect the skin.
-
-5. Open the abdominal cavity carefully.
-
-6. Open the thoracic cavity by cutting through the ribs.
-
-7. Examine the heart, lungs, liver, spleen, kidneys, stomach, small intestine, cecum, large colon, small colon, urinary bladder, and reproductive organs.
-
-8. Open the skull and examine the brain if neurological disease is suspected.
-
-9. Collect samples for laboratory diagnosis.
-
-10. Record all observations and dispose of the carcass properly.
-
-11.3.3 Porcine (Pigs)
-
-Positioning: Dorsal recumbency (lying on the back). This position provides optimal access to both the thoracic and abdominal cavities.
-
-Procedure Steps:
-
-1. Obtain the animal's history.
-
-2. Wear protective clothing.
-
-3. Perform an external examination.
-
-4. Make a midline incision from the throat to the pelvic region.
-
-5. Reflect the skin and expose the muscles.
-
-6. Open the abdominal cavity carefully.
-
-7. Open the thoracic cavity by cutting through the ribs.
-
-8. Examine the heart, lungs, liver, spleen, kidneys, stomach, intestines, pancreas, urinary bladder, reproductive organs, and lymph nodes.
-
-9. Examine the joints if arthritis is suspected.
-
-10. Collect tissue samples where necessary.
-
-11. Record all findings, dispose of the carcass safely, and disinfect all equipment.
-
-11.3.4 Canine and Feline (Dogs and Cats)
-
-Positioning: Dorsal recumbency (lying on the back). This position provides optimal access to both the thoracic and abdominal cavities.
-
-Procedure Steps:
-
-1. Obtain the history of the animal.
-
-2. Wear personal protective equipment.
-
-3. Carry out a complete external examination.
-
-4. Make a midline incision from the chin to the pelvis.
-
-5. Reflect the skin and examine the muscles.
-
-6. Open the abdominal cavity followed by the thoracic cavity.
-
-7. Examine the heart, lungs, liver, spleen, kidneys, stomach, intestines, pancreas, urinary bladder, reproductive organs, and lymph nodes.
-
-8. Open the skull and examine the brain if necessary.
-
-9. Collect samples for laboratory examination.
-
-10. Record all findings and dispose of the carcass safely while disinfecting all instruments.
-
-11.3.5 Poultry Species
-
-Positioning: Dorsal recumbency (lying on the back). This position provides optimal access to the thoracic and abdominal cavities.
-
-Procedure Steps:
-
-1. Obtain the history of the flock or bird.
-
-2. Wear gloves and other protective clothing.
-
-3. Examine the bird externally for body condition, feather quality, comb, wattles, eyes, legs, and vent.
-
-4. Wet the feathers with water to reduce contamination.
-
-5. Remove the skin over the breast muscles.
-
-6. Cut through both sides of the ribs and remove the sternum.
-
-7. Examine the air sacs, lungs, heart, liver, spleen, crop, proventriculus, gizzard, intestines, ceca, kidneys, bursa of Fabricius, and reproductive organs.
-
-8. Collect samples for laboratory diagnosis if required.
-
-9. Record all findings.
-
-10. Dispose of the carcass safely and disinfect all equipment used.
+Poultry: Dorsal recumbency. Steps include external examination, removal of sternum, organ examination, and sample collection.
 
 12.0 CHAPTER FIVE: DISCUSSION
 
 12.1 Introduction
 
-This chapter interprets the findings from Chapter Four by situating them within the empirical literature reviewed in Chapter Two. The discussion addresses each specific objective in turn and explores the implications for practice and future research.
+This chapter interprets the findings from Chapter Four by situating them within the empirical literature reviewed in Chapter Two.
 
 12.2 Interpretation of Findings
 
-The findings of this research demonstrate the importance of standardized, species-specific protocols for ${topic} across veterinary species. The analysis reveals that while general principles of systematic examination apply across all species, significant variations in positioning, procedural steps, and anatomical
+The findings of this research demonstrate the importance of standardized, species-specific protocols for ${topic} across veterinary species. The analysis reveals that while general principles of systematic examination apply across all species, significant variations in positioning, procedural steps, and anatomical considerations are required for effective examination of different species.
+
+12.3 Comparison with Previous Studies
+
+The findings are consistent with previous research that has emphasized the importance of species-specific approaches to ${topic} (Smith, 2020; Johnson & Williams, 2022).
+
+12.4 Implications for Practice
+
+The findings have significant implications for veterinary practice, education, and disease surveillance. Veterinary practices should implement standardized protocols that are species-specific and evidence-based.
+
+12.5 Limitations of the Study
+
+This research has several limitations, including the possibility that the literature review may not include all emerging techniques or species-specific variations.
+
+13.0 CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS
+
+13.1 Conclusions
+
+This comprehensive research paper has examined ${topic} procedures across multiple veterinary species. Key findings include:
+
+1. ${topic} requires systematic, species-specific approaches
+2. Proper positioning is critical for effective examination
+3. Standardized protocols improve diagnostic accuracy
+4. Training and competency of veterinary professionals are essential
+
+13.2 Recommendations
+
+1. Implement standardized protocols across veterinary practices
+2. Provide comprehensive training for veterinary professionals
+3. Develop quality assurance programs
+4. Invest in continuing education
+
+14.0 REFERENCES
+
+Anderson, D.M. (2023). Standardized Necropsy Protocols for Veterinary Practice. Veterinary Pathology, 56(4), 245-258.
+
+Brown, S.L., & Williams, P.C. (2022). Comparative Anatomy in Veterinary Practice. Veterinary Anatomy Journal, 45(3), 112-128.
+
+Johnson, R.K., & Williams, P.L. (2022). Postmortem Examination in Large Animals: A Practical Guide. Journal of Veterinary Science, 45(2), 89-102.
+
+Smith, J.A. (2020). History and Evolution of Veterinary Pathology. Veterinary Clinics, 38(3), 412-425.
+
+Thompson, M.R., Davis, S.L., & Anderson, P.C. (2021). Avian Necropsy Techniques: A Comprehensive Guide. Avian Diseases, 65(1), 15-28.
+
+Williams, P.C., & Brown, S.L. (2022). Comparative Veterinary Pathology: Species-Specific Considerations. Veterinary Science Reviews, 48(5), 178-195.
+
+15.0 APPENDICES
+
+Appendix A: Equipment and Materials Checklist
+Appendix B: Sample Documentation Forms
+Appendix C: Safety Protocol Checklist`;
+}
+
+// ============================================================
+// GENERATE DETAILED ASSIGNMENT
+// ============================================================
+function generateDetailedAssignment(topic: string): string {
+  return `PROCEDURE FOR CARRYING OUT POSTMORTEM EXAMINATION IN DIFFERENT ANIMAL SPECIES
+
+Course: Animal Health and Production
+
+Topic: ${topic}
+
+1.0 Introduction
+
+A postmortem examination (necropsy) is the systematic examination of an animal after death to determine the cause of death, identify diseases, evaluate organ changes, and collect samples for laboratory analysis. Before conducting a postmortem examination, the examiner should obtain the animal's history, wear appropriate personal protective equipment (PPE), prepare clean instruments, and select a suitable location away from healthy animals.
+
+2.0 Bovine, Caprine and Ovine (Cattle, Goats and Sheep)
+
+The animal is placed on its left lateral recumbency (left side) because the rumen remains on the lower side, allowing easier examination of the abdominal organs.
+
+The procedure is as follows:
+
+1. Record the history of the animal, including age, breed, sex, clinical signs, and date of death.
+2. Wear protective clothing such as gloves, boots, overalls, and a face mask.
+3. Perform an external examination by observing the body condition, skin, eyes, nose, mouth, anus, feet, and any visible injuries or swellings.
+4. Make a skin incision from the lower jaw to the anus and reflect the skin away from the body.
+5. Remove the left forelimb if necessary to improve access to the chest.
+6. Open the abdominal cavity carefully without damaging the internal organs.
+7. Open the thoracic cavity by cutting through the ribs and removing the rib cage.
+8. Examine all organs systematically, including the heart, lungs, liver, spleen, kidneys, rumen, reticulum, omasum, abomasum, intestines, urinary bladder, reproductive organs, and lymph nodes.
+9. Open and examine the head and brain if nervous disease is suspected.
+10. Collect tissue, blood, or organ samples for laboratory examination where necessary.
+11. Record all findings and dispose of the carcass safely by deep burial or incineration. Finally, clean and disinfect all equipment.
+
+3.0 Equidae (Horse, Donkey and Mule)
+
+The animal is positioned on its left side before examination.
+
+The procedure includes:
+
+1. Obtain the complete history of the animal.
+2. Wear personal protective equipment.
+3. Conduct a thorough external examination.
+4. Make a skin incision from the jaw to the pelvis and reflect the skin.
+5. Open the abdominal cavity carefully.
+6. Open the thoracic cavity by cutting through the ribs.
+7. Examine the heart, lungs, liver, spleen, kidneys, stomach, small intestine, cecum, large colon, small colon, urinary bladder, and reproductive organs.
+8. Open the skull and examine the brain if neurological disease is suspected.
+9. Collect samples for laboratory diagnosis.
+10. Record all observations and dispose of the carcass properly.
+
+4.0 Porcine (Pig)
+
+The pig is usually placed on its back (dorsal recumbency) for easier access to both body cavities.
+
+The procedure is as follows:
+
+1. Obtain the animal's history.
+2. Wear protective clothing.
+3. Perform an external examination.
+4. Make a midline incision from the throat to the pelvic region.
+5. Reflect the skin and expose the muscles.
+6. Open the abdominal cavity carefully.
+7. Open the thoracic cavity by cutting through the ribs.
+8. Examine the heart, lungs, liver, spleen, kidneys, stomach, intestines, pancreas, urinary bladder, reproductive organs, and lymph nodes.
+9. Examine the joints if arthritis is suspected.
+10. Collect tissue samples where necessary.
+11. Record all findings, dispose of the carcass safely, and disinfect all equipment.
+
+5.0 Canine and Feline (Dogs and Cats)
+
+Dogs and cats are examined while lying on their back (dorsal recumbency).
+
+The procedure includes:
+
+1. Obtain the history of the animal.
+2. Wear personal protective equipment.
+3. Carry out a complete external examination.
+4. Make a midline incision from the chin to the pelvis.
+5. Reflect the skin and examine the muscles.
+6. Open the abdominal cavity followed by the thoracic cavity.
+7. Examine the heart, lungs, liver, spleen, kidneys, stomach, intestines, pancreas, urinary bladder, reproductive organs, and lymph nodes.
+8. Open the skull and examine the brain if necessary.
+9. Collect samples for laboratory examination.
+10. Record all findings and dispose of the carcass safely while disinfecting all instruments.
+
+6.0 Poultry Species
+
+The bird is placed on its back (dorsal recumbency) during the postmortem examination.
+
+The procedure is as follows:
+
+1. Obtain the history of the flock or bird.
+2. Wear gloves and other protective clothing.
+3. Examine the bird externally for body condition, feather quality, comb, wattles, eyes, legs, and vent.
+4. Wet the feathers with water to reduce contamination.
+5. Remove the skin over the breast muscles.
+6. Cut through both sides of the ribs and remove the sternum.
+7. Examine the air sacs, lungs, heart, liver, spleen, crop, proventriculus, gizzard, intestines, ceca, kidneys, bursa of Fabricius, and reproductive organs.
+8. Collect samples for laboratory diagnosis if required.
+9. Record all findings.
+10. Dispose of the carcass safely and disinfect all equipment used.
+
+7.0 General Precautions During Postmortem Examination
+
+- Always wear appropriate personal protective equipment.
+- Use clean and sterilized instruments.
+- Handle organs carefully to avoid contamination.
+- Examine organs in a systematic order.
+- Collect laboratory samples before contamination occurs.
+- Record all abnormalities accurately.
+- Wash and disinfect instruments after use.
+- Dispose of carcasses by deep burial or incineration according to biosecurity regulations.
+
+8.0 Conclusion
+
+Postmortem examination is an important veterinary procedure used to determine the cause of death, diagnose diseases, and guide disease control measures. Although the positioning of the animal varies among species, the examination should always be systematic, thorough, and conducted under strict hygienic and biosecurity measures. Accurate recording of findings and proper disposal of the carcass are essential parts of every postmortem examination.`;
+}
