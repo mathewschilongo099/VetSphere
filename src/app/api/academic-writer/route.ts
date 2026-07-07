@@ -58,9 +58,10 @@ function buildChapterSpecs(topic: string): ChapterSpec[] {
 2.0 Declaration (standard academic declaration paragraph)
 3.0 Dedication (short, sincere, 2-4 sentences)
 4.0 Acknowledgements (short, sincere paragraph)
-5.0 Table of Contents (list every chapter and major subsection listed below, matching numbering exactly, with plausible page numbers)
-6.0 Abstract (300-350 words, written last-conceptually: state the problem, approach, key findings/arguments, and significance)
-7.0 List of Abbreviations and Acronyms (only abbreviations that are actually relevant to this specific topic — do not invent irrelevant ones)
+5.0 Abstract (300-350 words, written last-conceptually: state the problem, approach, key findings/arguments, and significance)
+6.0 List of Abbreviations and Acronyms (only abbreviations that are actually relevant to this specific topic — do not invent irrelevant ones)
+
+Do NOT write a Table of Contents section. Do not guess or invent page numbers for any section — you cannot know real page numbers, and a fabricated Table of Contents is worse than none at all. The document's real Table of Contents, with accurate page numbers, is generated separately from the finished PDF.
 
 Do not write Chapter One or any chapter content yet — stop after the abbreviations list.
 
