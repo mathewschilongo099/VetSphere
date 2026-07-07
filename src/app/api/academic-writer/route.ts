@@ -1,15 +1,9 @@
 // src/app/api/academic-writer/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-// Each request now generates ONE chapter, so this easily fits inside
-// Vercel Hobby's 60s hard cap (maxDuration only matters on Pro/Team, but
-// keeping it here is harmless).
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-// ============================================================
-// CONFIG
-// ============================================================
 const GEMINI_MODEL = 'gemini-2.5-flash';
 
 const typeLabels: Record<string, string> = {
@@ -53,112 +47,116 @@ function buildChapterSpecs(topic: string): ChapterSpec[] {
     {
       id: 'frontmatter',
       title: 'Front Matter',
-      instructions: `Write ONLY the following front-matter sections, in this order, fully written out (not placeholders):
-1.0 Title Page (a compelling, specific title derived from the topic; author line "VetSphere Academic Writer"; degree; date)
-2.0 Declaration (standard academic declaration paragraph)
-3.0 Dedication (short, sincere, 2-4 sentences)
-4.0 Acknowledgements (short, sincere paragraph)
-5.0 Abstract (300-350 words, written last-conceptually: state the problem, approach, key findings/arguments, and significance)
-6.0 List of Abbreviations and Acronyms (only abbreviations that are actually relevant to this specific topic — do not invent irrelevant ones)
+      instructions: `Write ONLY the following front-matter sections, in this order, fully written out:
 
-Do NOT write a Table of Contents section. Do not guess or invent page numbers for any section — you cannot know real page numbers, and a fabricated Table of Contents is worse than none at all. The document's real Table of Contents, with accurate page numbers, is generated separately from the finished PDF.
+1.0 Title Page
+2.0 Declaration
+3.0 Dedication
+4.0 Acknowledgements
+5.0 Abstract
+6.0 List of Abbreviations and Acronyms
 
-Do not write Chapter One or any chapter content yet — stop after the abbreviations list.
+Do NOT write a Table of Contents section. Do not guess or invent page numbers. The Table of Contents is generated separately.
 
-IMPORTANT: The title you invent here, and the framing of the problem in the Abstract, are FINAL. Every later chapter must stay consistent with them.`,
+IMPORTANT: The title and framing established here are FINAL. Every later chapter must stay consistent with them.`,
     },
     {
       id: 'chapter1',
       title: 'CHAPTER ONE: INTRODUCTION',
-      instructions: `Write the FULL Chapter One: Introduction. Use these exact numbered subsections, each with 3-6 well-developed paragraphs (one idea per paragraph, no filler, no repetition):
-1.0 Introduction
-1.1 Background of the Study
-1.2 Statement of the Problem
-1.3 Research Objectives (1.3.1 General Objective; 1.3.2 Specific Objectives — 3 to 5 specific objectives)
-1.4 Research Questions (matching the specific objectives)
+      instructions: `Write the FULL Chapter One: Introduction. Use these exact numbered subsections:
+
+1.0 Introduction (a short paragraph explaining what the chapter covers)
+1.1 Background of the Study (six paragraphs deep into global, regional and national status quo, mention different countries as examples, cite with references published in the last 10 years)
+1.2 Statement of the Problem (one paragraph, 100 words, convincing, cite as evidence)
+1.3 Research Objectives
+1.3.1 General Objective (clear, 20 to 25 words)
+1.3.2 Specific Objectives (only 3 specific objectives)
+1.4 Research Questions (turn objectives to questions)
 1.5 Significance of the Study
-1.6 Scope of Study
-1.7 Operational Definitions (define 5-8 key terms specific to this topic)
+1.6 Scope of Study (60 words)
+1.7 Operational Definitions (5 key words)
 
-Ground every claim in real, verifiable veterinary/scientific knowledge. Use in-text citations in APA 7th style, e.g. (Smith, 2021) or Smith (2021) argued that..., referencing real, plausible authors and years appropriate to the field — never fabricate exact statistics or quotes, but reasonable attributed claims are fine.
-
-IMPORTANT: The Research Objectives, Research Questions, and Operational Definitions you write here are FINAL. Every later chapter must refer back to these exact same objectives/questions/terms — never introduce different ones.`,
+Ground every claim in real, verifiable knowledge. Use in-text citations in APA 7th style. Never use numbered bracket citations. The Research Objectives and Research Questions written here are FINAL.`,
     },
     {
       id: 'chapter2',
       title: 'CHAPTER TWO: LITERATURE REVIEW',
       instructions: `Write the FULL Chapter Two: Literature Review. Use these exact numbered subsections:
-2.0 Introduction
-2.1 Empirical Review (break this into 3-5 relevant thematic sub-subsections, e.g. 2.1.1, 2.1.2, 2.1.3, each covering a distinct theme relevant to the topic, each with 3-5 paragraphs synthesising prior research, agreements and disagreements between scholars, and gaps)
-2.2 Theoretical Framework (identify and explain one or two theories/models genuinely relevant to this topic)
-2.3 Conceptual Framework (explain the relationships between key variables/concepts; you may describe a conceptual diagram in words)
 
-This chapter should read as a genuine critical synthesis of literature, not a list of summaries — compare, contrast, and evaluate sources against each other. Frame the themes so they clearly support the research objectives already established in Chapter One.`,
+2.0 Introduction (a short paragraph explaining what the chapter covers)
+2.1.0 Empirical Review (100 word paragraph, no citations)
+2.1.1 Create a theme from objective 1 and present literature at all levels, cite in standard way. Move beyond description.
+2.1.2 Create a theme from objective 2 and present literature at all levels, cite in standard way. Move beyond description.
+2.1.3 Create a theme from objective 3 and present literature at all levels, cite in standard way. Move beyond description.
+2.2 Theoretical Framework (use 2 different theories, state the theory, by who, when, what the theory is about, how the theory is linked to the current study. Maximum of 3 paragraphs)
+2.3 Conceptual Framework (short explanation showing the relationship between variables, followed by an editable sketch)
+
+This chapter must be a critical synthesis, not a list of summaries. Frame themes to support the research objectives from Chapter One.`,
     },
     {
       id: 'chapter3',
       title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
-      instructions: `Write the FULL Chapter Three: Research Methodology. Use these exact numbered subsections, each with 2-4 solid paragraphs, methodologically sound and consistent with the topic and study level:
-3.0 Introduction
-3.1 Research Approach
-3.2 Research Design
-3.3 Study Location
-3.4 Target Population
-3.5 Sample Size (justify with a rationale, e.g. Yamane's formula or similar where appropriate)
-3.6 Data Collection Instruments and Procedures
-3.7 Data Analysis Plan
-3.8 Reliability and Validity
-3.9 Ethical Considerations (informed consent, confidentiality, ethical approval)
+      instructions: `Write the FULL Chapter Three: Research Methodology. Use these exact numbered subsections:
 
-The methodology must be designed specifically to answer the Research Questions established in Chapter One — do not introduce a different research focus.`,
+3.0 Introduction (a short paragraph explaining what the chapter covers)
+3.1 Research Approach (60 words, be clear)
+3.2 Research Design (90 words, be clear, cite Creswell, justify the reason for choosing the design)
+3.3 Study Location (60 words)
+3.4 Target Population (60 words, state the actual population)
+3.5 Sample Size (show using a formula how the sample was calculated, justify the reason for the sample size)
+3.6 Data Collection Instruments and Procedures (100 words, ensure to cite)
+3.7 Data Analysis Plan (90 words, be clear, consistent, justify, cite)
+3.8 Reliability and Validity (60 words)
+3.9 Ethical Considerations (90 words, be clear)
+
+The methodology must be designed specifically to answer the Research Questions from Chapter One.`,
     },
     {
       id: 'chapter4',
       title: 'CHAPTER FOUR: PRESENTATION OF FINDINGS',
       instructions: `Write the FULL Chapter Four: Presentation of Findings. Use these exact numbered subsections:
-4.0 Introduction
-4.1 Descriptive/Demographic Results
-4.2 Key Thematic or Statistical Findings (2-3 relevant subsections depending on the topic)
+
+4.0 Introduction (a short paragraph explaining what the chapter covers)
+4.1 Descriptive and Demographic Results
+4.2 Key Thematic or Statistical Findings (organised by the research objectives)
 4.3 Summary of Findings
 
-Present findings as illustrative but realistic and internally consistent (percentages, frequencies, or thematic patterns that add up sensibly). Where useful, describe a table in words (e.g. "Table 4.1 shows that...") rather than fabricating a rigid ASCII table. Each subsection needs 3-5 paragraphs of substantive interpretation, not just numbers.
-
-Findings must directly answer the Research Questions/Objectives from Chapter One and be collected using the exact methodology described in Chapter Three — do not contradict either.`,
+Present findings as illustrative and internally consistent. Use realistic percentages and frequencies. Each subsection needs substantive interpretation, not just numbers. Findings must directly answer the Research Questions from Chapter One.`,
     },
     {
       id: 'chapter5',
       title: 'CHAPTER FIVE: DISCUSSION',
-      instructions: `Write the FULL Chapter Five: Discussion. Use these exact numbered subsections, each with 3-5 paragraphs:
-5.0 Introduction
+      instructions: `Write the FULL Chapter Five: Discussion. Use these exact numbered subsections:
+
+5.0 Introduction (a short paragraph explaining what the chapter covers)
 5.1 Interpretation of Key Findings
-5.2 Comparison with Previous Studies (explicitly engage with the literature from Chapter Two — agree, disagree, extend)
-5.3 Implications for Practice/Policy
+5.2 Comparison with Previous Studies (engage with literature from Chapter Two)
+5.3 Implications for Practice and Policy
 5.4 Limitations of the Study
 
-This chapter must genuinely argue and interpret the specific findings already presented in Chapter Four, and engage with the specific literature themes from Chapter Two — not restate Chapter Four in different words, and not introduce new findings or literature not seen before.`,
+This chapter must argue and interpret the findings from Chapter Four and engage with literature from Chapter Two.`,
     },
     {
       id: 'chapter6',
       title: 'CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS',
       instructions: `Write the FULL Chapter Six:
-6.0 Introduction (2-3 sentences only — a brief transition, not a restatement of the study)
-6.1 Conclusions (directly answering the research objectives/questions from Chapter One)
-6.2 Recommendations (specific, actionable, grouped by stakeholder if relevant — e.g. practitioners, policymakers, future researchers)
 
-Conclusions must map 1:1 onto the exact Research Objectives from Chapter One — do not introduce new objectives here. Do NOT write References or Appendices in this section — those come in a separate chapter.`,
+6.0 Introduction (a short paragraph explaining what the chapter covers)
+6.1 Conclusions (directly answering the research objectives from Chapter One)
+6.2 Recommendations (specific, actionable, grouped by stakeholder)
+
+Do NOT write References or Appendices in this section.`,
     },
     {
       id: 'references',
       title: 'REFERENCES AND APPENDICES',
-      instructions: `Write ONLY the following — do not write any chapter content, conclusions, or recommendations here:
+      instructions: `Write ONLY the following:
 
 REFERENCES
-Provide the FULL, complete list of 20-35 APA 7th edition references consistent with a study on "${topic}". They must be written out in full — never abbreviated, never a placeholder, never a note saying references are "omitted for brevity" or similar. Every single reference must be a complete APA 7th-formatted entry (author(s), year, title, source). They should look like real, plausible veterinary/scientific/education literature (realistic author names, plausible journal titles, years spread 2014-2025). Alphabetised by author surname.
+Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Never abbreviate or placehold.
 
 APPENDICES
-Briefly describe what would be included (e.g. data collection tool, consent form) in 1-2 short paragraphs — no need to write them out in full.
-
-CRITICAL: You MUST write out all 20-35 references individually and completely. Do not summarize, truncate, or state that references are omitted — that is not acceptable under any circumstance.`,
+Describe the instruments of data collection that would be included.`,
     },
   ];
 }
@@ -333,7 +331,7 @@ async function callYouCom(
         headers: { 'X-API-Key': youKey, 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: prompt, research_effort: effort }),
       },
-      15000 // kept short deliberately — see notes below on the 60s budget
+      15000
     );
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
@@ -399,13 +397,6 @@ async function callCerebras(
   return { text: '', error: `Cerebras: ${errors.join(' | ')}` };
 }
 
-// NOTE ON TIMEOUTS: all per-provider timeouts above were shortened from 45s/90s
-// down to 15-18s. On Hobby you only have 60s TOTAL for the whole request, so
-// the old 45s-per-provider timeouts meant even ONE fallback (e.g. Cerebras
-// failing over then Groq succeeding) could alone exceed your entire budget.
-// Short timeouts + fast fallthrough is the right tradeoff here: it's better
-// to try 3 providers at 15s each than get killed mid-way through 1 provider
-// at 45s.
 async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number
@@ -422,16 +413,13 @@ async function generateSection(
   const gemini = await callGemini(sectionPrompt, maxOutputTokens);
   if (gemini.text) return { text: gemini.text, apiUsed: 'Gemini', error: '' };
 
-  // You.com moved to last: it's a research/search API, inherently the
-  // slowest of the five, and least likely to return before the 60s wall
-  // if it's reached this late in the chain.
   const youCom = await callYouCom(sectionPrompt);
   if (youCom.text) return { text: youCom.text, apiUsed: 'You.com', error: '' };
 
   return {
     text: '',
     apiUsed: 'none',
-    error: `Cerebras failed (${cerebras.error}); Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); Gemini failed (${gemini.error}); You.com failed (${youCom.error})`,
+    error: `All providers failed: Cerebras (${cerebras.error}), Groq (${groq.error}), OpenRouter (${openRouter.error}), Gemini (${gemini.error}), You.com (${youCom.error})`,
   };
 }
 
@@ -443,66 +431,40 @@ function cleanText(text: string): string {
     .replace(/`/g, '')
     .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
     .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
-    // Stripping bracket citations above can leave a dangling space before
-    // punctuation (e.g. "...backgrounds [3]." -> "...backgrounds ." once
-    // "[3]" is removed). This shows up mainly in You.com output, which
-    // cites with numeric brackets rather than APA (Author, Year) style.
-    // Collapse leftover "<space>." / "<space>," / "<space>;" / "<space>:"
-    // back to normal punctuation spacing.
     .replace(/[ \t]+([.,;:])/g, '$1')
-    // Can also leave doubled sentence-enders ("...UNZA .."); collapse those.
     .replace(/\.\.+/g, '.')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
-// ============================================================
-// ASSIGNMENT / REPORT / CASE STUDY (single call — unchanged in shape)
-// ============================================================
 async function generateDetailedAssignment(
   topic: string,
   typeLabel: string,
   levelInfo: { label: string; pageCount: string; depth: string }
 ): Promise<{ content: string; apiUsed: string }> {
-  const prompt = `You are a veterinary professional writing a ${levelInfo.depth} ${typeLabel} for ${levelInfo.label}.
+  const prompt = `You are a professional academic writer producing a ${levelInfo.depth} ${typeLabel} for ${levelInfo.label}.
 
 TOPIC: "${topic}"
 
-Write a DETAILED, practical ${typeLabel} with:
+Write a DETAILED ${typeLabel} with:
 1.0 Title Page
 2.0 Introduction
-3.0 Main Body (organised into clearly labelled sections/subsections appropriate to the topic, each with 3-6 well-developed paragraphs — one idea per paragraph)
-4.0 Conclusion (no new information)
-5.0 References (APA 7th edition — 10-20 plausible, relevant sources)
-6.0 Appendices (brief description only, if relevant)
+3.0 Main Body (organised into labelled sections appropriate to the topic)
+4.0 Conclusion
+5.0 References (APA 7th edition, 20-30 sources)
+6.0 Appendices (brief description)
 
 STYLE RULES:
-- Simple, formal academic English, no slang or emojis.
-- Use in-text citations in APA 7th style throughout the main body, e.g. (Smith, 2021). NEVER use numbered bracket citations like [1] or [[2]] — those get stripped out downstream and will leave broken, incomplete sentences.
-- Justify main body text conceptually (i.e., write in complete, well-organised paragraphs, not bullet fragments), except where a table or list is genuinely clearer.
-- Do not add a preamble — start directly with the Title Page.`;
+- Simple, formal academic English
+- Use APA 7th style in-text citations
+- Never use numbered bracket citations
+- Write in complete paragraphs
+- Do not add a preamble`;
 
   const { text, apiUsed, error } = await generateSection(prompt, 3000);
   return { content: text ? cleanText(text) : '', apiUsed: error ? `${apiUsed} (${error})` : apiUsed };
 }
 
-// ============================================================
-// ROUTE HANDLER
-// ============================================================
-// Request body for research papers now looks like:
-// {
-//   topic, level, type: 'research',
-//   chapterIndex: 0,          // which chapter to generate THIS call
-//   previousContext?: string  // running summary passed back by the client
-// }
-//
-// Response for research papers:
-// {
-//   chapterId, chapterTitle, content, apiUsed,
-//   isLastChapter, nextChapterIndex,
-//   contextForNextChapter   // client must send this back as previousContext
-//                           // on the NEXT call
-// }
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -515,13 +477,12 @@ export async function POST(request: NextRequest) {
     const cleanTopic = topic
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
-      .replace(/[\u200B-\u200F\uFEFF]/g, '') // strip zero-width/invisible chars
+      .replace(/[\u200B-\u200F\uFEFF]/g, '')
       .trim();
 
     const levelInfo = levelMap[level] || levelMap['degree'];
     const typeLabel = typeLabels[type] || 'Assignment';
 
-    // --- Non-research types: unchanged, single call ---
     if (type !== 'research') {
       const result = await generateDetailedAssignment(cleanTopic, typeLabel, levelInfo);
       if (!result.content) {
@@ -541,36 +502,33 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // --- Research paper: ONE chapter per request ---
     const chapters = buildChapterSpecs(cleanTopic);
     const idx = Math.max(0, Math.min(chapterIndex, chapters.length - 1));
     const chapter = chapters[idx];
 
-    const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
+    const prompt = `You are an expert academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label}.
 
 TOPIC: "${cleanTopic}"
 
-${previousContext ? `CONTEXT — content already established earlier in this SAME paper. You MUST stay fully consistent with it: same title, same research objectives/questions, same terminology. Do NOT repeat this content verbatim, and do NOT invent a different title, objectives, or focus:
+${previousContext ? `CONTEXT (content already established in earlier chapters). Stay consistent with the same title, research objectives, and questions:
 """
 ${previousContext}
 """
 
-CRITICAL — AVOID REPETITION: If this chapter has its own "X.0 Introduction" subsection, keep it to 2-4 sentences that ONLY transition from the previous chapter. Do NOT re-explain the study's background, re-define terms, or restate the problem statement — that was already covered in Chapter One and the reader has already read it. Do NOT reuse the same transition template/sentence structure you may have used in earlier chapters (e.g. do not write "Having reviewed the literature in Chapter Two and established the research design in Chapter Three" more than once, or any near-identical variant of it) — vary the phrasing and angle every single time so no two chapters open the same way.
+IMPORTANT: Do not repeat content verbatim. If this chapter has an introduction, keep it to 2-4 sentences that only transition from the previous chapter. Do not re-explain the study's background or restate the problem statement.
 ` : ''}
+
 TASK: ${chapter.instructions}
 
-STYLE RULES (must follow strictly):
-- Simple, formal academic English. No slang, emojis, or informal language.
-- One idea per paragraph. Avoid long unbroken blocks of text.
-- Use clear numbered headings and subheadings exactly as specified above.
-- Do not include any chapter other than the one requested.
-- Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.
-- CITATIONS: Use ONLY APA 7th-style in-text citations, e.g. (Smith, 2021) or Smith (2021) argued that... NEVER use numbered bracket citations like [1] or [[2]] — those get stripped out downstream and will leave broken, incomplete sentences.
-- NEVER write placeholder text like "[omitted for brevity]", "[references truncated]", or similar shortcuts — always write out full, complete content exactly as instructed, however long it needs to be.`;
+STYLE RULES:
+- Simple, formal academic English. No slang or emojis.
+- One idea per paragraph.
+- Use numbered headings exactly as specified.
+- Use APA 7th style in-text citations only, e.g. (Smith, 2021).
+- NEVER use numbered bracket citations like [1] or [[2]].
+- Never write placeholder text like "[omitted for brevity]" or "[references truncated]".
+- Write out full, complete content as instructed.`;
 
-    // The references chapter needs room for 20-35 full APA entries, so it
-    // gets a larger budget than the other chapters (which was the root
-    // cause of references getting cut with a placeholder before).
     const chapterTokenBudget = chapter.id === 'references' ? 4000 : 3000;
 
     const { text, apiUsed, error } = await generateSection(prompt, chapterTokenBudget);
@@ -585,9 +543,6 @@ STYLE RULES (must follow strictly):
     const cleaned = cleanText(text);
     const isLastChapter = idx === chapters.length - 1;
 
-    // Build what gets carried into the NEXT call. Keep it lean: full text
-    // for frontmatter/chapter1 (title + objectives live there), short
-    // excerpts thereafter so prompt size doesn't balloon by chapter 6.
     const contextForNextChapter =
       chapter.id === 'frontmatter' || chapter.id === 'chapter1'
         ? `${previousContext}\n\n[${chapter.title}]\n${cleaned}`.trim()
