@@ -45,6 +45,9 @@ interface ChapterSpec {
   instructions: string;
 }
 
+// ============================================================
+// PROPOSAL SPECS – follows the PROPOSAL PROMPT.docx exactly
+// ============================================================
 function buildProposalSpecs(topic: string): ChapterSpec[] {
   return [
     {
@@ -75,28 +78,31 @@ Then on the next line, write "1.0 INTRODUCTION".
 Then write a short paragraph explaining what the chapter covers.
 
 Required subsections with EXACT specifications and DEPTH requirements:
+
 1.1 Background of the Study: Write 6 SUBSTANTIAL paragraphs (each 6-8 sentences minimum) covering global, regional and national status quo. Mention different countries as examples with specific statistics and context. Cite with references published in the last 10 years. Each paragraph must be detailed and informative.
 
 1.2 Statement of the Problem: Write 1 SUBSTANTIAL paragraph of approximately 100 words that is convincing, uses evidence, and clearly articulates the research gap.
 
-1.3 Research Objectives:
-1.3.1 General Objective (clear, 20 to 25 words)
-1.3.2 Specific Objectives (exactly 3 specific objectives, each clearly stated)
+1.3 Research Objectives: Write a short introductory sentence (e.g., "The following objectives guide this investigation:") before listing the objectives.
+1.3.1 General Objective: Clear, 20 to 25 words.
+1.3.2 Specific Objectives: EXACTLY 3 specific objectives. Each should be specific, measurable, and actionable.
 
-1.4 Research Questions (turn the 3 objectives into clear, specific questions)
+1.4 Research Questions: Write a short introductory sentence (e.g., "To address the objectives, the study seeks to answer the following questions:") before listing the questions. EXACTLY 3 research questions that directly correspond to the 3 specific objectives.
 
-1.5 Significance of the Study
+1.5 Significance of the Study: Write 2-3 substantial paragraphs explaining the significance to different stakeholders (university, students, policymakers, society).
 
-1.6 Scope of Study: Write 1 paragraph (approximately 60 words) clearly defining boundaries.
+1.6 Scope of Study: Write 1 paragraph (approximately 60 words) clearly defining boundaries (geographical, temporal, and population scope).
 
-1.7 Operational Definitions: Define exactly 5 key terms.
+1.7 Operational Definitions: Define exactly 5 key terms with 2-3 sentences each.
 
 CRITICAL RULES:
-- Each subsection must have SUBSTANTIAL content - not brief or superficial
-- Write detailed, analytical paragraphs with proper academic depth
-- Use APA 7th style in-text citations throughout
-- Never use numbered bracket citations
-- Use plain text only, no markdown
+- You MUST write EXACTLY 3 specific objectives and EXACTLY 3 research questions.
+- Include introductory sentences for 1.3 and 1.4 as specified.
+- Each subsection must have SUBSTANTIAL content.
+- Write detailed, analytical paragraphs.
+- Use APA 7th style in-text citations throughout.
+- Never use numbered bracket citations.
+- Use plain text only, no markdown.
 
 EXACT FORMAT REQUIRED:
 CHAPTER ONE
@@ -105,7 +111,26 @@ CHAPTER ONE
 1.1 Background of the Study
 [six substantial paragraphs with citations]
 1.2 Statement of the Problem
-[one paragraph of approximately 100 words]`,
+[one paragraph of approximately 100 words]
+1.3 Research Objectives
+[Introductory sentence: "The following objectives guide this investigation:"]
+1.3.1 General Objective
+[20 to 25 words]
+1.3.2 Specific Objectives
+1. [First specific objective]
+2. [Second specific objective]
+3. [Third specific objective]
+1.4 Research Questions
+[Introductory sentence: "To address the objectives, the study seeks to answer the following questions:"]
+1. [First research question]
+2. [Second research question]
+3. [Third research question]
+1.5 Significance of the Study
+[2-3 substantial paragraphs]
+1.6 Scope of Study
+[approximately 60 words]
+1.7 Operational Definitions
+[5 key terms with definitions]`,
     },
     {
       id: 'chapter2',
@@ -133,10 +158,10 @@ Required subsections with EXACT specifications and DEPTH requirements:
 2.3 Conceptual Framework: Write a substantial explanation showing the relationship between variables, followed by a detailed editable sketch described in words.
 
 CRITICAL RULES:
-- Each subsection must have SUBSTANTIAL content - not brief or superficial
-- Write detailed, analytical paragraphs with proper academic depth
-- Use APA 7th style in-text citations
-- Use plain text only, no markdown
+- Each subsection must have SUBSTANTIAL content.
+- Write detailed, analytical paragraphs.
+- Use APA 7th style in-text citations.
+- Use plain text only, no markdown.
 
 EXACT FORMAT REQUIRED:
 CHAPTER TWO
@@ -161,28 +186,20 @@ Then write a short paragraph explaining what the chapter covers.
 
 Required subsections with EXACT specifications and DEPTH requirements:
 3.1 Research Approach: Write 1 clear paragraph (60 words)
-
 3.2 Research Design: Write 1 clear paragraph (90 words), cite Creswell, justify the reason for choosing the design
-
 3.3 Study Location: Write 1 clear paragraph (60 words)
-
 3.4 Target Population: Write 1 clear paragraph (60 words, state the actual population)
-
 3.5 Sample Size: Show using a formula how the sample was calculated, justify the reason for the sample size
-
 3.6 Data Collection Instruments and Procedures: Write 1 clear paragraph (100 words, ensure to cite)
-
 3.7 Data Analysis Plan: Write 1 clear paragraph (90 words, be clear, consistent, justify, cite)
-
 3.8 Reliability and Validity: Write 1 clear paragraph (60 words)
-
 3.9 Ethical Considerations: Write 1 clear paragraph (90 words)
 
 CRITICAL RULES:
-- Each subsection must have SUBSTANTIAL content - not brief or superficial
-- Write detailed, analytical paragraphs with proper academic depth
-- Cite Creswell for research design
-- Use plain text only, no markdown
+- Each subsection must have SUBSTANTIAL content.
+- Write detailed, analytical paragraphs.
+- Cite Creswell for research design.
+- Use plain text only, no markdown.
 
 EXACT FORMAT REQUIRED:
 CHAPTER THREE
@@ -202,41 +219,60 @@ REFERENCES
 Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full with complete bibliographic details.
 
 WORK PLAN
-Present a detailed work plan showing specific activities across months.
+Present a detailed work plan showing specific activities across months (e.g., Month 1-2: Literature Review, Month 3: Proposal Writing, etc.). Include at least 6 months.
 
 BUDGET
-Present a detailed budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha.
+Present a detailed budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha (ZMW). Include categories like stationery, data bundles, transport, assistant allowances, printing, equipment, software, and contingency.
 
-INSTRUMENTS OF DATA COLLECTION
-Write COMPLETE instruments with actual content following the exact format shown:
+APPENDICES
+Write COMPLETE instruments with actual content. Follow these exact headings and ensure each is thorough:
 
 APPENDIX A: STUDENT QUESTIONNAIRE
 
-Write a full structured questionnaire with actual questions and response options covering:
-- Demographic Information
-- Socioeconomic Status
-- Information Resource Access
-- Academic Impact
-- Coping Strategies
+Write a full structured questionnaire with at least 5 sections and 20-25 actual questions with clear response options. Include:
+Section A: Demographic Information (age, gender, year of study, faculty, residence)
+Section B: Socioeconomic Status (monthly budget, source of funding, employment status, household income)
+Section C: Information Resource Access (internet access, device ownership, library usage, frequency, barriers)
+Section D: Academic Impact (perceived impact on grades, assignment completion, research quality)
+Section E: Coping Strategies (strategies used to overcome access challenges)
+
+Each question must have response options (e.g., Likert scale, multiple choice, yes/no). Write all questions out in full.
 
 APPENDIX B: SEMI-STRUCTURED INTERVIEW GUIDE
 
-Write a full interview guide with actual open-ended questions covering:
-- Background and Demographics
-- Information Access Challenges
-- Impact of Poverty
-- Coping Mechanisms
-- Recommendations
+Write a full interview guide with an introduction and at least 15-20 actual open-ended questions organized into sections:
+- Introduction and consent statement
+- Section 1: Background and Demographics (3-4 questions)
+- Section 2: Information Access Challenges (4-5 questions)
+- Section 3: Impact of Poverty on Academic Work (3-4 questions)
+- Section 4: Coping Mechanisms and Support Systems (3-4 questions)
+- Section 5: Recommendations (2-3 questions)
+- Closing statement
 
 APPENDIX C: INFORMED CONSENT FORM
 
-Write a complete informed consent form with actual content.
+Write a complete informed consent form with all required sections:
+- Study Title
+- Purpose of the Study
+- Procedures
+- Voluntary Participation and Withdrawal
+- Confidentiality and Data Protection
+- Risks and Benefits
+- Contact Information
+- Consent Statement with Participant's Name, Signature, and Date
 
-CRITICAL: All instruments must contain ACTUAL questions and content, not descriptions. Write out all questions, response options, and consent text in full. Follow the exact heading format shown above.`,
+APPENDIX D: INTRODUCTORY LETTER
+
+Write a formal letter from the researcher to the university administration or relevant authorities requesting permission to collect data. Include: date, recipient details, subject, introduction, purpose, request for access, assurance of ethical conduct, and signature.
+
+CRITICAL: All appendices must contain ACTUAL content, not descriptions. Write out all questions, response options, consent text, and letter content in full. Be comprehensive and detailed.`,
     },
   ];
 }
 
+// ============================================================
+// RESEARCH PAPER SPECS (full dissertation structure)
+// ============================================================
 function buildResearchSpecs(topic: string): ChapterSpec[] {
   return [
     {
@@ -278,10 +314,10 @@ Required subsections:
 1.7 Operational Definitions
 
 CRITICAL RULES:
-- Each subsection must have SUBSTANTIAL content
-- Write detailed, analytical paragraphs
-- Use APA 7th style in-text citations
-- Use plain text only, no markdown
+- Each subsection must have SUBSTANTIAL content.
+- Write detailed, analytical paragraphs.
+- Use APA 7th style in-text citations.
+- Use plain text only, no markdown.
 
 EXACT FORMAT REQUIRED:
 CHAPTER ONE
@@ -308,10 +344,10 @@ Required subsections:
 2.3 Conceptual Framework
 
 CRITICAL RULES:
-- Each subsection must have SUBSTANTIAL content
-- Write detailed, analytical paragraphs
-- Use APA 7th style in-text citations
-- Use plain text only, no markdown`,
+- Each subsection must have SUBSTANTIAL content.
+- Write detailed, analytical paragraphs.
+- Use APA 7th style in-text citations.
+- Use plain text only, no markdown.`,
     },
     {
       id: 'chapter3',
@@ -337,10 +373,10 @@ Required subsections:
 3.9 Ethical Considerations
 
 CRITICAL RULES:
-- Each subsection must have SUBSTANTIAL content
-- Write detailed, analytical paragraphs
-- Cite Creswell for research design
-- Use plain text only, no markdown`,
+- Each subsection must have SUBSTANTIAL content.
+- Write detailed, analytical paragraphs.
+- Cite Creswell for research design.
+- Use plain text only, no markdown.`,
     },
     {
       id: 'chapter4',
@@ -360,9 +396,9 @@ Required subsections:
 4.3 Summary of Findings
 
 CRITICAL RULES:
-- Present realistic findings with percentages and frequencies
-- Each subsection must have SUBSTANTIAL content
-- Use plain text only, no markdown`,
+- Present realistic findings with percentages and frequencies.
+- Each subsection must have SUBSTANTIAL content.
+- Use plain text only, no markdown.`,
     },
     {
       id: 'chapter5',
@@ -383,10 +419,10 @@ Required subsections:
 5.4 Limitations of the Study
 
 CRITICAL RULES:
-- Each subsection must have SUBSTANTIAL content
-- Interpret findings from Chapter Four
-- Engage with literature from Chapter Two
-- Use plain text only, no markdown`,
+- Each subsection must have SUBSTANTIAL content.
+- Interpret findings from Chapter Four.
+- Engage with literature from Chapter Two.
+- Use plain text only, no markdown.`,
     },
     {
       id: 'chapter6',
@@ -405,9 +441,9 @@ Required subsections:
 6.2 Recommendations
 
 CRITICAL RULES:
-- DO NOT include a 6.0 Introduction subsection
-- Each subsection must have SUBSTANTIAL content
-- Use plain text only, no markdown
+- DO NOT include a 6.0 Introduction subsection.
+- Each subsection must have SUBSTANTIAL content.
+- Use plain text only, no markdown.
 
 EXACT FORMAT REQUIRED:
 CHAPTER SIX
@@ -433,45 +469,46 @@ Write COMPLETE and DETAILED appendices with actual content, not placeholders. Fo
 
 APPENDIX A: STUDENT QUESTIONNAIRE
 
-Write a full structured questionnaire with the following sections:
+Write a full structured questionnaire with at least 5 sections and 20-25 actual questions with clear response options. Include:
 Section A: Demographic Information (age, gender, year of study, faculty, residence)
 Section B: Socioeconomic Status (monthly budget, source of funding, employment status, household income)
-Section C: Information Resource Access (internet access, device ownership, library usage, frequency of access)
+Section C: Information Resource Access (internet access, device ownership, library usage, frequency, barriers)
 Section D: Academic Impact (perceived impact on grades, assignment completion, research quality)
 Section E: Coping Strategies (strategies used to overcome access challenges)
 
-Each section should have 5-8 actual questions with response options (Likert scale, multiple choice, yes/no).
+Each question must have response options (e.g., Likert scale, multiple choice, yes/no). Write all questions out in full.
 
 APPENDIX B: SEMI-STRUCTURED INTERVIEW GUIDE
 
-Write a full interview guide with:
+Write a full interview guide with an introduction and at least 15-20 actual open-ended questions organized into sections:
 - Introduction and consent statement
-- Section 1: Background and Demographics
-- Section 2: Information Access Challenges
-- Section 3: Impact of Poverty on Academic Work
-- Section 4: Coping Mechanisms and Support Systems
-- Section 5: Recommendations
+- Section 1: Background and Demographics (3-4 questions)
+- Section 2: Information Access Challenges (4-5 questions)
+- Section 3: Impact of Poverty on Academic Work (3-4 questions)
+- Section 4: Coping Mechanisms and Support Systems (3-4 questions)
+- Section 5: Recommendations (2-3 questions)
 - Closing statement
-
-Include 15-20 actual open-ended questions that would be asked during interviews.
 
 APPENDIX C: INFORMED CONSENT FORM
 
-Write a complete informed consent form with:
-- Study title
-- Purpose of the study
+Write a complete informed consent form with all required sections:
+- Study Title
+- Purpose of the Study
 - Procedures
-- Voluntary participation
-- Confidentiality
-- Risks and benefits
-- Contact information
-- Consent statement with signature lines
+- Voluntary Participation and Withdrawal
+- Confidentiality and Data Protection
+- Risks and Benefits
+- Contact Information
+- Consent Statement with Participant's Name, Signature, and Date
 
-CRITICAL: All appendices must contain ACTUAL content, not descriptions of what would be included. Write out all questions, response options, and consent text in full.`,
+CRITICAL: All appendices must contain ACTUAL content, not descriptions. Write out all questions, response options, and consent text in full. Be comprehensive and detailed.`,
     },
   ];
 }
 
+// ============================================================
+// DISPATCHER
+// ============================================================
 function buildChapterSpecs(topic: string, docType: string): ChapterSpec[] {
   if (docType === 'proposal') {
     return buildProposalSpecs(topic);
@@ -479,6 +516,9 @@ function buildChapterSpecs(topic: string, docType: string): ChapterSpec[] {
   return buildResearchSpecs(topic);
 }
 
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -497,6 +537,9 @@ async function fetchWithTimeout(
   }
 }
 
+// ============================================================
+// AI PROVIDER CALLS (Gemini, OpenRouter, Groq, You.com, Cerebras)
+// ============================================================
 async function callGemini(
   prompt: string,
   maxOutputTokens: number,
@@ -715,6 +758,9 @@ async function callCerebras(
   return { text: '', error: `Cerebras: ${errors.join(' | ')}` };
 }
 
+// ============================================================
+// SECTION GENERATOR – tries providers in order
+// ============================================================
 async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number
@@ -741,6 +787,9 @@ async function generateSection(
   };
 }
 
+// ============================================================
+// CLEANUP
+// ============================================================
 function cleanText(text: string): string {
   return text
     .replace(/\*\*/g, '')
@@ -755,6 +804,9 @@ function cleanText(text: string): string {
     .trim();
 }
 
+// ============================================================
+// MAIN POST HANDLER
+// ============================================================
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -791,23 +843,36 @@ This is a ${levelInfo.label} academic document. The content must be COMPREHENSIV
 `;
 
     let chapterSpecificInstruction = '';
+
     if (type === 'proposal') {
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER ONE SPECIFICS:
-- 1.1 Background: exactly 6 substantial paragraphs (each 6-8 sentences)
+- 1.1 Background: exactly 6 substantial paragraphs (each 6-8 sentences) with citations
 - 1.2 Statement of Problem: approximately 100 words with citations
+- 1.3 Research Objectives: include introductory sentence before listing
+- 1.3.2 Specific Objectives: EXACTLY 3 objectives. DO NOT write 4 or more.
+- 1.4 Research Questions: include introductory sentence before listing. EXACTLY 3 questions that match the 3 objectives.
 - 1.6 Scope of Study: approximately 60 words
-- 1.7 Operational Definitions: 5 terms`;
+- 1.7 Operational Definitions: 5 terms with clear definitions
+
+CRITICAL REMINDER:
+- You MUST write EXACTLY 3 specific objectives.
+- You MUST write EXACTLY 3 research questions.
+- Each objective must correspond to one research question.
+- DO NOT add extra objectives or questions.
+- For 1.3 and 1.4, include the required introductory sentences.`;
       }
+
       if (chapter.id === 'chapter2') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER TWO SPECIFICS:
 - 2.1.0 Empirical Review: exactly 100 words, NO citations
-- 2.1.1, 2.1.2, 2.1.3: Each 3-4 substantial paragraphs
+- 2.1.1, 2.1.2, 2.1.3: Each 3-4 substantial paragraphs with citations
 - 2.2 Theoretical Framework: 4-5 substantial paragraphs total
 - 2.3 Conceptual Framework: Detailed explanation with variables`;
       }
+
       if (chapter.id === 'chapter3') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER THREE SPECIFICS:
@@ -815,31 +880,36 @@ PROPOSAL CHAPTER THREE SPECIFICS:
 - 3.2 Research Design: exactly 90 words, cite Creswell
 - 3.3 Study Location: exactly 60 words
 - 3.4 Target Population: exactly 60 words
-- 3.5 Sample Size: Show formula and justification
+- 3.5 Sample Size: Show formula and detailed justification
 - 3.6 Data Collection: exactly 100 words, cite sources
 - 3.7 Data Analysis: exactly 90 words, justify, cite
 - 3.8 Reliability and Validity: exactly 60 words
 - 3.9 Ethical Considerations: exactly 90 words`;
       }
+
       if (chapter.id === 'references') {
         chapterSpecificInstruction = `
 PROPOSAL REFERENCES SPECIFICS:
 - 30 complete APA 7th references
 - 4 research methods books
-- Work Plan with activities and timelines
-- Budget table in Zambian Kwacha
-- Appendix A: Student Questionnaire with actual questions
-- Appendix B: Interview Guide with actual questions
-- Appendix C: Informed Consent Form with actual content`;
+- Work Plan with specific activities and timelines
+- Budget table in Zambian Kwacha with realistic figures
+- Appendix A: Student Questionnaire with 5 sections and 20-25 actual questions with response options
+- Appendix B: Interview Guide with 15-20 actual open-ended questions
+- Appendix C: Informed Consent Form with all required sections
+- Appendix D: Introductory Letter
+- All appendices must contain ACTUAL content, not descriptions.
+- The questionnaire, interview guide, consent form, and letter must be comprehensive and detailed.`;
       }
     } else {
+      // RESEARCH paper
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 RESEARCH CHAPTER ONE SPECIFICS:
 - 1.1 Background: 6-8 substantial paragraphs with citations
 - 1.2 Statement of Problem: 1 substantial paragraph
 - 1.5 Significance: 2-3 substantial paragraphs
-- 1.7 Operational Definitions: 5-8 terms`;
+- 1.7 Operational Definitions: 5-8 terms with definitions`;
       }
       if (chapter.id === 'chapter6') {
         chapterSpecificInstruction = `
@@ -853,12 +923,14 @@ RESEARCH CHAPTER SIX SPECIFICS:
 RESEARCH REFERENCES SPECIFICS:
 - 30 complete APA 7th references
 - 4 research methods books
-- Appendix A: Student Questionnaire with actual questions
-- Appendix B: Interview Guide with actual questions
-- Appendix C: Informed Consent Form with actual content`;
+- Appendix A: Student Questionnaire with 5 sections and 20-25 actual questions with response options
+- Appendix B: Interview Guide with 15-20 actual open-ended questions
+- Appendix C: Informed Consent Form with all required sections
+- All appendices must contain ACTUAL content, not descriptions.`;
       }
     }
 
+    // Build full prompt
     const prompt = `You are an expert academic writer producing a ${levelInfo.depth} ${typeLabel} for ${levelInfo.label}.
 
 TOPIC: "${cleanTopic}"
@@ -872,18 +944,19 @@ TASK: ${chapter.instructions}
 ${chapterSpecificInstruction}
 
 CRITICAL RULES:
-- This is a continuous academic document
-- Start with the chapter label exactly as specified
-- Write SUBSTANTIAL, DETAILED content - never brief or superficial
-- Use APA 7th style in-text citations throughout
-- Never use numbered bracket citations like [1]
-- Use plain text only. No markdown, no asterisks, no underscores
-- Avoid the use of hyphens or dashes throughout
-- Write out full content. Never use placeholders
-- The document must demonstrate ${levelInfo.depth} academic writing
+- This is a continuous academic document.
+- Start with the chapter label exactly as specified.
+- Write SUBSTANTIAL, DETAILED content - never brief or superficial.
+- Use APA 7th style in-text citations throughout.
+- Never use numbered bracket citations like [1].
+- Use plain text only. No markdown, no asterisks, no underscores.
+- Avoid the use of hyphens or dashes throughout.
+- Write out full content. Never use placeholders.
+- The document must demonstrate ${levelInfo.depth} academic writing.
 
-For appendices: Write ACTUAL questions, response options, and consent text - not descriptions.`;
+For appendices: Write ACTUAL questions, response options, and consent text - not descriptions. Be comprehensive and detailed.`;
 
+    // Token budget: references needs more room
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 3500;
 
     const { text, apiUsed, error } = await generateSection(prompt, chapterTokenBudget);
