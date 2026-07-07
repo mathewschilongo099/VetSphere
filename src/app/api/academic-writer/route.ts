@@ -40,6 +40,7 @@ interface ChapterSpec {
   id: string;
   title: string;
   chapterLabel: string;
+  chapterNumber: string;
   instructions: string;
 }
 
@@ -49,6 +50,7 @@ function buildChapterSpecs(topic: string): ChapterSpec[] {
       id: 'frontmatter',
       title: 'FRONT MATTER',
       chapterLabel: '',
+      chapterNumber: '',
       instructions: `Write ONLY the following front-matter sections, in this order, fully written out:
 
 DECLARATION
@@ -67,11 +69,16 @@ CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write heading
       id: 'chapter1',
       title: 'CHAPTER ONE: INTRODUCTION',
       chapterLabel: 'CHAPTER ONE',
+      chapterNumber: '1',
       instructions: `Write the FULL Chapter One content.
 
-CRITICAL: Start with the chapter label "CHAPTER ONE" on its own line, then the chapter title "1.0 INTRODUCTION" on the next line.
+CRITICAL FORMAT:
+Start with "CHAPTER ONE" on its own line.
+Then on the next line, write "1.0 INTRODUCTION".
+Then write the content.
 
-Then continue with these subsections in order:
+Required subsections:
+1.0 Introduction
 1.1 Background of the Study
 1.2 Statement of the Problem
 1.3 Research Objectives (with 1.3.1 General Objective and 1.3.2 Specific Objectives)
@@ -87,26 +94,28 @@ CRITICAL RULES:
 - Never use numbered bracket citations like [1]
 - Use plain text only, no markdown, no asterisks
 
-IMPORTANT FORMAT:
+EXACT FORMAT REQUIRED:
 CHAPTER ONE
 1.0 INTRODUCTION
-[content]
+[content here]
 1.1 Background of the Study
-[content]`,
+[content here]`,
     },
     {
       id: 'chapter2',
       title: 'CHAPTER TWO: LITERATURE REVIEW',
       chapterLabel: 'CHAPTER TWO',
+      chapterNumber: '2',
       instructions: `Write the FULL Chapter Two content.
 
-CRITICAL: Start with the chapter label "CHAPTER TWO" on its own line, then the chapter title "2.0 LITERATURE REVIEW" on the next line.
+CRITICAL FORMAT:
+Start with "CHAPTER TWO" on its own line.
+Then on the next line, write "2.0 LITERATURE REVIEW".
+Then write the content.
 
-Then continue with these subsections in order:
-2.1 Empirical Review
-2.1.1 Theme from Objective 1
-2.1.2 Theme from Objective 2
-2.1.3 Theme from Objective 3
+Required subsections:
+2.0 Introduction
+2.1 Empirical Review (with 2.1.1, 2.1.2, 2.1.3 as themes from the three objectives)
 2.2 Theoretical Framework
 2.3 Conceptual Framework
 
@@ -116,22 +125,27 @@ CRITICAL RULES:
 - Use APA 7th style in-text citations
 - Use plain text only, no markdown
 
-IMPORTANT FORMAT:
+EXACT FORMAT REQUIRED:
 CHAPTER TWO
 2.0 LITERATURE REVIEW
-[content]
+[content here]
 2.1 Empirical Review
-[content]`,
+[content here]`,
     },
     {
       id: 'chapter3',
       title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
       chapterLabel: 'CHAPTER THREE',
+      chapterNumber: '3',
       instructions: `Write the FULL Chapter Three content.
 
-CRITICAL: Start with the chapter label "CHAPTER THREE" on its own line, then the chapter title "3.0 RESEARCH METHODOLOGY" on the next line.
+CRITICAL FORMAT:
+Start with "CHAPTER THREE" on its own line.
+Then on the next line, write "3.0 RESEARCH METHODOLOGY".
+Then write the content.
 
-Then continue with these subsections in order:
+Required subsections:
+3.0 Introduction
 3.1 Research Approach
 3.2 Research Design
 3.3 Study Location
@@ -147,22 +161,27 @@ CRITICAL RULES:
 - Cite Creswell for research design
 - Use plain text only, no markdown
 
-IMPORTANT FORMAT:
+EXACT FORMAT REQUIRED:
 CHAPTER THREE
 3.0 RESEARCH METHODOLOGY
-[content]
+[content here]
 3.1 Research Approach
-[content]`,
+[content here]`,
     },
     {
       id: 'chapter4',
       title: 'CHAPTER FOUR: PRESENTATION OF FINDINGS',
       chapterLabel: 'CHAPTER FOUR',
+      chapterNumber: '4',
       instructions: `Write the FULL Chapter Four content.
 
-CRITICAL: Start with the chapter label "CHAPTER FOUR" on its own line, then the chapter title "4.0 PRESENTATION OF FINDINGS" on the next line.
+CRITICAL FORMAT:
+Start with "CHAPTER FOUR" on its own line.
+Then on the next line, write "4.0 PRESENTATION OF FINDINGS".
+Then write the content.
 
-Then continue with these subsections in order:
+Required subsections:
+4.0 Introduction
 4.1 Descriptive and Demographic Results
 4.2 Key Thematic or Statistical Findings
 4.3 Summary of Findings
@@ -172,22 +191,27 @@ CRITICAL RULES:
 - Present realistic findings with percentages and frequencies
 - Use plain text only, no markdown
 
-IMPORTANT FORMAT:
+EXACT FORMAT REQUIRED:
 CHAPTER FOUR
 4.0 PRESENTATION OF FINDINGS
-[content]
+[content here]
 4.1 Descriptive and Demographic Results
-[content]`,
+[content here]`,
     },
     {
       id: 'chapter5',
       title: 'CHAPTER FIVE: DISCUSSION',
       chapterLabel: 'CHAPTER FIVE',
+      chapterNumber: '5',
       instructions: `Write the FULL Chapter Five content.
 
-CRITICAL: Start with the chapter label "CHAPTER FIVE" on its own line, then the chapter title "5.0 DISCUSSION" on the next line.
+CRITICAL FORMAT:
+Start with "CHAPTER FIVE" on its own line.
+Then on the next line, write "5.0 DISCUSSION".
+Then write the content.
 
-Then continue with these subsections in order:
+Required subsections:
+5.0 Introduction
 5.1 Interpretation of Key Findings
 5.2 Comparison with Previous Studies
 5.3 Implications for Practice and Policy
@@ -197,22 +221,27 @@ CRITICAL RULES:
 - Each subsection heading should be on its own line
 - Use plain text only, no markdown
 
-IMPORTANT FORMAT:
+EXACT FORMAT REQUIRED:
 CHAPTER FIVE
 5.0 DISCUSSION
-[content]
+[content here]
 5.1 Interpretation of Key Findings
-[content]`,
+[content here]`,
     },
     {
       id: 'chapter6',
       title: 'CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS',
       chapterLabel: 'CHAPTER SIX',
+      chapterNumber: '6',
       instructions: `Write the FULL Chapter Six content.
 
-CRITICAL: Start with the chapter label "CHAPTER SIX" on its own line, then the chapter title "6.0 CONCLUSIONS AND RECOMMENDATIONS" on the next line.
+CRITICAL FORMAT:
+Start with "CHAPTER SIX" on its own line.
+Then on the next line, write "6.0 CONCLUSIONS AND RECOMMENDATIONS".
+Then write the content.
 
-Then continue with these subsections in order:
+Required subsections:
+6.0 Introduction
 6.1 Conclusions
 6.2 Recommendations
 
@@ -220,17 +249,18 @@ CRITICAL RULES:
 - Each subsection heading should be on its own line
 - Use plain text only, no markdown
 
-IMPORTANT FORMAT:
+EXACT FORMAT REQUIRED:
 CHAPTER SIX
 6.0 CONCLUSIONS AND RECOMMENDATIONS
-[content]
+[content here]
 6.1 Conclusions
-[content]`,
+[content here]`,
     },
     {
       id: 'references',
-      title: 'REFERENCES AND APPENDICES',
-      chapterLabel: 'REFERENCES AND APPENDICES',
+      title: 'REFERENCES',
+      chapterLabel: 'REFERENCES',
+      chapterNumber: '',
       instructions: `Write ONLY the following.
 
 REFERENCES
@@ -530,12 +560,17 @@ async function generateDetailedAssignment(
 TOPIC: "${topic}"
 
 Write a DETAILED ${typeLabel} with:
-1.0 Title Page
-2.0 Introduction
-3.0 Main Body
-4.0 Conclusion
-5.0 References
-6.0 Appendices
+TITLE PAGE
+DECLARATION
+DEDICATION
+ACKNOWLEDGEMENTS
+ABSTRACT
+TABLE OF CONTENTS
+1.0 INTRODUCTION
+2.0 MAIN BODY
+3.0 CONCLUSION
+REFERENCES
+APPENDICES
 
 STYLE RULES:
 - Use plain text only, no markdown
@@ -599,21 +634,22 @@ TASK: ${chapter.instructions}
 
 CRITICAL RULES FOR CONTINUITY:
 - This is a continuous academic document.
-- Start with the chapter label and title exactly as specified.
+- Start with the chapter label exactly as specified (e.g., "CHAPTER ONE").
+- Then on the next line, write the chapter title (e.g., "1.0 INTRODUCTION").
 - Do not repeat content from previous chapters.
 - Do not re-explain the study's background or restate the problem statement.
 - Use plain text only. No markdown, no asterisks, no underscores.
 - Use APA 7th style in-text citations only. Never use numbered bracket citations.
 - Write out full content. Never use placeholders.
 
-FORMAT EXAMPLE FOR CHAPTERS:
+EXACT FORMAT REQUIRED FOR EACH CHAPTER:
 CHAPTER ONE
 1.0 INTRODUCTION
 [content here]
 1.1 Background of the Study
 [content here]
 
-Make sure the chapter label (e.g., "CHAPTER ONE") and the chapter title (e.g., "1.0 INTRODUCTION") are on separate lines.`;
+Make sure the chapter label and the chapter title are on separate lines.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 4000 : 3000;
 
@@ -638,6 +674,7 @@ Make sure the chapter label (e.g., "CHAPTER ONE") and the chapter title (e.g., "
       chapterId: chapter.id,
       chapterTitle: chapter.title,
       chapterLabel: chapter.chapterLabel,
+      chapterNumber: chapter.chapterNumber,
       content: cleaned,
       apiUsed,
       isLastChapter,
