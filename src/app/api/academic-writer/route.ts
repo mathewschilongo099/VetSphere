@@ -39,6 +39,7 @@ const levelMap: Record<string, { label: string; pageCount: string; depth: string
 interface ChapterSpec {
   id: string;
   title: string;
+  chapterLabel: string;
   instructions: string;
 }
 
@@ -47,27 +48,28 @@ function buildChapterSpecs(topic: string): ChapterSpec[] {
     {
       id: 'frontmatter',
       title: 'FRONT MATTER',
+      chapterLabel: '',
       instructions: `Write ONLY the following front-matter sections, in this order, fully written out:
 
-1.0 Title Page
-2.0 Declaration
-3.0 Dedication
-4.0 Acknowledgements
-5.0 Abstract
-6.0 List of Abbreviations and Acronyms
+DECLARATION
+DEDICATION
+ACKNOWLEDGEMENTS
+ABSTRACT (with keywords)
+LIST OF ABBREVIATIONS AND ACRONYMS
 
 Do NOT write a Table of Contents section. Do not guess page numbers.
 
 The title and framing you establish here are FINAL. Every later chapter must stay consistent.
 
-CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write headings as plain numbered text like "1.0 Title Page".`,
+CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write headings in ALL CAPS as shown above.`,
     },
     {
       id: 'chapter1',
-      title: '1.0 INTRODUCTION',
+      title: 'CHAPTER ONE: INTRODUCTION',
+      chapterLabel: 'CHAPTER ONE',
       instructions: `Write the FULL Chapter One content.
 
-CRITICAL: Start DIRECTLY with "1.0 Introduction" as the first heading. This is the chapter heading itself.
+CRITICAL: Start with the chapter label "CHAPTER ONE" on its own line, then the chapter title "1.0 INTRODUCTION" on the next line.
 
 Then continue with these subsections in order:
 1.1 Background of the Study
@@ -83,20 +85,28 @@ CRITICAL RULES:
 - Write substantial paragraphs under each heading
 - Use APA 7th style in-text citations
 - Never use numbered bracket citations like [1]
-- The Research Objectives and Questions written here are FINAL
 - Use plain text only, no markdown, no asterisks
 
-IMPORTANT: This is a continuous chapter. Do not write a separate chapter title line before "1.0 Introduction". Just start with "1.0 Introduction" as the main heading.`,
+IMPORTANT FORMAT:
+CHAPTER ONE
+1.0 INTRODUCTION
+[content]
+1.1 Background of the Study
+[content]`,
     },
     {
       id: 'chapter2',
-      title: '2.0 LITERATURE REVIEW',
+      title: 'CHAPTER TWO: LITERATURE REVIEW',
+      chapterLabel: 'CHAPTER TWO',
       instructions: `Write the FULL Chapter Two content.
 
-CRITICAL: Start DIRECTLY with "2.0 Literature Review" as the first heading. This is the chapter heading itself.
+CRITICAL: Start with the chapter label "CHAPTER TWO" on its own line, then the chapter title "2.0 LITERATURE REVIEW" on the next line.
 
 Then continue with these subsections in order:
-2.1 Empirical Review (with 2.1.1, 2.1.2, 2.1.3 as themes from the three objectives)
+2.1 Empirical Review
+2.1.1 Theme from Objective 1
+2.1.2 Theme from Objective 2
+2.1.3 Theme from Objective 3
 2.2 Theoretical Framework
 2.3 Conceptual Framework
 
@@ -104,17 +114,22 @@ CRITICAL RULES:
 - Each subsection heading should be on its own line
 - Write substantial paragraphs under each heading
 - Use APA 7th style in-text citations
-- This chapter must be a critical synthesis of literature
-- Use plain text only, no markdown, no asterisks
+- Use plain text only, no markdown
 
-IMPORTANT: This is a continuous chapter. Start with "2.0 Literature Review" as the main heading.`,
+IMPORTANT FORMAT:
+CHAPTER TWO
+2.0 LITERATURE REVIEW
+[content]
+2.1 Empirical Review
+[content]`,
     },
     {
       id: 'chapter3',
-      title: '3.0 RESEARCH METHODOLOGY',
+      title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
+      chapterLabel: 'CHAPTER THREE',
       instructions: `Write the FULL Chapter Three content.
 
-CRITICAL: Start DIRECTLY with "3.0 Research Methodology" as the first heading. This is the chapter heading itself.
+CRITICAL: Start with the chapter label "CHAPTER THREE" on its own line, then the chapter title "3.0 RESEARCH METHODOLOGY" on the next line.
 
 Then continue with these subsections in order:
 3.1 Research Approach
@@ -129,18 +144,23 @@ Then continue with these subsections in order:
 
 CRITICAL RULES:
 - Each subsection heading should be on its own line
-- Write substantial paragraphs under each heading
 - Cite Creswell for research design
-- Use plain text only, no markdown, no asterisks
+- Use plain text only, no markdown
 
-IMPORTANT: This is a continuous chapter. Start with "3.0 Research Methodology" as the main heading.`,
+IMPORTANT FORMAT:
+CHAPTER THREE
+3.0 RESEARCH METHODOLOGY
+[content]
+3.1 Research Approach
+[content]`,
     },
     {
       id: 'chapter4',
-      title: '4.0 PRESENTATION OF FINDINGS',
+      title: 'CHAPTER FOUR: PRESENTATION OF FINDINGS',
+      chapterLabel: 'CHAPTER FOUR',
       instructions: `Write the FULL Chapter Four content.
 
-CRITICAL: Start DIRECTLY with "4.0 Presentation of Findings" as the first heading. This is the chapter heading itself.
+CRITICAL: Start with the chapter label "CHAPTER FOUR" on its own line, then the chapter title "4.0 PRESENTATION OF FINDINGS" on the next line.
 
 Then continue with these subsections in order:
 4.1 Descriptive and Demographic Results
@@ -150,17 +170,22 @@ Then continue with these subsections in order:
 CRITICAL RULES:
 - Each subsection heading should be on its own line
 - Present realistic findings with percentages and frequencies
-- Findings must answer the Research Questions from Chapter One
-- Use plain text only, no markdown, no asterisks
+- Use plain text only, no markdown
 
-IMPORTANT: This is a continuous chapter. Start with "4.0 Presentation of Findings" as the main heading.`,
+IMPORTANT FORMAT:
+CHAPTER FOUR
+4.0 PRESENTATION OF FINDINGS
+[content]
+4.1 Descriptive and Demographic Results
+[content]`,
     },
     {
       id: 'chapter5',
-      title: '5.0 DISCUSSION',
+      title: 'CHAPTER FIVE: DISCUSSION',
+      chapterLabel: 'CHAPTER FIVE',
       instructions: `Write the FULL Chapter Five content.
 
-CRITICAL: Start DIRECTLY with "5.0 Discussion" as the first heading. This is the chapter heading itself.
+CRITICAL: Start with the chapter label "CHAPTER FIVE" on its own line, then the chapter title "5.0 DISCUSSION" on the next line.
 
 Then continue with these subsections in order:
 5.1 Interpretation of Key Findings
@@ -170,18 +195,22 @@ Then continue with these subsections in order:
 
 CRITICAL RULES:
 - Each subsection heading should be on its own line
-- Interpret findings from Chapter Four
-- Engage with literature from Chapter Two
-- Use plain text only, no markdown, no asterisks
+- Use plain text only, no markdown
 
-IMPORTANT: This is a continuous chapter. Start with "5.0 Discussion" as the main heading.`,
+IMPORTANT FORMAT:
+CHAPTER FIVE
+5.0 DISCUSSION
+[content]
+5.1 Interpretation of Key Findings
+[content]`,
     },
     {
       id: 'chapter6',
-      title: '6.0 CONCLUSIONS AND RECOMMENDATIONS',
+      title: 'CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS',
+      chapterLabel: 'CHAPTER SIX',
       instructions: `Write the FULL Chapter Six content.
 
-CRITICAL: Start DIRECTLY with "6.0 Conclusions and Recommendations" as the first heading. This is the chapter heading itself.
+CRITICAL: Start with the chapter label "CHAPTER SIX" on its own line, then the chapter title "6.0 CONCLUSIONS AND RECOMMENDATIONS" on the next line.
 
 Then continue with these subsections in order:
 6.1 Conclusions
@@ -189,15 +218,19 @@ Then continue with these subsections in order:
 
 CRITICAL RULES:
 - Each subsection heading should be on its own line
-- Conclusions must answer the Research Objectives from Chapter One
-- Recommendations must be specific and actionable
-- Use plain text only, no markdown, no asterisks
+- Use plain text only, no markdown
 
-IMPORTANT: This is a continuous chapter. Start with "6.0 Conclusions and Recommendations" as the main heading.`,
+IMPORTANT FORMAT:
+CHAPTER SIX
+6.0 CONCLUSIONS AND RECOMMENDATIONS
+[content]
+6.1 Conclusions
+[content]`,
     },
     {
       id: 'references',
       title: 'REFERENCES AND APPENDICES',
+      chapterLabel: 'REFERENCES AND APPENDICES',
       instructions: `Write ONLY the following.
 
 REFERENCES
@@ -565,14 +598,22 @@ ${previousContext || 'This is the first chapter.'}
 TASK: ${chapter.instructions}
 
 CRITICAL RULES FOR CONTINUITY:
-- This is a continuous academic document. Do NOT write a separate standalone introduction for this chapter.
-- Start DIRECTLY with the chapter heading: "${chapter.title}"
-- Then continue with the required subsections.
+- This is a continuous academic document.
+- Start with the chapter label and title exactly as specified.
 - Do not repeat content from previous chapters.
 - Do not re-explain the study's background or restate the problem statement.
 - Use plain text only. No markdown, no asterisks, no underscores.
 - Use APA 7th style in-text citations only. Never use numbered bracket citations.
-- Write out full content. Never use placeholders.`;
+- Write out full content. Never use placeholders.
+
+FORMAT EXAMPLE FOR CHAPTERS:
+CHAPTER ONE
+1.0 INTRODUCTION
+[content here]
+1.1 Background of the Study
+[content here]
+
+Make sure the chapter label (e.g., "CHAPTER ONE") and the chapter title (e.g., "1.0 INTRODUCTION") are on separate lines.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 4000 : 3000;
 
@@ -596,6 +637,7 @@ CRITICAL RULES FOR CONTINUITY:
     return NextResponse.json({
       chapterId: chapter.id,
       chapterTitle: chapter.title,
+      chapterLabel: chapter.chapterLabel,
       content: cleaned,
       apiUsed,
       isLastChapter,
