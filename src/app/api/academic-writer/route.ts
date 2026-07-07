@@ -1,15 +1,16 @@
 // src/app/api/academic-writer/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 
-// Allow this route to run long enough for multi-chapter generation on Vercel.
-// (Requires a Pro/Team plan for >60s; on Hobby this caps at 60s — see notes below.)
-export const maxDuration = 300;
+// Each request now generates ONE chapter, so this easily fits inside
+// Vercel Hobby's 60s hard cap (maxDuration only matters on Pro/Team, but
+// keeping it here is harmless).
+export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
 // ============================================================
 // CONFIG
 // ============================================================
-const GEMINI_MODEL = 'gemini-2.5-flash'; // matches the rest of VetSphere's AI pipeline
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 const typeLabels: Record<string, string> = {
   essay: 'Assignment',
@@ -41,8 +42,6 @@ const levelMap: Record<string, { label: string; pageCount: string; depth: string
   },
 };
 
-// A chapter is generated in its own call so the model can go deep on that
-// chapter alone, instead of thinly covering 15 sections in one shot.
 interface ChapterSpec {
   id: string;
   title: string;
@@ -63,7 +62,9 @@ function buildChapterSpecs(topic: string): ChapterSpec[] {
 6.0 Abstract (300-350 words, written last-conceptually: state the problem, approach, key findings/arguments, and significance)
 7.0 List of Abbreviations and Acronyms (only abbreviations that are actually relevant to this specific topic — do not invent irrelevant ones)
 
-Do not write Chapter One or any chapter content yet — stop after the abbreviations list.`,
+Do not write Chapter One or any chapter content yet — stop after the abbreviations list.
+
+IMPORTANT: The title you invent here, and the framing of the problem in the Abstract, are FINAL. Every later chapter must stay consistent with them.`,
     },
     {
       id: 'chapter1',
@@ -78,7 +79,9 @@ Do not write Chapter One or any chapter content yet — stop after the abbreviat
 1.6 Scope of Study
 1.7 Operational Definitions (define 5-8 key terms specific to this topic)
 
-Ground every claim in real, verifiable veterinary/scientific knowledge. Use in-text citations in APA 7th style, e.g. (Smith, 2021) or Smith (2021) argued that..., referencing real, plausible authors and years appropriate to the field — never fabricate exact statistics or quotes, but reasonable attributed claims are fine.`,
+Ground every claim in real, verifiable veterinary/scientific knowledge. Use in-text citations in APA 7th style, e.g. (Smith, 2021) or Smith (2021) argued that..., referencing real, plausible authors and years appropriate to the field — never fabricate exact statistics or quotes, but reasonable attributed claims are fine.
+
+IMPORTANT: The Research Objectives, Research Questions, and Operational Definitions you write here are FINAL. Every later chapter must refer back to these exact same objectives/questions/terms — never introduce different ones.`,
     },
     {
       id: 'chapter2',
@@ -89,7 +92,7 @@ Ground every claim in real, verifiable veterinary/scientific knowledge. Use in-t
 2.2 Theoretical Framework (identify and explain one or two theories/models genuinely relevant to this topic)
 2.3 Conceptual Framework (explain the relationships between key variables/concepts; you may describe a conceptual diagram in words)
 
-This chapter should read as a genuine critical synthesis of literature, not a list of summaries — compare, contrast, and evaluate sources against each other.`,
+This chapter should read as a genuine critical synthesis of literature, not a list of summaries — compare, contrast, and evaluate sources against each other. Frame the themes so they clearly support the research objectives already established in Chapter One.`,
     },
     {
       id: 'chapter3',
@@ -104,7 +107,9 @@ This chapter should read as a genuine critical synthesis of literature, not a li
 3.6 Data Collection Instruments and Procedures
 3.7 Data Analysis Plan
 3.8 Reliability and Validity
-3.9 Ethical Considerations (informed consent, confidentiality, ethical approval)`,
+3.9 Ethical Considerations (informed consent, confidentiality, ethical approval)
+
+The methodology must be designed specifically to answer the Research Questions established in Chapter One — do not introduce a different research focus.`,
     },
     {
       id: 'chapter4',
@@ -115,7 +120,9 @@ This chapter should read as a genuine critical synthesis of literature, not a li
 4.2 Key Thematic or Statistical Findings (2-3 relevant subsections depending on the topic)
 4.3 Summary of Findings
 
-Present findings as illustrative but realistic and internally consistent (percentages, frequencies, or thematic patterns that add up sensibly). Where useful, describe a table in words (e.g. "Table 4.1 shows that...") rather than fabricating a rigid ASCII table. Each subsection needs 3-5 paragraphs of substantive interpretation, not just numbers.`,
+Present findings as illustrative but realistic and internally consistent (percentages, frequencies, or thematic patterns that add up sensibly). Where useful, describe a table in words (e.g. "Table 4.1 shows that...") rather than fabricating a rigid ASCII table. Each subsection needs 3-5 paragraphs of substantive interpretation, not just numbers.
+
+Findings must directly answer the Research Questions/Objectives from Chapter One and be collected using the exact methodology described in Chapter Three — do not contradict either.`,
     },
     {
       id: 'chapter5',
@@ -127,7 +134,7 @@ Present findings as illustrative but realistic and internally consistent (percen
 5.3 Implications for Practice/Policy
 5.4 Limitations of the Study
 
-This chapter must genuinely argue and interpret, not just restate Chapter Four.`,
+This chapter must genuinely argue and interpret the specific findings already presented in Chapter Four, and engage with the specific literature themes from Chapter Two — not restate Chapter Four in different words, and not introduce new findings or literature not seen before.`,
     },
     {
       id: 'chapter6',
@@ -142,7 +149,9 @@ REFERENCES
 Provide 20-35 APA 7th edition references consistent with a study on "${topic}". They should look like real, plausible veterinary/scientific literature (realistic author names, plausible journal titles, years spread 2014-2025). Alphabetised.
 
 APPENDICES
-Briefly describe what would be included (e.g. data collection tool, consent form) in 1-2 short paragraphs — no need to write them out in full.`,
+Briefly describe what would be included (e.g. data collection tool, consent form) in 1-2 short paragraphs — no need to write them out in full.
+
+Conclusions must map 1:1 onto the exact Research Objectives from Chapter One — do not introduce new objectives here.`,
     },
   ];
 }
@@ -182,13 +191,10 @@ async function callGemini(
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.45,
-              maxOutputTokens,
-            },
+            generationConfig: { temperature: 0.45, maxOutputTokens },
           }),
         },
-        45000
+        18000
       );
       const data = await response.json();
 
@@ -196,10 +202,8 @@ async function callGemini(
         const status = data.error.code || response.status;
         const message = data.error.message || JSON.stringify(data.error);
         console.error(`Gemini error (status ${status}):`, message);
-
-        // 429 = rate limit / quota exceeded. Back off and retry once.
         if ((status === 429 || status === 503) && attempt < retries) {
-          await sleep(1500);
+          await sleep(800);
           continue;
         }
         return { text: '', error: `Gemini ${status}: ${message}` };
@@ -215,7 +219,7 @@ async function callGemini(
       const isAbort = e?.name === 'AbortError';
       console.error('Gemini fetch error:', e);
       if (attempt < retries && !isAbort) {
-        await sleep(1500);
+        await sleep(800);
         continue;
       }
       return { text: '', error: isAbort ? 'Gemini timed out' : `Gemini fetch failed: ${e.message || e}` };
@@ -249,7 +253,7 @@ async function callOpenRouter(
           max_tokens: maxTokens,
         }),
       },
-      45000
+      18000
     );
     const data = await response.json();
     if (data.error || !data.choices) {
@@ -289,7 +293,7 @@ async function callGroq(
           max_tokens: maxTokens,
         }),
       },
-      45000
+      18000
     );
     const data = await response.json();
     if (data.error || !data.choices) {
@@ -305,19 +309,11 @@ async function callGroq(
   }
 }
 
-// Not every free Cerebras account has access to every model — llama-3.3-70b in
-// particular can require separate approval. llama3.1-8b is the one reliably
-// available on every free account, so it's the last resort in this list.
 const CEREBRAS_MODEL_CANDIDATES = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
 
-// You.com's Research API actually does live web research to ground its answer,
-// rather than pure generation — so it's slower (real searches happen) but
-// doesn't depend on the same LLM-inference rate limits as the other
-// providers. This mirrors the exact working call already used in
-// autopublish/route.ts.
 async function callYouCom(
   prompt: string,
-  effort: 'lite' | 'standard' = 'standard'
+  effort: 'lite' | 'standard' = 'lite'
 ): Promise<{ text: string; error: string }> {
   const youKey = process.env.YOU_API_KEY;
   if (!youKey) return { text: '', error: 'YOU_API_KEY is not set' };
@@ -327,16 +323,10 @@ async function callYouCom(
       'https://api.you.com/v1/research',
       {
         method: 'POST',
-        headers: {
-          'X-API-Key': youKey,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          input: prompt,
-          research_effort: effort,
-        }),
+        headers: { 'X-API-Key': youKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input: prompt, research_effort: effort }),
       },
-      90000 // Research API runs real searches, so give it more time than pure-inference providers.
+      15000 // kept short deliberately — see notes below on the 60s budget
     );
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
@@ -381,18 +371,14 @@ async function callCerebras(
             max_completion_tokens: maxTokens,
           }),
         },
-        45000
+        15000
       );
       const data = await response.json();
       if (!response.ok || data.error || !data.choices) {
-        // Cerebras returns errors as a flat object: {"message": "...", "type": "...", "code": "..."}
-        // — not nested under `data.error` like OpenAI/Gemini/Groq — so check both shapes.
         const message =
           data.error?.message || data.message || `HTTP ${response.status}: ${JSON.stringify(data)}`;
         console.error(`Cerebras error (model ${model}):`, message);
         errors.push(`${model}: ${message}`);
-        // "does not exist or you do not have access" means try the next model.
-        // Anything else (rate limit, server error) also just moves on to the next candidate.
         continue;
       }
       return { text: data.choices[0]?.message?.content || '', error: '' };
@@ -406,17 +392,17 @@ async function callCerebras(
   return { text: '', error: `Cerebras: ${errors.join(' | ')}` };
 }
 
+// NOTE ON TIMEOUTS: all per-provider timeouts above were shortened from 45s/90s
+// down to 15-18s. On Hobby you only have 60s TOTAL for the whole request, so
+// the old 45s-per-provider timeouts meant even ONE fallback (e.g. Cerebras
+// failing over then Groq succeeding) could alone exceed your entire budget.
+// Short timeouts + fast fallthrough is the right tradeoff here: it's better
+// to try 3 providers at 15s each than get killed mid-way through 1 provider
+// at 45s.
 async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number
 ): Promise<{ text: string; apiUsed: string; error: string }> {
-  // Cerebras first: 1M tokens/day free, by far the most generous quota.
-  // Groq next: solid but shares a per-key daily token budget with other
-  // VetSphere features. OpenRouter next (shared/flaky free routing).
-  // You.com next: proven working elsewhere in VetSphere (autopublish), but
-  // it's a research/search API under the hood so it's slower and burns
-  // credits rather than being purely rate-limited.
-  // Gemini last: only ~20 requests/day and shared with autopublish.
   const cerebras = await callCerebras(sectionPrompt, maxOutputTokens);
   if (cerebras.text) return { text: cerebras.text, apiUsed: 'Cerebras', error: '' };
 
@@ -426,16 +412,19 @@ async function generateSection(
   const openRouter = await callOpenRouter(sectionPrompt, maxOutputTokens);
   if (openRouter.text) return { text: openRouter.text, apiUsed: 'OpenRouter', error: '' };
 
-  const youCom = await callYouCom(sectionPrompt);
-  if (youCom.text) return { text: youCom.text, apiUsed: 'You.com', error: '' };
-
   const gemini = await callGemini(sectionPrompt, maxOutputTokens);
   if (gemini.text) return { text: gemini.text, apiUsed: 'Gemini', error: '' };
+
+  // You.com moved to last: it's a research/search API, inherently the
+  // slowest of the five, and least likely to return before the 60s wall
+  // if it's reached this late in the chain.
+  const youCom = await callYouCom(sectionPrompt);
+  if (youCom.text) return { text: youCom.text, apiUsed: 'You.com', error: '' };
 
   return {
     text: '',
     apiUsed: 'none',
-    error: `Cerebras failed (${cerebras.error}); Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); You.com failed (${youCom.error}); Gemini failed (${gemini.error})`,
+    error: `Cerebras failed (${cerebras.error}); Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); Gemini failed (${gemini.error}); You.com failed (${youCom.error})`,
   };
 }
 
@@ -445,65 +434,14 @@ function cleanText(text: string): string {
     .replace(/\*/g, '')
     .replace(/#{1,6}\s/g, '')
     .replace(/`/g, '')
-    .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '') // strip You.com-style citation markers like [[1]]
-    .replace(/\[\d+(?:,\s*\d+)*\]/g, '') // strip [1], [2,3] style markers
+    .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
+    .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
 
 // ============================================================
-// RESEARCH PAPER: generated chapter-by-chapter for real depth
-// ============================================================
-async function generateFullResearchPaper(
-  topic: string,
-  levelInfo: { label: string; pageCount: string; depth: string }
-): Promise<{ content: string; apiUsedList: string[] }> {
-  const chapters = buildChapterSpecs(topic);
-  const generatedParts: string[] = [];
-  const apiUsedList: string[] = [];
-
-  // Sequential, not parallel: free-tier providers (Groq TPM, Gemini RPD,
-  // OpenRouter RPM) are shared per-key limits, so firing 6-7 chapters at once
-  // instantly exhausts them (this is what caused every chapter to fail at
-  // once). ~3000 tokens is a realistic, well-developed chapter length and
-  // keeps each single request safely under Groq's per-minute token budget.
-  // A short gap between chapters keeps us under per-minute request limits too.
-  const TOKENS_PER_CHAPTER = 3000;
-
-  for (let i = 0; i < chapters.length; i++) {
-    const chapter = chapters[i];
-    if (i > 0) await sleep(4000);
-
-    const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
-
-TOPIC: "${topic}"
-
-TASK: ${chapter.instructions}
-
-STYLE RULES (must follow strictly):
-- Simple, formal academic English. No slang, emojis, or informal language.
-- One idea per paragraph. Avoid long unbroken blocks of text.
-- Use clear numbered headings and subheadings exactly as specified above.
-- Do not include any chapter other than the one requested.
-- Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.`;
-
-    const { text, apiUsed, error } = await generateSection(prompt, TOKENS_PER_CHAPTER);
-    apiUsedList.push(`${chapter.id}: ${apiUsed}${error ? ` (${error})` : ''}`);
-
-    if (text) {
-      generatedParts.push(cleanText(text));
-    } else {
-      generatedParts.push(
-        `${chapter.title}\n\n[This section could not be generated. Reason: ${error || 'unknown error'}]`
-      );
-    }
-  }
-
-  return { content: generatedParts.join('\n\n'), apiUsedList };
-}
-
-// ============================================================
-// ASSIGNMENT / REPORT / CASE STUDY (shorter — single call is fine)
+// ASSIGNMENT / REPORT / CASE STUDY (single call — unchanged in shape)
 // ============================================================
 async function generateDetailedAssignment(
   topic: string,
@@ -528,17 +466,31 @@ STYLE RULES:
 - Justify main body text conceptually (i.e., write in complete, well-organised paragraphs, not bullet fragments), except where a table or list is genuinely clearer.
 - Do not add a preamble — start directly with the Title Page.`;
 
-  const { text, apiUsed, error } = await generateSection(prompt, 4000);
+  const { text, apiUsed, error } = await generateSection(prompt, 3000);
   return { content: text ? cleanText(text) : '', apiUsed: error ? `${apiUsed} (${error})` : apiUsed };
 }
 
 // ============================================================
 // ROUTE HANDLER
 // ============================================================
+// Request body for research papers now looks like:
+// {
+//   topic, level, type: 'research',
+//   chapterIndex: 0,          // which chapter to generate THIS call
+//   previousContext?: string  // running summary passed back by the client
+// }
+//
+// Response for research papers:
+// {
+//   chapterId, chapterTitle, content, apiUsed,
+//   isLastChapter, nextChapterIndex,
+//   contextForNextChapter   // client must send this back as previousContext
+//                           // on the NEXT call
+// }
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { topic, level = 'degree', type = 'essay' } = body;
+    const { topic, level = 'degree', type = 'essay', chapterIndex = 0, previousContext = '' } = body;
 
     if (!topic) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
@@ -547,40 +499,87 @@ export async function POST(request: NextRequest) {
     const cleanTopic = topic
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
-      .replace(/[‎]/g, '')
+      .replace(/[\u200B-\u200F\uFEFF]/g, '') // strip zero-width/invisible chars
       .trim();
 
     const levelInfo = levelMap[level] || levelMap['degree'];
     const typeLabel = typeLabels[type] || 'Assignment';
 
-    let aiResponse = '';
-    let apiUsed = '';
-
-    if (type === 'research') {
-      console.log('🔬 Generating full research paper chapter-by-chapter...');
-      const { content, apiUsedList } = await generateFullResearchPaper(cleanTopic, levelInfo);
-      aiResponse = content;
-      apiUsed = apiUsedList.join(', ');
-    } else {
+    // --- Non-research types: unchanged, single call ---
+    if (type !== 'research') {
       const result = await generateDetailedAssignment(cleanTopic, typeLabel, levelInfo);
-      aiResponse = result.content;
-      apiUsed = result.apiUsed || 'none';
+      if (!result.content) {
+        return NextResponse.json(
+          { error: 'Failed to generate content from any configured AI provider.' },
+          { status: 502 }
+        );
+      }
+      return NextResponse.json({
+        content: result.content,
+        topic: cleanTopic,
+        level,
+        type,
+        apiUsed: result.apiUsed,
+        wordCount: result.content.split(/\s+/).length,
+        generatedAt: new Date().toISOString(),
+      });
     }
 
-    if (!aiResponse) {
+    // --- Research paper: ONE chapter per request ---
+    const chapters = buildChapterSpecs(cleanTopic);
+    const idx = Math.max(0, Math.min(chapterIndex, chapters.length - 1));
+    const chapter = chapters[idx];
+
+    const prompt = `You are an expert veterinary academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label} (target overall length ${levelInfo.pageCount}).
+
+TOPIC: "${cleanTopic}"
+
+${previousContext ? `CONTEXT — content already established earlier in this SAME paper. You MUST stay fully consistent with it: same title, same research objectives/questions, same terminology. Do NOT repeat this content verbatim, and do NOT invent a different title, objectives, or focus:
+"""
+${previousContext}
+"""
+` : ''}
+TASK: ${chapter.instructions}
+
+STYLE RULES (must follow strictly):
+- Simple, formal academic English. No slang, emojis, or informal language.
+- One idea per paragraph. Avoid long unbroken blocks of text.
+- Use clear numbered headings and subheadings exactly as specified above.
+- Do not include any chapter other than the one requested.
+- Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.`;
+
+    const { text, apiUsed, error } = await generateSection(prompt, 3000);
+
+    if (!text) {
       return NextResponse.json(
-        { error: 'Failed to generate content from any configured AI provider. Check GEMINI_API_KEY / OPENROUTER_API_KEY.' },
+        { error: `Failed to generate "${chapter.title}". ${error}` },
         { status: 502 }
       );
     }
 
+    const cleaned = cleanText(text);
+    const isLastChapter = idx === chapters.length - 1;
+
+    // Build what gets carried into the NEXT call. Keep it lean: full text
+    // for frontmatter/chapter1 (title + objectives live there), short
+    // excerpts thereafter so prompt size doesn't balloon by chapter 6.
+    const contextForNextChapter =
+      chapter.id === 'frontmatter' || chapter.id === 'chapter1'
+        ? `${previousContext}\n\n[${chapter.title}]\n${cleaned}`.trim()
+        : `${previousContext}\n\n[${chapter.title} — excerpt]\n${cleaned.slice(0, 500)}...`.trim();
+
     return NextResponse.json({
-      content: aiResponse,
+      chapterId: chapter.id,
+      chapterTitle: chapter.title,
+      content: cleaned,
+      apiUsed,
+      isLastChapter,
+      nextChapterIndex: idx + 1,
+      contextForNextChapter,
+      totalChapters: chapters.length,
       topic: cleanTopic,
       level,
       type,
-      apiUsed,
-      wordCount: aiResponse.split(/\s+/).length,
       generatedAt: new Date().toISOString(),
     });
   } catch (error: any) {
