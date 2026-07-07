@@ -35,7 +35,7 @@ const levelDescriptions: Record<AcademicLevel, string> = {
   phd: 'Original contribution with extensive literature review'
 };
 
-type Block = { type: 'h1' | 'h2' | 'h3' | 'para' | 'blank'; text: string };
+type Block = { type: 'chapter' | 'h1' | 'h2' | 'h3' | 'para' | 'blank'; text: string };
 
 function parseBlocks(content: string): Block[] {
   const lines = content.split('\n');
@@ -48,7 +48,25 @@ function parseBlocks(content: string): Block[] {
       continue;
     }
 
-    // Main chapter headings: "1.0 Introduction", "2.0 Literature Review", etc.
+    // CHAPTER ONE, CHAPTER TWO, etc. (main chapter labels)
+    if (/^CHAPTER\s+(ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN)\b/i.test(trimmed)) {
+      blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
+      continue;
+    }
+
+    // REFERENCES (as a main heading)
+    if (/^REFERENCES\s*$/i.test(trimmed)) {
+      blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
+      continue;
+    }
+
+    // APPENDICES (as a main heading)
+    if (/^APPENDICES\s*$/i.test(trimmed)) {
+      blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
+      continue;
+    }
+
+    // Main numbered headings: "1.0 INTRODUCTION", "2.0 LITERATURE REVIEW", etc.
     if (/^\d+\.0\s+[A-Z]/.test(trimmed)) {
       blocks.push({ type: 'h1', text: trimmed });
       continue;
@@ -66,12 +84,6 @@ function parseBlocks(content: string): Block[] {
       continue;
     }
 
-    // REFERENCES or APPENDICES
-    if (/^(REFERENCES|APPENDICES|APPENDIX)\s*$/i.test(trimmed)) {
-      blocks.push({ type: 'h1', text: trimmed.toUpperCase() });
-      continue;
-    }
-
     // Regular paragraph text
     blocks.push({ type: 'para', text: trimmed });
   }
@@ -86,8 +98,12 @@ function stripFakeToc(blocks: Block[]): Block[] {
 }
 
 function splitFrontAndBody(blocks: Block[]): { front: Block[]; body: Block[] } {
-  const idx = blocks.findIndex((b) => b.type === 'h1' && /^1\.0\s+Introduction\b/i.test(b.text));
-  if (idx === -1) return { front: blocks, body: [] };
+  const idx = blocks.findIndex((b) => b.type === 'chapter' && /^CHAPTER ONE/i.test(b.text));
+  if (idx === -1) {
+    const h1Idx = blocks.findIndex((b) => b.type === 'h1' && /^1\.0\s+INTRODUCTION\b/i.test(b.text));
+    if (h1Idx === -1) return { front: blocks, body: [] };
+    return { front: blocks.slice(0, h1Idx), body: blocks.slice(h1Idx) };
+  }
   return { front: blocks.slice(0, idx), body: blocks.slice(idx) };
 }
 
@@ -119,7 +135,12 @@ function drawBlocks(
     const gapAfter = 6;
     let isHeading = false;
 
-    if (block.type === 'h1') {
+    if (block.type === 'chapter') {
+      fontStyle = 'bold';
+      size = 16;
+      gapBefore = 20;
+      isHeading = true;
+    } else if (block.type === 'h1') {
       fontStyle = 'bold';
       size = 14;
       gapBefore = 16;
@@ -252,7 +273,7 @@ async function generateAcademicPdf(
 
   // Front matter
   doc.addPage();
-  const declIdx = front.findIndex((b) => b.type === 'h1' && /^2\.0\s+Declaration/i.test(b.text));
+  const declIdx = front.findIndex((b) => b.type === 'chapter' && /^DECLARATION/i.test(b.text));
   const frontMatterBlocks = declIdx === -1 ? front : front.slice(declIdx);
   drawBlocks(doc, frontMatterBlocks, PAGE_MARGIN, false);
   const frontMatterPageCount = doc.getNumberOfPages();
@@ -484,29 +505,38 @@ export default function AcademicWriterForm() {
         continue;
       }
 
-      if (block.type === 'h1') {
+      if (block.type === 'chapter') {
         elements.push(
-          <h2 key={i} className="text-2xl font-bold mt-8 mb-4 text-gray-900 border-b border-gray-200 pb-2">
+          <h2 key={i} className="text-3xl font-bold mt-10 mb-4 text-gray-900 border-b-2 border-gray-300 pb-2 text-center tracking-wide">
             {block.text}
           </h2>
         );
         continue;
       }
 
-      if (block.type === 'h2') {
+      if (block.type === 'h1') {
         elements.push(
-          <h3 key={i} className="text-xl font-bold mt-6 mb-3 text-gray-800">
+          <h3 key={i} className="text-2xl font-bold mt-8 mb-3 text-gray-800">
             {block.text}
           </h3>
         );
         continue;
       }
 
-      if (block.type === 'h3') {
+      if (block.type === 'h2') {
         elements.push(
-          <h4 key={i} className="text-lg font-bold mt-4 mb-2 text-gray-700">
+          <h4 key={i} className="text-xl font-bold mt-6 mb-2 text-gray-700">
             {block.text}
           </h4>
+        );
+        continue;
+      }
+
+      if (block.type === 'h3') {
+        elements.push(
+          <h5 key={i} className="text-lg font-bold mt-4 mb-2 text-gray-600">
+            {block.text}
+          </h5>
         );
         continue;
       }
@@ -535,7 +565,7 @@ export default function AcademicWriterForm() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             required
-            placeholder="e.g., Poverty and Information Resource Access Among University Students: A Case Study of the University of Zambia"
+            placeholder="e.g., Burden and Predictors of HIV TB Coinfection at Kalulushi General Hospital: A Cross-Sectional Study"
             rows={4}
             className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
             style={{ color: '#1a1a1a', backgroundColor: '#ffffff' }}
