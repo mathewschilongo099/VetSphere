@@ -35,29 +35,58 @@ const levelDescriptions: Record<AcademicLevel, string> = {
   phd: 'Original contribution with extensive literature review'
 };
 
-type Block = { type: 'h2' | 'h3' | 'bare' | 'para' | 'blank'; text: string };
+type Block = { type: 'h1' | 'h2' | 'h3' | 'para' | 'blank'; text: string };
 
 function parseBlocks(content: string): Block[] {
-  return content.split('\n').map((raw) => {
+  const lines = content.split('\n');
+  const blocks: Block[] = [];
+
+  for (const raw of lines) {
     const trimmed = raw.trim();
-    if (!trimmed) return { type: 'blank', text: '' } as Block;
-    if (/^\d+\.0\s+/.test(trimmed)) return { type: 'h2', text: trimmed } as Block;
-    if (/^\d+\.\d+(\.\d+)?\s+/.test(trimmed)) return { type: 'h3', text: trimmed } as Block;
-    if (/^(REFERENCES|APPENDICES)$/i.test(trimmed)) {
-      return { type: 'bare', text: trimmed.toUpperCase() } as Block;
+    if (!trimmed) {
+      blocks.push({ type: 'blank', text: '' });
+      continue;
     }
-    return { type: 'para', text: trimmed } as Block;
-  });
+
+    // Main chapter headings: "1.0 Introduction", "2.0 Literature Review", etc.
+    if (/^\d+\.0\s+[A-Z]/.test(trimmed)) {
+      blocks.push({ type: 'h1', text: trimmed });
+      continue;
+    }
+
+    // Subsection headings: "1.1 Background", "2.1 Empirical Review", etc.
+    if (/^\d+\.\d+(\.\d+)?\s+[A-Z]/.test(trimmed)) {
+      blocks.push({ type: 'h2', text: trimmed });
+      continue;
+    }
+
+    // Sub-subsections: "2.1.1 Theme from Objective 1"
+    if (/^\d+\.\d+\.\d+\s+[A-Z]/.test(trimmed)) {
+      blocks.push({ type: 'h3', text: trimmed });
+      continue;
+    }
+
+    // REFERENCES or APPENDICES
+    if (/^(REFERENCES|APPENDICES|APPENDIX)\s*$/i.test(trimmed)) {
+      blocks.push({ type: 'h1', text: trimmed.toUpperCase() });
+      continue;
+    }
+
+    // Regular paragraph text
+    blocks.push({ type: 'para', text: trimmed });
+  }
+
+  return blocks;
 }
 
 function stripFakeToc(blocks: Block[]): Block[] {
   return blocks.filter(
-    (b) => !/\.{4,}/.test(b.text) && !/^5\.0\s+Table of Contents/i.test(b.text.trim())
+    (b) => !/\.{4,}/.test(b.text) && !/Table of Contents/i.test(b.text.trim())
   );
 }
 
 function splitFrontAndBody(blocks: Block[]): { front: Block[]; body: Block[] } {
-  const idx = blocks.findIndex((b) => b.type === 'h2' && /^1\.0\s+Introduction\b/i.test(b.text));
+  const idx = blocks.findIndex((b) => b.type === 'h1' && /^1\.0\s+Introduction\b/i.test(b.text));
   if (idx === -1) return { front: blocks, body: [] };
   return { front: blocks.slice(0, idx), body: blocks.slice(idx) };
 }
@@ -90,20 +119,20 @@ function drawBlocks(
     const gapAfter = 6;
     let isHeading = false;
 
-    if (block.type === 'h2') {
+    if (block.type === 'h1') {
+      fontStyle = 'bold';
+      size = 14;
+      gapBefore = 16;
+      isHeading = true;
+    } else if (block.type === 'h2') {
       fontStyle = 'bold';
       size = 13;
-      gapBefore = 14;
+      gapBefore = 12;
       isHeading = true;
     } else if (block.type === 'h3') {
       fontStyle = 'bold';
       size = 12;
       gapBefore = 10;
-      isHeading = true;
-    } else if (block.type === 'bare') {
-      fontStyle = 'bold';
-      size = 13;
-      gapBefore = 14;
       isHeading = true;
     }
 
@@ -202,6 +231,7 @@ async function generateAcademicPdf(
   const doc = new JsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const pageWidth = doc.internal.pageSize.getWidth();
 
+  // Title Page
   doc.setFont('times', 'bold');
   doc.setFontSize(18);
   const titleLines = doc.splitTextToSize(topic.toUpperCase(), pageWidth - PAGE_MARGIN * 2) as string[];
@@ -220,16 +250,19 @@ async function generateAcademicPdf(
     }
   );
 
+  // Front matter
   doc.addPage();
-  const declIdx = front.findIndex((b) => b.type === 'h2' && /^2\.0\s+Declaration/i.test(b.text));
+  const declIdx = front.findIndex((b) => b.type === 'h1' && /^2\.0\s+Declaration/i.test(b.text));
   const frontMatterBlocks = declIdx === -1 ? front : front.slice(declIdx);
   drawBlocks(doc, frontMatterBlocks, PAGE_MARGIN, false);
   const frontMatterPageCount = doc.getNumberOfPages();
 
+  // Measure body headings for TOC
   const { default: ScratchJsPDF } = await import('jspdf');
   const scratchDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const { headings: bodyHeadings } = drawBlocks(scratchDoc, body, PAGE_MARGIN, true);
 
+  // Measure TOC
   const scratchTocDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   scratchTocDoc.setFont('times', 'bold');
   scratchTocDoc.setFontSize(14);
@@ -243,6 +276,7 @@ async function generateAcademicPdf(
   );
   const tocPageCount = scratchTocDoc.getNumberOfPages();
 
+  // Real TOC
   doc.addPage();
   doc.setFont('times', 'bold');
   doc.setFontSize(14);
@@ -253,9 +287,11 @@ async function generateAcademicPdf(
   }));
   renderToc(doc, realEntries, PAGE_MARGIN + 30);
 
+  // Real body
   doc.addPage();
   drawBlocks(doc, body, PAGE_MARGIN, false);
 
+  // Page numbers
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -280,9 +316,7 @@ export default function AcademicWriterForm() {
   const [wordCount, setWordCount] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [pdfGenerating, setPdfGenerating] = useState(false);
-  const [chapterProgress, setChapterProgress] = useState<{ current: number; total: number } | null>(
-    null
-  );
+  const [chapterProgress, setChapterProgress] = useState<{ current: number; total: number } | null>(null);
   const [resumeState, setResumeState] = useState<{
     chapterIndex: number;
     previousContext: string;
@@ -329,7 +363,7 @@ export default function AcademicWriterForm() {
         });
         throw new Error(
           data.error ||
-            `Failed while generating chapter ${chapterIndex + 1}. Your earlier chapters are still shown below. Click Retry to continue.`
+            `Failed while generating chapter ${chapterIndex + 1}. Your earlier chapters are still shown below.`
         );
       }
 
@@ -359,12 +393,6 @@ export default function AcademicWriterForm() {
         await runResearchLoop(0, '', '', 8);
         setLoadingMessage('Done!');
       } else {
-        setLoadingMessage('Connecting to AI provider...');
-        setTimeout(() => setLoadingMessage('Analyzing your topic...'), 2000);
-        setTimeout(() => setLoadingMessage('Generating comprehensive content...'), 4000);
-        setTimeout(() => setLoadingMessage('Adding citations and references...'), 6000);
-        setTimeout(() => setLoadingMessage('Finalizing your academic paper...'), 8000);
-
         const response = await fetch('/api/academic-writer', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -445,65 +473,53 @@ export default function AcademicWriterForm() {
   const renderContent = () => {
     if (!result) return null;
 
-    const lines = result.split('\n');
+    const blocks = parseBlocks(result);
     const elements: JSX.Element[] = [];
 
-    lines.forEach((line, index) => {
-      if (!line.trim()) {
-        elements.push(<br key={`br-${index}`} />);
-        return;
+    for (let i = 0; i < blocks.length; i++) {
+      const block = blocks[i];
+
+      if (block.type === 'blank') {
+        elements.push(<div key={`blank-${i}`} className="h-3" />);
+        continue;
       }
 
-      if (line.match(/^\d+\.0\s/)) {
+      if (block.type === 'h1') {
         elements.push(
-          <h2 key={index} className="text-xl font-bold mt-6 mb-3" style={{ color: '#1a1a1a' }}>
-            {line}
+          <h2 key={i} className="text-2xl font-bold mt-8 mb-4 text-gray-900 border-b border-gray-200 pb-2">
+            {block.text}
           </h2>
         );
-        return;
+        continue;
       }
 
-      if (line.match(/^\d+\.\d+\s/)) {
+      if (block.type === 'h2') {
         elements.push(
-          <h3 key={index} className="text-lg font-bold mt-4 mb-2" style={{ color: '#2d2d2d' }}>
-            {line}
+          <h3 key={i} className="text-xl font-bold mt-6 mb-3 text-gray-800">
+            {block.text}
           </h3>
         );
-        return;
+        continue;
       }
 
-      if (line.match(/^\d+\.\s/)) {
+      if (block.type === 'h3') {
         elements.push(
-          <p
-            key={index}
-            className="mb-1 leading-relaxed text-justify"
-            style={{ paddingLeft: '20pt', textIndent: '-20pt', color: '#1a1a1a' }}
-          >
-            {line}
+          <h4 key={i} className="text-lg font-bold mt-4 mb-2 text-gray-700">
+            {block.text}
+          </h4>
+        );
+        continue;
+      }
+
+      if (block.type === 'para') {
+        elements.push(
+          <p key={i} className="mb-3 leading-relaxed text-justify text-gray-800">
+            {block.text}
           </p>
         );
-        return;
+        continue;
       }
-
-      if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
-        elements.push(
-          <p
-            key={index}
-            className="mb-1 leading-relaxed text-justify"
-            style={{ paddingLeft: '20pt', color: '#1a1a1a' }}
-          >
-            {line}
-          </p>
-        );
-        return;
-      }
-
-      elements.push(
-        <p key={index} className="mb-2 leading-relaxed text-justify" style={{ color: '#1a1a1a' }}>
-          {line}
-        </p>
-      );
-    });
+    }
 
     return elements;
   };
