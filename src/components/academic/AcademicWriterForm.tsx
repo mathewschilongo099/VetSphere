@@ -310,6 +310,75 @@ export default function AcademicWriterForm() {
   const [chapterProgress, setChapterProgress] = useState<{ current: number; total: number } | null>(
     null
   );
+  // Resume state for research papers: if a chapter fails partway through
+  // (e.g. every AI provider's free quota is exhausted for the day), we keep
+  // exactly what's needed to continue from that exact chapter instead of
+  // discarding the chapters already generated. Cleared on a fresh submit.
+  const [resumeState, setResumeState] = useState<{
+    chapterIndex: number;
+    previousContext: string;
+    accumulatedContent: string;
+    totalChapters: number;
+  } | null>(null);
+
+  const runResearchLoop = async (
+    startIndex: number,
+    startContext: string,
+    startContent: string,
+    startTotal: number
+  ) => {
+    let allContent = startContent;
+    let previousContext = startContext;
+    let chapterIndex = startIndex;
+    let isLastChapter = false;
+    let totalChapters = startTotal;
+
+    while (!isLastChapter) {
+      setLoadingMessage(`📝 Writing chapter ${chapterIndex + 1} of ${totalChapters}...`);
+      setChapterProgress({ current: chapterIndex + 1, total: totalChapters });
+
+      const response = await fetch('/api/academic-writer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          level,
+          type,
+          chapterIndex,
+          previousContext
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Preserve everything generated so far so the user can retry just
+        // this one chapter instead of losing the whole paper.
+        setResumeState({
+          chapterIndex,
+          previousContext,
+          accumulatedContent: allContent,
+          totalChapters
+        });
+        throw new Error(
+          data.error ||
+            `Failed while generating chapter ${chapterIndex + 1}. Your earlier chapters are still shown below — click Retry to continue from here.`
+        );
+      }
+
+      allContent += (allContent ? '\n\n' : '') + data.content;
+      previousContext = data.contextForNextChapter;
+      isLastChapter = data.isLastChapter;
+      chapterIndex = data.nextChapterIndex;
+      totalChapters = data.totalChapters;
+
+      setResult(allContent);
+      setWordCount(allContent.split(/\s+/).length);
+    }
+
+    // Success: no need to resume anything anymore.
+    setResumeState(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -317,56 +386,11 @@ export default function AcademicWriterForm() {
     setError(null);
     setResult(null);
     setChapterProgress(null);
+    setResumeState(null);
 
     try {
       if (type === 'research') {
-        // Research papers are generated one chapter per request so each
-        // call stays well under Vercel's 60s limit. Each chapter's prompt
-        // is fed the previous chapters' context (contextForNextChapter)
-        // so the title, objectives, and findings stay consistent instead
-        // of every chapter re-inventing its own version of the paper.
-        let allContent = '';
-        let previousContext = '';
-        let chapterIndex = 0;
-        let isLastChapter = false;
-        let totalChapters = 7; // corrected as soon as the first response arrives
-
-        while (!isLastChapter) {
-          setLoadingMessage(`📝 Writing chapter ${chapterIndex + 1} of ${totalChapters}...`);
-          setChapterProgress({ current: chapterIndex + 1, total: totalChapters });
-
-          const response = await fetch('/api/academic-writer', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              topic,
-              level,
-              type,
-              chapterIndex,
-              previousContext
-            })
-          });
-
-          const data = await response.json();
-
-          if (!response.ok) {
-            throw new Error(
-              data.error ||
-                `Failed while generating chapter ${chapterIndex + 1}. Earlier chapters are still shown below.`
-            );
-          }
-
-          allContent += (allContent ? '\n\n' : '') + data.content;
-          previousContext = data.contextForNextChapter;
-          isLastChapter = data.isLastChapter;
-          chapterIndex = data.nextChapterIndex;
-          totalChapters = data.totalChapters;
-
-          // Show progress as each chapter lands rather than one long blank wait.
-          setResult(allContent);
-          setWordCount(allContent.split(/\s+/).length);
-        }
-
+        await runResearchLoop(0, '', '', 8);
         setLoadingMessage('✅ Done!');
       } else {
         // Assignment / Report / Case Study: unchanged, single call.
@@ -390,6 +414,28 @@ export default function AcademicWriterForm() {
         setWordCount(data.content.split(/\s+/).length);
         setLoadingMessage('✅ Done!');
       }
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong. Please try again.');
+      setLoadingMessage('');
+    } finally {
+      setLoading(false);
+      setChapterProgress(null);
+    }
+  };
+
+  const handleRetryChapter = async () => {
+    if (!resumeState) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      await runResearchLoop(
+        resumeState.chapterIndex,
+        resumeState.previousContext,
+        resumeState.accumulatedContent,
+        resumeState.totalChapters
+      );
+      setLoadingMessage('✅ Done!');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
       setLoadingMessage('');
@@ -625,8 +671,19 @@ export default function AcademicWriterForm() {
           <div className="font-semibold">Error:</div>
           {error}
           <div className="text-sm mt-2 text-red-600">
-            Tip: Try refreshing or using a different topic.
+            {resumeState
+              ? 'This is usually a temporary AI provider issue (rate limit or daily quota). Waiting a bit before retrying often works.'
+              : 'Tip: Try refreshing or using a different topic.'}
           </div>
+          {resumeState && (
+            <button
+              onClick={handleRetryChapter}
+              disabled={loading}
+              className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition"
+            >
+              🔄 Retry chapter {resumeState.chapterIndex + 1} of {resumeState.totalChapters}
+            </button>
+          )}
         </div>
       )}
 
