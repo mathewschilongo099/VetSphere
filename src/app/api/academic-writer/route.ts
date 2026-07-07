@@ -555,7 +555,7 @@ ${previousContext ? `CONTEXT — content already established earlier in this SAM
 ${previousContext}
 """
 
-CRITICAL — AVOID REPETITION: If this chapter has its own "X.0 Introduction" subsection, keep it to 2-4 sentences that ONLY transition from the previous chapter (e.g. "Having reviewed the literature in Chapter Two, this chapter now outlines..."). Do NOT re-explain the study's background, re-define terms, or restate the problem statement — that was already covered in Chapter One and the reader has already read it.
+CRITICAL — AVOID REPETITION: If this chapter has its own "X.0 Introduction" subsection, keep it to 2-4 sentences that ONLY transition from the previous chapter. Do NOT re-explain the study's background, re-define terms, or restate the problem statement — that was already covered in Chapter One and the reader has already read it. Do NOT reuse the same transition template/sentence structure you may have used in earlier chapters (e.g. do not write "Having reviewed the literature in Chapter Two and established the research design in Chapter Three" more than once, or any near-identical variant of it) — vary the phrasing and angle every single time so no two chapters open the same way.
 ` : ''}
 TASK: ${chapter.instructions}
 
