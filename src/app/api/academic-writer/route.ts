@@ -310,6 +310,51 @@ async function callGroq(
 // available on every free account, so it's the last resort in this list.
 const CEREBRAS_MODEL_CANDIDATES = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
 
+// You.com's Research API actually does live web research to ground its answer,
+// rather than pure generation — so it's slower (real searches happen) but
+// doesn't depend on the same LLM-inference rate limits as the other
+// providers. This mirrors the exact working call already used in
+// autopublish/route.ts.
+async function callYouCom(
+  prompt: string,
+  effort: 'lite' | 'standard' = 'standard'
+): Promise<{ text: string; error: string }> {
+  const youKey = process.env.YOU_API_KEY;
+  if (!youKey) return { text: '', error: 'YOU_API_KEY is not set' };
+
+  try {
+    const response = await fetchWithTimeout(
+      'https://api.you.com/v1/research',
+      {
+        method: 'POST',
+        headers: {
+          'X-API-Key': youKey,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          input: prompt,
+          research_effort: effort,
+        }),
+      },
+      90000 // Research API runs real searches, so give it more time than pure-inference providers.
+    );
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      return { text: '', error: `You.com HTTP ${response.status}: ${errText.slice(0, 300)}` };
+    }
+    const data = await response.json();
+    const content = data.output?.content || '';
+    if (!content || content.trim().length < 100) {
+      return { text: '', error: 'You.com returned too-short or empty content' };
+    }
+    return { text: content, error: '' };
+  } catch (e: any) {
+    const isAbort = e?.name === 'AbortError';
+    console.error('You.com fetch error:', e);
+    return { text: '', error: isAbort ? 'You.com timed out' : `You.com fetch failed: ${e.message || e}` };
+  }
+}
+
 async function callCerebras(
   prompt: string,
   maxTokens: number
@@ -368,6 +413,9 @@ async function generateSection(
   // Cerebras first: 1M tokens/day free, by far the most generous quota.
   // Groq next: solid but shares a per-key daily token budget with other
   // VetSphere features. OpenRouter next (shared/flaky free routing).
+  // You.com next: proven working elsewhere in VetSphere (autopublish), but
+  // it's a research/search API under the hood so it's slower and burns
+  // credits rather than being purely rate-limited.
   // Gemini last: only ~20 requests/day and shared with autopublish.
   const cerebras = await callCerebras(sectionPrompt, maxOutputTokens);
   if (cerebras.text) return { text: cerebras.text, apiUsed: 'Cerebras', error: '' };
@@ -378,13 +426,16 @@ async function generateSection(
   const openRouter = await callOpenRouter(sectionPrompt, maxOutputTokens);
   if (openRouter.text) return { text: openRouter.text, apiUsed: 'OpenRouter', error: '' };
 
+  const youCom = await callYouCom(sectionPrompt);
+  if (youCom.text) return { text: youCom.text, apiUsed: 'You.com', error: '' };
+
   const gemini = await callGemini(sectionPrompt, maxOutputTokens);
   if (gemini.text) return { text: gemini.text, apiUsed: 'Gemini', error: '' };
 
   return {
     text: '',
     apiUsed: 'none',
-    error: `Cerebras failed (${cerebras.error}); Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); Gemini failed (${gemini.error})`,
+    error: `Cerebras failed (${cerebras.error}); Groq failed (${groq.error}); OpenRouter failed (${openRouter.error}); You.com failed (${youCom.error}); Gemini failed (${gemini.error})`,
   };
 }
 
@@ -394,6 +445,8 @@ function cleanText(text: string): string {
     .replace(/\*/g, '')
     .replace(/#{1,6}\s/g, '')
     .replace(/`/g, '')
+    .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '') // strip You.com-style citation markers like [[1]]
+    .replace(/\[\d+(?:,\s*\d+)*\]/g, '') // strip [1], [2,3] style markers
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
