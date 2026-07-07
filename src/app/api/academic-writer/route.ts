@@ -72,12 +72,12 @@ CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write heading
 CRITICAL FORMAT:
 Start with "CHAPTER ONE" on its own line.
 Then on the next line, write "1.0 INTRODUCTION".
-Then write a substantial paragraph explaining what the chapter covers.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections with EXACT specifications and DEPTH requirements:
 1.1 Background of the Study: Write 6 SUBSTANTIAL paragraphs (each 6-8 sentences minimum) covering global, regional and national status quo. Mention different countries as examples with specific statistics and context. Cite with references published in the last 10 years. Each paragraph must be detailed and informative.
 
-1.2 Statement of the Problem: Write 1 SUBSTANTIAL paragraph of approximately 150-200 words that is convincing, uses evidence, and clearly articulates the research gap.
+1.2 Statement of the Problem: Write 1 SUBSTANTIAL paragraph of approximately 100 words that is convincing, uses evidence, and clearly articulates the research gap.
 
 1.3 Research Objectives:
 1.3.1 General Objective (clear, 20 to 25 words)
@@ -85,11 +85,11 @@ Required subsections with EXACT specifications and DEPTH requirements:
 
 1.4 Research Questions (turn the 3 objectives into clear, specific questions)
 
-1.5 Significance of the Study: Write 2-3 substantial paragraphs explaining the significance to different stakeholders.
+1.5 Significance of the Study
 
-1.6 Scope of Study: Write 1 substantial paragraph (approximately 80-100 words) clearly defining boundaries.
+1.6 Scope of Study: Write 1 paragraph (approximately 60 words) clearly defining boundaries.
 
-1.7 Operational Definitions: Define exactly 5 key terms with clear, academic definitions (2-3 sentences each).
+1.7 Operational Definitions: Define exactly 5 key terms.
 
 CRITICAL RULES:
 - Each subsection must have SUBSTANTIAL content - not brief or superficial
@@ -101,11 +101,11 @@ CRITICAL RULES:
 EXACT FORMAT REQUIRED:
 CHAPTER ONE
 1.0 INTRODUCTION
-[substantial paragraph]
+[short paragraph explaining what the chapter covers]
 1.1 Background of the Study
 [six substantial paragraphs with citations]
 1.2 Statement of the Problem
-[one substantial paragraph of 150-200 words]`,
+[one paragraph of approximately 100 words]`,
     },
     {
       id: 'chapter2',
@@ -117,10 +117,10 @@ CHAPTER ONE
 CRITICAL FORMAT:
 Start with "CHAPTER TWO" on its own line.
 Then on the next line, write "2.0 INTRODUCTION".
-Then write a substantial paragraph explaining what the chapter covers.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections with EXACT specifications and DEPTH requirements:
-2.1.0 Empirical Review: Write exactly 100-150 words with NO citations - a synthesis of the research landscape.
+2.1.0 Empirical Review: Write exactly 100 words with NO citations - a synthesis of the research landscape.
 
 2.1.1 Theme from Objective 1: Write 3-4 SUBSTANTIAL paragraphs presenting literature at global, regional, and national levels. Cite in standard APA style. Move beyond description - critically analyze, compare, and synthesize.
 
@@ -141,9 +141,9 @@ CRITICAL RULES:
 EXACT FORMAT REQUIRED:
 CHAPTER TWO
 2.0 INTRODUCTION
-[substantial paragraph]
+[short paragraph]
 2.1.0 Empirical Review
-[100-150 words with no citations]
+[100 words with no citations]
 2.1.1 [Theme from Objective 1]
 [3-4 substantial paragraphs with citations]`,
     },
@@ -157,26 +157,26 @@ CHAPTER TWO
 CRITICAL FORMAT:
 Start with "CHAPTER THREE" on its own line.
 Then on the next line, write "3.0 INTRODUCTION".
-Then write a substantial paragraph explaining what the chapter covers.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections with EXACT specifications and DEPTH requirements:
-3.1 Research Approach: Write 1 detailed paragraph (60-80 words) clearly explaining the approach and its justification.
+3.1 Research Approach: Write 1 clear paragraph (60 words)
 
-3.2 Research Design: Write 2 detailed paragraphs (90-120 words total) clearly explaining the design, cite Creswell, justify the reason for choosing the design.
+3.2 Research Design: Write 1 clear paragraph (90 words), cite Creswell, justify the reason for choosing the design
 
-3.3 Study Location: Write 1 detailed paragraph (60-80 words) describing the location and its relevance.
+3.3 Study Location: Write 1 clear paragraph (60 words)
 
-3.4 Target Population: Write 1 detailed paragraph (60-80 words) stating the actual population and its characteristics.
+3.4 Target Population: Write 1 clear paragraph (60 words, state the actual population)
 
-3.5 Sample Size: Show using a formula how the sample was calculated, justify the reason for the sample size with detailed explanation.
+3.5 Sample Size: Show using a formula how the sample was calculated, justify the reason for the sample size
 
-3.6 Data Collection Instruments and Procedures: Write 2 detailed paragraphs (120-150 words total) describing instruments and procedures, ensure to cite.
+3.6 Data Collection Instruments and Procedures: Write 1 clear paragraph (100 words, ensure to cite)
 
-3.7 Data Analysis Plan: Write 2 detailed paragraphs (120-150 words total) clearly explaining the plan, be consistent, justify, cite.
+3.7 Data Analysis Plan: Write 1 clear paragraph (90 words, be clear, consistent, justify, cite)
 
-3.8 Reliability and Validity: Write 1 detailed paragraph (60-80 words) explaining measures taken.
+3.8 Reliability and Validity: Write 1 clear paragraph (60 words)
 
-3.9 Ethical Considerations: Write 2 detailed paragraphs (120-150 words total) clearly explaining ethical protocols.
+3.9 Ethical Considerations: Write 1 clear paragraph (90 words)
 
 CRITICAL RULES:
 - Each subsection must have SUBSTANTIAL content - not brief or superficial
@@ -187,9 +187,9 @@ CRITICAL RULES:
 EXACT FORMAT REQUIRED:
 CHAPTER THREE
 3.0 INTRODUCTION
-[substantial paragraph]
+[short paragraph]
 3.1 Research Approach
-[60-80 words]`,
+[60 words]`,
     },
     {
       id: 'references',
@@ -202,56 +202,37 @@ REFERENCES
 Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full with complete bibliographic details.
 
 WORK PLAN
-Present a detailed work plan showing specific activities across months with clear timelines. Include:
-- Month 1: Literature Review and Proposal Development
-- Month 2: Instrument Development and Pilot Testing
-- Month 3: Data Collection
-- Month 4: Data Analysis
-- Month 5: Report Writing
-- Month 6: Revision and Submission
+Present a detailed work plan showing specific activities across months.
 
 BUDGET
-Present a detailed budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha with realistic figures. Include:
-- Stationery and Printing
-- Internet Data Bundles
-- Research Assistant Allowance
-- Transport and Logistics
-- Questionnaire Printing
-- Equipment (Recording Devices)
-- Data Analysis Software
-- Contingency Fund
+Present a detailed budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha.
 
 INSTRUMENTS OF DATA COLLECTION
-Write COMPLETE instruments with actual content:
+Write COMPLETE instruments with actual content following the exact format shown:
 
-INSTRUMENT 1: STUDENT QUESTIONNAIRE
+APPENDIX A: STUDENT QUESTIONNAIRE
+
 Write a full structured questionnaire with actual questions and response options covering:
-- Demographic Information (age, gender, year of study, faculty, residence)
-- Socioeconomic Status (monthly budget, source of funding, employment status)
-- Information Resource Access (internet access, device ownership, library usage)
-- Academic Impact (perceived impact on grades, assignment completion)
-- Coping Strategies (strategies used to overcome access challenges)
+- Demographic Information
+- Socioeconomic Status
+- Information Resource Access
+- Academic Impact
+- Coping Strategies
 
-INSTRUMENT 2: INTERVIEW GUIDE
+APPENDIX B: SEMI-STRUCTURED INTERVIEW GUIDE
+
 Write a full interview guide with actual open-ended questions covering:
 - Background and Demographics
 - Information Access Challenges
-- Impact of Poverty on Academic Work
-- Coping Mechanisms and Support Systems
+- Impact of Poverty
+- Coping Mechanisms
 - Recommendations
 
-INSTRUMENT 3: INFORMED CONSENT FORM
-Write a complete informed consent form with actual content including:
-- Study title
-- Purpose of the study
-- Procedures
-- Voluntary participation
-- Confidentiality
-- Risks and benefits
-- Contact information
-- Consent statement with signature lines
+APPENDIX C: INFORMED CONSENT FORM
 
-CRITICAL: All instruments must contain ACTUAL questions and content, not descriptions. Write out all questions, response options, and consent text in full.`,
+Write a complete informed consent form with actual content.
+
+CRITICAL: All instruments must contain ACTUAL questions and content, not descriptions. Write out all questions, response options, and consent text in full. Follow the exact heading format shown above.`,
     },
   ];
 }
@@ -265,10 +246,10 @@ function buildResearchSpecs(topic: string): ChapterSpec[] {
       chapterNumber: '',
       instructions: `Write ONLY the following front-matter sections, in this order, fully written out with substantial content:
 
-DECLARATION (formal declaration paragraph)
-DEDICATION (sincere dedication 3-4 sentences)
-ACKNOWLEDGEMENTS (substantial paragraph thanking relevant parties)
-ABSTRACT (250-300 words summarizing the entire study with keywords)
+DECLARATION
+DEDICATION
+ACKNOWLEDGEMENTS
+ABSTRACT (with keywords)
 LIST OF ABBREVIATIONS AND ACRONYMS
 
 Do NOT write a Table of Contents section. Do not guess page numbers.
@@ -285,16 +266,16 @@ CRITICAL: Use plain text only. No markdown, no asterisks. Write headings in ALL 
 CRITICAL FORMAT:
 Start with "CHAPTER ONE" on its own line.
 Then on the next line, write "1.0 INTRODUCTION".
-Then write substantial content.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections:
-1.1 Background of the Study (6-8 substantial paragraphs with citations)
-1.2 Statement of the Problem (1 substantial paragraph)
-1.3 Research Objectives (with 1.3.1 General Objective and 1.3.2 Specific Objectives - 3-5 objectives)
-1.4 Research Questions (matching the objectives)
-1.5 Significance of the Study (2-3 substantial paragraphs)
-1.6 Scope of Study (1 substantial paragraph)
-1.7 Operational Definitions (5-8 key terms with 2-3 sentence definitions)
+1.1 Background of the Study
+1.2 Statement of the Problem
+1.3 Research Objectives (with 1.3.1 General Objective and 1.3.2 Specific Objectives)
+1.4 Research Questions
+1.5 Significance of the Study
+1.6 Scope of Study
+1.7 Operational Definitions
 
 CRITICAL RULES:
 - Each subsection must have SUBSTANTIAL content
@@ -305,7 +286,7 @@ CRITICAL RULES:
 EXACT FORMAT REQUIRED:
 CHAPTER ONE
 1.0 INTRODUCTION
-[substantial content]
+[short paragraph]
 1.1 Background of the Study
 [6-8 substantial paragraphs]`,
     },
@@ -319,12 +300,12 @@ CHAPTER ONE
 CRITICAL FORMAT:
 Start with "CHAPTER TWO" on its own line.
 Then on the next line, write "2.0 LITERATURE REVIEW".
-Then write substantial content.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections:
-2.1 Empirical Review (with 3-4 thematic sub-subsections each with 4-5 substantial paragraphs)
-2.2 Theoretical Framework (2 theories with detailed explanation, 4-5 paragraphs)
-2.3 Conceptual Framework (detailed explanation with variables described)
+2.1 Empirical Review
+2.2 Theoretical Framework
+2.3 Conceptual Framework
 
 CRITICAL RULES:
 - Each subsection must have SUBSTANTIAL content
@@ -342,18 +323,18 @@ CRITICAL RULES:
 CRITICAL FORMAT:
 Start with "CHAPTER THREE" on its own line.
 Then on the next line, write "3.0 RESEARCH METHODOLOGY".
-Then write substantial content.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections:
-3.1 Research Approach (2-3 paragraphs)
-3.2 Research Design (3-4 paragraphs, cite Creswell)
-3.3 Study Location (2-3 paragraphs)
-3.4 Target Population (2-3 paragraphs)
-3.5 Sample Size (show formula, detailed justification)
-3.6 Data Collection Instruments and Procedures (3-4 paragraphs, cite)
-3.7 Data Analysis Plan (3-4 paragraphs, justify, cite)
-3.8 Reliability and Validity (2-3 paragraphs)
-3.9 Ethical Considerations (3-4 paragraphs)
+3.1 Research Approach
+3.2 Research Design
+3.3 Study Location
+3.4 Target Population
+3.5 Sample Size
+3.6 Data Collection Instruments and Procedures
+3.7 Data Analysis Plan
+3.8 Reliability and Validity
+3.9 Ethical Considerations
 
 CRITICAL RULES:
 - Each subsection must have SUBSTANTIAL content
@@ -371,12 +352,12 @@ CRITICAL RULES:
 CRITICAL FORMAT:
 Start with "CHAPTER FOUR" on its own line.
 Then on the next line, write "4.0 PRESENTATION OF FINDINGS".
-Then write substantial content.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections:
-4.1 Descriptive and Demographic Results (3-4 paragraphs with realistic percentages)
-4.2 Key Thematic or Statistical Findings (4-5 paragraphs organized by objectives)
-4.3 Summary of Findings (2-3 paragraphs)
+4.1 Descriptive and Demographic Results
+4.2 Key Thematic or Statistical Findings
+4.3 Summary of Findings
 
 CRITICAL RULES:
 - Present realistic findings with percentages and frequencies
@@ -393,13 +374,13 @@ CRITICAL RULES:
 CRITICAL FORMAT:
 Start with "CHAPTER FIVE" on its own line.
 Then on the next line, write "5.0 DISCUSSION".
-Then write substantial content.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections:
-5.1 Interpretation of Key Findings (4-5 substantial paragraphs)
-5.2 Comparison with Previous Studies (4-5 substantial paragraphs)
-5.3 Implications for Practice and Policy (3-4 substantial paragraphs)
-5.4 Limitations of the Study (2-3 substantial paragraphs)
+5.1 Interpretation of Key Findings
+5.2 Comparison with Previous Studies
+5.3 Implications for Practice and Policy
+5.4 Limitations of the Study
 
 CRITICAL RULES:
 - Each subsection must have SUBSTANTIAL content
@@ -417,11 +398,11 @@ CRITICAL RULES:
 CRITICAL FORMAT:
 Start with "CHAPTER SIX" on its own line.
 Then on the next line, write "6.0 CONCLUSIONS AND RECOMMENDATIONS".
-Then write substantial content.
+Then write a short paragraph explaining what the chapter covers.
 
 Required subsections:
-6.1 Conclusions (4-5 substantial paragraphs)
-6.2 Recommendations (3-4 substantial paragraphs grouped by stakeholder)
+6.1 Conclusions
+6.2 Recommendations
 
 CRITICAL RULES:
 - DO NOT include a 6.0 Introduction subsection
@@ -431,7 +412,7 @@ CRITICAL RULES:
 EXACT FORMAT REQUIRED:
 CHAPTER SIX
 6.0 CONCLUSIONS AND RECOMMENDATIONS
-[substantial content]
+[short paragraph]
 6.1 Conclusions
 [4-5 substantial paragraphs]
 6.2 Recommendations
@@ -448,9 +429,10 @@ REFERENCES
 Provide a complete list of 30 references published in the last 10 years. Use a mixture of books and journals. Include 4 research methods books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full with complete bibliographic details.
 
 APPENDICES
-Write COMPLETE and DETAILED appendices with actual content, not placeholders.
+Write COMPLETE and DETAILED appendices with actual content, not placeholders. Follow the exact heading format shown:
 
 APPENDIX A: STUDENT QUESTIONNAIRE
+
 Write a full structured questionnaire with the following sections:
 Section A: Demographic Information (age, gender, year of study, faculty, residence)
 Section B: Socioeconomic Status (monthly budget, source of funding, employment status, household income)
@@ -461,6 +443,7 @@ Section E: Coping Strategies (strategies used to overcome access challenges)
 Each section should have 5-8 actual questions with response options (Likert scale, multiple choice, yes/no).
 
 APPENDIX B: SEMI-STRUCTURED INTERVIEW GUIDE
+
 Write a full interview guide with:
 - Introduction and consent statement
 - Section 1: Background and Demographics
@@ -473,6 +456,7 @@ Write a full interview guide with:
 Include 15-20 actual open-ended questions that would be asked during interviews.
 
 APPENDIX C: INFORMED CONSENT FORM
+
 Write a complete informed consent form with:
 - Study title
 - Purpose of the study
@@ -795,7 +779,6 @@ export async function POST(request: NextRequest) {
 
     const totalChapters = type === 'proposal' ? 5 : 8;
 
-    // Depth instruction
     let depthInstruction = `
 CRITICAL DEPTH REQUIREMENT:
 This is a ${levelInfo.label} academic document. The content must be COMPREHENSIVE and THOROUGH.
@@ -813,14 +796,14 @@ This is a ${levelInfo.label} academic document. The content must be COMPREHENSIV
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER ONE SPECIFICS:
 - 1.1 Background: exactly 6 substantial paragraphs (each 6-8 sentences)
-- 1.2 Statement of Problem: 150-200 words with citations
-- 1.6 Scope of Study: 80-100 words
-- 1.7 Operational Definitions: 5 terms with 2-3 sentence definitions each`;
+- 1.2 Statement of Problem: approximately 100 words with citations
+- 1.6 Scope of Study: approximately 60 words
+- 1.7 Operational Definitions: 5 terms`;
       }
       if (chapter.id === 'chapter2') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER TWO SPECIFICS:
-- 2.1.0 Empirical Review: 100-150 words, NO citations
+- 2.1.0 Empirical Review: exactly 100 words, NO citations
 - 2.1.1, 2.1.2, 2.1.3: Each 3-4 substantial paragraphs
 - 2.2 Theoretical Framework: 4-5 substantial paragraphs total
 - 2.3 Conceptual Framework: Detailed explanation with variables`;
@@ -828,31 +811,35 @@ PROPOSAL CHAPTER TWO SPECIFICS:
       if (chapter.id === 'chapter3') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER THREE SPECIFICS:
-- Each subsection must be comprehensive and detailed
-- 3.2 Research Design: 90-120 words, cite Creswell
-- 3.5 Sample Size: Show formula and detailed justification
-- 3.6 Data Collection: 120-150 words, cite sources
-- 3.7 Data Analysis: 120-150 words, justify, cite
-- 3.9 Ethical Considerations: 120-150 words`;
+- 3.1 Research Approach: exactly 60 words
+- 3.2 Research Design: exactly 90 words, cite Creswell
+- 3.3 Study Location: exactly 60 words
+- 3.4 Target Population: exactly 60 words
+- 3.5 Sample Size: Show formula and justification
+- 3.6 Data Collection: exactly 100 words, cite sources
+- 3.7 Data Analysis: exactly 90 words, justify, cite
+- 3.8 Reliability and Validity: exactly 60 words
+- 3.9 Ethical Considerations: exactly 90 words`;
       }
       if (chapter.id === 'references') {
         chapterSpecificInstruction = `
 PROPOSAL REFERENCES SPECIFICS:
 - 30 complete APA 7th references
 - 4 research methods books
-- Work Plan with specific activities and timelines
+- Work Plan with activities and timelines
 - Budget table in Zambian Kwacha
-- 3 complete instruments with actual questions (Questionnaire, Interview Guide, Consent Form)`;
+- Appendix A: Student Questionnaire with actual questions
+- Appendix B: Interview Guide with actual questions
+- Appendix C: Informed Consent Form with actual content`;
       }
     } else {
-      // Research paper specs
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 RESEARCH CHAPTER ONE SPECIFICS:
 - 1.1 Background: 6-8 substantial paragraphs with citations
 - 1.2 Statement of Problem: 1 substantial paragraph
 - 1.5 Significance: 2-3 substantial paragraphs
-- 1.7 Operational Definitions: 5-8 terms with 2-3 sentence definitions`;
+- 1.7 Operational Definitions: 5-8 terms`;
       }
       if (chapter.id === 'chapter6') {
         chapterSpecificInstruction = `
@@ -866,9 +853,9 @@ RESEARCH CHAPTER SIX SPECIFICS:
 RESEARCH REFERENCES SPECIFICS:
 - 30 complete APA 7th references
 - 4 research methods books
-- Complete Appendix A: Student Questionnaire with actual questions
-- Complete Appendix B: Interview Guide with actual questions
-- Complete Appendix C: Informed Consent Form with actual content`;
+- Appendix A: Student Questionnaire with actual questions
+- Appendix B: Interview Guide with actual questions
+- Appendix C: Informed Consent Form with actual content`;
       }
     }
 
@@ -888,7 +875,6 @@ CRITICAL RULES:
 - This is a continuous academic document
 - Start with the chapter label exactly as specified
 - Write SUBSTANTIAL, DETAILED content - never brief or superficial
-- Each paragraph should be 5-7 sentences minimum for main content
 - Use APA 7th style in-text citations throughout
 - Never use numbered bracket citations like [1]
 - Use plain text only. No markdown, no asterisks, no underscores
@@ -896,7 +882,7 @@ CRITICAL RULES:
 - Write out full content. Never use placeholders
 - The document must demonstrate ${levelInfo.depth} academic writing
 
-For appendices: Write ACTUAL questions, response options, and consent text - not descriptions of what would be included.`;
+For appendices: Write ACTUAL questions, response options, and consent text - not descriptions.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 3500;
 
