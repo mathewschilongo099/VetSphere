@@ -5,7 +5,7 @@ import { useState } from 'react';
 import type jsPDF from 'jspdf';
 
 type AcademicLevel = 'diploma' | 'degree' | 'masters' | 'phd';
-type DocumentType = 'essay' | 'research' | 'report' | 'case-study';
+type DocumentType = 'essay' | 'research' | 'report' | 'case-study' | 'proposal';
 
 const levelLabels: Record<AcademicLevel, string> = {
   diploma: 'Diploma',
@@ -25,7 +25,8 @@ const typeLabels: Record<DocumentType, string> = {
   essay: 'Assignment',
   research: 'Research Paper',
   report: 'Report',
-  'case-study': 'Case Study'
+  'case-study': 'Case Study',
+  proposal: 'Research Proposal'
 };
 
 const levelDescriptions: Record<AcademicLevel, string> = {
@@ -272,10 +273,10 @@ async function generateAcademicPdf(
   );
 
   // Front matter
-  doc.addPage();
-  const declIdx = front.findIndex((b) => b.type === 'chapter' && /^DECLARATION/i.test(b.text));
-  const frontMatterBlocks = declIdx === -1 ? front : front.slice(declIdx);
-  drawBlocks(doc, frontMatterBlocks, PAGE_MARGIN, false);
+  if (front.length > 0) {
+    doc.addPage();
+    drawBlocks(doc, front, PAGE_MARGIN, false);
+  }
   const frontMatterPageCount = doc.getNumberOfPages();
 
   // Measure body headings for TOC
@@ -410,24 +411,9 @@ export default function AcademicWriterForm() {
     setResumeState(null);
 
     try {
-      if (type === 'research') {
-        await runResearchLoop(0, '', '', 8);
-        setLoadingMessage('Done!');
-      } else {
-        const response = await fetch('/api/academic-writer', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, level, type })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) throw new Error(data.error || 'Failed to generate');
-
-        setResult(data.content);
-        setWordCount(data.content.split(/\s+/).length);
-        setLoadingMessage('Done!');
-      }
+      const totalChapters = type === 'proposal' ? 5 : 8;
+      await runResearchLoop(0, '', '', totalChapters);
+      setLoadingMessage('Done!');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
       setLoadingMessage('');
@@ -507,7 +493,7 @@ export default function AcademicWriterForm() {
 
       if (block.type === 'chapter') {
         elements.push(
-          <h2 key={i} className="text-3xl font-bold mt-10 mb-4 text-gray-900 border-b-2 border-gray-300 pb-2 text-center tracking-wide">
+          <h2 key={i} className="text-4xl font-bold mt-12 mb-4 text-gray-900 border-b-4 border-gray-800 pb-3 text-center tracking-wider uppercase">
             {block.text}
           </h2>
         );
@@ -516,7 +502,7 @@ export default function AcademicWriterForm() {
 
       if (block.type === 'h1') {
         elements.push(
-          <h3 key={i} className="text-2xl font-bold mt-8 mb-3 text-gray-800">
+          <h3 key={i} className="text-2xl font-bold mt-8 mb-4 text-gray-800">
             {block.text}
           </h3>
         );
@@ -525,7 +511,7 @@ export default function AcademicWriterForm() {
 
       if (block.type === 'h2') {
         elements.push(
-          <h4 key={i} className="text-xl font-bold mt-6 mb-2 text-gray-700">
+          <h4 key={i} className="text-xl font-bold mt-6 mb-3 text-gray-700">
             {block.text}
           </h4>
         );
@@ -600,7 +586,7 @@ export default function AcademicWriterForm() {
 
         <div>
           <label className="block font-semibold text-gray-700 mb-2">Document Type</label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {(Object.keys(typeLabels) as DocumentType[]).map((t) => (
               <button
                 key={t}
