@@ -139,19 +139,25 @@ This chapter must genuinely argue and interpret the specific findings already pr
     {
       id: 'chapter6',
       title: 'CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS',
-      instructions: `Write the FULL Chapter Six plus References and Appendices:
-6.0 Introduction
+      instructions: `Write the FULL Chapter Six:
+6.0 Introduction (2-3 sentences only — a brief transition, not a restatement of the study)
 6.1 Conclusions (directly answering the research objectives/questions from Chapter One)
 6.2 Recommendations (specific, actionable, grouped by stakeholder if relevant — e.g. practitioners, policymakers, future researchers)
 
-Then:
+Conclusions must map 1:1 onto the exact Research Objectives from Chapter One — do not introduce new objectives here. Do NOT write References or Appendices in this section — those come in a separate chapter.`,
+    },
+    {
+      id: 'references',
+      title: 'REFERENCES AND APPENDICES',
+      instructions: `Write ONLY the following — do not write any chapter content, conclusions, or recommendations here:
+
 REFERENCES
-Provide 20-35 APA 7th edition references consistent with a study on "${topic}". They should look like real, plausible veterinary/scientific literature (realistic author names, plausible journal titles, years spread 2014-2025). Alphabetised.
+Provide the FULL, complete list of 20-35 APA 7th edition references consistent with a study on "${topic}". They must be written out in full — never abbreviated, never a placeholder, never a note saying references are "omitted for brevity" or similar. Every single reference must be a complete APA 7th-formatted entry (author(s), year, title, source). They should look like real, plausible veterinary/scientific/education literature (realistic author names, plausible journal titles, years spread 2014-2025). Alphabetised by author surname.
 
 APPENDICES
 Briefly describe what would be included (e.g. data collection tool, consent form) in 1-2 short paragraphs — no need to write them out in full.
 
-Conclusions must map 1:1 onto the exact Research Objectives from Chapter One — do not introduce new objectives here.`,
+CRITICAL: You MUST write out all 20-35 references individually and completely. Do not summarize, truncate, or state that references are omitted — that is not acceptable under any circumstance.`,
     },
   ];
 }
@@ -436,6 +442,15 @@ function cleanText(text: string): string {
     .replace(/`/g, '')
     .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
     .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
+    // Stripping bracket citations above can leave a dangling space before
+    // punctuation (e.g. "...backgrounds [3]." -> "...backgrounds ." once
+    // "[3]" is removed). This shows up mainly in You.com output, which
+    // cites with numeric brackets rather than APA (Author, Year) style.
+    // Collapse leftover "<space>." / "<space>," / "<space>;" / "<space>:"
+    // back to normal punctuation spacing.
+    .replace(/[ \t]+([.,;:])/g, '$1')
+    // Can also leave doubled sentence-enders ("...UNZA .."); collapse those.
+    .replace(/\.\.+/g, '.')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
@@ -462,7 +477,7 @@ Write a DETAILED, practical ${typeLabel} with:
 
 STYLE RULES:
 - Simple, formal academic English, no slang or emojis.
-- Use in-text citations in APA 7th style throughout the main body.
+- Use in-text citations in APA 7th style throughout the main body, e.g. (Smith, 2021). NEVER use numbered bracket citations like [1] or [[2]] — those get stripped out downstream and will leave broken, incomplete sentences.
 - Justify main body text conceptually (i.e., write in complete, well-organised paragraphs, not bullet fragments), except where a table or list is genuinely clearer.
 - Do not add a preamble — start directly with the Title Page.`;
 
@@ -538,6 +553,8 @@ ${previousContext ? `CONTEXT — content already established earlier in this SAM
 """
 ${previousContext}
 """
+
+CRITICAL — AVOID REPETITION: If this chapter has its own "X.0 Introduction" subsection, keep it to 2-4 sentences that ONLY transition from the previous chapter (e.g. "Having reviewed the literature in Chapter Two, this chapter now outlines..."). Do NOT re-explain the study's background, re-define terms, or restate the problem statement — that was already covered in Chapter One and the reader has already read it.
 ` : ''}
 TASK: ${chapter.instructions}
 
@@ -546,9 +563,16 @@ STYLE RULES (must follow strictly):
 - One idea per paragraph. Avoid long unbroken blocks of text.
 - Use clear numbered headings and subheadings exactly as specified above.
 - Do not include any chapter other than the one requested.
-- Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.`;
+- Do not add a preamble like "Here is the chapter" — output only the section content itself, starting directly with the numbered heading.
+- CITATIONS: Use ONLY APA 7th-style in-text citations, e.g. (Smith, 2021) or Smith (2021) argued that... NEVER use numbered bracket citations like [1] or [[2]] — those get stripped out downstream and will leave broken, incomplete sentences.
+- NEVER write placeholder text like "[omitted for brevity]", "[references truncated]", or similar shortcuts — always write out full, complete content exactly as instructed, however long it needs to be.`;
 
-    const { text, apiUsed, error } = await generateSection(prompt, 3000);
+    // The references chapter needs room for 20-35 full APA entries, so it
+    // gets a larger budget than the other chapters (which was the root
+    // cause of references getting cut with a placeholder before).
+    const chapterTokenBudget = chapter.id === 'references' ? 4000 : 3000;
+
+    const { text, apiUsed, error } = await generateSection(prompt, chapterTokenBudget);
 
     if (!text) {
       return NextResponse.json(
