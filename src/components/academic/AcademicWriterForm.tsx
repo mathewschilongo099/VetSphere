@@ -8,10 +8,10 @@ type AcademicLevel = 'diploma' | 'degree' | 'masters' | 'phd';
 type DocumentType = 'essay' | 'research' | 'report' | 'case-study';
 
 const levelLabels: Record<AcademicLevel, string> = {
-  diploma: '🎓 Diploma',
-  degree: "📘 Bachelor's",
-  masters: "🎯 Master's",
-  phd: '🔬 PhD'
+  diploma: 'Diploma',
+  degree: "Bachelor's Degree",
+  masters: "Master's Degree",
+  phd: 'PhD'
 };
 
 const levelDegreeNames: Record<AcademicLevel, string> = {
@@ -35,17 +35,6 @@ const levelDescriptions: Record<AcademicLevel, string> = {
   phd: 'Original contribution with extensive literature review'
 };
 
-// ============================================================
-// PDF GENERATION
-// ============================================================
-// Real, direct-download PDF (no print dialog), built with jsPDF instead of
-// window.print(). Because we lay the document out programmatically instead
-// of screenshotting HTML, we can also compute a genuinely accurate table of
-// contents: a first "dry run" pass measures which page each heading actually
-// lands on, then a second real pass renders the TOC with correct numbers.
-//
-// Requires: npm install jspdf
-
 type Block = { type: 'h2' | 'h3' | 'bare' | 'para' | 'blank'; text: string };
 
 function parseBlocks(content: string): Block[] {
@@ -61,9 +50,6 @@ function parseBlocks(content: string): Block[] {
   });
 }
 
-// The AI's own front-matter text includes a guessed Table of Contents with
-// dot-leader placeholder lines (e.g. "1.0 Introduction ..... 1"). We strip
-// that out entirely and replace it with a computed one.
 function stripFakeToc(blocks: Block[]): Block[] {
   return blocks.filter(
     (b) => !/\.{4,}/.test(b.text) && !/^5\.0\s+Table of Contents/i.test(b.text.trim())
@@ -76,7 +62,7 @@ function splitFrontAndBody(blocks: Block[]): { front: Block[]; body: Block[] } {
   return { front: blocks.slice(0, idx), body: blocks.slice(idx) };
 }
 
-const PAGE_MARGIN = 72; // 1 inch, matches your standard formatting rules
+const PAGE_MARGIN = 72;
 
 function drawBlocks(
   doc: jsPDF,
@@ -123,7 +109,7 @@ function drawBlocks(
 
     doc.setFont('times', fontStyle);
     doc.setFontSize(size);
-    const lineH = size * 1.5; // 1.5 line spacing per your formatting rules
+    const lineH = size * 1.5;
 
     y += gapBefore;
     if (y + lineH > bottom) {
@@ -143,7 +129,6 @@ function drawBlocks(
       }
       const isLast = i === lines.length - 1;
       if (!isHeading && !isLast) {
-        // Justified body text per your standard formatting rules.
         doc.text(ln, PAGE_MARGIN, y, { maxWidth, align: 'justify' } as any);
       } else {
         doc.text(ln, PAGE_MARGIN, y);
@@ -217,7 +202,6 @@ async function generateAcademicPdf(
   const doc = new JsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // --- Title page ---
   doc.setFont('times', 'bold');
   doc.setFontSize(18);
   const titleLines = doc.splitTextToSize(topic.toUpperCase(), pageWidth - PAGE_MARGIN * 2) as string[];
@@ -236,19 +220,16 @@ async function generateAcademicPdf(
     }
   );
 
-  // --- Front matter (Declaration, Dedication, Acknowledgements, Abstract, Abbreviations) ---
   doc.addPage();
   const declIdx = front.findIndex((b) => b.type === 'h2' && /^2\.0\s+Declaration/i.test(b.text));
   const frontMatterBlocks = declIdx === -1 ? front : front.slice(declIdx);
   drawBlocks(doc, frontMatterBlocks, PAGE_MARGIN, false);
   const frontMatterPageCount = doc.getNumberOfPages();
 
-  // --- Body: measurement-only pass to find each heading's real page ---
   const { default: ScratchJsPDF } = await import('jspdf');
   const scratchDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const { headings: bodyHeadings } = drawBlocks(scratchDoc, body, PAGE_MARGIN, true);
 
-  // --- TOC: measurement pass to find how many pages the TOC itself needs ---
   const scratchTocDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   scratchTocDoc.setFont('times', 'bold');
   scratchTocDoc.setFontSize(14);
@@ -262,7 +243,6 @@ async function generateAcademicPdf(
   );
   const tocPageCount = scratchTocDoc.getNumberOfPages();
 
-  // --- Real TOC render, now with correct final page numbers ---
   doc.addPage();
   doc.setFont('times', 'bold');
   doc.setFontSize(14);
@@ -273,11 +253,9 @@ async function generateAcademicPdf(
   }));
   renderToc(doc, realEntries, PAGE_MARGIN + 30);
 
-  // --- Real body render ---
   doc.addPage();
   drawBlocks(doc, body, PAGE_MARGIN, false);
 
-  // --- Page numbers on every page ---
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -292,28 +270,19 @@ async function generateAcademicPdf(
   doc.save(filename);
 }
 
-// ============================================================
-// COMPONENT
-// ============================================================
 export default function AcademicWriterForm() {
   const [topic, setTopic] = useState('');
   const [level, setLevel] = useState<AcademicLevel>('degree');
-  const [type, setType] = useState<DocumentType>('essay');
+  const [type, setType] = useState<DocumentType>('research');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [pdfGenerating, setPdfGenerating] = useState(false);
-  // Tracks "chapter 3 of 7" style progress while a research paper is being
-  // generated one chapter per request. Null outside of that flow.
   const [chapterProgress, setChapterProgress] = useState<{ current: number; total: number } | null>(
     null
   );
-  // Resume state for research papers: if a chapter fails partway through
-  // (e.g. every AI provider's free quota is exhausted for the day), we keep
-  // exactly what's needed to continue from that exact chapter instead of
-  // discarding the chapters already generated. Cleared on a fresh submit.
   const [resumeState, setResumeState] = useState<{
     chapterIndex: number;
     previousContext: string;
@@ -334,7 +303,7 @@ export default function AcademicWriterForm() {
     let totalChapters = startTotal;
 
     while (!isLastChapter) {
-      setLoadingMessage(`📝 Writing chapter ${chapterIndex + 1} of ${totalChapters}...`);
+      setLoadingMessage(`Writing chapter ${chapterIndex + 1} of ${totalChapters}...`);
       setChapterProgress({ current: chapterIndex + 1, total: totalChapters });
 
       const response = await fetch('/api/academic-writer', {
@@ -352,8 +321,6 @@ export default function AcademicWriterForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        // Preserve everything generated so far so the user can retry just
-        // this one chapter instead of losing the whole paper.
         setResumeState({
           chapterIndex,
           previousContext,
@@ -362,7 +329,7 @@ export default function AcademicWriterForm() {
         });
         throw new Error(
           data.error ||
-            `Failed while generating chapter ${chapterIndex + 1}. Your earlier chapters are still shown below — click Retry to continue from here.`
+            `Failed while generating chapter ${chapterIndex + 1}. Your earlier chapters are still shown below. Click Retry to continue.`
         );
       }
 
@@ -376,7 +343,6 @@ export default function AcademicWriterForm() {
       setWordCount(allContent.split(/\s+/).length);
     }
 
-    // Success: no need to resume anything anymore.
     setResumeState(null);
   };
 
@@ -391,14 +357,13 @@ export default function AcademicWriterForm() {
     try {
       if (type === 'research') {
         await runResearchLoop(0, '', '', 8);
-        setLoadingMessage('✅ Done!');
+        setLoadingMessage('Done!');
       } else {
-        // Assignment / Report / Case Study: unchanged, single call.
-        setLoadingMessage('⏳ Connecting to AI provider...');
-        setTimeout(() => setLoadingMessage('🧠 Analyzing your topic...'), 2000);
-        setTimeout(() => setLoadingMessage('📝 Generating comprehensive content...'), 4000);
-        setTimeout(() => setLoadingMessage('🔍 Adding citations and references...'), 6000);
-        setTimeout(() => setLoadingMessage('✨ Finalizing your academic paper...'), 8000);
+        setLoadingMessage('Connecting to AI provider...');
+        setTimeout(() => setLoadingMessage('Analyzing your topic...'), 2000);
+        setTimeout(() => setLoadingMessage('Generating comprehensive content...'), 4000);
+        setTimeout(() => setLoadingMessage('Adding citations and references...'), 6000);
+        setTimeout(() => setLoadingMessage('Finalizing your academic paper...'), 8000);
 
         const response = await fetch('/api/academic-writer', {
           method: 'POST',
@@ -412,7 +377,7 @@ export default function AcademicWriterForm() {
 
         setResult(data.content);
         setWordCount(data.content.split(/\s+/).length);
-        setLoadingMessage('✅ Done!');
+        setLoadingMessage('Done!');
       }
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -435,7 +400,7 @@ export default function AcademicWriterForm() {
         resumeState.accumulatedContent,
         resumeState.totalChapters
       );
-      setLoadingMessage('✅ Done!');
+      setLoadingMessage('Done!');
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
       setLoadingMessage('');
@@ -448,7 +413,7 @@ export default function AcademicWriterForm() {
   const copyToClipboard = () => {
     if (result) {
       navigator.clipboard.writeText(result);
-      alert('✅ Content copied to clipboard!');
+      alert('Content copied to clipboard!');
     }
   };
 
@@ -477,7 +442,6 @@ export default function AcademicWriterForm() {
     }
   };
 
-  // Helper function to render content with proper formatting
   const renderContent = () => {
     if (!result) return null;
 
@@ -555,13 +519,13 @@ export default function AcademicWriterForm() {
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             required
-            placeholder="e.g., Procedure for postmortem examination in bovine, caprine, ovine, equine, porcine, canine, feline, and poultry"
+            placeholder="e.g., Poverty and Information Resource Access Among University Students: A Case Study of the University of Zambia"
             rows={4}
             className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition"
             style={{ color: '#1a1a1a', backgroundColor: '#ffffff' }}
           />
           <p className="text-sm text-gray-500 mt-1">
-            Be specific for better results — the AI will write comprehensive content
+            Be specific for better results. The AI will write comprehensive content.
           </p>
         </div>
 
@@ -642,11 +606,6 @@ export default function AcademicWriterForm() {
                 </svg>
                 {loadingMessage}
               </span>
-              <span className="text-xs text-green-100">
-                {chapterProgress
-                  ? 'Writing your research paper chapter by chapter — this stays under the timeout on Vercel Hobby'
-                  : 'This may take a moment for comprehensive content'}
-              </span>
               {chapterProgress && (
                 <div className="w-full max-w-xs h-1.5 bg-green-800/40 rounded-full overflow-hidden mt-1">
                   <div
@@ -661,7 +620,7 @@ export default function AcademicWriterForm() {
               )}
             </span>
           ) : (
-            '📝 Generate Academic Paper'
+            'Generate Academic Paper'
           )}
         </button>
       </form>
@@ -670,18 +629,13 @@ export default function AcademicWriterForm() {
         <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
           <div className="font-semibold">Error:</div>
           {error}
-          <div className="text-sm mt-2 text-red-600">
-            {resumeState
-              ? 'This is usually a temporary AI provider issue (rate limit or daily quota). Waiting a bit before retrying often works.'
-              : 'Tip: Try refreshing or using a different topic.'}
-          </div>
           {resumeState && (
             <button
               onClick={handleRetryChapter}
               disabled={loading}
               className="mt-3 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition"
             >
-              🔄 Retry chapter {resumeState.chapterIndex + 1} of {resumeState.totalChapters}
+              Retry chapter {resumeState.chapterIndex + 1} of {resumeState.totalChapters}
             </button>
           )}
         </div>
@@ -691,7 +645,7 @@ export default function AcademicWriterForm() {
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
             <div>
-              <h3 className="font-bold text-lg text-gray-900">📄 Generated {typeLabels[type]}</h3>
+              <h3 className="font-bold text-lg text-gray-900">Generated {typeLabels[type]}</h3>
               <div className="text-sm text-gray-500">
                 {levelLabels[level]} • {wordCount} words
               </div>
@@ -701,20 +655,20 @@ export default function AcademicWriterForm() {
                 onClick={copyToClipboard}
                 className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
               >
-                📋 Copy
+                Copy
               </button>
               <button
                 onClick={downloadAsTXT}
                 className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium transition"
               >
-                ⬇️ TXT
+                TXT
               </button>
               <button
                 onClick={downloadAsPDF}
                 disabled={pdfGenerating}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition"
               >
-                {pdfGenerating ? '⏳ Generating PDF...' : '⬇️ PDF'}
+                {pdfGenerating ? 'Generating PDF...' : 'PDF'}
               </button>
             </div>
           </div>
