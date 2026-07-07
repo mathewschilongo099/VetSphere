@@ -196,21 +196,62 @@ CHAPTER THREE
       title: 'REFERENCES AND APPENDICES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write ONLY the following sections with COMPLETE content.
+      instructions: `Write ONLY the following sections with COMPLETE and DETAILED content.
 
 REFERENCES
 Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full with complete bibliographic details.
 
 WORK PLAN
-Present a detailed work plan showing specific activities across months (e.g., Month 1: Literature Review, Month 2: Proposal Writing, etc.) with clear timelines.
+Present a detailed work plan showing specific activities across months with clear timelines. Include:
+- Month 1: Literature Review and Proposal Development
+- Month 2: Instrument Development and Pilot Testing
+- Month 3: Data Collection
+- Month 4: Data Analysis
+- Month 5: Report Writing
+- Month 6: Revision and Submission
 
 BUDGET
-Present a detailed budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha with realistic figures.
+Present a detailed budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha with realistic figures. Include:
+- Stationery and Printing
+- Internet Data Bundles
+- Research Assistant Allowance
+- Transport and Logistics
+- Questionnaire Printing
+- Equipment (Recording Devices)
+- Data Analysis Software
+- Contingency Fund
 
 INSTRUMENTS OF DATA COLLECTION
-Describe in 3-4 substantial paragraphs the instruments that would be used (e.g., questionnaire, interview guide) with specific details about structure, content, and administration.
+Write COMPLETE instruments with actual content:
 
-CRITICAL: Use plain text only. No markdown, no asterisks. Write out all content completely - no placeholders.`,
+INSTRUMENT 1: STUDENT QUESTIONNAIRE
+Write a full structured questionnaire with actual questions and response options covering:
+- Demographic Information (age, gender, year of study, faculty, residence)
+- Socioeconomic Status (monthly budget, source of funding, employment status)
+- Information Resource Access (internet access, device ownership, library usage)
+- Academic Impact (perceived impact on grades, assignment completion)
+- Coping Strategies (strategies used to overcome access challenges)
+
+INSTRUMENT 2: INTERVIEW GUIDE
+Write a full interview guide with actual open-ended questions covering:
+- Background and Demographics
+- Information Access Challenges
+- Impact of Poverty on Academic Work
+- Coping Mechanisms and Support Systems
+- Recommendations
+
+INSTRUMENT 3: INFORMED CONSENT FORM
+Write a complete informed consent form with actual content including:
+- Study title
+- Purpose of the study
+- Procedures
+- Voluntary participation
+- Confidentiality
+- Risks and benefits
+- Contact information
+- Consent statement with signature lines
+
+CRITICAL: All instruments must contain ACTUAL questions and content, not descriptions. Write out all questions, response options, and consent text in full.`,
     },
   ];
 }
@@ -398,16 +439,51 @@ CHAPTER SIX
     },
     {
       id: 'references',
-      title: 'REFERENCES',
-      chapterLabel: 'REFERENCES',
+      title: 'REFERENCES AND APPENDICES',
+      chapterLabel: 'REFERENCES AND APPENDICES',
       chapterNumber: '',
-      instructions: `Write ONLY the following with COMPLETE content.
+      instructions: `Write ONLY the following with COMPLETE and DETAILED content.
 
 REFERENCES
-Provide a complete list of 30 references published in the last 10 years. Use a mixture of books and journals. Include 4 research methods books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full.
+Provide a complete list of 30 references published in the last 10 years. Use a mixture of books and journals. Include 4 research methods books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full with complete bibliographic details.
 
 APPENDICES
-Describe in 3-4 substantial paragraphs the instruments of data collection that would be included.`,
+Write COMPLETE and DETAILED appendices with actual content, not placeholders.
+
+APPENDIX A: STUDENT QUESTIONNAIRE
+Write a full structured questionnaire with the following sections:
+Section A: Demographic Information (age, gender, year of study, faculty, residence)
+Section B: Socioeconomic Status (monthly budget, source of funding, employment status, household income)
+Section C: Information Resource Access (internet access, device ownership, library usage, frequency of access)
+Section D: Academic Impact (perceived impact on grades, assignment completion, research quality)
+Section E: Coping Strategies (strategies used to overcome access challenges)
+
+Each section should have 5-8 actual questions with response options (Likert scale, multiple choice, yes/no).
+
+APPENDIX B: SEMI-STRUCTURED INTERVIEW GUIDE
+Write a full interview guide with:
+- Introduction and consent statement
+- Section 1: Background and Demographics
+- Section 2: Information Access Challenges
+- Section 3: Impact of Poverty on Academic Work
+- Section 4: Coping Mechanisms and Support Systems
+- Section 5: Recommendations
+- Closing statement
+
+Include 15-20 actual open-ended questions that would be asked during interviews.
+
+APPENDIX C: INFORMED CONSENT FORM
+Write a complete informed consent form with:
+- Study title
+- Purpose of the study
+- Procedures
+- Voluntary participation
+- Confidentiality
+- Risks and benefits
+- Contact information
+- Consent statement with signature lines
+
+CRITICAL: All appendices must contain ACTUAL content, not descriptions of what would be included. Write out all questions, response options, and consent text in full.`,
     },
   ];
 }
@@ -719,7 +795,7 @@ export async function POST(request: NextRequest) {
 
     const totalChapters = type === 'proposal' ? 5 : 8;
 
-    // Special instruction for depth
+    // Depth instruction
     let depthInstruction = `
 CRITICAL DEPTH REQUIREMENT:
 This is a ${levelInfo.label} academic document. The content must be COMPREHENSIVE and THOROUGH.
@@ -766,7 +842,7 @@ PROPOSAL REFERENCES SPECIFICS:
 - 4 research methods books
 - Work Plan with specific activities and timelines
 - Budget table in Zambian Kwacha
-- 3-4 paragraphs describing instruments`;
+- 3 complete instruments with actual questions (Questionnaire, Interview Guide, Consent Form)`;
       }
     } else {
       // Research paper specs
@@ -784,6 +860,15 @@ RESEARCH CHAPTER SIX SPECIFICS:
 - DO NOT include "6.0 Introduction" subsection
 - 6.1 Conclusions: 4-5 substantial paragraphs
 - 6.2 Recommendations: 3-4 substantial paragraphs grouped by stakeholder`;
+      }
+      if (chapter.id === 'references') {
+        chapterSpecificInstruction = `
+RESEARCH REFERENCES SPECIFICS:
+- 30 complete APA 7th references
+- 4 research methods books
+- Complete Appendix A: Student Questionnaire with actual questions
+- Complete Appendix B: Interview Guide with actual questions
+- Complete Appendix C: Informed Consent Form with actual content`;
       }
     }
 
@@ -809,9 +894,11 @@ CRITICAL RULES:
 - Use plain text only. No markdown, no asterisks, no underscores
 - Avoid the use of hyphens or dashes throughout
 - Write out full content. Never use placeholders
-- The document must demonstrate ${levelInfo.depth} academic writing`;
+- The document must demonstrate ${levelInfo.depth} academic writing
 
-    const chapterTokenBudget = chapter.id === 'references' ? 4500 : 3500;
+For appendices: Write ACTUAL questions, response options, and consent text - not descriptions of what would be included.`;
+
+    const chapterTokenBudget = chapter.id === 'references' ? 6000 : 3500;
 
     const { text, apiUsed, error } = await generateSection(prompt, chapterTokenBudget);
 
