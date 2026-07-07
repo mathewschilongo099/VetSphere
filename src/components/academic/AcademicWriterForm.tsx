@@ -2,6 +2,7 @@
 'use client';
 
 import { useState } from 'react';
+import type jsPDF from 'jspdf';
 
 type AcademicLevel = 'diploma' | 'degree' | 'masters' | 'phd';
 type DocumentType = 'essay' | 'research' | 'report' | 'case-study';
@@ -11,6 +12,13 @@ const levelLabels: Record<AcademicLevel, string> = {
   degree: "📘 Bachelor's",
   masters: "🎯 Master's",
   phd: '🔬 PhD'
+};
+
+const levelDegreeNames: Record<AcademicLevel, string> = {
+  diploma: 'Diploma',
+  degree: "Bachelor's Degree",
+  masters: "Master's Degree",
+  phd: 'PhD'
 };
 
 const typeLabels: Record<DocumentType, string> = {
@@ -27,6 +35,266 @@ const levelDescriptions: Record<AcademicLevel, string> = {
   phd: 'Original contribution with extensive literature review'
 };
 
+// ============================================================
+// PDF GENERATION
+// ============================================================
+// Real, direct-download PDF (no print dialog), built with jsPDF instead of
+// window.print(). Because we lay the document out programmatically instead
+// of screenshotting HTML, we can also compute a genuinely accurate table of
+// contents: a first "dry run" pass measures which page each heading actually
+// lands on, then a second real pass renders the TOC with correct numbers.
+//
+// Requires: npm install jspdf
+
+type Block = { type: 'h2' | 'h3' | 'bare' | 'para' | 'blank'; text: string };
+
+function parseBlocks(content: string): Block[] {
+  return content.split('\n').map((raw) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return { type: 'blank', text: '' } as Block;
+    if (/^\d+\.0\s+/.test(trimmed)) return { type: 'h2', text: trimmed } as Block;
+    if (/^\d+\.\d+(\.\d+)?\s+/.test(trimmed)) return { type: 'h3', text: trimmed } as Block;
+    if (/^(REFERENCES|APPENDICES)$/i.test(trimmed)) {
+      return { type: 'bare', text: trimmed.toUpperCase() } as Block;
+    }
+    return { type: 'para', text: trimmed } as Block;
+  });
+}
+
+// The AI's own front-matter text includes a guessed Table of Contents with
+// dot-leader placeholder lines (e.g. "1.0 Introduction ..... 1"). We strip
+// that out entirely and replace it with a computed one.
+function stripFakeToc(blocks: Block[]): Block[] {
+  return blocks.filter(
+    (b) => !/\.{4,}/.test(b.text) && !/^5\.0\s+Table of Contents/i.test(b.text.trim())
+  );
+}
+
+function splitFrontAndBody(blocks: Block[]): { front: Block[]; body: Block[] } {
+  const idx = blocks.findIndex((b) => b.type === 'h2' && /^1\.0\s+Introduction\b/i.test(b.text));
+  if (idx === -1) return { front: blocks, body: [] };
+  return { front: blocks.slice(0, idx), body: blocks.slice(idx) };
+}
+
+const PAGE_MARGIN = 72; // 1 inch, matches your standard formatting rules
+
+function drawBlocks(
+  doc: jsPDF,
+  blocks: Block[],
+  startY: number,
+  recordHeadingPages: boolean
+): { finalY: number; headings: { text: string; page: number }[] } {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const maxWidth = pageWidth - PAGE_MARGIN * 2;
+  const bottom = pageHeight - PAGE_MARGIN;
+
+  let y = startY;
+  const headings: { text: string; page: number }[] = [];
+
+  for (const block of blocks) {
+    if (block.type === 'blank') {
+      y += 9;
+      continue;
+    }
+
+    let fontStyle: 'normal' | 'bold' = 'normal';
+    let size = 12;
+    let gapBefore = 0;
+    const gapAfter = 6;
+    let isHeading = false;
+
+    if (block.type === 'h2') {
+      fontStyle = 'bold';
+      size = 13;
+      gapBefore = 14;
+      isHeading = true;
+    } else if (block.type === 'h3') {
+      fontStyle = 'bold';
+      size = 12;
+      gapBefore = 10;
+      isHeading = true;
+    } else if (block.type === 'bare') {
+      fontStyle = 'bold';
+      size = 13;
+      gapBefore = 14;
+      isHeading = true;
+    }
+
+    doc.setFont('times', fontStyle);
+    doc.setFontSize(size);
+    const lineH = size * 1.5; // 1.5 line spacing per your formatting rules
+
+    y += gapBefore;
+    if (y + lineH > bottom) {
+      doc.addPage();
+      y = PAGE_MARGIN;
+    }
+
+    if (isHeading && recordHeadingPages) {
+      headings.push({ text: block.text, page: doc.getNumberOfPages() });
+    }
+
+    const lines = doc.splitTextToSize(block.text, maxWidth) as string[];
+    lines.forEach((ln, i) => {
+      if (y + lineH > bottom) {
+        doc.addPage();
+        y = PAGE_MARGIN;
+      }
+      const isLast = i === lines.length - 1;
+      if (!isHeading && !isLast) {
+        // Justified body text per your standard formatting rules.
+        doc.text(ln, PAGE_MARGIN, y, { maxWidth, align: 'justify' } as any);
+      } else {
+        doc.text(ln, PAGE_MARGIN, y);
+      }
+      y += lineH;
+    });
+
+    y += gapAfter;
+  }
+
+  return { finalY: y, headings };
+}
+
+function renderToc(
+  doc: jsPDF,
+  entries: { label: string; page: number }[],
+  startY: number
+): void {
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const maxWidth = pageWidth - PAGE_MARGIN * 2;
+  const bottom = pageHeight - PAGE_MARGIN;
+
+  let y = startY;
+  doc.setFont('times', 'normal');
+  doc.setFontSize(12);
+  const lineH = 12 * 1.5;
+  const dotChar = '.';
+  const dotWidth = doc.getTextWidth(dotChar);
+
+  for (const entry of entries) {
+    if (y + lineH > bottom) {
+      doc.addPage();
+      y = PAGE_MARGIN;
+    }
+    const pageStr = String(entry.page);
+    const pageStrWidth = doc.getTextWidth(pageStr);
+    const labelMaxWidth = maxWidth - pageStrWidth - 20;
+    const labelLines = doc.splitTextToSize(entry.label, labelMaxWidth) as string[];
+
+    labelLines.forEach((ln, i) => {
+      if (y + lineH > bottom) {
+        doc.addPage();
+        y = PAGE_MARGIN;
+      }
+      if (i === 0) {
+        const labelWidth = doc.getTextWidth(ln);
+        const dotsWidth = Math.max(0, maxWidth - labelWidth - pageStrWidth - 10);
+        const numDots = Math.max(3, Math.floor(dotsWidth / dotWidth));
+        doc.text(ln, PAGE_MARGIN, y);
+        doc.text(dotChar.repeat(numDots), PAGE_MARGIN + labelWidth + 4, y);
+        doc.text(pageStr, pageWidth - PAGE_MARGIN - pageStrWidth, y);
+      } else {
+        doc.text(ln, PAGE_MARGIN + 12, y);
+      }
+      y += lineH;
+    });
+  }
+}
+
+async function generateAcademicPdf(
+  content: string,
+  topic: string,
+  level: AcademicLevel
+): Promise<void> {
+  const { default: JsPDF } = await import('jspdf');
+
+  const blocks = stripFakeToc(parseBlocks(content));
+  const { front, body } = splitFrontAndBody(blocks);
+
+  const doc = new JsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
+  const pageWidth = doc.internal.pageSize.getWidth();
+
+  // --- Title page ---
+  doc.setFont('times', 'bold');
+  doc.setFontSize(18);
+  const titleLines = doc.splitTextToSize(topic.toUpperCase(), pageWidth - PAGE_MARGIN * 2) as string[];
+  let y = 220;
+  titleLines.forEach((ln) => {
+    doc.text(ln, pageWidth / 2, y, { align: 'center' } as any);
+    y += 26;
+  });
+  doc.setFont('times', 'normal');
+  doc.setFontSize(13);
+  y += 60;
+  ['VetSphere Academic Writer', levelDegreeNames[level], new Date().toLocaleDateString()].forEach(
+    (line) => {
+      doc.text(line, pageWidth / 2, y, { align: 'center' } as any);
+      y += 20;
+    }
+  );
+
+  // --- Front matter (Declaration, Dedication, Acknowledgements, Abstract, Abbreviations) ---
+  doc.addPage();
+  const declIdx = front.findIndex((b) => b.type === 'h2' && /^2\.0\s+Declaration/i.test(b.text));
+  const frontMatterBlocks = declIdx === -1 ? front : front.slice(declIdx);
+  drawBlocks(doc, frontMatterBlocks, PAGE_MARGIN, false);
+  const frontMatterPageCount = doc.getNumberOfPages();
+
+  // --- Body: measurement-only pass to find each heading's real page ---
+  const { default: ScratchJsPDF } = await import('jspdf');
+  const scratchDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
+  const { headings: bodyHeadings } = drawBlocks(scratchDoc, body, PAGE_MARGIN, true);
+
+  // --- TOC: measurement pass to find how many pages the TOC itself needs ---
+  const scratchTocDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
+  scratchTocDoc.setFont('times', 'bold');
+  scratchTocDoc.setFontSize(14);
+  scratchTocDoc.text('TABLE OF CONTENTS', scratchTocDoc.internal.pageSize.getWidth() / 2, PAGE_MARGIN, {
+    align: 'center',
+  } as any);
+  renderToc(
+    scratchTocDoc,
+    bodyHeadings.map((h) => ({ label: h.text, page: h.page })),
+    PAGE_MARGIN + 30
+  );
+  const tocPageCount = scratchTocDoc.getNumberOfPages();
+
+  // --- Real TOC render, now with correct final page numbers ---
+  doc.addPage();
+  doc.setFont('times', 'bold');
+  doc.setFontSize(14);
+  doc.text('TABLE OF CONTENTS', pageWidth / 2, PAGE_MARGIN, { align: 'center' } as any);
+  const realEntries = bodyHeadings.map((h) => ({
+    label: h.text,
+    page: frontMatterPageCount + tocPageCount + h.page,
+  }));
+  renderToc(doc, realEntries, PAGE_MARGIN + 30);
+
+  // --- Real body render ---
+  doc.addPage();
+  drawBlocks(doc, body, PAGE_MARGIN, false);
+
+  // --- Page numbers on every page ---
+  const totalPages = doc.getNumberOfPages();
+  for (let p = 1; p <= totalPages; p++) {
+    doc.setPage(p);
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10);
+    doc.text(String(p), pageWidth / 2, doc.internal.pageSize.getHeight() - 40, {
+      align: 'center',
+    } as any);
+  }
+
+  const filename = `${topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 60)}-${level}.pdf`;
+  doc.save(filename);
+}
+
+// ============================================================
+// COMPONENT
+// ============================================================
 export default function AcademicWriterForm() {
   const [topic, setTopic] = useState('');
   const [level, setLevel] = useState<AcademicLevel>('degree');
@@ -36,13 +304,14 @@ export default function AcademicWriterForm() {
   const [error, setError] = useState<string | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
+  const [pdfGenerating, setPdfGenerating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setResult(null);
-    setLoadingMessage('⏳ Connecting to Gemini AI...');
+    setLoadingMessage('⏳ Connecting to AI provider...');
 
     try {
       setTimeout(() => setLoadingMessage('🧠 Analyzing your topic...'), 2000);
@@ -57,10 +326,9 @@ export default function AcademicWriterForm() {
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) throw new Error(data.error || 'Failed to generate');
-      
-      console.log('Content received:', data.content.substring(0, 200)); // Debug log
+
       setResult(data.content);
       const words = data.content.split(/\s+/).length;
       setWordCount(words);
@@ -92,111 +360,32 @@ export default function AcademicWriterForm() {
     }
   };
 
-  const downloadAsPDF = () => {
-    if (result) {
-      const printWindow = window.open('', '_blank', 'width=900,height=700');
-      if (printWindow) {
-        printWindow.document.write(`
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <title>Academic Paper</title>
-              <style>
-                body {
-                  font-family: 'Times New Roman', Times, serif;
-                  font-size: 12pt;
-                  line-height: 1.5;
-                  margin: 1in;
-                  text-align: justify;
-                  max-width: 8.5in;
-                  margin-left: auto;
-                  margin-right: auto;
-                  color: #000000;
-                }
-                h1, h2, h3, h4, h5, h6 {
-                  font-family: 'Times New Roman', Times, serif;
-                  color: #000000;
-                }
-                h1 { font-size: 14pt; font-weight: bold; text-align: center; }
-                h2 { font-size: 13pt; font-weight: bold; margin-top: 12pt; margin-bottom: 6pt; }
-                h3 { font-size: 12pt; font-weight: bold; margin-top: 8pt; margin-bottom: 4pt; }
-                p {
-                  margin-bottom: 4pt;
-                  text-align: justify;
-                  line-height: 1.5;
-                  color: #000000;
-                }
-                .title-page {
-                  text-align: center;
-                  margin-top: 2in;
-                  margin-bottom: 2in;
-                }
-                .title-page h1 {
-                  font-size: 18pt;
-                  margin-bottom: 12pt;
-                }
-                .title-page p {
-                  text-align: center;
-                  margin-bottom: 4pt;
-                }
-                .page-number {
-                  text-align: center;
-                  margin-top: 12pt;
-                  font-size: 10pt;
-                }
-                .procedure-step {
-                  margin-bottom: 2pt;
-                  padding-left: 20pt;
-                  text-indent: -20pt;
-                }
-              </style>
-            </head>
-            <body>
-              ${result.split('\n').map(line => {
-                if (line.match(/^\d+\.0\s/)) {
-                  return `<h2>${line}</h2>`;
-                }
-                if (line.match(/^\d+\.\d+\s/)) {
-                  return `<h3>${line}</h3>`;
-                }
-                if (line.match(/^\d+\.\s/)) {
-                  return `<p class="procedure-step">${line}</p>`;
-                }
-                if (line.trim()) {
-                  return `<p>${line}</p>`;
-                }
-                return '<br>';
-              }).join('')}
-              <div class="page-number">${new Date().getFullYear()} | Page 1</div>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        setTimeout(() => {
-          printWindow.focus();
-          printWindow.print();
-        }, 1000);
-      }
+  const downloadAsPDF = async () => {
+    if (!result) return;
+    setPdfGenerating(true);
+    try {
+      await generateAcademicPdf(result, topic, level);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      alert('Sorry, the PDF could not be generated. Please try the TXT download instead.');
+    } finally {
+      setPdfGenerating(false);
     }
   };
 
-  // Helper function to render content with proper formatting - FIXED with explicit colors
+  // Helper function to render content with proper formatting
   const renderContent = () => {
     if (!result) return null;
-
-    console.log('Rendering content, length:', result.length); // Debug log
 
     const lines = result.split('\n');
     const elements: JSX.Element[] = [];
 
     lines.forEach((line, index) => {
-      // Skip empty lines but add spacing
       if (!line.trim()) {
         elements.push(<br key={`br-${index}`} />);
         return;
       }
 
-      // Main headings (1.0, 2.0, etc.)
       if (line.match(/^\d+\.0\s/)) {
         elements.push(
           <h2 key={index} className="text-xl font-bold mt-6 mb-3" style={{ color: '#1a1a1a' }}>
@@ -206,7 +395,6 @@ export default function AcademicWriterForm() {
         return;
       }
 
-      // Subheadings (1.1, 1.2, etc.)
       if (line.match(/^\d+\.\d+\s/)) {
         elements.push(
           <h3 key={index} className="text-lg font-bold mt-4 mb-2" style={{ color: '#2d2d2d' }}>
@@ -216,27 +404,32 @@ export default function AcademicWriterForm() {
         return;
       }
 
-      // Numbered steps (1., 2., 3., etc.)
       if (line.match(/^\d+\.\s/)) {
         elements.push(
-          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt', textIndent: '-20pt', color: '#1a1a1a' }}>
+          <p
+            key={index}
+            className="mb-1 leading-relaxed text-justify"
+            style={{ paddingLeft: '20pt', textIndent: '-20pt', color: '#1a1a1a' }}
+          >
             {line}
           </p>
         );
         return;
       }
 
-      // Bullet points
       if (line.trim().startsWith('-') || line.trim().startsWith('•')) {
         elements.push(
-          <p key={index} className="mb-1 leading-relaxed text-justify" style={{ paddingLeft: '20pt', color: '#1a1a1a' }}>
+          <p
+            key={index}
+            className="mb-1 leading-relaxed text-justify"
+            style={{ paddingLeft: '20pt', color: '#1a1a1a' }}
+          >
             {line}
           </p>
         );
         return;
       }
 
-      // Regular paragraphs - with explicit color
       elements.push(
         <p key={index} className="mb-2 leading-relaxed text-justify" style={{ color: '#1a1a1a' }}>
           {line}
@@ -269,9 +462,7 @@ export default function AcademicWriterForm() {
         </div>
 
         <div>
-          <label className="block font-semibold text-gray-700 mb-2">
-            Academic Level
-          </label>
+          <label className="block font-semibold text-gray-700 mb-2">Academic Level</label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {(Object.keys(levelLabels) as AcademicLevel[]).map((l) => (
               <button
@@ -294,9 +485,7 @@ export default function AcademicWriterForm() {
         </div>
 
         <div>
-          <label className="block font-semibold text-gray-700 mb-2">
-            Document Type
-          </label>
+          <label className="block font-semibold text-gray-700 mb-2">Document Type</label>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {(Object.keys(typeLabels) as DocumentType[]).map((t) => (
               <button
@@ -319,21 +508,39 @@ export default function AcademicWriterForm() {
           type="submit"
           disabled={loading || !topic.trim()}
           className={`w-full font-bold py-4 rounded-xl transition shadow-lg ${
-            loading 
-              ? 'bg-gradient-to-r from-green-600 to-green-700 text-white' 
+            loading
+              ? 'bg-gradient-to-r from-green-600 to-green-700 text-white'
               : 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >
           {loading ? (
             <span className="flex flex-col items-center gap-2">
               <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
                 {loadingMessage}
               </span>
-              <span className="text-xs text-green-100">This may take a moment for comprehensive content</span>
+              <span className="text-xs text-green-100">
+                This may take a moment for comprehensive content
+              </span>
             </span>
           ) : (
             '📝 Generate Academic Paper'
@@ -351,7 +558,6 @@ export default function AcademicWriterForm() {
         </div>
       )}
 
-      {/* RESULTS - Displayed directly below the button with visible text */}
       {result && (
         <div className="mt-8 pt-6 border-t border-gray-200">
           <div className="flex flex-wrap justify-between items-center mb-4 gap-3">
@@ -376,21 +582,23 @@ export default function AcademicWriterForm() {
               </button>
               <button
                 onClick={downloadAsPDF}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
+                disabled={pdfGenerating}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition"
               >
-                📄 Download PDF
+                {pdfGenerating ? '⏳ Building PDF...' : '📄 Download PDF'}
               </button>
             </div>
           </div>
 
-          {/* Content displayed directly - NO BOX, with visible text */}
-          <div style={{ 
-            fontFamily: 'Times New Roman, Times, serif', 
-            fontSize: '12pt', 
-            lineHeight: '1.5',
-            color: '#1a1a1a',
-            backgroundColor: '#ffffff'
-          }}>
+          <div
+            style={{
+              fontFamily: 'Times New Roman, Times, serif',
+              fontSize: '12pt',
+              lineHeight: '1.5',
+              color: '#1a1a1a',
+              backgroundColor: '#ffffff'
+            }}
+          >
             {renderContent()}
           </div>
 
