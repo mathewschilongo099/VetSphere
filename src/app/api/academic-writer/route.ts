@@ -52,7 +52,7 @@ function buildProposalSpecs(topic: string): ChapterSpec[] {
       title: 'FRONT MATTER',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write ONLY the following front-matter sections for a RESEARCH PROPOSAL, in this order, fully written out:
+      instructions: `Write ONLY the following front-matter sections for a RESEARCH PROPOSAL, in this order, fully written out with substantial content:
 
 TITLE PAGE (with the research title, author name, degree, date)
 TABLE OF CONTENTS (list all sections with page numbers as placeholders)
@@ -67,137 +67,150 @@ CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write heading
       title: 'CHAPTER ONE: INTRODUCTION',
       chapterLabel: 'CHAPTER ONE',
       chapterNumber: '1',
-      instructions: `Write the FULL Chapter One for a RESEARCH PROPOSAL.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter One for a RESEARCH PROPOSAL.
 
 CRITICAL FORMAT:
 Start with "CHAPTER ONE" on its own line.
 Then on the next line, write "1.0 INTRODUCTION".
-Then write a short paragraph explaining what the chapter covers.
+Then write a substantial paragraph explaining what the chapter covers.
 
-Required subsections with EXACT specifications:
-1.1 Background of the Study (6 paragraphs covering global, regional and national status quo. Mention different countries as examples. Cite with references published in the last 10 years)
-1.2 Statement of the Problem (1 paragraph, approximately 100 words, convincing, cite as evidence)
-1.3 Research Objectives
+Required subsections with EXACT specifications and DEPTH requirements:
+1.1 Background of the Study: Write 6 SUBSTANTIAL paragraphs (each 6-8 sentences minimum) covering global, regional and national status quo. Mention different countries as examples with specific statistics and context. Cite with references published in the last 10 years. Each paragraph must be detailed and informative.
+
+1.2 Statement of the Problem: Write 1 SUBSTANTIAL paragraph of approximately 150-200 words that is convincing, uses evidence, and clearly articulates the research gap.
+
+1.3 Research Objectives:
 1.3.1 General Objective (clear, 20 to 25 words)
-1.3.2 Specific Objectives (exactly 3 specific objectives)
-1.4 Research Questions (turn the 3 objectives into questions)
-1.5 Significance of the Study
-1.6 Scope of Study (approximately 60 words)
-1.7 Operational Definitions (define 5 key terms)
+1.3.2 Specific Objectives (exactly 3 specific objectives, each clearly stated)
+
+1.4 Research Questions (turn the 3 objectives into clear, specific questions)
+
+1.5 Significance of the Study: Write 2-3 substantial paragraphs explaining the significance to different stakeholders.
+
+1.6 Scope of Study: Write 1 substantial paragraph (approximately 80-100 words) clearly defining boundaries.
+
+1.7 Operational Definitions: Define exactly 5 key terms with clear, academic definitions (2-3 sentences each).
 
 CRITICAL RULES:
-- Start with CHAPTER ONE on its own line
-- Then on the next line write 1.0 INTRODUCTION
-- Each subsection heading should be on its own line
-- Write substantial paragraphs under each heading
-- Use APA 7th style in-text citations
-- Never use numbered bracket citations like [1]
-- Use plain text only, no markdown, no asterisks
+- Each subsection must have SUBSTANTIAL content - not brief or superficial
+- Write detailed, analytical paragraphs with proper academic depth
+- Use APA 7th style in-text citations throughout
+- Never use numbered bracket citations
+- Use plain text only, no markdown
 
 EXACT FORMAT REQUIRED:
 CHAPTER ONE
 1.0 INTRODUCTION
-[short paragraph explaining what the chapter covers]
+[substantial paragraph]
 1.1 Background of the Study
-[six paragraphs of content]
+[six substantial paragraphs with citations]
 1.2 Statement of the Problem
-[one paragraph of content]`,
+[one substantial paragraph of 150-200 words]`,
     },
     {
       id: 'chapter2',
       title: 'CHAPTER TWO: LITERATURE REVIEW',
       chapterLabel: 'CHAPTER TWO',
       chapterNumber: '2',
-      instructions: `Write the FULL Chapter Two for a RESEARCH PROPOSAL.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter Two for a RESEARCH PROPOSAL.
 
 CRITICAL FORMAT:
 Start with "CHAPTER TWO" on its own line.
 Then on the next line, write "2.0 INTRODUCTION".
-Then write a short paragraph explaining what the chapter covers.
+Then write a substantial paragraph explaining what the chapter covers.
 
-Required subsections with EXACT specifications:
-2.1.0 Empirical Review (100 word paragraph, NO citations)
-2.1.1 (Create a theme from objective 1 and present literature at all levels, cite in standard way. Move beyond description)
-2.1.2 (Create a theme from objective 2 and present literature at all levels, cite in standard way. Move beyond description)
-2.1.3 (Create a theme from objective 3 and present literature at all levels, cite in standard way. Move beyond description)
-2.2 Theoretical Framework (use 2 different theories, state the theory, by who, when, what the theory is about, how the theory is linked to the current study. Maximum of 3 paragraphs)
-2.3 Conceptual Framework (short explanation showing the relationship between variables, followed by an editable sketch described in words)
+Required subsections with EXACT specifications and DEPTH requirements:
+2.1.0 Empirical Review: Write exactly 100-150 words with NO citations - a synthesis of the research landscape.
+
+2.1.1 Theme from Objective 1: Write 3-4 SUBSTANTIAL paragraphs presenting literature at global, regional, and national levels. Cite in standard APA style. Move beyond description - critically analyze, compare, and synthesize.
+
+2.1.2 Theme from Objective 2: Write 3-4 SUBSTANTIAL paragraphs presenting literature at global, regional, and national levels. Cite in standard APA style. Move beyond description - critically analyze, compare, and synthesize.
+
+2.1.3 Theme from Objective 3: Write 3-4 SUBSTANTIAL paragraphs presenting literature at global, regional, and national levels. Cite in standard APA style. Move beyond description - critically analyze, compare, and synthesize.
+
+2.2 Theoretical Framework: Use exactly 2 different theories. For each theory, state the theory, by whom, when, what the theory is about, and how the theory is linked to the current study. Write 4-5 substantial paragraphs total.
+
+2.3 Conceptual Framework: Write a substantial explanation showing the relationship between variables, followed by a detailed editable sketch described in words.
 
 CRITICAL RULES:
-- Start with CHAPTER TWO on its own line
-- Then on the next line write 2.0 INTRODUCTION
-- Each subsection heading should be on its own line
+- Each subsection must have SUBSTANTIAL content - not brief or superficial
+- Write detailed, analytical paragraphs with proper academic depth
 - Use APA 7th style in-text citations
 - Use plain text only, no markdown
 
 EXACT FORMAT REQUIRED:
 CHAPTER TWO
 2.0 INTRODUCTION
-[short paragraph]
+[substantial paragraph]
 2.1.0 Empirical Review
-[100 word paragraph with no citations]
+[100-150 words with no citations]
 2.1.1 [Theme from Objective 1]
-[content with citations]`,
+[3-4 substantial paragraphs with citations]`,
     },
     {
       id: 'chapter3',
       title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
       chapterLabel: 'CHAPTER THREE',
       chapterNumber: '3',
-      instructions: `Write the FULL Chapter Three for a RESEARCH PROPOSAL.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter Three for a RESEARCH PROPOSAL.
 
 CRITICAL FORMAT:
 Start with "CHAPTER THREE" on its own line.
 Then on the next line, write "3.0 INTRODUCTION".
-Then write a short paragraph explaining what the chapter covers.
+Then write a substantial paragraph explaining what the chapter covers.
 
-Required subsections with EXACT specifications:
-3.1 Research Approach (60 words, be clear)
-3.2 Research Design (90 words, be clear, cite Creswell, justify the reason for choosing the design)
-3.3 Study Location (60 words)
-3.4 Target Population (60 words, state the actual population)
-3.5 Sample Size (show using a formula how the sample was calculated, justify the reason for the sample size)
-3.6 Data Collection Instruments and Procedures (100 words, ensure to cite)
-3.7 Data Analysis Plan (90 words, be clear, consistent, justify, cite)
-3.8 Reliability and Validity (60 words)
-3.9 Ethical Considerations (90 words, be clear)
+Required subsections with EXACT specifications and DEPTH requirements:
+3.1 Research Approach: Write 1 detailed paragraph (60-80 words) clearly explaining the approach and its justification.
+
+3.2 Research Design: Write 2 detailed paragraphs (90-120 words total) clearly explaining the design, cite Creswell, justify the reason for choosing the design.
+
+3.3 Study Location: Write 1 detailed paragraph (60-80 words) describing the location and its relevance.
+
+3.4 Target Population: Write 1 detailed paragraph (60-80 words) stating the actual population and its characteristics.
+
+3.5 Sample Size: Show using a formula how the sample was calculated, justify the reason for the sample size with detailed explanation.
+
+3.6 Data Collection Instruments and Procedures: Write 2 detailed paragraphs (120-150 words total) describing instruments and procedures, ensure to cite.
+
+3.7 Data Analysis Plan: Write 2 detailed paragraphs (120-150 words total) clearly explaining the plan, be consistent, justify, cite.
+
+3.8 Reliability and Validity: Write 1 detailed paragraph (60-80 words) explaining measures taken.
+
+3.9 Ethical Considerations: Write 2 detailed paragraphs (120-150 words total) clearly explaining ethical protocols.
 
 CRITICAL RULES:
-- Start with CHAPTER THREE on its own line
-- Then on the next line write 3.0 INTRODUCTION
-- Each subsection heading should be on its own line
+- Each subsection must have SUBSTANTIAL content - not brief or superficial
+- Write detailed, analytical paragraphs with proper academic depth
 - Cite Creswell for research design
 - Use plain text only, no markdown
 
 EXACT FORMAT REQUIRED:
 CHAPTER THREE
 3.0 INTRODUCTION
-[short paragraph]
+[substantial paragraph]
 3.1 Research Approach
-[60 words of content]
-3.2 Research Design
-[90 words of content with Creswell citation]`,
+[60-80 words]`,
     },
     {
       id: 'references',
       title: 'REFERENCES AND APPENDICES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write ONLY the following.
+      instructions: `Write ONLY the following sections with COMPLETE content.
 
 REFERENCES
-Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full.
+Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full with complete bibliographic details.
 
 WORK PLAN
-Present a simple work plan showing activities across months (e.g., Month 1: Literature Review, Month 2: Proposal Writing, etc.)
+Present a detailed work plan showing specific activities across months (e.g., Month 1: Literature Review, Month 2: Proposal Writing, etc.) with clear timelines.
 
 BUDGET
-Present a simple budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha.
+Present a detailed budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha with realistic figures.
 
 INSTRUMENTS OF DATA COLLECTION
-Describe the instruments that would be used (e.g., questionnaire, interview guide) in 2-3 paragraphs.
+Describe in 3-4 substantial paragraphs the instruments that would be used (e.g., questionnaire, interview guide) with specific details about structure, content, and administration.
 
-CRITICAL: Use plain text only. No markdown, no asterisks.`,
+CRITICAL: Use plain text only. No markdown, no asterisks. Write out all content completely - no placeholders.`,
     },
   ];
 }
@@ -209,228 +222,192 @@ function buildResearchSpecs(topic: string): ChapterSpec[] {
       title: 'FRONT MATTER',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write ONLY the following front-matter sections, in this order, fully written out:
+      instructions: `Write ONLY the following front-matter sections, in this order, fully written out with substantial content:
 
-DECLARATION
-DEDICATION
-ACKNOWLEDGEMENTS
-ABSTRACT (with keywords)
+DECLARATION (formal declaration paragraph)
+DEDICATION (sincere dedication 3-4 sentences)
+ACKNOWLEDGEMENTS (substantial paragraph thanking relevant parties)
+ABSTRACT (250-300 words summarizing the entire study with keywords)
 LIST OF ABBREVIATIONS AND ACRONYMS
 
 Do NOT write a Table of Contents section. Do not guess page numbers.
 
-CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write headings in ALL CAPS as shown above.`,
+CRITICAL: Use plain text only. No markdown, no asterisks. Write headings in ALL CAPS.`,
     },
     {
       id: 'chapter1',
       title: 'CHAPTER ONE: INTRODUCTION',
       chapterLabel: 'CHAPTER ONE',
       chapterNumber: '1',
-      instructions: `Write the FULL Chapter One content.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter One.
 
 CRITICAL FORMAT:
 Start with "CHAPTER ONE" on its own line.
 Then on the next line, write "1.0 INTRODUCTION".
-Then write the content.
+Then write substantial content.
 
 Required subsections:
-1.1 Background of the Study
-1.2 Statement of the Problem
-1.3 Research Objectives (with 1.3.1 General Objective and 1.3.2 Specific Objectives)
-1.4 Research Questions
-1.5 Significance of the Study
-1.6 Scope of Study
-1.7 Operational Definitions
+1.1 Background of the Study (6-8 substantial paragraphs with citations)
+1.2 Statement of the Problem (1 substantial paragraph)
+1.3 Research Objectives (with 1.3.1 General Objective and 1.3.2 Specific Objectives - 3-5 objectives)
+1.4 Research Questions (matching the objectives)
+1.5 Significance of the Study (2-3 substantial paragraphs)
+1.6 Scope of Study (1 substantial paragraph)
+1.7 Operational Definitions (5-8 key terms with 2-3 sentence definitions)
 
 CRITICAL RULES:
-- Start with CHAPTER ONE on its own line
-- Then on the next line write 1.0 INTRODUCTION
-- Each subsection heading should be on its own line
-- Write substantial paragraphs under each heading
+- Each subsection must have SUBSTANTIAL content
+- Write detailed, analytical paragraphs
 - Use APA 7th style in-text citations
 - Use plain text only, no markdown
 
 EXACT FORMAT REQUIRED:
 CHAPTER ONE
 1.0 INTRODUCTION
-[content here]
+[substantial content]
 1.1 Background of the Study
-[content here]`,
+[6-8 substantial paragraphs]`,
     },
     {
       id: 'chapter2',
       title: 'CHAPTER TWO: LITERATURE REVIEW',
       chapterLabel: 'CHAPTER TWO',
       chapterNumber: '2',
-      instructions: `Write the FULL Chapter Two content.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter Two.
 
 CRITICAL FORMAT:
 Start with "CHAPTER TWO" on its own line.
 Then on the next line, write "2.0 LITERATURE REVIEW".
-Then write the content.
+Then write substantial content.
 
 Required subsections:
-2.1 Empirical Review (with 2.1.1, 2.1.2, 2.1.3 as themes from the three objectives)
-2.2 Theoretical Framework
-2.3 Conceptual Framework
+2.1 Empirical Review (with 3-4 thematic sub-subsections each with 4-5 substantial paragraphs)
+2.2 Theoretical Framework (2 theories with detailed explanation, 4-5 paragraphs)
+2.3 Conceptual Framework (detailed explanation with variables described)
 
 CRITICAL RULES:
-- Start with CHAPTER TWO on its own line
-- Then on the next line write 2.0 LITERATURE REVIEW
-- Each subsection heading should be on its own line
+- Each subsection must have SUBSTANTIAL content
+- Write detailed, analytical paragraphs
 - Use APA 7th style in-text citations
-- Use plain text only, no markdown
-
-EXACT FORMAT REQUIRED:
-CHAPTER TWO
-2.0 LITERATURE REVIEW
-[content here]
-2.1 Empirical Review
-[content here]`,
+- Use plain text only, no markdown`,
     },
     {
       id: 'chapter3',
       title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
       chapterLabel: 'CHAPTER THREE',
       chapterNumber: '3',
-      instructions: `Write the FULL Chapter Three content.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter Three.
 
 CRITICAL FORMAT:
 Start with "CHAPTER THREE" on its own line.
 Then on the next line, write "3.0 RESEARCH METHODOLOGY".
-Then write the content.
+Then write substantial content.
 
 Required subsections:
-3.1 Research Approach
-3.2 Research Design
-3.3 Study Location
-3.4 Target Population
-3.5 Sample Size
-3.6 Data Collection Instruments and Procedures
-3.7 Data Analysis Plan
-3.8 Reliability and Validity
-3.9 Ethical Considerations
+3.1 Research Approach (2-3 paragraphs)
+3.2 Research Design (3-4 paragraphs, cite Creswell)
+3.3 Study Location (2-3 paragraphs)
+3.4 Target Population (2-3 paragraphs)
+3.5 Sample Size (show formula, detailed justification)
+3.6 Data Collection Instruments and Procedures (3-4 paragraphs, cite)
+3.7 Data Analysis Plan (3-4 paragraphs, justify, cite)
+3.8 Reliability and Validity (2-3 paragraphs)
+3.9 Ethical Considerations (3-4 paragraphs)
 
 CRITICAL RULES:
-- Start with CHAPTER THREE on its own line
-- Then on the next line write 3.0 RESEARCH METHODOLOGY
-- Each subsection heading should be on its own line
+- Each subsection must have SUBSTANTIAL content
+- Write detailed, analytical paragraphs
 - Cite Creswell for research design
-- Use plain text only, no markdown
-
-EXACT FORMAT REQUIRED:
-CHAPTER THREE
-3.0 RESEARCH METHODOLOGY
-[content here]
-3.1 Research Approach
-[content here]`,
+- Use plain text only, no markdown`,
     },
     {
       id: 'chapter4',
       title: 'CHAPTER FOUR: PRESENTATION OF FINDINGS',
       chapterLabel: 'CHAPTER FOUR',
       chapterNumber: '4',
-      instructions: `Write the FULL Chapter Four content.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter Four.
 
 CRITICAL FORMAT:
 Start with "CHAPTER FOUR" on its own line.
 Then on the next line, write "4.0 PRESENTATION OF FINDINGS".
-Then write the content.
+Then write substantial content.
 
 Required subsections:
-4.1 Descriptive and Demographic Results
-4.2 Key Thematic or Statistical Findings
-4.3 Summary of Findings
+4.1 Descriptive and Demographic Results (3-4 paragraphs with realistic percentages)
+4.2 Key Thematic or Statistical Findings (4-5 paragraphs organized by objectives)
+4.3 Summary of Findings (2-3 paragraphs)
 
 CRITICAL RULES:
-- Start with CHAPTER FOUR on its own line
-- Then on the next line write 4.0 PRESENTATION OF FINDINGS
-- Each subsection heading should be on its own line
 - Present realistic findings with percentages and frequencies
-- Use plain text only, no markdown
-
-EXACT FORMAT REQUIRED:
-CHAPTER FOUR
-4.0 PRESENTATION OF FINDINGS
-[content here]
-4.1 Descriptive and Demographic Results
-[content here]`,
+- Each subsection must have SUBSTANTIAL content
+- Use plain text only, no markdown`,
     },
     {
       id: 'chapter5',
       title: 'CHAPTER FIVE: DISCUSSION',
       chapterLabel: 'CHAPTER FIVE',
       chapterNumber: '5',
-      instructions: `Write the FULL Chapter Five content.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter Five.
 
 CRITICAL FORMAT:
 Start with "CHAPTER FIVE" on its own line.
 Then on the next line, write "5.0 DISCUSSION".
-Then write the content.
+Then write substantial content.
 
 Required subsections:
-5.1 Interpretation of Key Findings
-5.2 Comparison with Previous Studies
-5.3 Implications for Practice and Policy
-5.4 Limitations of the Study
+5.1 Interpretation of Key Findings (4-5 substantial paragraphs)
+5.2 Comparison with Previous Studies (4-5 substantial paragraphs)
+5.3 Implications for Practice and Policy (3-4 substantial paragraphs)
+5.4 Limitations of the Study (2-3 substantial paragraphs)
 
 CRITICAL RULES:
-- Start with CHAPTER FIVE on its own line
-- Then on the next line write 5.0 DISCUSSION
-- Each subsection heading should be on its own line
-- Use plain text only, no markdown
-
-EXACT FORMAT REQUIRED:
-CHAPTER FIVE
-5.0 DISCUSSION
-[content here]
-5.1 Interpretation of Key Findings
-[content here]`,
+- Each subsection must have SUBSTANTIAL content
+- Interpret findings from Chapter Four
+- Engage with literature from Chapter Two
+- Use plain text only, no markdown`,
     },
     {
       id: 'chapter6',
       title: 'CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS',
       chapterLabel: 'CHAPTER SIX',
       chapterNumber: '6',
-      instructions: `Write the FULL Chapter Six content.
+      instructions: `Write a COMPREHENSIVE and DETAILED Chapter Six.
 
 CRITICAL FORMAT:
 Start with "CHAPTER SIX" on its own line.
 Then on the next line, write "6.0 CONCLUSIONS AND RECOMMENDATIONS".
-Then write the content.
+Then write substantial content.
 
 Required subsections:
-6.1 Conclusions
-6.2 Recommendations
+6.1 Conclusions (4-5 substantial paragraphs)
+6.2 Recommendations (3-4 substantial paragraphs grouped by stakeholder)
 
 CRITICAL RULES:
-- Start with CHAPTER SIX on its own line
-- Then on the next line write 6.0 CONCLUSIONS AND RECOMMENDATIONS
 - DO NOT include a 6.0 Introduction subsection
-- Each subsection heading should be on its own line
+- Each subsection must have SUBSTANTIAL content
 - Use plain text only, no markdown
 
 EXACT FORMAT REQUIRED:
 CHAPTER SIX
 6.0 CONCLUSIONS AND RECOMMENDATIONS
-[content here]
+[substantial content]
 6.1 Conclusions
-[content here]
+[4-5 substantial paragraphs]
 6.2 Recommendations
-[content here]`,
+[3-4 substantial paragraphs]`,
     },
     {
       id: 'references',
       title: 'REFERENCES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write ONLY the following.
+      instructions: `Write ONLY the following with COMPLETE content.
 
 REFERENCES
 Provide a complete list of 30 references published in the last 10 years. Use a mixture of books and journals. Include 4 research methods books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full.
 
 APPENDICES
-Describe the instruments of data collection that would be included.`,
+Describe in 3-4 substantial paragraphs the instruments of data collection that would be included.`,
     },
   ];
 }
@@ -740,51 +717,73 @@ export async function POST(request: NextRequest) {
     const idx = Math.max(0, Math.min(chapterIndex, chapters.length - 1));
     const chapter = chapters[idx];
 
-    // For proposal, we have fewer chapters (frontmatter, chapter1, chapter2, chapter3, references)
-    // For research, we have more chapters (frontmatter, chapter1-6, references)
     const totalChapters = type === 'proposal' ? 5 : 8;
 
-    // Special instruction for proposal chapters
+    // Special instruction for depth
+    let depthInstruction = `
+CRITICAL DEPTH REQUIREMENT:
+This is a ${levelInfo.label} academic document. The content must be COMPREHENSIVE and THOROUGH.
+- Write SUBSTANTIAL paragraphs (minimum 5-7 sentences per paragraph for main content)
+- Provide detailed analysis, not brief summaries
+- Include specific examples, statistics, and evidence
+- Write 2-3 paragraphs per subsection where appropriate
+- The document should reflect ${levelInfo.depth}
+- Do not be brief or superficial - this is a serious academic work
+`;
+
     let chapterSpecificInstruction = '';
     if (type === 'proposal') {
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
-CRITICAL FOR PROPOSAL CHAPTER ONE:
-- Write exactly 6 paragraphs for 1.1 Background of the Study
-- Write exactly 1 paragraph of approximately 100 words for 1.2 Statement of the Problem
-- Write exactly 3 specific objectives
-- Write exactly 60 words for 1.6 Scope of Study
-- Define exactly 5 key terms for 1.7 Operational Definitions`;
+PROPOSAL CHAPTER ONE SPECIFICS:
+- 1.1 Background: exactly 6 substantial paragraphs (each 6-8 sentences)
+- 1.2 Statement of Problem: 150-200 words with citations
+- 1.6 Scope of Study: 80-100 words
+- 1.7 Operational Definitions: 5 terms with 2-3 sentence definitions each`;
       }
       if (chapter.id === 'chapter2') {
         chapterSpecificInstruction = `
-CRITICAL FOR PROPOSAL CHAPTER TWO:
-- Write exactly 100 words for 2.1.0 Empirical Review with NO citations
-- Create 3 themes from the 3 objectives for 2.1.1, 2.1.2, 2.1.3
-- Use exactly 2 theories for 2.2 Theoretical Framework
-- Include a description of the conceptual framework with variables`;
+PROPOSAL CHAPTER TWO SPECIFICS:
+- 2.1.0 Empirical Review: 100-150 words, NO citations
+- 2.1.1, 2.1.2, 2.1.3: Each 3-4 substantial paragraphs
+- 2.2 Theoretical Framework: 4-5 substantial paragraphs total
+- 2.3 Conceptual Framework: Detailed explanation with variables`;
       }
       if (chapter.id === 'chapter3') {
         chapterSpecificInstruction = `
-CRITICAL FOR PROPOSAL CHAPTER THREE:
-- Write exactly 60 words for 3.1 Research Approach
-- Write exactly 90 words for 3.2 Research Design, cite Creswell
-- Write exactly 60 words for 3.3 Study Location
-- Write exactly 60 words for 3.4 Target Population
-- Show a formula for 3.5 Sample Size calculation
-- Write exactly 100 words for 3.6 Data Collection Instruments and Procedures
-- Write exactly 90 words for 3.7 Data Analysis Plan
-- Write exactly 60 words for 3.8 Reliability and Validity
-- Write exactly 90 words for 3.9 Ethical Considerations`;
+PROPOSAL CHAPTER THREE SPECIFICS:
+- Each subsection must be comprehensive and detailed
+- 3.2 Research Design: 90-120 words, cite Creswell
+- 3.5 Sample Size: Show formula and detailed justification
+- 3.6 Data Collection: 120-150 words, cite sources
+- 3.7 Data Analysis: 120-150 words, justify, cite
+- 3.9 Ethical Considerations: 120-150 words`;
       }
       if (chapter.id === 'references') {
         chapterSpecificInstruction = `
-CRITICAL FOR PROPOSAL REFERENCES:
-- Provide exactly 30 references published in the last 10 years
-- Include 4 research methods books
-- Include a Work Plan table
-- Include a Budget table in Zambian Kwacha
-- Include Instruments of Data Collection description`;
+PROPOSAL REFERENCES SPECIFICS:
+- 30 complete APA 7th references
+- 4 research methods books
+- Work Plan with specific activities and timelines
+- Budget table in Zambian Kwacha
+- 3-4 paragraphs describing instruments`;
+      }
+    } else {
+      // Research paper specs
+      if (chapter.id === 'chapter1') {
+        chapterSpecificInstruction = `
+RESEARCH CHAPTER ONE SPECIFICS:
+- 1.1 Background: 6-8 substantial paragraphs with citations
+- 1.2 Statement of Problem: 1 substantial paragraph
+- 1.5 Significance: 2-3 substantial paragraphs
+- 1.7 Operational Definitions: 5-8 terms with 2-3 sentence definitions`;
+      }
+      if (chapter.id === 'chapter6') {
+        chapterSpecificInstruction = `
+RESEARCH CHAPTER SIX SPECIFICS:
+- DO NOT include "6.0 Introduction" subsection
+- 6.1 Conclusions: 4-5 substantial paragraphs
+- 6.2 Recommendations: 3-4 substantial paragraphs grouped by stakeholder`;
       }
     }
 
@@ -792,23 +791,27 @@ CRITICAL FOR PROPOSAL REFERENCES:
 
 TOPIC: "${cleanTopic}"
 
+${depthInstruction}
+
 PREVIOUS CONTENT (for continuity):
 ${previousContext || 'This is the first section.'}
 
 TASK: ${chapter.instructions}
 ${chapterSpecificInstruction}
 
-CRITICAL RULES FOR CONTINUITY:
-- This is a continuous academic document.
-- Start with the chapter label exactly as specified (e.g., "CHAPTER ONE").
-- Then on the next line, write the chapter title (e.g., "1.0 INTRODUCTION").
-- Do not repeat content from previous chapters.
-- Use plain text only. No markdown, no asterisks, no underscores.
-- Use APA 7th style in-text citations only. Never use numbered bracket citations.
-- Write out full content. Never use placeholders.
-- Avoid the use of hyphens or dashes throughout.`;
+CRITICAL RULES:
+- This is a continuous academic document
+- Start with the chapter label exactly as specified
+- Write SUBSTANTIAL, DETAILED content - never brief or superficial
+- Each paragraph should be 5-7 sentences minimum for main content
+- Use APA 7th style in-text citations throughout
+- Never use numbered bracket citations like [1]
+- Use plain text only. No markdown, no asterisks, no underscores
+- Avoid the use of hyphens or dashes throughout
+- Write out full content. Never use placeholders
+- The document must demonstrate ${levelInfo.depth} academic writing`;
 
-    const chapterTokenBudget = chapter.id === 'references' ? 4000 : 3000;
+    const chapterTokenBudget = chapter.id === 'references' ? 4500 : 3500;
 
     const { text, apiUsed, error } = await generateSection(prompt, chapterTokenBudget);
 
