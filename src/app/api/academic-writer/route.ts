@@ -46,7 +46,7 @@ function buildChapterSpecs(topic: string): ChapterSpec[] {
   return [
     {
       id: 'frontmatter',
-      title: 'Front Matter',
+      title: 'FRONT MATTER',
       instructions: `Write ONLY the following front-matter sections, in this order, fully written out:
 
 1.0 Title Page
@@ -56,107 +56,157 @@ function buildChapterSpecs(topic: string): ChapterSpec[] {
 5.0 Abstract
 6.0 List of Abbreviations and Acronyms
 
-Do NOT write a Table of Contents section. Do not guess or invent page numbers. The Table of Contents is generated separately.
+Do NOT write a Table of Contents section. Do not guess page numbers.
 
-IMPORTANT: The title and framing established here are FINAL. Every later chapter must stay consistent with them.`,
+The title and framing you establish here are FINAL. Every later chapter must stay consistent.
+
+CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write headings as plain numbered text like "1.0 Title Page".`,
     },
     {
       id: 'chapter1',
-      title: 'CHAPTER ONE: INTRODUCTION',
-      instructions: `Write the FULL Chapter One: Introduction. Use these exact numbered subsections:
+      title: '1.0 INTRODUCTION',
+      instructions: `Write the FULL Chapter One content.
 
-1.0 Introduction (a short paragraph explaining what the chapter covers)
-1.1 Background of the Study (six paragraphs deep into global, regional and national status quo, mention different countries as examples, cite with references published in the last 10 years)
-1.2 Statement of the Problem (one paragraph, 100 words, convincing, cite as evidence)
-1.3 Research Objectives
-1.3.1 General Objective (clear, 20 to 25 words)
-1.3.2 Specific Objectives (only 3 specific objectives)
-1.4 Research Questions (turn objectives to questions)
+CRITICAL: Start DIRECTLY with "1.0 Introduction" as the first heading. This is the chapter heading itself.
+
+Then continue with these subsections in order:
+1.1 Background of the Study
+1.2 Statement of the Problem
+1.3 Research Objectives (with 1.3.1 General Objective and 1.3.2 Specific Objectives)
+1.4 Research Questions
 1.5 Significance of the Study
-1.6 Scope of Study (60 words)
-1.7 Operational Definitions (5 key words)
+1.6 Scope of Study
+1.7 Operational Definitions
 
-Ground every claim in real, verifiable knowledge. Use in-text citations in APA 7th style. Never use numbered bracket citations. The Research Objectives and Research Questions written here are FINAL.`,
+CRITICAL RULES:
+- Each subsection heading should be on its own line
+- Write substantial paragraphs under each heading
+- Use APA 7th style in-text citations
+- Never use numbered bracket citations like [1]
+- The Research Objectives and Questions written here are FINAL
+- Use plain text only, no markdown, no asterisks
+
+IMPORTANT: This is a continuous chapter. Do not write a separate chapter title line before "1.0 Introduction". Just start with "1.0 Introduction" as the main heading.`,
     },
     {
       id: 'chapter2',
-      title: 'CHAPTER TWO: LITERATURE REVIEW',
-      instructions: `Write the FULL Chapter Two: Literature Review. Use these exact numbered subsections:
+      title: '2.0 LITERATURE REVIEW',
+      instructions: `Write the FULL Chapter Two content.
 
-2.0 Introduction (a short paragraph explaining what the chapter covers)
-2.1.0 Empirical Review (100 word paragraph, no citations)
-2.1.1 Create a theme from objective 1 and present literature at all levels, cite in standard way. Move beyond description.
-2.1.2 Create a theme from objective 2 and present literature at all levels, cite in standard way. Move beyond description.
-2.1.3 Create a theme from objective 3 and present literature at all levels, cite in standard way. Move beyond description.
-2.2 Theoretical Framework (use 2 different theories, state the theory, by who, when, what the theory is about, how the theory is linked to the current study. Maximum of 3 paragraphs)
-2.3 Conceptual Framework (short explanation showing the relationship between variables, followed by an editable sketch)
+CRITICAL: Start DIRECTLY with "2.0 Literature Review" as the first heading. This is the chapter heading itself.
 
-This chapter must be a critical synthesis, not a list of summaries. Frame themes to support the research objectives from Chapter One.`,
+Then continue with these subsections in order:
+2.1 Empirical Review (with 2.1.1, 2.1.2, 2.1.3 as themes from the three objectives)
+2.2 Theoretical Framework
+2.3 Conceptual Framework
+
+CRITICAL RULES:
+- Each subsection heading should be on its own line
+- Write substantial paragraphs under each heading
+- Use APA 7th style in-text citations
+- This chapter must be a critical synthesis of literature
+- Use plain text only, no markdown, no asterisks
+
+IMPORTANT: This is a continuous chapter. Start with "2.0 Literature Review" as the main heading.`,
     },
     {
       id: 'chapter3',
-      title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
-      instructions: `Write the FULL Chapter Three: Research Methodology. Use these exact numbered subsections:
+      title: '3.0 RESEARCH METHODOLOGY',
+      instructions: `Write the FULL Chapter Three content.
 
-3.0 Introduction (a short paragraph explaining what the chapter covers)
-3.1 Research Approach (60 words, be clear)
-3.2 Research Design (90 words, be clear, cite Creswell, justify the reason for choosing the design)
-3.3 Study Location (60 words)
-3.4 Target Population (60 words, state the actual population)
-3.5 Sample Size (show using a formula how the sample was calculated, justify the reason for the sample size)
-3.6 Data Collection Instruments and Procedures (100 words, ensure to cite)
-3.7 Data Analysis Plan (90 words, be clear, consistent, justify, cite)
-3.8 Reliability and Validity (60 words)
-3.9 Ethical Considerations (90 words, be clear)
+CRITICAL: Start DIRECTLY with "3.0 Research Methodology" as the first heading. This is the chapter heading itself.
 
-The methodology must be designed specifically to answer the Research Questions from Chapter One.`,
+Then continue with these subsections in order:
+3.1 Research Approach
+3.2 Research Design
+3.3 Study Location
+3.4 Target Population
+3.5 Sample Size
+3.6 Data Collection Instruments and Procedures
+3.7 Data Analysis Plan
+3.8 Reliability and Validity
+3.9 Ethical Considerations
+
+CRITICAL RULES:
+- Each subsection heading should be on its own line
+- Write substantial paragraphs under each heading
+- Cite Creswell for research design
+- Use plain text only, no markdown, no asterisks
+
+IMPORTANT: This is a continuous chapter. Start with "3.0 Research Methodology" as the main heading.`,
     },
     {
       id: 'chapter4',
-      title: 'CHAPTER FOUR: PRESENTATION OF FINDINGS',
-      instructions: `Write the FULL Chapter Four: Presentation of Findings. Use these exact numbered subsections:
+      title: '4.0 PRESENTATION OF FINDINGS',
+      instructions: `Write the FULL Chapter Four content.
 
-4.0 Introduction (a short paragraph explaining what the chapter covers)
+CRITICAL: Start DIRECTLY with "4.0 Presentation of Findings" as the first heading. This is the chapter heading itself.
+
+Then continue with these subsections in order:
 4.1 Descriptive and Demographic Results
-4.2 Key Thematic or Statistical Findings (organised by the research objectives)
+4.2 Key Thematic or Statistical Findings
 4.3 Summary of Findings
 
-Present findings as illustrative and internally consistent. Use realistic percentages and frequencies. Each subsection needs substantive interpretation, not just numbers. Findings must directly answer the Research Questions from Chapter One.`,
+CRITICAL RULES:
+- Each subsection heading should be on its own line
+- Present realistic findings with percentages and frequencies
+- Findings must answer the Research Questions from Chapter One
+- Use plain text only, no markdown, no asterisks
+
+IMPORTANT: This is a continuous chapter. Start with "4.0 Presentation of Findings" as the main heading.`,
     },
     {
       id: 'chapter5',
-      title: 'CHAPTER FIVE: DISCUSSION',
-      instructions: `Write the FULL Chapter Five: Discussion. Use these exact numbered subsections:
+      title: '5.0 DISCUSSION',
+      instructions: `Write the FULL Chapter Five content.
 
-5.0 Introduction (a short paragraph explaining what the chapter covers)
+CRITICAL: Start DIRECTLY with "5.0 Discussion" as the first heading. This is the chapter heading itself.
+
+Then continue with these subsections in order:
 5.1 Interpretation of Key Findings
-5.2 Comparison with Previous Studies (engage with literature from Chapter Two)
+5.2 Comparison with Previous Studies
 5.3 Implications for Practice and Policy
 5.4 Limitations of the Study
 
-This chapter must argue and interpret the findings from Chapter Four and engage with literature from Chapter Two.`,
+CRITICAL RULES:
+- Each subsection heading should be on its own line
+- Interpret findings from Chapter Four
+- Engage with literature from Chapter Two
+- Use plain text only, no markdown, no asterisks
+
+IMPORTANT: This is a continuous chapter. Start with "5.0 Discussion" as the main heading.`,
     },
     {
       id: 'chapter6',
-      title: 'CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS',
-      instructions: `Write the FULL Chapter Six:
+      title: '6.0 CONCLUSIONS AND RECOMMENDATIONS',
+      instructions: `Write the FULL Chapter Six content.
 
-6.0 Introduction (a short paragraph explaining what the chapter covers)
-6.1 Conclusions (directly answering the research objectives from Chapter One)
-6.2 Recommendations (specific, actionable, grouped by stakeholder)
+CRITICAL: Start DIRECTLY with "6.0 Conclusions and Recommendations" as the first heading. This is the chapter heading itself.
 
-Do NOT write References or Appendices in this section.`,
+Then continue with these subsections in order:
+6.1 Conclusions
+6.2 Recommendations
+
+CRITICAL RULES:
+- Each subsection heading should be on its own line
+- Conclusions must answer the Research Objectives from Chapter One
+- Recommendations must be specific and actionable
+- Use plain text only, no markdown, no asterisks
+
+IMPORTANT: This is a continuous chapter. Start with "6.0 Conclusions and Recommendations" as the main heading.`,
     },
     {
       id: 'references',
       title: 'REFERENCES AND APPENDICES',
-      instructions: `Write ONLY the following:
+      instructions: `Write ONLY the following.
 
 REFERENCES
-Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Never abbreviate or placehold.
+Provide a complete list of 30 references published in the last 10 years. Use a mixture of books and journals. Include 4 research methods books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full.
 
 APPENDICES
-Describe the instruments of data collection that would be included.`,
+Describe the instruments of data collection that would be included.
+
+CRITICAL: Use plain text only. No markdown, no asterisks.`,
     },
   ];
 }
@@ -449,17 +499,16 @@ TOPIC: "${topic}"
 Write a DETAILED ${typeLabel} with:
 1.0 Title Page
 2.0 Introduction
-3.0 Main Body (organised into labelled sections appropriate to the topic)
+3.0 Main Body
 4.0 Conclusion
-5.0 References (APA 7th edition, 20-30 sources)
-6.0 Appendices (brief description)
+5.0 References
+6.0 Appendices
 
 STYLE RULES:
-- Simple, formal academic English
+- Use plain text only, no markdown
 - Use APA 7th style in-text citations
 - Never use numbered bracket citations
-- Write in complete paragraphs
-- Do not add a preamble`;
+- Write in complete paragraphs`;
 
   const { text, apiUsed, error } = await generateSection(prompt, 3000);
   return { content: text ? cleanText(text) : '', apiUsed: error ? `${apiUsed} (${error})` : apiUsed };
@@ -510,24 +559,20 @@ export async function POST(request: NextRequest) {
 
 TOPIC: "${cleanTopic}"
 
-${previousContext ? `CONTEXT (content already established in earlier chapters). Stay consistent with the same title, research objectives, and questions:
-"""
-${previousContext}
-"""
-
-IMPORTANT: Do not repeat content verbatim. If this chapter has an introduction, keep it to 2-4 sentences that only transition from the previous chapter. Do not re-explain the study's background or restate the problem statement.
-` : ''}
+PREVIOUS CONTENT (for continuity):
+${previousContext || 'This is the first chapter.'}
 
 TASK: ${chapter.instructions}
 
-STYLE RULES:
-- Simple, formal academic English. No slang or emojis.
-- One idea per paragraph.
-- Use numbered headings exactly as specified.
-- Use APA 7th style in-text citations only, e.g. (Smith, 2021).
-- NEVER use numbered bracket citations like [1] or [[2]].
-- Never write placeholder text like "[omitted for brevity]" or "[references truncated]".
-- Write out full, complete content as instructed.`;
+CRITICAL RULES FOR CONTINUITY:
+- This is a continuous academic document. Do NOT write a separate standalone introduction for this chapter.
+- Start DIRECTLY with the chapter heading: "${chapter.title}"
+- Then continue with the required subsections.
+- Do not repeat content from previous chapters.
+- Do not re-explain the study's background or restate the problem statement.
+- Use plain text only. No markdown, no asterisks, no underscores.
+- Use APA 7th style in-text citations only. Never use numbered bracket citations.
+- Write out full content. Never use placeholders.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 4000 : 3000;
 
@@ -545,8 +590,8 @@ STYLE RULES:
 
     const contextForNextChapter =
       chapter.id === 'frontmatter' || chapter.id === 'chapter1'
-        ? `${previousContext}\n\n[${chapter.title}]\n${cleaned}`.trim()
-        : `${previousContext}\n\n[${chapter.title} — excerpt]\n${cleaned.slice(0, 500)}...`.trim();
+        ? `${previousContext}\n\n${cleaned}`.trim()
+        : `${previousContext}\n\n${cleaned.slice(0, 1000)}...`.trim();
 
     return NextResponse.json({
       chapterId: chapter.id,
