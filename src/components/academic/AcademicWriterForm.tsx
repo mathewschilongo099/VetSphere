@@ -305,39 +305,97 @@ export default function AcademicWriterForm() {
   const [wordCount, setWordCount] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [pdfGenerating, setPdfGenerating] = useState(false);
+  // Tracks "chapter 3 of 7" style progress while a research paper is being
+  // generated one chapter per request. Null outside of that flow.
+  const [chapterProgress, setChapterProgress] = useState<{ current: number; total: number } | null>(
+    null
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
     setResult(null);
-    setLoadingMessage('⏳ Connecting to AI provider...');
+    setChapterProgress(null);
 
     try {
-      setTimeout(() => setLoadingMessage('🧠 Analyzing your topic...'), 2000);
-      setTimeout(() => setLoadingMessage('📝 Generating comprehensive content...'), 4000);
-      setTimeout(() => setLoadingMessage('🔍 Adding citations and references...'), 6000);
-      setTimeout(() => setLoadingMessage('✨ Finalizing your academic paper...'), 8000);
+      if (type === 'research') {
+        // Research papers are generated one chapter per request so each
+        // call stays well under Vercel's 60s limit. Each chapter's prompt
+        // is fed the previous chapters' context (contextForNextChapter)
+        // so the title, objectives, and findings stay consistent instead
+        // of every chapter re-inventing its own version of the paper.
+        let allContent = '';
+        let previousContext = '';
+        let chapterIndex = 0;
+        let isLastChapter = false;
+        let totalChapters = 7; // corrected as soon as the first response arrives
 
-      const response = await fetch('/api/academic-writer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic, level, type })
-      });
+        while (!isLastChapter) {
+          setLoadingMessage(`📝 Writing chapter ${chapterIndex + 1} of ${totalChapters}...`);
+          setChapterProgress({ current: chapterIndex + 1, total: totalChapters });
 
-      const data = await response.json();
+          const response = await fetch('/api/academic-writer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              topic,
+              level,
+              type,
+              chapterIndex,
+              previousContext
+            })
+          });
 
-      if (!response.ok) throw new Error(data.error || 'Failed to generate');
+          const data = await response.json();
 
-      setResult(data.content);
-      const words = data.content.split(/\s+/).length;
-      setWordCount(words);
-      setLoadingMessage('✅ Done!');
+          if (!response.ok) {
+            throw new Error(
+              data.error ||
+                `Failed while generating chapter ${chapterIndex + 1}. Earlier chapters are still shown below.`
+            );
+          }
+
+          allContent += (allContent ? '\n\n' : '') + data.content;
+          previousContext = data.contextForNextChapter;
+          isLastChapter = data.isLastChapter;
+          chapterIndex = data.nextChapterIndex;
+          totalChapters = data.totalChapters;
+
+          // Show progress as each chapter lands rather than one long blank wait.
+          setResult(allContent);
+          setWordCount(allContent.split(/\s+/).length);
+        }
+
+        setLoadingMessage('✅ Done!');
+      } else {
+        // Assignment / Report / Case Study: unchanged, single call.
+        setLoadingMessage('⏳ Connecting to AI provider...');
+        setTimeout(() => setLoadingMessage('🧠 Analyzing your topic...'), 2000);
+        setTimeout(() => setLoadingMessage('📝 Generating comprehensive content...'), 4000);
+        setTimeout(() => setLoadingMessage('🔍 Adding citations and references...'), 6000);
+        setTimeout(() => setLoadingMessage('✨ Finalizing your academic paper...'), 8000);
+
+        const response = await fetch('/api/academic-writer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, level, type })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) throw new Error(data.error || 'Failed to generate');
+
+        setResult(data.content);
+        setWordCount(data.content.split(/\s+/).length);
+        setLoadingMessage('✅ Done!');
+      }
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
       setLoadingMessage('');
     } finally {
       setLoading(false);
+      setChapterProgress(null);
     }
   };
 
@@ -539,8 +597,22 @@ export default function AcademicWriterForm() {
                 {loadingMessage}
               </span>
               <span className="text-xs text-green-100">
-                This may take a moment for comprehensive content
+                {chapterProgress
+                  ? 'Writing your research paper chapter by chapter — this stays under the timeout on Vercel Hobby'
+                  : 'This may take a moment for comprehensive content'}
               </span>
+              {chapterProgress && (
+                <div className="w-full max-w-xs h-1.5 bg-green-800/40 rounded-full overflow-hidden mt-1">
+                  <div
+                    className="h-full bg-white transition-all duration-500"
+                    style={{
+                      width: `${Math.round(
+                        (chapterProgress.current / chapterProgress.total) * 100
+                      )}%`
+                    }}
+                  />
+                </div>
+              )}
             </span>
           ) : (
             '📝 Generate Academic Paper'
@@ -585,25 +657,13 @@ export default function AcademicWriterForm() {
                 disabled={pdfGenerating}
                 className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition"
               >
-                {pdfGenerating ? '⏳ Building PDF...' : '📄 Download PDF'}
+                {pdfGenerating ? '⏳ Generating PDF...' : '⬇️ PDF'}
               </button>
             </div>
           </div>
 
-          <div
-            style={{
-              fontFamily: 'Times New Roman, Times, serif',
-              fontSize: '12pt',
-              lineHeight: '1.5',
-              color: '#1a1a1a',
-              backgroundColor: '#ffffff'
-            }}
-          >
+          <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-10 max-h-[70vh] overflow-y-auto shadow-sm">
             {renderContent()}
-          </div>
-
-          <div className="text-center text-sm text-gray-500 mt-6 pt-4 border-t border-gray-200">
-            Generated by VetSphere Academic Writer • {new Date().toLocaleDateString()}
           </div>
         </div>
       )}
