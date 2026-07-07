@@ -11,27 +11,28 @@ const typeLabels: Record<string, string> = {
   research: 'Research Paper',
   report: 'Report',
   'case-study': 'Case Study',
+  proposal: 'Research Proposal',
 };
 
 const levelMap: Record<string, { label: string; pageCount: string; depth: string }> = {
   diploma: {
     label: 'Diploma Level',
-    pageCount: '20-30 pages',
+    pageCount: '15-25 pages',
     depth: 'clear, practical, and moderately detailed',
   },
   degree: {
     label: "Bachelor's Degree Level",
-    pageCount: '30-45 pages',
+    pageCount: '20-30 pages',
     depth: 'detailed, well-referenced, and analytically sound',
   },
   masters: {
     label: "Master's Degree Level",
-    pageCount: '40-60 pages',
+    pageCount: '25-40 pages',
     depth: 'rigorous, critically analytical, and thoroughly evidenced',
   },
   phd: {
     label: 'PhD Level',
-    pageCount: '50-80 pages',
+    pageCount: '35-50 pages',
     depth: 'highly rigorous, original, critically evaluative, and exhaustively evidenced',
   },
 };
@@ -44,7 +45,164 @@ interface ChapterSpec {
   instructions: string;
 }
 
-function buildChapterSpecs(topic: string): ChapterSpec[] {
+function buildProposalSpecs(topic: string): ChapterSpec[] {
+  return [
+    {
+      id: 'frontmatter',
+      title: 'FRONT MATTER',
+      chapterLabel: '',
+      chapterNumber: '',
+      instructions: `Write ONLY the following front-matter sections for a RESEARCH PROPOSAL, in this order, fully written out:
+
+TITLE PAGE (with the research title, author name, degree, date)
+TABLE OF CONTENTS (list all sections with page numbers as placeholders)
+LIST OF ABBREVIATIONS AND ACRONYMS
+
+Do NOT write any chapter content yet. Stop after the abbreviations list.
+
+CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write headings in ALL CAPS as shown above.`,
+    },
+    {
+      id: 'chapter1',
+      title: 'CHAPTER ONE: INTRODUCTION',
+      chapterLabel: 'CHAPTER ONE',
+      chapterNumber: '1',
+      instructions: `Write the FULL Chapter One for a RESEARCH PROPOSAL.
+
+CRITICAL FORMAT:
+Start with "CHAPTER ONE" on its own line.
+Then on the next line, write "1.0 INTRODUCTION".
+Then write a short paragraph explaining what the chapter covers.
+
+Required subsections with EXACT specifications:
+1.1 Background of the Study (6 paragraphs covering global, regional and national status quo. Mention different countries as examples. Cite with references published in the last 10 years)
+1.2 Statement of the Problem (1 paragraph, approximately 100 words, convincing, cite as evidence)
+1.3 Research Objectives
+1.3.1 General Objective (clear, 20 to 25 words)
+1.3.2 Specific Objectives (exactly 3 specific objectives)
+1.4 Research Questions (turn the 3 objectives into questions)
+1.5 Significance of the Study
+1.6 Scope of Study (approximately 60 words)
+1.7 Operational Definitions (define 5 key terms)
+
+CRITICAL RULES:
+- Start with CHAPTER ONE on its own line
+- Then on the next line write 1.0 INTRODUCTION
+- Each subsection heading should be on its own line
+- Write substantial paragraphs under each heading
+- Use APA 7th style in-text citations
+- Never use numbered bracket citations like [1]
+- Use plain text only, no markdown, no asterisks
+
+EXACT FORMAT REQUIRED:
+CHAPTER ONE
+1.0 INTRODUCTION
+[short paragraph explaining what the chapter covers]
+1.1 Background of the Study
+[six paragraphs of content]
+1.2 Statement of the Problem
+[one paragraph of content]`,
+    },
+    {
+      id: 'chapter2',
+      title: 'CHAPTER TWO: LITERATURE REVIEW',
+      chapterLabel: 'CHAPTER TWO',
+      chapterNumber: '2',
+      instructions: `Write the FULL Chapter Two for a RESEARCH PROPOSAL.
+
+CRITICAL FORMAT:
+Start with "CHAPTER TWO" on its own line.
+Then on the next line, write "2.0 INTRODUCTION".
+Then write a short paragraph explaining what the chapter covers.
+
+Required subsections with EXACT specifications:
+2.1.0 Empirical Review (100 word paragraph, NO citations)
+2.1.1 (Create a theme from objective 1 and present literature at all levels, cite in standard way. Move beyond description)
+2.1.2 (Create a theme from objective 2 and present literature at all levels, cite in standard way. Move beyond description)
+2.1.3 (Create a theme from objective 3 and present literature at all levels, cite in standard way. Move beyond description)
+2.2 Theoretical Framework (use 2 different theories, state the theory, by who, when, what the theory is about, how the theory is linked to the current study. Maximum of 3 paragraphs)
+2.3 Conceptual Framework (short explanation showing the relationship between variables, followed by an editable sketch described in words)
+
+CRITICAL RULES:
+- Start with CHAPTER TWO on its own line
+- Then on the next line write 2.0 INTRODUCTION
+- Each subsection heading should be on its own line
+- Use APA 7th style in-text citations
+- Use plain text only, no markdown
+
+EXACT FORMAT REQUIRED:
+CHAPTER TWO
+2.0 INTRODUCTION
+[short paragraph]
+2.1.0 Empirical Review
+[100 word paragraph with no citations]
+2.1.1 [Theme from Objective 1]
+[content with citations]`,
+    },
+    {
+      id: 'chapter3',
+      title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
+      chapterLabel: 'CHAPTER THREE',
+      chapterNumber: '3',
+      instructions: `Write the FULL Chapter Three for a RESEARCH PROPOSAL.
+
+CRITICAL FORMAT:
+Start with "CHAPTER THREE" on its own line.
+Then on the next line, write "3.0 INTRODUCTION".
+Then write a short paragraph explaining what the chapter covers.
+
+Required subsections with EXACT specifications:
+3.1 Research Approach (60 words, be clear)
+3.2 Research Design (90 words, be clear, cite Creswell, justify the reason for choosing the design)
+3.3 Study Location (60 words)
+3.4 Target Population (60 words, state the actual population)
+3.5 Sample Size (show using a formula how the sample was calculated, justify the reason for the sample size)
+3.6 Data Collection Instruments and Procedures (100 words, ensure to cite)
+3.7 Data Analysis Plan (90 words, be clear, consistent, justify, cite)
+3.8 Reliability and Validity (60 words)
+3.9 Ethical Considerations (90 words, be clear)
+
+CRITICAL RULES:
+- Start with CHAPTER THREE on its own line
+- Then on the next line write 3.0 INTRODUCTION
+- Each subsection heading should be on its own line
+- Cite Creswell for research design
+- Use plain text only, no markdown
+
+EXACT FORMAT REQUIRED:
+CHAPTER THREE
+3.0 INTRODUCTION
+[short paragraph]
+3.1 Research Approach
+[60 words of content]
+3.2 Research Design
+[90 words of content with Creswell citation]`,
+    },
+    {
+      id: 'references',
+      title: 'REFERENCES AND APPENDICES',
+      chapterLabel: 'REFERENCES',
+      chapterNumber: '',
+      instructions: `Write ONLY the following.
+
+REFERENCES
+Provide a complete list of 30 references published in the last 10 years. Use credible verifiable sources, a mixture of books and journals. Include 4 research methods published books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full.
+
+WORK PLAN
+Present a simple work plan showing activities across months (e.g., Month 1: Literature Review, Month 2: Proposal Writing, etc.)
+
+BUDGET
+Present a simple budget table showing items, quantities, unit costs, and total costs in Zambian Kwacha.
+
+INSTRUMENTS OF DATA COLLECTION
+Describe the instruments that would be used (e.g., questionnaire, interview guide) in 2-3 paragraphs.
+
+CRITICAL: Use plain text only. No markdown, no asterisks.`,
+    },
+  ];
+}
+
+function buildResearchSpecs(topic: string): ChapterSpec[] {
   return [
     {
       id: 'frontmatter',
@@ -61,8 +219,6 @@ LIST OF ABBREVIATIONS AND ACRONYMS
 
 Do NOT write a Table of Contents section. Do not guess page numbers.
 
-The title and framing you establish here are FINAL. Every later chapter must stay consistent.
-
 CRITICAL: Use plain text only. No markdown, no asterisks for bold. Write headings in ALL CAPS as shown above.`,
     },
     {
@@ -78,7 +234,6 @@ Then on the next line, write "1.0 INTRODUCTION".
 Then write the content.
 
 Required subsections:
-1.0 Introduction
 1.1 Background of the Study
 1.2 Statement of the Problem
 1.3 Research Objectives (with 1.3.1 General Objective and 1.3.2 Specific Objectives)
@@ -88,11 +243,12 @@ Required subsections:
 1.7 Operational Definitions
 
 CRITICAL RULES:
+- Start with CHAPTER ONE on its own line
+- Then on the next line write 1.0 INTRODUCTION
 - Each subsection heading should be on its own line
 - Write substantial paragraphs under each heading
 - Use APA 7th style in-text citations
-- Never use numbered bracket citations like [1]
-- Use plain text only, no markdown, no asterisks
+- Use plain text only, no markdown
 
 EXACT FORMAT REQUIRED:
 CHAPTER ONE
@@ -114,14 +270,14 @@ Then on the next line, write "2.0 LITERATURE REVIEW".
 Then write the content.
 
 Required subsections:
-2.0 Introduction
 2.1 Empirical Review (with 2.1.1, 2.1.2, 2.1.3 as themes from the three objectives)
 2.2 Theoretical Framework
 2.3 Conceptual Framework
 
 CRITICAL RULES:
+- Start with CHAPTER TWO on its own line
+- Then on the next line write 2.0 LITERATURE REVIEW
 - Each subsection heading should be on its own line
-- Write substantial paragraphs under each heading
 - Use APA 7th style in-text citations
 - Use plain text only, no markdown
 
@@ -145,7 +301,6 @@ Then on the next line, write "3.0 RESEARCH METHODOLOGY".
 Then write the content.
 
 Required subsections:
-3.0 Introduction
 3.1 Research Approach
 3.2 Research Design
 3.3 Study Location
@@ -157,6 +312,8 @@ Required subsections:
 3.9 Ethical Considerations
 
 CRITICAL RULES:
+- Start with CHAPTER THREE on its own line
+- Then on the next line write 3.0 RESEARCH METHODOLOGY
 - Each subsection heading should be on its own line
 - Cite Creswell for research design
 - Use plain text only, no markdown
@@ -181,12 +338,13 @@ Then on the next line, write "4.0 PRESENTATION OF FINDINGS".
 Then write the content.
 
 Required subsections:
-4.0 Introduction
 4.1 Descriptive and Demographic Results
 4.2 Key Thematic or Statistical Findings
 4.3 Summary of Findings
 
 CRITICAL RULES:
+- Start with CHAPTER FOUR on its own line
+- Then on the next line write 4.0 PRESENTATION OF FINDINGS
 - Each subsection heading should be on its own line
 - Present realistic findings with percentages and frequencies
 - Use plain text only, no markdown
@@ -211,13 +369,14 @@ Then on the next line, write "5.0 DISCUSSION".
 Then write the content.
 
 Required subsections:
-5.0 Introduction
 5.1 Interpretation of Key Findings
 5.2 Comparison with Previous Studies
 5.3 Implications for Practice and Policy
 5.4 Limitations of the Study
 
 CRITICAL RULES:
+- Start with CHAPTER FIVE on its own line
+- Then on the next line write 5.0 DISCUSSION
 - Each subsection heading should be on its own line
 - Use plain text only, no markdown
 
@@ -241,11 +400,13 @@ Then on the next line, write "6.0 CONCLUSIONS AND RECOMMENDATIONS".
 Then write the content.
 
 Required subsections:
-6.0 Introduction
 6.1 Conclusions
 6.2 Recommendations
 
 CRITICAL RULES:
+- Start with CHAPTER SIX on its own line
+- Then on the next line write 6.0 CONCLUSIONS AND RECOMMENDATIONS
+- DO NOT include a 6.0 Introduction subsection
 - Each subsection heading should be on its own line
 - Use plain text only, no markdown
 
@@ -254,6 +415,8 @@ CHAPTER SIX
 6.0 CONCLUSIONS AND RECOMMENDATIONS
 [content here]
 6.1 Conclusions
+[content here]
+6.2 Recommendations
 [content here]`,
     },
     {
@@ -267,11 +430,16 @@ REFERENCES
 Provide a complete list of 30 references published in the last 10 years. Use a mixture of books and journals. Include 4 research methods books. All references must be in APA 7th edition format, alphabetised by author surname. Write out every reference in full.
 
 APPENDICES
-Describe the instruments of data collection that would be included.
-
-CRITICAL: Use plain text only. No markdown, no asterisks.`,
+Describe the instruments of data collection that would be included.`,
     },
   ];
+}
+
+function buildChapterSpecs(topic: string, docType: string): ChapterSpec[] {
+  if (docType === 'proposal') {
+    return buildProposalSpecs(topic);
+  }
+  return buildResearchSpecs(topic);
 }
 
 function sleep(ms: number) {
@@ -550,42 +718,10 @@ function cleanText(text: string): string {
     .trim();
 }
 
-async function generateDetailedAssignment(
-  topic: string,
-  typeLabel: string,
-  levelInfo: { label: string; pageCount: string; depth: string }
-): Promise<{ content: string; apiUsed: string }> {
-  const prompt = `You are a professional academic writer producing a ${levelInfo.depth} ${typeLabel} for ${levelInfo.label}.
-
-TOPIC: "${topic}"
-
-Write a DETAILED ${typeLabel} with:
-TITLE PAGE
-DECLARATION
-DEDICATION
-ACKNOWLEDGEMENTS
-ABSTRACT
-TABLE OF CONTENTS
-1.0 INTRODUCTION
-2.0 MAIN BODY
-3.0 CONCLUSION
-REFERENCES
-APPENDICES
-
-STYLE RULES:
-- Use plain text only, no markdown
-- Use APA 7th style in-text citations
-- Never use numbered bracket citations
-- Write in complete paragraphs`;
-
-  const { text, apiUsed, error } = await generateSection(prompt, 3000);
-  return { content: text ? cleanText(text) : '', apiUsed: error ? `${apiUsed} (${error})` : apiUsed };
-}
-
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { topic, level = 'degree', type = 'essay', chapterIndex = 0, previousContext = '' } = body;
+    const { topic, level = 'degree', type = 'research', chapterIndex = 0, previousContext = '' } = body;
 
     if (!topic) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
@@ -598,58 +734,79 @@ export async function POST(request: NextRequest) {
       .trim();
 
     const levelInfo = levelMap[level] || levelMap['degree'];
-    const typeLabel = typeLabels[type] || 'Assignment';
+    const typeLabel = typeLabels[type] || 'Research Paper';
 
-    if (type !== 'research') {
-      const result = await generateDetailedAssignment(cleanTopic, typeLabel, levelInfo);
-      if (!result.content) {
-        return NextResponse.json(
-          { error: 'Failed to generate content from any configured AI provider.' },
-          { status: 502 }
-        );
-      }
-      return NextResponse.json({
-        content: result.content,
-        topic: cleanTopic,
-        level,
-        type,
-        apiUsed: result.apiUsed,
-        wordCount: result.content.split(/\s+/).length,
-        generatedAt: new Date().toISOString(),
-      });
-    }
-
-    const chapters = buildChapterSpecs(cleanTopic);
+    const chapters = buildChapterSpecs(cleanTopic, type);
     const idx = Math.max(0, Math.min(chapterIndex, chapters.length - 1));
     const chapter = chapters[idx];
 
-    const prompt = `You are an expert academic writer producing a ${levelInfo.depth} research paper section for ${levelInfo.label}.
+    // For proposal, we have fewer chapters (frontmatter, chapter1, chapter2, chapter3, references)
+    // For research, we have more chapters (frontmatter, chapter1-6, references)
+    const totalChapters = type === 'proposal' ? 5 : 8;
+
+    // Special instruction for proposal chapters
+    let chapterSpecificInstruction = '';
+    if (type === 'proposal') {
+      if (chapter.id === 'chapter1') {
+        chapterSpecificInstruction = `
+CRITICAL FOR PROPOSAL CHAPTER ONE:
+- Write exactly 6 paragraphs for 1.1 Background of the Study
+- Write exactly 1 paragraph of approximately 100 words for 1.2 Statement of the Problem
+- Write exactly 3 specific objectives
+- Write exactly 60 words for 1.6 Scope of Study
+- Define exactly 5 key terms for 1.7 Operational Definitions`;
+      }
+      if (chapter.id === 'chapter2') {
+        chapterSpecificInstruction = `
+CRITICAL FOR PROPOSAL CHAPTER TWO:
+- Write exactly 100 words for 2.1.0 Empirical Review with NO citations
+- Create 3 themes from the 3 objectives for 2.1.1, 2.1.2, 2.1.3
+- Use exactly 2 theories for 2.2 Theoretical Framework
+- Include a description of the conceptual framework with variables`;
+      }
+      if (chapter.id === 'chapter3') {
+        chapterSpecificInstruction = `
+CRITICAL FOR PROPOSAL CHAPTER THREE:
+- Write exactly 60 words for 3.1 Research Approach
+- Write exactly 90 words for 3.2 Research Design, cite Creswell
+- Write exactly 60 words for 3.3 Study Location
+- Write exactly 60 words for 3.4 Target Population
+- Show a formula for 3.5 Sample Size calculation
+- Write exactly 100 words for 3.6 Data Collection Instruments and Procedures
+- Write exactly 90 words for 3.7 Data Analysis Plan
+- Write exactly 60 words for 3.8 Reliability and Validity
+- Write exactly 90 words for 3.9 Ethical Considerations`;
+      }
+      if (chapter.id === 'references') {
+        chapterSpecificInstruction = `
+CRITICAL FOR PROPOSAL REFERENCES:
+- Provide exactly 30 references published in the last 10 years
+- Include 4 research methods books
+- Include a Work Plan table
+- Include a Budget table in Zambian Kwacha
+- Include Instruments of Data Collection description`;
+      }
+    }
+
+    const prompt = `You are an expert academic writer producing a ${levelInfo.depth} ${typeLabel} for ${levelInfo.label}.
 
 TOPIC: "${cleanTopic}"
 
 PREVIOUS CONTENT (for continuity):
-${previousContext || 'This is the first chapter.'}
+${previousContext || 'This is the first section.'}
 
 TASK: ${chapter.instructions}
+${chapterSpecificInstruction}
 
 CRITICAL RULES FOR CONTINUITY:
 - This is a continuous academic document.
 - Start with the chapter label exactly as specified (e.g., "CHAPTER ONE").
 - Then on the next line, write the chapter title (e.g., "1.0 INTRODUCTION").
 - Do not repeat content from previous chapters.
-- Do not re-explain the study's background or restate the problem statement.
 - Use plain text only. No markdown, no asterisks, no underscores.
 - Use APA 7th style in-text citations only. Never use numbered bracket citations.
 - Write out full content. Never use placeholders.
-
-EXACT FORMAT REQUIRED FOR EACH CHAPTER:
-CHAPTER ONE
-1.0 INTRODUCTION
-[content here]
-1.1 Background of the Study
-[content here]
-
-Make sure the chapter label and the chapter title are on separate lines.`;
+- Avoid the use of hyphens or dashes throughout.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 4000 : 3000;
 
