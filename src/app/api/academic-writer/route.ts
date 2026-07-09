@@ -939,4 +939,29 @@ For appendices: Write ACTUAL questions, response options, and consent text - not
     const contextForNextChapter =
       chapter.id === 'frontmatter' || chapter.id === 'chapter1'
         ? `${previousContext}\n\n${cleaned}`.trim()
-        : `${previousContext}\n\n${cleaned.slice(0
+        : `${previousContext}\n\n${cleaned.slice(0, 1000)}...`.trim();
+
+    return NextResponse.json({
+      chapterId: chapter.id,
+      chapterTitle: chapter.title,
+      chapterLabel: chapter.chapterLabel,
+      chapterNumber: chapter.chapterNumber,
+      content: cleaned,
+      apiUsed,
+      isLastChapter,
+      nextChapterIndex: idx + 1,
+      contextForNextChapter,
+      totalChapters: chapters.length,
+      topic: cleanTopic,
+      level,
+      type,
+      generatedAt: new Date().toISOString(),
+    });
+  } catch (error: any) {
+    console.error('Academic writer error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to generate academic content' },
+      { status: 500 }
+    );
+  }
+}
