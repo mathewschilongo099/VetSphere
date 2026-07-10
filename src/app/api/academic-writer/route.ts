@@ -792,7 +792,6 @@ async function generatePptxFromPaper(content: string, topic: string, level: stri
       lightText: '666666',
     };
 
-    // Extract key sections from the paper
     const sections = extractSections(content);
 
     // Title Slide
@@ -872,7 +871,8 @@ async function generatePptxFromPaper(content: string, topic: string, level: stri
       fontSize: 14, fontFace: 'Arial', color: colors.white, align: 'center',
     });
 
-    const buffer = await pptx.write({ outputType: 'nodebuffer' });
+    const result = await pptx.write({ outputType: 'nodebuffer' });
+    const buffer = Buffer.isBuffer(result) ? result : Buffer.from(result);
     return { buffer, error: '' };
   } catch (error: any) {
     console.error('PPTX generation error:', error);
@@ -895,7 +895,6 @@ function extractSections(content: string): { title: string; bullets: string[] }[
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // Check if this is a section heading
     const isSection = sectionKeywords.some(keyword =>
       trimmed.toUpperCase().includes(keyword) &&
       trimmed.length < 100
@@ -909,7 +908,6 @@ function extractSections(content: string): { title: string; bullets: string[] }[
       continue;
     }
 
-    // Add bullet points
     if (currentSection && trimmed.length > 20 && trimmed.length < 200) {
       let bullet = trimmed
         .replace(/^[0-9. ]+/, '')
@@ -945,7 +943,7 @@ export async function POST(request: NextRequest) {
       }
 
       const result = await generatePptxFromPaper(content, topic || 'Research Presentation', level || 'Master\'s Degree');
-      if (result.error || !result.buffer) {
+      if (result.error || !result.buffer || result.buffer.length === 0) {
         return NextResponse.json({ error: result.error || 'PPTX generation failed' }, { status: 502 });
       }
 
@@ -959,7 +957,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ============================================================
-    // ACTION: GENERATE (original functionality)
+    // ACTION: GENERATE
     // ============================================================
     if (!topic) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
