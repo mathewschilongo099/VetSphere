@@ -46,7 +46,7 @@ interface ChapterSpec {
 }
 
 // ============================================================
-// BUILD PROPOSAL SPECS
+// BUILD PROPOSAL SPECS - ADAPTABLE STRUCTURE
 // ============================================================
 function buildProposalSpecs(topic: string): ChapterSpec[] {
   return [
@@ -79,40 +79,38 @@ CHAPTER ONE
 [Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
 
 1.1 Background of the Study
-[Write 6 substantial paragraphs, each 6-8 sentences. Cover global, regional, and national context. Mention different countries as examples. Cite with references from the last 10 years.]
+[Write 4-8 substantial paragraphs. The number depends on the topic complexity. Each paragraph 5-7 sentences. Cover global, regional, and national context. Mention different countries as examples. Cite with references from the last 10 years. ADAPT the content to the SPECIFIC topic - do not use generic text.]
 
 1.2 Statement of the Problem
-[Write 1 paragraph of approximately 100 words. Be convincing. Cite as evidence.]
+[Write 1-2 paragraphs. Be convincing. Cite as evidence. Clearly articulate the research gap SPECIFIC to this topic.]
 
 1.3 Research Objectives
 The following objectives guide this investigation:
 1.3.1 General Objective
-[Write 20 to 25 words]
+[One clear overarching objective]
 1.3.2 Specific Objectives
-1. [First specific objective]
-2. [Second specific objective]
-3. [Third specific objective]
+[Write 3-5 specific objectives based on the topic's complexity and scope. Each must be specific and measurable.]
 
 1.4 Research Questions
 To address the objectives, the study seeks to answer the following questions:
-1. [First research question]
-2. [Second research question]
-3. [Third research question]
+[Write 3-5 research questions that directly correspond to the objectives above.]
 
 1.5 Significance of the Study
-[Write 2-3 substantial paragraphs]
+[Write 2-4 substantial paragraphs explaining significance to different stakeholders. Adapt to the specific topic.]
 
 1.6 Scope of Study
-[Write 1 paragraph of approximately 60 words]
+[Write 1-2 paragraphs clearly defining boundaries. Adapt to the specific topic's geographical, temporal, and population scope.]
 
 1.7 Operational Definitions
-[Define exactly 5 key terms with 2-3 sentences each]
+[Define 5-8 key terms specific to this topic with 2-3 sentences each.]
 
 CRITICAL RULES:
 - The heading "1.0 INTRODUCTION" IS the introduction - do not add a separate subsection.
-- You MUST write EXACTLY 3 specific objectives and EXACTLY 3 research questions.
-- Each subsection must have SUBSTANTIAL content.
-- Use APA 7th style in-text citations.
+- WRITE UNIQUELY FOR EACH TOPIC. Do not use generic, reusable text.
+- The number of objectives and questions should be 3-5, not always exactly 3.
+- The number of Background paragraphs should be 4-8, not always exactly 6.
+- Each subsection must have SUBSTANTIAL, TOPIC-SPECIFIC content.
+- Use APA 7th style in-text citations throughout.
 - Use plain text only.`,
     },
     {
@@ -129,26 +127,26 @@ CHAPTER TWO
 [Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
 
 2.1.0 Empirical Review
-[Write exactly 100 words with NO citations]
+[Write 100-150 words with NO citations - a synthesis of the research landscape specific to this topic.]
 
 2.1.1 [Theme from Objective 1]
-[Write 3-4 substantial paragraphs with APA citations]
+[Write 3-5 substantial paragraphs presenting literature at global, regional, and national levels. Cite in standard APA style. Move beyond description - critically analyze, compare, and synthesize. TAILOR to the specific topic.]
 
 2.1.2 [Theme from Objective 2]
-[Write 3-4 substantial paragraphs with APA citations]
+[Write 3-5 substantial paragraphs presenting literature at global, regional, and national levels. Cite in standard APA style. Move beyond description - critically analyze, compare, and synthesize. TAILOR to the specific topic.]
 
 2.1.3 [Theme from Objective 3]
-[Write 3-4 substantial paragraphs with APA citations]
+[Write 3-5 substantial paragraphs presenting literature at global, regional, and national levels. Cite in standard APA style. Move beyond description - critically analyze, compare, and synthesize. TAILOR to the specific topic.]
 
 2.2 Theoretical Framework
-[Write 4-5 substantial paragraphs using exactly 2 different theories]
+[Write 4-6 substantial paragraphs using exactly 2 different theories that are RELEVANT to this specific topic. State the theory, by whom, when, what the theory is about, and how the theory is linked to the current study.]
 
 2.3 Conceptual Framework
-[Write a substantial explanation showing the relationship between variables, followed by a description of the conceptual framework sketch]
+[Write a substantial explanation showing the relationship between variables, followed by a description of the conceptual framework sketch. ADAPT to the specific topic's variables.]
 
 CRITICAL RULES:
 - The heading "2.0 INTRODUCTION" IS the introduction - do not add a separate subsection.
-- Each subsection must have SUBSTANTIAL content.
+- Each subsection must have SUBSTANTIAL, TOPIC-SPECIFIC content.
 - Use APA 7th style in-text citations.
 - Use plain text only.`,
     },
@@ -166,35 +164,35 @@ CHAPTER THREE
 [Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
 
 3.1 Research Approach
-[Write 60 words exactly]
+[Write 60-80 words clearly explaining the approach and its justification.]
 
 3.2 Research Design
-[Write 90 words exactly, cite Creswell, justify the design choice]
+[Write 90-120 words clearly explaining the design, cite Creswell, justify the reason for choosing the design.]
 
 3.3 Study Location
-[Write 60 words exactly]
+[Write 60-80 words describing the location and its relevance to this specific study.]
 
 3.4 Target Population
-[Write 60 words exactly, state the actual population]
+[Write 60-80 words stating the actual population and its characteristics specific to this study.]
 
 3.5 Sample Size
-[Show using a formula how the sample was calculated, justify the sample size]
+[Show using a formula how the sample was calculated, justify the reason for the sample size with detailed explanation.]
 
 3.6 Data Collection Instruments and Procedures
-[Write 100 words exactly, ensure to cite]
+[Write 100-150 words describing instruments and procedures, ensure to cite.]
 
 3.7 Data Analysis Plan
-[Write 90 words exactly, be clear, consistent, justify, cite]
+[Write 90-120 words clearly explaining the plan, be consistent, justify, cite.]
 
 3.8 Reliability and Validity
-[Write 60 words exactly]
+[Write 60-80 words explaining measures taken specific to this study.]
 
 3.9 Ethical Considerations
-[Write 90 words exactly]
+[Write 90-120 words clearly explaining ethical protocols specific to this study.]
 
 CRITICAL RULES:
 - The heading "3.0 INTRODUCTION" IS the introduction - do not add a separate subsection.
-- Each subsection must have SUBSTANTIAL content.
+- Each subsection must have SUBSTANTIAL, TOPIC-SPECIFIC content.
 - Cite Creswell for research design.
 - Use plain text only.`,
     },
@@ -249,7 +247,7 @@ CRITICAL: All appendices must contain ACTUAL content, not descriptions.`,
 }
 
 // ============================================================
-// BUILD RESEARCH SPECS
+// BUILD RESEARCH SPECS - ADAPTABLE STRUCTURE
 // ============================================================
 function buildResearchSpecs(topic: string): ChapterSpec[] {
   return [
@@ -281,37 +279,39 @@ CRITICAL - FOLLOW THIS EXACT FORMAT. Start DIRECTLY with the numbered heading:
 
 CHAPTER ONE
 1.0 Introduction
-[Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
+[Write a short paragraph explaining what the chapter covers - this IS the introduction content]
 
 1.1 Background of the Study
-[Write 6-8 substantial paragraphs with citations covering global, regional, and national context]
+[Write 4-8 substantial paragraphs. Adapt to the topic complexity. Cover global, regional, and national context. Cite with references from the last 10 years. Make it UNIQUE to this specific topic.]
 
 1.2 Statement of the Problem
-[Write 1 substantial paragraph]
+[Write 1-2 substantial paragraphs. Adapt to the specific topic.]
 
 1.3 Research Objectives
 [Write a short introductory sentence]
 1.3.1 General Objective
-[20 to 25 words]
+[One clear overarching objective]
 1.3.2 Specific Objectives
-[EXACTLY 3 specific objectives]
+[Write 3-5 specific objectives based on the topic]
 
 1.4 Research Questions
 [Write a short introductory sentence]
-[EXACTLY 3 research questions]
+[Write 3-5 research questions corresponding to the objectives]
 
 1.5 Significance of the Study
-[Write 2-3 substantial paragraphs]
+[Write 2-4 substantial paragraphs adapted to the topic]
 
 1.6 Scope of Study
-[Write 1 substantial paragraph]
+[Write 1-2 substantial paragraphs adapted to the topic]
 
 1.7 Operational Definitions
-[Define 5-8 key terms]
+[Define 5-8 key terms specific to this topic]
 
 CRITICAL RULES:
 - The heading "1.0 Introduction" IS the introduction - do not add a separate subsection.
-- You MUST write EXACTLY 3 specific objectives and EXACTLY 3 research questions.
+- WRITE UNIQUELY FOR EACH TOPIC. Do not use generic, reusable text.
+- Objectives and questions should be 3-5, not always exactly 3.
+- Background paragraphs should be 4-8, not always exactly 6.
 - Use APA 7th style in-text citations.
 - Use plain text only.`,
     },
@@ -326,20 +326,20 @@ CRITICAL - FOLLOW THIS EXACT FORMAT. Start DIRECTLY with the numbered heading:
 
 CHAPTER TWO
 2.0 Introduction
-[Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
+[Write a short paragraph explaining what the chapter covers - this IS the introduction content]
 
 2.1 Empirical Review
-[Write substantial paragraphs with citations]
+[Write substantial paragraphs with citations. Adapt themes to this specific topic. Cover 3-5 themes derived from the objectives.]
 
 2.2 Theoretical Framework
-[Write 4-5 substantial paragraphs using exactly 2 different theories]
+[Write 4-6 substantial paragraphs using exactly 2 different theories relevant to this topic]
 
 2.3 Conceptual Framework
-[Write a substantial explanation showing the relationship between variables]
+[Write a substantial explanation showing the relationship between variables specific to this study]
 
 CRITICAL RULES:
 - The heading "2.0 Introduction" IS the introduction - do not add a separate subsection.
-- Each subsection must have SUBSTANTIAL content.
+- Each subsection must have SUBSTANTIAL, TOPIC-SPECIFIC content.
 - Use APA 7th style in-text citations.
 - Use plain text only.`,
     },
@@ -354,34 +354,34 @@ CRITICAL - FOLLOW THIS EXACT FORMAT. Start DIRECTLY with the numbered heading:
 
 CHAPTER THREE
 3.0 Introduction
-[Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
+[Write a short paragraph explaining what the chapter covers - this IS the introduction content]
 
 3.1 Research Approach
-[Write 1 clear paragraph]
+[Write 1-2 clear paragraphs adapted to the topic]
 
 3.2 Research Design
-[Write 1 clear paragraph, cite Creswell, justify the design choice]
+[Write 1-2 clear paragraphs, cite Creswell, justify the design choice]
 
 3.3 Study Location
-[Write 1 clear paragraph]
+[Write 1-2 clear paragraphs specific to this study]
 
 3.4 Target Population
-[Write 1 clear paragraph, state the actual population]
+[Write 1-2 clear paragraphs, state the actual population]
 
 3.5 Sample Size
 [Show using a formula how the sample was calculated, justify the sample size]
 
 3.6 Data Collection Instruments and Procedures
-[Write 1 clear paragraph, ensure to cite]
+[Write 1-2 clear paragraphs, ensure to cite]
 
 3.7 Data Analysis Plan
-[Write 1 clear paragraph, be consistent, justify, cite]
+[Write 1-2 clear paragraphs, be consistent, justify, cite]
 
 3.8 Reliability and Validity
-[Write 1 clear paragraph]
+[Write 1-2 clear paragraphs]
 
 3.9 Ethical Considerations
-[Write 1 clear paragraph]
+[Write 1-2 clear paragraphs]
 
 CRITICAL RULES:
 - The heading "3.0 Introduction" IS the introduction - do not add a separate subsection.
@@ -399,13 +399,13 @@ CRITICAL - FOLLOW THIS EXACT FORMAT. Start DIRECTLY with the numbered heading:
 
 CHAPTER FOUR
 4.0 Introduction
-[Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
+[Write a short paragraph explaining what the chapter covers - this IS the introduction content]
 
 4.1 Descriptive and Demographic Results
-[Write 3-4 paragraphs with realistic percentages and frequencies]
+[Write 3-5 paragraphs with realistic percentages and frequencies]
 
 4.2 Key Thematic or Statistical Findings
-[Write 4-5 paragraphs organized by objectives]
+[Write 4-6 paragraphs organized by the research objectives]
 
 4.3 Summary of Findings
 [Write 2-3 paragraphs]
@@ -426,19 +426,19 @@ CRITICAL - FOLLOW THIS EXACT FORMAT. Start DIRECTLY with the numbered heading:
 
 CHAPTER FIVE
 5.0 Introduction
-[Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
+[Write a short paragraph explaining what the chapter covers - this IS the introduction content]
 
 5.1 Interpretation of Key Findings
-[Write 4-5 substantial paragraphs]
+[Write 4-6 substantial paragraphs]
 
 5.2 Comparison with Previous Studies
-[Write 4-5 substantial paragraphs]
+[Write 4-6 substantial paragraphs engaging with literature from Chapter Two]
 
 5.3 Implications for Practice and Policy
-[Write 3-4 substantial paragraphs]
+[Write 3-5 substantial paragraphs]
 
 5.4 Limitations of the Study
-[Write 2-3 substantial paragraphs]
+[Write 2-4 substantial paragraphs]
 
 CRITICAL RULES:
 - The heading "5.0 Introduction" IS the introduction - do not add a separate subsection.
@@ -457,13 +457,13 @@ CRITICAL - FOLLOW THIS EXACT FORMAT. Start DIRECTLY with the numbered heading:
 
 CHAPTER SIX
 6.0 Introduction
-[Write a short paragraph explaining what the chapter covers - this IS the introduction content, not a separate subsection]
+[Write a short paragraph explaining what the chapter covers - this IS the introduction content]
 
 6.1 Conclusions
-[Write 4-5 substantial paragraphs]
+[Write 4-6 substantial paragraphs]
 
 6.2 Recommendations
-[Write 3-4 substantial paragraphs grouped by stakeholder]
+[Write 3-5 substantial paragraphs grouped by stakeholder]
 
 CRITICAL RULES:
 - The heading "6.0 Introduction" IS the introduction - do not add a separate subsection.
@@ -545,7 +545,7 @@ async function callGemini(
             generationConfig: { temperature: 0.45, maxOutputTokens },
           }),
         },
-        18000
+        25000
       );
       const data = await response.json();
 
@@ -586,39 +586,46 @@ async function callOpenRouter(
   const openRouterKey = process.env.OPENROUTER_API_KEY;
   if (!openRouterKey) return { text: '', error: 'OPENROUTER_API_KEY is not set' };
 
-  try {
-    const response = await fetchWithTimeout(
-      'https://openrouter.ai/api/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${openRouterKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
-          'X-Title': 'VetSphere Academic Writer',
+  const models = [
+    'meta-llama/llama-3.1-8b-instruct:free',
+    'meta-llama/llama-3.1-8b-instruct',
+  ];
+
+  for (const model of models) {
+    try {
+      const response = await fetchWithTimeout(
+        'https://openrouter.ai/api/v1/chat/completions',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${openRouterKey}`,
+            'Content-Type': 'application/json',
+            'HTTP-Referer': process.env.BASE_URL || 'http://localhost:3000',
+            'X-Title': 'VetSphere Academic Writer',
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: 'user', content: prompt }],
+            temperature: 0.45,
+            max_tokens: maxTokens,
+          }),
         },
-        body: JSON.stringify({
-          model: 'meta-llama/llama-3.1-8b-instruct:free',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.45,
-          max_tokens: maxTokens,
-        }),
-      },
-      18000
-    );
-    const data = await response.json();
-    if (data.error || !data.choices) {
-      const message = data.error?.message || 'unknown OpenRouter error';
-      const metadata = data.error?.metadata ? ` | ${JSON.stringify(data.error.metadata)}` : '';
-      console.error('OpenRouter error:', message, metadata);
-      return { text: '', error: `OpenRouter: ${message}${metadata}` };
+        25000
+      );
+      const data = await response.json();
+      if (data.error || !data.choices) {
+        const message = data.error?.message || 'unknown OpenRouter error';
+        console.error(`OpenRouter error (${model}):`, message);
+        continue;
+      }
+      return { text: data.choices[0]?.message?.content || '', error: '' };
+    } catch (e: any) {
+      console.error(`OpenRouter fetch error (${model}):`, e);
+      continue;
     }
-    return { text: data.choices[0]?.message?.content || '', error: '' };
-  } catch (e: any) {
-    const isAbort = e?.name === 'AbortError';
-    console.error('OpenRouter fetch error:', e);
-    return { text: '', error: isAbort ? 'OpenRouter timed out' : `OpenRouter fetch failed: ${e.message || e}` };
   }
+
+  return { text: '', error: 'OpenRouter: All models failed' };
 }
 
 async function callGroq(
@@ -644,7 +651,7 @@ async function callGroq(
           max_tokens: maxTokens,
         }),
       },
-      18000
+      25000
     );
     const data = await response.json();
     if (data.error || !data.choices) {
@@ -660,7 +667,7 @@ async function callGroq(
   }
 }
 
-const CEREBRAS_MODEL_CANDIDATES = ['llama-3.3-70b', 'llama3.1-70b', 'llama3.1-8b'];
+const CEREBRAS_MODEL_CANDIDATES = ['llama3.1-70b', 'llama3.1-8b'];
 
 async function callYouCom(
   prompt: string,
@@ -677,7 +684,7 @@ async function callYouCom(
         headers: { 'X-API-Key': youKey, 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: prompt, research_effort: effort }),
       },
-      15000
+      25000
     );
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
@@ -722,7 +729,7 @@ async function callCerebras(
             max_completion_tokens: maxTokens,
           }),
         },
-        15000
+        25000
       );
       const data = await response.json();
       if (!response.ok || data.error || !data.choices) {
@@ -747,9 +754,7 @@ async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number
 ): Promise<{ text: string; apiUsed: string; error: string }> {
-  const cerebras = await callCerebras(sectionPrompt, maxOutputTokens);
-  if (cerebras.text) return { text: cerebras.text, apiUsed: 'Cerebras', error: '' };
-
+  
   const groq = await callGroq(sectionPrompt, maxOutputTokens);
   if (groq.text) return { text: groq.text, apiUsed: 'Groq', error: '' };
 
@@ -759,13 +764,16 @@ async function generateSection(
   const gemini = await callGemini(sectionPrompt, maxOutputTokens);
   if (gemini.text) return { text: gemini.text, apiUsed: 'Gemini', error: '' };
 
+  const cerebras = await callCerebras(sectionPrompt, maxOutputTokens);
+  if (cerebras.text) return { text: cerebras.text, apiUsed: 'Cerebras', error: '' };
+
   const youCom = await callYouCom(sectionPrompt);
   if (youCom.text) return { text: youCom.text, apiUsed: 'You.com', error: '' };
 
   return {
     text: '',
     apiUsed: 'none',
-    error: `All providers failed: Cerebras (${cerebras.error}), Groq (${groq.error}), OpenRouter (${openRouter.error}), Gemini (${gemini.error}), You.com (${youCom.error})`,
+    error: `All providers failed: Groq (${groq.error}), OpenRouter (${openRouter.error}), Gemini (${gemini.error}), Cerebras (${cerebras.error}), You.com (${youCom.error})`,
   };
 }
 
@@ -784,9 +792,8 @@ function cleanText(text: string): string {
 }
 
 // ============================================================
-// PPTX GENERATOR - Python-pptx ONLY
+// PPTX GENERATOR - Calls Python-pptx route
 // ============================================================
-
 async function generatePptxFromPaper(content: string, topic: string, level: string): Promise<{ buffer: Buffer; error: string }> {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
@@ -869,7 +876,6 @@ This is a ${levelInfo.label} academic document. The content must be COMPREHENSIV
 - Write SUBSTANTIAL paragraphs (minimum 5-7 sentences per paragraph for main content)
 - Provide detailed analysis, not brief summaries
 - Include specific examples, statistics, and evidence
-- Write 2-3 paragraphs per subsection where appropriate
 - The document should reflect ${levelInfo.depth}
 - Do not be brief or superficial - this is a serious academic work
 `;
@@ -881,40 +887,35 @@ This is a ${levelInfo.label} academic document. The content must be COMPREHENSIV
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER ONE SPECIFICS:
 - The heading "1.0 INTRODUCTION" IS the introduction - do not add a separate subsection.
-- 1.1 Background: exactly 6 substantial paragraphs (each 6-8 sentences) with citations
-- 1.2 Statement of Problem: approximately 100 words with citations
-- 1.3 Research Objectives: include introductory sentence before listing
-- 1.3.2 Specific Objectives: EXACTLY 3 objectives. DO NOT write 4 or more.
-- 1.4 Research Questions: include introductory sentence before listing. EXACTLY 3 questions.
-- 1.6 Scope of Study: approximately 60 words
-- 1.7 Operational Definitions: 5 terms with clear definitions
-
-CRITICAL: You MUST write EXACTLY 3 specific objectives and EXACTLY 3 research questions.`;
+- 1.1 Background: 4-8 substantial paragraphs (adapt to topic complexity)
+- 1.2 Statement of Problem: 1-2 paragraphs
+- 1.3.2 Specific Objectives: 3-5 objectives (based on topic scope)
+- 1.4 Research Questions: 3-5 questions matching objectives
+- 1.7 Operational Definitions: 5-8 terms
+- WRITE UNIQUELY FOR THIS SPECIFIC TOPIC.`;
       }
 
       if (chapter.id === 'chapter2') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER TWO SPECIFICS:
 - The heading "2.0 INTRODUCTION" IS the introduction - do not add a separate subsection.
-- 2.1.0 Empirical Review: exactly 100 words, NO citations
-- 2.1.1, 2.1.2, 2.1.3: Each 3-4 substantial paragraphs with citations
-- 2.2 Theoretical Framework: 4-5 substantial paragraphs total
-- 2.3 Conceptual Framework: Detailed explanation with variables`;
+- 2.1.0 Empirical Review: 100-150 words, NO citations
+- 2.1.1, 2.1.2, 2.1.3: Each 3-5 substantial paragraphs
+- 2.2 Theoretical Framework: 4-6 substantial paragraphs
+- WRITE UNIQUELY FOR THIS SPECIFIC TOPIC.`;
       }
 
       if (chapter.id === 'chapter3') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER THREE SPECIFICS:
 - The heading "3.0 INTRODUCTION" IS the introduction - do not add a separate subsection.
-- 3.1 Research Approach: exactly 60 words
-- 3.2 Research Design: exactly 90 words, cite Creswell
-- 3.3 Study Location: exactly 60 words
-- 3.4 Target Population: exactly 60 words
-- 3.5 Sample Size: Show formula and detailed justification
-- 3.6 Data Collection: exactly 100 words, cite sources
-- 3.7 Data Analysis: exactly 90 words, justify, cite
-- 3.8 Reliability and Validity: exactly 60 words
-- 3.9 Ethical Considerations: exactly 90 words`;
+- 3.1 Research Approach: 60-80 words
+- 3.2 Research Design: 90-120 words, cite Creswell
+- 3.3 Study Location: 60-80 words
+- 3.4 Target Population: 60-80 words
+- 3.6 Data Collection: 100-150 words, cite sources
+- 3.7 Data Analysis: 90-120 words, justify, cite
+- 3.9 Ethical Considerations: 90-120 words`;
       }
 
       if (chapter.id === 'references') {
@@ -927,30 +928,26 @@ PROPOSAL REFERENCES SPECIFICS:
 - Appendix A: Student Questionnaire with 5 sections and 20-25 actual questions
 - Appendix B: Interview Guide with 15-20 actual open-ended questions
 - Appendix C: Informed Consent Form with all required sections
-- Appendix D: Introductory Letter
-- All appendices must contain ACTUAL content, not descriptions.`;
+- Appendix D: Introductory Letter`;
       }
     } else {
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 RESEARCH CHAPTER ONE SPECIFICS:
 - The heading "1.0 Introduction" IS the introduction - do not add a separate subsection.
-- 1.1 Background: 6-8 substantial paragraphs with citations
-- 1.2 Statement of Problem: 1 substantial paragraph
-- 1.3.2 Specific Objectives: EXACTLY 3 objectives
-- 1.4 Research Questions: EXACTLY 3 questions
-- 1.5 Significance: 2-3 substantial paragraphs
-- 1.7 Operational Definitions: 5-8 terms with definitions
-
-CRITICAL: You MUST write EXACTLY 3 specific objectives and EXACTLY 3 research questions.`;
+- 1.1 Background: 4-8 substantial paragraphs (adapt to topic)
+- 1.3.2 Specific Objectives: 3-5 objectives
+- 1.4 Research Questions: 3-5 questions
+- 1.7 Operational Definitions: 5-8 terms
+- WRITE UNIQUELY FOR THIS SPECIFIC TOPIC.`;
       }
 
       if (chapter.id === 'chapter6') {
         chapterSpecificInstruction = `
 RESEARCH CHAPTER SIX SPECIFICS:
 - The heading "6.0 Introduction" IS the introduction - do not add a separate subsection.
-- 6.1 Conclusions: 4-5 substantial paragraphs
-- 6.2 Recommendations: 3-4 substantial paragraphs grouped by stakeholder`;
+- 6.1 Conclusions: 4-6 substantial paragraphs
+- 6.2 Recommendations: 3-5 substantial paragraphs grouped by stakeholder`;
       }
 
       if (chapter.id === 'references') {
@@ -959,8 +956,7 @@ RESEARCH REFERENCES SPECIFICS:
 - 30 complete APA 7th references
 - 4 research methods books
 - Appendix A: Data Extraction Tool with actual variables
-- Appendix B: Participant Information Sheet and Informed Consent with actual content
-- All appendices must contain ACTUAL content, not descriptions.`;
+- Appendix B: Participant Information Sheet and Informed Consent with actual content`;
       }
     }
 
@@ -980,7 +976,10 @@ CRITICAL RULES:
 - This is a continuous academic document.
 - Start with the chapter label exactly as specified (e.g., "CHAPTER ONE").
 - The numbered introduction heading (e.g., "1.0 Introduction") IS the introduction - do NOT add a separate subsection called "Introduction" underneath it.
-- Write SUBSTANTIAL, DETAILED content - never brief or superficial.
+- WRITE UNIQUELY FOR EACH TOPIC. Do not use generic, reusable text that could be copied between papers.
+- Each paper should look and feel different based on the topic.
+- The number of objectives and questions should vary between 3-5 depending on the topic.
+- The number of paragraphs in each section should vary based on topic complexity.
 - Use APA 7th style in-text citations throughout.
 - Never use numbered bracket citations like [1].
 - Use plain text only. No markdown, no asterisks, no underscores.
