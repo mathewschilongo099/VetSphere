@@ -49,43 +49,36 @@ function parseBlocks(content: string): Block[] {
       continue;
     }
 
-    // CHAPTER ONE, CHAPTER TWO, etc. (main chapter labels)
     if (/^CHAPTER\s+(ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN)\b/i.test(trimmed)) {
       blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
       continue;
     }
 
-    // REFERENCES (as a main heading)
     if (/^REFERENCES\s*$/i.test(trimmed)) {
       blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
       continue;
     }
 
-    // APPENDICES (as a main heading)
     if (/^APPENDICES\s*$/i.test(trimmed)) {
       blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
       continue;
     }
 
-    // Main numbered headings: "1.0 INTRODUCTION", "2.0 LITERATURE REVIEW", etc.
     if (/^\d+\.0\s+[A-Z]/.test(trimmed)) {
       blocks.push({ type: 'h1', text: trimmed });
       continue;
     }
 
-    // Subsection headings: "1.1 Background", "2.1 Empirical Review", etc.
     if (/^\d+\.\d+(\.\d+)?\s+[A-Z]/.test(trimmed)) {
       blocks.push({ type: 'h2', text: trimmed });
       continue;
     }
 
-    // Sub-subsections: "2.1.1 Theme from Objective 1"
     if (/^\d+\.\d+\.\d+\s+[A-Z]/.test(trimmed)) {
       blocks.push({ type: 'h3', text: trimmed });
       continue;
     }
 
-    // Regular paragraph text
     blocks.push({ type: 'para', text: trimmed });
   }
 
@@ -253,7 +246,6 @@ async function generateAcademicPdf(
   const doc = new JsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const pageWidth = doc.internal.pageSize.getWidth();
 
-  // Title Page
   doc.setFont('times', 'bold');
   doc.setFontSize(18);
   const titleLines = doc.splitTextToSize(topic.toUpperCase(), pageWidth - PAGE_MARGIN * 2) as string[];
@@ -272,19 +264,16 @@ async function generateAcademicPdf(
     }
   );
 
-  // Front matter
   if (front.length > 0) {
     doc.addPage();
     drawBlocks(doc, front, PAGE_MARGIN, false);
   }
   const frontMatterPageCount = doc.getNumberOfPages();
 
-  // Measure body headings for TOC
   const { default: ScratchJsPDF } = await import('jspdf');
   const scratchDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const { headings: bodyHeadings } = drawBlocks(scratchDoc, body, PAGE_MARGIN, true);
 
-  // Measure TOC
   const scratchTocDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   scratchTocDoc.setFont('times', 'bold');
   scratchTocDoc.setFontSize(14);
@@ -298,7 +287,6 @@ async function generateAcademicPdf(
   );
   const tocPageCount = scratchTocDoc.getNumberOfPages();
 
-  // Real TOC
   doc.addPage();
   doc.setFont('times', 'bold');
   doc.setFontSize(14);
@@ -309,11 +297,9 @@ async function generateAcademicPdf(
   }));
   renderToc(doc, realEntries, PAGE_MARGIN + 30);
 
-  // Real body
   doc.addPage();
   drawBlocks(doc, body, PAGE_MARGIN, false);
 
-  // Page numbers
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -479,13 +465,17 @@ export default function AcademicWriterForm() {
   };
 
   // ============================================================
-  // DOWNLOAD PPTX - Uses Presenton API
+  // DOWNLOAD PPTX - Calls API with better error handling
   // ============================================================
   const downloadAsPPTX = async () => {
     if (!result) return;
     setPptxGenerating(true);
+    setError(null);
 
     try {
+      // Show loading message
+      setLoadingMessage('Generating PowerPoint presentation...');
+
       const response = await fetch('/api/academic-writer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -498,25 +488,64 @@ export default function AcademicWriterForm() {
         }),
       });
 
+      // Check if response is ok
       if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error: ${response.status}`);
+      }
+
+      // Get the content type to determine if it's a PPTX or error
+      const contentType = response.headers.get('content-type') || '';
+
+      if (contentType.includes('application/json')) {
+        // If it's JSON, there was an error
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to generate PPTX');
       }
 
+      // It's a file - download it
       const blob = await response.blob();
+      
+      // Check if it's a valid PPTX file (starts with PK)
+      if (blob.size < 100) {
+        const text = await blob.text();
+        if (text.includes('error') || text.includes('failed')) {
+          throw new Error(text.substring(0, 100));
+        }
+      }
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${topic.toLowerCase().replace(/\s+/g, '-')}-presentation.pptx`;
+      const filename = `${topic.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-presentation.pptx`;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
-    } catch (err) {
+
+      setLoadingMessage('PPTX downloaded successfully!');
+      setTimeout(() => setLoadingMessage(''), 2000);
+    } catch (err: any) {
       console.error('PPTX generation failed:', err);
-      alert('Sorry, the PPTX could not be generated. Please try again.');
+      
+      // Show a more helpful error message
+      let errorMessage = err.message || 'Failed to generate PPTX. Please try again.';
+      
+      if (errorMessage.includes('502') || errorMessage.includes('503')) {
+        errorMessage = 'PPTX service is temporarily unavailable. Please try again in a few minutes.';
+      } else if (errorMessage.includes('timeout')) {
+        errorMessage = 'PPTX generation is taking too long. Please try again with a shorter topic.';
+      }
+      
+      setError(`PPTX Error: ${errorMessage}`);
+      alert(`Sorry, the PPTX could not be generated.\n\n${errorMessage}`);
     } finally {
       setPptxGenerating(false);
+      // Reset loading message if still showing
+      if (loadingMessage === 'Generating PowerPoint presentation...') {
+        setLoadingMessage('');
+      }
     }
   };
 
@@ -748,9 +777,13 @@ export default function AcademicWriterForm() {
               <button
                 onClick={downloadAsPPTX}
                 disabled={pptxGenerating}
-                className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition text-white ${
+                  pptxGenerating
+                    ? 'bg-orange-400 cursor-not-allowed'
+                    : 'bg-orange-600 hover:bg-orange-700'
+                }`}
               >
-                {pptxGenerating ? 'Generating Slides...' : 'PPTX'}
+                {pptxGenerating ? 'Generating PPTX...' : 'PPTX'}
               </button>
             </div>
           </div>
