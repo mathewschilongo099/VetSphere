@@ -1,6 +1,5 @@
 // src/app/api/academic-writer/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import pptxgen from 'pptxgenjs';
 
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
@@ -46,6 +45,9 @@ interface ChapterSpec {
   instructions: string;
 }
 
+// ============================================================
+// BUILD PROPOSAL SPECS
+// ============================================================
 function buildProposalSpecs(topic: string): ChapterSpec[] {
   return [
     {
@@ -246,6 +248,9 @@ CRITICAL: All appendices must contain ACTUAL content, not descriptions.`,
   ];
 }
 
+// ============================================================
+// BUILD RESEARCH SPECS
+// ============================================================
 function buildResearchSpecs(topic: string): ChapterSpec[] {
   return [
     {
@@ -496,6 +501,9 @@ function buildChapterSpecs(topic: string, docType: string): ChapterSpec[] {
   return buildResearchSpecs(topic);
 }
 
+// ============================================================
+// UTILITY FUNCTIONS
+// ============================================================
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -514,6 +522,9 @@ async function fetchWithTimeout(
   }
 }
 
+// ============================================================
+// AI PROVIDER FUNCTIONS
+// ============================================================
 async function callGemini(
   prompt: string,
   maxOutputTokens: number,
@@ -773,157 +784,82 @@ function cleanText(text: string): string {
 }
 
 // ============================================================
-// PPTX GENERATOR FUNCTION - Creates presentation from research paper
+// PPTX GENERATOR USING PRESENTON API
 // ============================================================
 async function generatePptxFromPaper(content: string, topic: string, level: string): Promise<{ buffer: Buffer; error: string }> {
   try {
-    const pptx = new pptxgen();
+    const presentonUrl = process.env.PRESENTON_URL || 'http://localhost:5000';
+    const presentonKey = process.env.PRESENTON_API_KEY;
 
-    pptx.defineLayout({ name: 'WIDE', width: 13.33, height: 7.5 });
-    pptx.layout = 'WIDE';
-    pptx.author = 'VetSphere Academic Writer';
-    pptx.title = topic;
-    pptx.subject = level;
+    // Prepare the prompt for Presenton
+    const prompt = `
+    Create a professional academic presentation on "${topic}".
+    Academic Level: ${level}
+    
+    Content from the research paper:
+    ${content.slice(0, 8000)}
+    
+    Required Slides:
+    1. Title Slide - "${topic}"
+    2. Outline
+    3. Introduction
+    4. Background
+    5. Problem Statement
+    6. Research Objectives
+    7. Research Questions
+    8. Literature Review
+    9. Methodology
+    10. Findings
+    11. Discussion
+    12. Conclusions
+    13. Recommendations
+    14. References
+    15. Thank You
+    
+    Each slide should have 3-6 clear bullet points.
+    Use professional academic language.
+    `;
 
-    const colors = {
-      primary: '0B5CFF',
-      white: 'FFFFFF',
-      text: '1A1A2E',
-      lightText: '666666',
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
     };
+    if (presentonKey) {
+      headers['Authorization'] = `Bearer ${presentonKey}`;
+    }
 
-    const sections = extractSections(content);
-
-    // Title Slide
-    const titleSlide = pptx.addSlide();
-    titleSlide.background = { color: colors.primary };
-    titleSlide.addText(topic.toUpperCase(), {
-      x: 0.5, y: 1.5, w: 12.33, h: 2,
-      fontSize: 36, fontFace: 'Arial', color: colors.white, align: 'center', bold: true,
-    });
-    titleSlide.addText('Research Presentation', {
-      x: 0.5, y: 3.8, w: 12.33, h: 0.8,
-      fontSize: 24, fontFace: 'Arial', color: colors.white, align: 'center', italic: true,
-    });
-    titleSlide.addText(`VetSphere Academic Writer • ${level} • ${new Date().toLocaleDateString()}`, {
-      x: 0.5, y: 5.5, w: 12.33, h: 0.6,
-      fontSize: 16, fontFace: 'Arial', color: colors.white, align: 'center',
+    const response = await fetch(`${presentonUrl}/api/generate`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        prompt: prompt,
+        template: 'academic',
+        exportFormat: 'pptx',
+        title: topic,
+      }),
     });
 
-    // Outline Slide
-    const outlineSlide = pptx.addSlide();
-    outlineSlide.addText('Presentation Outline', {
-      x: 0.5, y: 0.3, w: 12.33, h: 0.8,
-      fontSize: 28, fontFace: 'Arial', color: colors.primary, bold: true,
-    });
-    let yPos = 1.5;
-    sections.slice(0, 12).forEach((section, index) => {
-      outlineSlide.addText(`${index + 1}. ${section.title}`, {
-        x: 1, y: yPos, w: 11, h: 0.5,
-        fontSize: 16, fontFace: 'Arial', color: colors.text,
-      });
-      yPos += 0.6;
-    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      return { buffer: Buffer.from(''), error: `Presenton API error: ${response.status} - ${errorText}` };
+    }
 
-    // Content Slides
-    sections.forEach((section, index) => {
-      const slide = pptx.addSlide();
-
-      slide.addText(`Slide ${index + 2}`, {
-        x: 0.5, y: 0.2, w: 12.33, h: 0.4,
-        fontSize: 12, fontFace: 'Arial', color: colors.lightText,
-      });
-
-      slide.addText(section.title, {
-        x: 0.5, y: 0.7, w: 12.33, h: 0.8,
-        fontSize: 24, fontFace: 'Arial', color: colors.primary, bold: true,
-      });
-
-      let bulletY = 1.8;
-      const bullets = section.bullets.length > 0 ? section.bullets : ['Key information not available'];
-
-      bullets.forEach((bullet: string) => {
-        if (bulletY > 6.5) return;
-        slide.addText([
-          { text: '● ', options: { fontSize: 16, color: colors.primary } },
-          { text: bullet, options: { fontSize: 14, color: colors.text } },
-        ], {
-          x: 0.8, y: bulletY, w: 11.5, h: 0.6,
-          fontSize: 14, fontFace: 'Arial', color: colors.text, valign: 'top',
-        });
-        bulletY += 0.7;
-      });
-    });
-
-    // Thank You Slide
-    const thankYouSlide = pptx.addSlide();
-    thankYouSlide.background = { color: colors.primary };
-    thankYouSlide.addText('Thank You', {
-      x: 0.5, y: 2, w: 12.33, h: 1.5,
-      fontSize: 48, fontFace: 'Arial', color: colors.white, align: 'center', bold: true,
-    });
-    thankYouSlide.addText('Questions & Discussion', {
-      x: 0.5, y: 3.8, w: 12.33, h: 0.8,
-      fontSize: 20, fontFace: 'Arial', color: colors.white, align: 'center', italic: true,
-    });
-    thankYouSlide.addText('Generated by VetSphere Academic Writer', {
-      x: 0.5, y: 4.8, w: 12.33, h: 0.6,
-      fontSize: 14, fontFace: 'Arial', color: colors.white, align: 'center',
-    });
-
-    const result = await pptx.write({ outputType: 'nodebuffer' });
-    const buffer = Buffer.isBuffer(result) ? result : Buffer.from(result);
-    return { buffer, error: '' };
+    const data = await response.json();
+    
+    let pptxBuffer: Buffer;
+    if (data.pptx_url) {
+      const pptxResponse = await fetch(data.pptx_url);
+      pptxBuffer = Buffer.from(await pptxResponse.arrayBuffer());
+    } else if (data.pptx_data) {
+      pptxBuffer = Buffer.from(data.pptx_data, 'base64');
+    } else {
+      return { buffer: Buffer.from(''), error: 'No PPTX data returned from Presenton' };
+    }
+    
+    return { buffer: pptxBuffer, error: '' };
   } catch (error: any) {
     console.error('PPTX generation error:', error);
     return { buffer: Buffer.from(''), error: error.message || 'PPTX generation failed' };
   }
-}
-
-function extractSections(content: string): { title: string; bullets: string[] }[] {
-  const sections: { title: string; bullets: string[] }[] = [];
-  const lines = content.split('\n');
-  let currentSection: { title: string; bullets: string[] } | null = null;
-
-  const sectionKeywords = [
-    'ABSTRACT', 'INTRODUCTION', 'BACKGROUND', 'PROBLEM', 'OBJECTIVES',
-    'QUESTIONS', 'LITERATURE REVIEW', 'THEORETICAL', 'METHODOLOGY',
-    'FINDINGS', 'DISCUSSION', 'CONCLUSIONS', 'RECOMMENDATIONS'
-  ];
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-
-    const isSection = sectionKeywords.some(keyword =>
-      trimmed.toUpperCase().includes(keyword) &&
-      trimmed.length < 100
-    );
-
-    if (isSection && !trimmed.startsWith('●') && !trimmed.startsWith('-')) {
-      if (currentSection && currentSection.bullets.length > 0) {
-        sections.push(currentSection);
-      }
-      currentSection = { title: trimmed.slice(0, 60), bullets: [] };
-      continue;
-    }
-
-    if (currentSection && trimmed.length > 20 && trimmed.length < 200) {
-      let bullet = trimmed
-        .replace(/^[0-9. ]+/, '')
-        .replace(/^[-•*]\s*/, '')
-        .trim();
-      if (bullet.length > 10 && bullet.length < 150) {
-        currentSection.bullets.push(bullet.slice(0, 120));
-      }
-    }
-  }
-
-  if (currentSection && currentSection.bullets.length > 0) {
-    sections.push(currentSection);
-  }
-
-  return sections;
 }
 
 // ============================================================
@@ -935,7 +871,7 @@ export async function POST(request: NextRequest) {
     const { topic, level = 'degree', type = 'research', chapterIndex = 0, previousContext = '', action = 'generate', content = '' } = body;
 
     // ============================================================
-    // ACTION: PPTX
+    // ACTION: PPTX (using Presenton API)
     // ============================================================
     if (action === 'pptx') {
       if (!content) {
