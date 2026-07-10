@@ -46,224 +46,426 @@ interface ChapterSpec {
 }
 
 // ============================================================
-// ASSIGNMENT SPECS (General academic essay/task)
+// ASSIGNMENT SPECS - COMPLETE AND DETAILED
 // ============================================================
 function buildAssignmentSpecs(topic: string): ChapterSpec[] {
   return [
     {
-      id: 'frontmatter',
-      title: 'FRONT MATTER',
+      id: 'title',
+      title: 'TITLE PAGE',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write ONLY the following front-matter section for an ASSIGNMENT:
+      instructions: `Write a COMPLETE TITLE PAGE for an ASSIGNMENT:
 
-TITLE PAGE (with the assignment title, author name, student ID, course name, date)
+TITLE: Create a clear, descriptive title based on the topic
+STUDENT NAME: [Student Name]
+STUDENT ID: [Student ID]
+COURSE NAME: [Course Name]
+COURSE CODE: [Course Code]
+INSTITUTION: [Institution Name]
+DATE: [Current Date]
 
-Do NOT write any chapter content yet. Stop after the title page.
-
-CRITICAL: Use plain text only. No markdown, no asterisks.`,
+CRITICAL: Use plain text only. No markdown.`,
     },
     {
-      id: 'assignment',
-      title: 'ASSIGNMENT CONTENT',
+      id: 'introduction',
+      title: '1.0 INTRODUCTION',
       chapterLabel: '',
-      chapterNumber: '',
-      instructions: `Write a COMPLETE ASSIGNMENT (General Academic Essay/Task).
+      chapterNumber: '1',
+      instructions: `Write a COMPREHENSIVE INTRODUCTION (10% of total length) for this ASSIGNMENT.
 
-This is a STUDENT ASSIGNMENT - NOT a research paper. You are answering a specific question or prompt. This is ARGUMENT-DRIVEN.
-
-STRUCTURE WITH PERCENTAGE GUIDANCE:
-
-1.0 INTRODUCTION (10%)
-[Write 2-3 paragraphs]
-- Context and background
-- Thesis statement or purpose (the argument you will make)
+CONTENT REQUIREMENTS:
+- Context and background to the topic
+- Clear thesis statement or purpose (the argument you will make)
 - Roadmap of what follows
+- Explain why this topic is important
+- Define key terms if needed
 
-2.0 MAIN BODY (70-75%)
-[Write 6-10 paragraphs organized by themes or sub-questions, NOT chronologically]
-CRITICAL RULES FOR BODY PARAGRAPHS:
+LENGTH: 3-4 substantial paragraphs (minimum 400-500 words)
+FORMAT: Plain text only. No markdown.
+
+CRITICAL: This is an ARGUMENT-DRIVEN assignment. The introduction should set up the argument you will develop.`,
+    },
+    {
+      id: 'body',
+      title: '2.0 MAIN BODY',
+      chapterLabel: '',
+      chapterNumber: '2',
+      instructions: `Write a COMPREHENSIVE MAIN BODY (70-75% of total length) for this ASSIGNMENT.
+
+CONTENT REQUIREMENTS:
+- Organized by themes or sub-questions, NOT chronologically
 - Each paragraph = ONE idea
 - Topic sentence FIRST stating a claim (not just a subject)
-- Evidence/citation to support the claim
+- Evidence/citation to support each claim
 - Analysis explaining the significance
 - Link to next point
 - Balance breadth vs depth - cover 3-5 points well
 - Avoid pure description; always link facts back to the question
 
-3.0 CONCLUSION (10-15%)
-[Write 1-2 paragraphs]
-- Synthesize the argument
-- Answer the question posed
-- NO new information
-- Tie back to the introduction
+STRUCTURE:
+2.1 [Theme/Sub-topic 1] - 3-4 paragraphs
+2.2 [Theme/Sub-topic 2] - 3-4 paragraphs
+2.3 [Theme/Sub-topic 3] - 3-4 paragraphs
+(Add more sections if needed)
 
-4.0 REFERENCES
-[Provide 10-15 credible references in APA 7th edition format]
+LENGTH: 8-12 substantial paragraphs (minimum 1500-2000 words)
+FORMAT: Plain text only. No markdown.
+CITATIONS: Use APA 7th style throughout.
 
 CRITICAL RULES:
-- This is an ASSIGNMENT - write in a clear, academic style
-- Focus on answering the question directly
-- Use topic sentences that state a claim, not just a subject
-- Use appropriate academic citations
-- Use plain text only. No markdown.`,
+- Topic sentences must state a claim, not just a subject
+- Example: "Antibiotic overuse in livestock accelerates resistance" NOT "This section discusses antibiotics"
+- Always link facts back to the question
+- Use appropriate academic citations`,
+    },
+    {
+      id: 'conclusion',
+      title: '3.0 CONCLUSION',
+      chapterLabel: '',
+      chapterNumber: '3',
+      instructions: `Write a COMPREHENSIVE CONCLUSION (10-15% of total length) for this ASSIGNMENT.
+
+CONTENT REQUIREMENTS:
+- Synthesize the argument made in the body
+- Answer the question posed in the introduction
+- NO new information
+- Tie back to the introduction
+- May include implications or recommendations
+
+LENGTH: 2-3 substantial paragraphs (minimum 300-400 words)
+FORMAT: Plain text only. No markdown.
+
+CRITICAL: Do NOT introduce new ideas or evidence in the conclusion.`,
+    },
+    {
+      id: 'references',
+      title: '4.0 REFERENCES',
+      chapterLabel: '',
+      chapterNumber: '4',
+      instructions: `Write a COMPLETE REFERENCE LIST for this ASSIGNMENT.
+
+REQUIREMENTS:
+- 12-20 credible references in APA 7th edition format
+- Alphabetical order by author surname
+- Mix of books, journal articles, and credible online sources
+- All references must be cited in the text above
+
+FORMAT: APA 7th edition
+CRITICAL: Write out every reference in full. No placeholders.`,
     },
   ];
 }
 
 // ============================================================
-// CASE STUDY SPECS
+// CASE STUDY SPECS - COMPLETE AND DETAILED
 // ============================================================
 function buildCaseStudySpecs(topic: string): ChapterSpec[] {
   return [
     {
-      id: 'frontmatter',
-      title: 'FRONT MATTER',
+      id: 'title',
+      title: 'TITLE PAGE',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write ONLY the following front-matter section for a CASE STUDY:
+      instructions: `Write a COMPLETE TITLE PAGE for a CASE STUDY:
 
-TITLE PAGE (with the case study title, author name, student ID, course name, institution, date)
+TITLE: Create a clear, descriptive case study title
+AUTHOR NAME: [Author Name]
+STUDENT ID: [Student ID]
+COURSE NAME: [Course Name]
+INSTITUTION: [Institution Name]
+DATE: [Current Date]
 
-Do NOT write any chapter content yet. Stop after the title page.
-
-CRITICAL: Use plain text only. No markdown, no asterisks.`,
+CRITICAL: Use plain text only. No markdown.`,
     },
     {
-      id: 'casestudy',
-      title: 'CASE STUDY CONTENT',
+      id: 'introduction',
+      title: '1.0 INTRODUCTION',
       chapterLabel: '',
-      chapterNumber: '',
-      instructions: `Write a COMPLETE CASE STUDY ANALYSIS.
+      chapterNumber: '1',
+      instructions: `Write a COMPREHENSIVE INTRODUCTION (8-10% of total length) for this CASE STUDY.
 
-This is a CASE STUDY - NOT a research paper. You are analyzing a specific case/patient/situation.
+CONTENT REQUIREMENTS:
+- Why this case matters - significance and relevance
+- Clear objective of the case study
+- Brief overview of the case
+- What the reader should learn
 
-STRUCTURE WITH PERCENTAGE GUIDANCE:
+LENGTH: 3-4 substantial paragraphs (minimum 400-500 words)
+FORMAT: Plain text only. No markdown.
 
-1.0 INTRODUCTION (8-10%)
-[Write 2-3 paragraphs]
-- Why this case matters
-- Objective of the case study
+CRITICAL: This section sets up the importance of the case study.`,
+    },
+    {
+      id: 'presentation',
+      title: '2.0 CASE PRESENTATION',
+      chapterLabel: '',
+      chapterNumber: '2',
+      instructions: `Write a COMPREHENSIVE CASE PRESENTATION (15-20% of total length).
 
-2.0 CASE PRESENTATION (15-20%) - FACTS ONLY, NO INTERPRETATION
-[Write 3-5 paragraphs]
-- Signalment and history
-- Clinical exam findings
-- Diagnostics and test results
-- Present facts objectively - DO NOT interpret here
+CRITICAL: FACTS ONLY - NO INTERPRETATION.
 
-3.0 DISCUSSION / ANALYSIS (35-40%) - THIS IS THE CORE MARKED SECTION
-[Write 5-8 paragraphs]
-- Interpret the findings from Section 2.0
-- Differential diagnoses - rule in and rule out
-- Comparison to literature
-- Justify every diagnosis and treatment choice with "why"
-- If case is atypical, explain the deviation explicitly
+CONTENT REQUIREMENTS:
+- Signalment (species, breed, age, sex, neuter status)
+- History (presenting complaint, duration, previous treatments)
+- Clinical examination findings (physical exam, vital signs)
+- Diagnostics and test results (lab findings, imaging)
+- Present all facts objectively
 
-4.0 MANAGEMENT / OUTCOME (15-20%)
-[Write 3-4 paragraphs]
-- Treatment provided
-- Rationale for treatment (refer to literature)
-- Prognosis
-- Follow-up and outcome
-
-5.0 CONCLUSION (5-8%)
-[Write 1-2 paragraphs]
-- Summary of key points
-- Tie back to the objective
-- No new information
-
-6.0 REFERENCES
-[Provide 10-15 credible references in APA 7th edition format]
-
-7.0 APPENDICES
-[Describe any raw data, images, lab reports]
+LENGTH: 4-6 substantial paragraphs (minimum 600-800 words)
+FORMAT: Plain text only. No markdown.
 
 CRITICAL RULES:
-- STRICTLY separate description (Section 2.0) from interpretation (Section 3.0)
-- Every diagnosis or treatment choice needs a "why" - justify against literature
-- Use real clinical terminology correctly
-- Keep case facts consistent throughout
-- Use plain text only. No markdown.`,
+- DO NOT interpret findings here
+- DO NOT discuss differentials here
+- Present facts as facts
+- Be detailed and specific`,
+    },
+    {
+      id: 'discussion',
+      title: '3.0 DISCUSSION / ANALYSIS',
+      chapterLabel: '',
+      chapterNumber: '3',
+      instructions: `Write a COMPREHENSIVE DISCUSSION/ANALYSIS (35-40% of total length).
+
+THIS IS THE CORE MARKED SECTION.
+
+CONTENT REQUIREMENTS:
+- Interpret the findings from Section 2.0
+- Discuss differential diagnoses - rule in and rule out
+- Compare to literature - reference relevant studies
+- Justify every diagnosis with "why" (refer to literature)
+- Explain treatment rationale (refer to literature)
+- If case is atypical, explain the deviation explicitly
+
+LENGTH: 8-12 substantial paragraphs (minimum 1200-1500 words)
+FORMAT: Plain text only. No markdown.
+CITATIONS: Use APA 7th style throughout.
+
+CRITICAL RULES:
+- Every diagnosis or treatment choice needs a "why"
+- Justify against literature, not just state it
+- Use real clinical terminology correctly`,
+    },
+    {
+      id: 'management',
+      title: '4.0 MANAGEMENT / OUTCOME',
+      chapterLabel: '',
+      chapterNumber: '4',
+      instructions: `Write a COMPREHENSIVE MANAGEMENT/OUTCOME section (15-20% of total length).
+
+CONTENT REQUIREMENTS:
+- Treatment provided (specific details)
+- Rationale for treatment (refer to literature)
+- Prognosis - explain expected outcome
+- Follow-up and actual outcome
+- Any complications or challenges
+
+LENGTH: 4-6 substantial paragraphs (minimum 500-700 words)
+FORMAT: Plain text only. No markdown.
+CITATIONS: Use APA 7th style where appropriate.`,
+    },
+    {
+      id: 'conclusion',
+      title: '5.0 CONCLUSION',
+      chapterLabel: '',
+      chapterNumber: '5',
+      instructions: `Write a COMPREHENSIVE CONCLUSION (5-8% of total length) for this CASE STUDY.
+
+CONTENT REQUIREMENTS:
+- Summary of key points
+- Tie back to the objective from Section 1.0
+- What was learned from this case
+- No new information
+
+LENGTH: 2-3 substantial paragraphs (minimum 250-350 words)
+FORMAT: Plain text only. No markdown.`,
+    },
+    {
+      id: 'references',
+      title: '6.0 REFERENCES',
+      chapterLabel: '',
+      chapterNumber: '6',
+      instructions: `Write a COMPLETE REFERENCE LIST for this CASE STUDY.
+
+REQUIREMENTS:
+- 12-20 credible references in APA 7th edition format
+- Mix of veterinary journals, textbooks, and clinical guidelines
+- All references must be cited in the text above
+
+FORMAT: APA 7th edition
+CRITICAL: Write out every reference in full. No placeholders.`,
+    },
+    {
+      id: 'appendices',
+      title: '7.0 APPENDICES',
+      chapterLabel: '',
+      chapterNumber: '7',
+      instructions: `Write a COMPLETE APPENDICES section for this CASE STUDY.
+
+CONTENT REQUIREMENTS:
+- Describe any raw data (lab results, test values)
+- Describe any images (radiographs, ultrasound images)
+- Describe any additional supporting documents
+- Include relevant details that support the case
+
+FORMAT: Plain text only. No markdown.`,
     },
   ];
 }
 
 // ============================================================
-// REPORT SPECS
+// REPORT SPECS - COMPLETE AND DETAILED
 // ============================================================
 function buildReportSpecs(topic: string): ChapterSpec[] {
   return [
     {
-      id: 'frontmatter',
-      title: 'FRONT MATTER',
+      id: 'title',
+      title: 'TITLE PAGE',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write ONLY the following front-matter sections for a REPORT:
+      instructions: `Write a COMPLETE TITLE PAGE for a REPORT:
 
-TITLE PAGE (with the report title, author name, organization, date)
-EXECUTIVE SUMMARY (one paragraph: purpose, method, key findings, recommendations)
+TITLE: Create a clear, descriptive report title
+AUTHOR NAME: [Author Name]
+ORGANIZATION: [Organization Name]
+DATE: [Current Date]
 
-Do NOT write any chapter content yet. Stop after the executive summary.
-
-CRITICAL: Use plain text only. No markdown, no asterisks.`,
+CRITICAL: Use plain text only. No markdown.`,
     },
     {
-      id: 'report',
-      title: 'REPORT CONTENT',
+      id: 'executive',
+      title: 'EXECUTIVE SUMMARY',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write a COMPLETE PROFESSIONAL REPORT.
+      instructions: `Write a COMPLETE EXECUTIVE SUMMARY for this REPORT.
 
-This is a REPORT - NOT a research paper. Write for decision-makers who skim rather than read start to finish.
-
-STRUCTURE WITH PERCENTAGE GUIDANCE:
-
-1.0 INTRODUCTION (10%)
-[Write 2-3 paragraphs]
-- Background
+CONTENT REQUIREMENTS:
+- One comprehensive paragraph
 - Purpose of the report
-- Scope
+- Method/approach
+- Key findings
+- Main recommendations
+
+LENGTH: 150-200 words
+FORMAT: Plain text only. No markdown.
+
+CRITICAL: This is for decision-makers who skim. Be concise but comprehensive.`,
+    },
+    {
+      id: 'introduction',
+      title: '1.0 INTRODUCTION',
+      chapterLabel: '',
+      chapterNumber: '1',
+      instructions: `Write a COMPREHENSIVE INTRODUCTION (10% of total length) for this REPORT.
+
+CONTENT REQUIREMENTS:
+- Background and context
+- Purpose of the report
+- Scope of the report
 - Methodology (if applicable)
 
-2.0 FINDINGS / RESULTS (40-50%)
-[Write 4-6 paragraphs with clear subheadings]
-- Present findings objectively and factually
-- Use tables/figures where numeric data supports the point
+LENGTH: 3-4 substantial paragraphs (minimum 400-500 words)
+FORMAT: Plain text only. No markdown.`,
+    },
+    {
+      id: 'findings',
+      title: '2.0 FINDINGS / RESULTS',
+      chapterLabel: '',
+      chapterNumber: '2',
+      instructions: `Write a COMPREHENSIVE FINDINGS/RESULTS section (40-50% of total length).
+
+CRITICAL: Present findings objectively and factually. NO INTERPRETATION.
+
+CONTENT REQUIREMENTS:
 - Organized under clear subheadings
-- NO opinion or interpretation here
+- Use tables/figures where numeric data supports the point
+- Present data logically
+- Be neutral and factual
 
-3.0 DISCUSSION (20-25%)
-[Write 3-4 paragraphs]
-- What the findings mean
-- Implications
-- Limitations
-
-4.0 RECOMMENDATIONS (10-15%)
-[Write 2-3 paragraphs]
-- Specific, actionable recommendations
-- Tied directly to findings
-- Be specific ("Increase vaccination monitoring in Q3" not "Vaccination should be improved")
-
-5.0 CONCLUSION (5%)
-[Write 1 paragraph]
-- Brief close
-- No new information
-
-6.0 REFERENCES
-[Provide 10-15 credible references in APA 7th edition format]
-
-7.0 APPENDICES
-[Describe any supporting documents]
+LENGTH: 6-10 substantial paragraphs (minimum 800-1200 words)
+FORMAT: Plain text only. No markdown.
 
 CRITICAL RULES:
-- Use headings, bullet points, bolded key figures for skimmability
-- Findings section = neutral and factual
+- This section is NEUTRAL and FACTUAL
 - Save opinion/interpretation for Discussion
-- Recommendations must be specific and actionable
-- Keep objective, formal tone throughout
-- Avoid first person unless specified
-- Use plain text only. No markdown.`,
+- Use headings for skimmability`,
+    },
+    {
+      id: 'discussion',
+      title: '3.0 DISCUSSION',
+      chapterLabel: '',
+      chapterNumber: '3',
+      instructions: `Write a COMPREHENSIVE DISCUSSION section (20-25% of total length) for this REPORT.
+
+CONTENT REQUIREMENTS:
+- What the findings mean
+- Implications of the findings
+- Limitations of the study/report
+
+LENGTH: 4-6 substantial paragraphs (minimum 500-700 words)
+FORMAT: Plain text only. No markdown.
+
+CRITICAL: This is where you interpret the findings from Section 2.0.`,
+    },
+    {
+      id: 'recommendations',
+      title: '4.0 RECOMMENDATIONS',
+      chapterLabel: '',
+      chapterNumber: '4',
+      instructions: `Write a COMPREHENSIVE RECOMMENDATIONS section (10-15% of total length).
+
+CONTENT REQUIREMENTS:
+- Specific, actionable recommendations
+- Tied directly to findings
+- Be specific (e.g., "Increase monitoring in Q3" not "Improve monitoring")
+
+LENGTH: 3-4 substantial paragraphs (minimum 300-500 words)
+FORMAT: Plain text only. No markdown.
+
+CRITICAL: Recommendations must be SPECIFIC and ACTIONABLE.`,
+    },
+    {
+      id: 'conclusion',
+      title: '5.0 CONCLUSION',
+      chapterLabel: '',
+      chapterNumber: '5',
+      instructions: `Write a BRIEF CONCLUSION (5% of total length) for this REPORT.
+
+CONTENT REQUIREMENTS:
+- Brief close
+- No new information
+- Tie back to purpose
+
+LENGTH: 1-2 paragraphs (minimum 100-150 words)
+FORMAT: Plain text only. No markdown.`,
+    },
+    {
+      id: 'references',
+      title: '6.0 REFERENCES',
+      chapterLabel: '',
+      chapterNumber: '6',
+      instructions: `Write a COMPLETE REFERENCE LIST for this REPORT.
+
+REQUIREMENTS:
+- 12-20 credible references in APA 7th edition format
+- All references must be cited in the text above
+
+FORMAT: APA 7th edition`,
+    },
+    {
+      id: 'appendices',
+      title: '7.0 APPENDICES',
+      chapterLabel: '',
+      chapterNumber: '7',
+      instructions: `Write a COMPLETE APPENDICES section for this REPORT.
+
+CONTENT REQUIREMENTS:
+- Describe any supporting documents
+- Describe any raw data or detailed analysis
+- Include any additional information
+
+FORMAT: Plain text only. No markdown.`,
     },
   ];
 }
@@ -297,33 +499,30 @@ CRITICAL: Use plain text only. No markdown, no asterisks.`,
 
 CHAPTER ONE
 1.0 INTRODUCTION
-[Write a short paragraph explaining what the chapter covers]
+[Short paragraph explaining what the chapter covers]
 
 1.1 Background of the Study
-[Write 4-8 substantial paragraphs. Cover global, regional, and national context. Mention different countries as examples. Cite with references from the last 10 years.]
+[6-8 substantial paragraphs with citations]
 
 1.2 Statement of the Problem
-[Write 1-2 paragraphs. Be convincing. Cite as evidence.]
+[2-3 substantial paragraphs]
 
 1.3 Research Objectives
-The following objectives guide this investigation:
 1.3.1 General Objective
-[One clear overarching objective]
 1.3.2 Specific Objectives
-[Write 3-5 specific objectives]
+[3-5 objectives]
 
 1.4 Research Questions
-To address the objectives, the study seeks to answer the following questions:
-[Write 3-5 research questions]
+[3-5 questions]
 
 1.5 Significance of the Study
-[Write 2-4 substantial paragraphs]
+[3-4 paragraphs]
 
 1.6 Scope of Study
-[Write 1-2 paragraphs]
+[2 paragraphs]
 
 1.7 Operational Definitions
-[Define 5-8 key terms]
+[5-8 key terms]
 
 CRITICAL: Use APA 7th style in-text citations. Use plain text only.`,
     },
@@ -336,25 +535,25 @@ CRITICAL: Use APA 7th style in-text citations. Use plain text only.`,
 
 CHAPTER TWO
 2.0 INTRODUCTION
-[Write a short paragraph explaining what the chapter covers]
+[Short paragraph]
 
 2.1.0 Empirical Review
-[Write 100-150 words with NO citations]
+[150-200 words with NO citations]
 
 2.1.1 [Theme from Objective 1]
-[Write 3-5 substantial paragraphs with citations]
+[4-5 substantial paragraphs with citations]
 
 2.1.2 [Theme from Objective 2]
-[Write 3-5 substantial paragraphs with citations]
+[4-5 substantial paragraphs with citations]
 
 2.1.3 [Theme from Objective 3]
-[Write 3-5 substantial paragraphs with citations]
+[4-5 substantial paragraphs with citations]
 
 2.2 Theoretical Framework
-[Write 4-6 substantial paragraphs using exactly 2 different theories]
+[5-6 paragraphs using 2 theories]
 
 2.3 Conceptual Framework
-[Write a substantial explanation showing the relationship between variables]
+[Detailed explanation with variables]
 
 CRITICAL: Use APA 7th style in-text citations. Use plain text only.`,
     },
@@ -367,34 +566,15 @@ CRITICAL: Use APA 7th style in-text citations. Use plain text only.`,
 
 CHAPTER THREE
 3.0 INTRODUCTION
-[Write a short paragraph explaining what the chapter covers]
-
 3.1 Research Approach
-[Write 60-80 words]
-
 3.2 Research Design
-[Write 90-120 words, cite Creswell]
-
 3.3 Study Location
-[Write 60-80 words]
-
 3.4 Target Population
-[Write 60-80 words]
-
 3.5 Sample Size
-[Show using a formula how the sample was calculated]
-
 3.6 Data Collection Instruments and Procedures
-[Write 100-150 words, cite sources]
-
 3.7 Data Analysis Plan
-[Write 90-120 words, justify, cite]
-
 3.8 Reliability and Validity
-[Write 60-80 words]
-
 3.9 Ethical Considerations
-[Write 90-120 words]
 
 CRITICAL: Cite Creswell. Use plain text only.`,
     },
@@ -469,30 +649,15 @@ CRITICAL: Use plain text only. No markdown, no asterisks.`,
 
 CHAPTER ONE
 1.0 Introduction
-[Short paragraph]
-
 1.1 Background of the Study
-[4-8 substantial paragraphs with citations]
-
 1.2 Statement of the Problem
-[1-2 substantial paragraphs]
-
 1.3 Research Objectives
 1.3.1 General Objective
 1.3.2 Specific Objectives
-[3-5 objectives]
-
 1.4 Research Questions
-[3-5 questions]
-
 1.5 Significance of the Study
-[2-4 substantial paragraphs]
-
 1.6 Scope of Study
-[1-2 substantial paragraphs]
-
 1.7 Operational Definitions
-[Define 5-8 key terms]
 
 CRITICAL: Use APA 7th style in-text citations. Use plain text only.`,
     },
@@ -505,16 +670,9 @@ CRITICAL: Use APA 7th style in-text citations. Use plain text only.`,
 
 CHAPTER TWO
 2.0 Introduction
-[Short paragraph]
-
 2.1 Empirical Review
-[3-5 themes with substantial paragraphs]
-
 2.2 Theoretical Framework
-[4-6 paragraphs using 2 theories]
-
 2.3 Conceptual Framework
-[Explanation showing relationship between variables]
 
 CRITICAL: Use APA 7th style in-text citations. Use plain text only.`,
     },
@@ -636,7 +794,7 @@ async function fetchWithTimeout(
 }
 
 // ============================================================
-// AI PROVIDER FUNCTIONS (Keep your existing ones)
+// AI PROVIDER FUNCTIONS
 // ============================================================
 async function callGemini(
   prompt: string,
@@ -658,7 +816,7 @@ async function callGemini(
             generationConfig: { temperature: 0.45, maxOutputTokens },
           }),
         },
-        25000
+        30000
       );
       const data = await response.json();
 
@@ -723,7 +881,7 @@ async function callOpenRouter(
             max_tokens: maxTokens,
           }),
         },
-        25000
+        30000
       );
       const data = await response.json();
       if (data.error || !data.choices) {
@@ -764,7 +922,7 @@ async function callGroq(
           max_tokens: maxTokens,
         }),
       },
-        25000
+      30000
     );
     const data = await response.json();
     if (data.error || !data.choices) {
@@ -797,7 +955,7 @@ async function callYouCom(
         headers: { 'X-API-Key': youKey, 'Content-Type': 'application/json' },
         body: JSON.stringify({ input: prompt, research_effort: effort }),
       },
-      25000
+      30000
     );
     if (!response.ok) {
       const errText = await response.text().catch(() => '');
@@ -842,7 +1000,7 @@ async function callCerebras(
             max_completion_tokens: maxTokens,
           }),
         },
-        25000
+        30000
       );
       const data = await response.json();
       if (!response.ok || data.error || !data.choices) {
@@ -980,7 +1138,7 @@ export async function POST(request: NextRequest) {
     const chapters = buildChapterSpecs(cleanTopic, type);
     
     const isSimpleType = ['essay', 'report', 'case-study'].includes(type);
-    const totalChapters = isSimpleType ? 2 : (type === 'proposal' ? 5 : 8);
+    const totalChapters = isSimpleType ? 9 : (type === 'proposal' ? 5 : 8);
     
     const idx = Math.max(0, Math.min(chapterIndex, chapters.length - 1));
     const chapter = chapters[idx];
@@ -988,11 +1146,12 @@ export async function POST(request: NextRequest) {
     let depthInstruction = `
 CRITICAL DEPTH REQUIREMENT:
 This is a ${levelInfo.label} academic document. The content must be COMPREHENSIVE and THOROUGH.
-- Write SUBSTANTIAL paragraphs (minimum 5-7 sentences per paragraph for main content)
+- Write SUBSTANTIAL paragraphs (minimum 5-7 sentences per paragraph)
 - Provide detailed analysis, not brief summaries
 - Include specific examples, statistics, and evidence
 - The document should reflect ${levelInfo.depth}
 - Do not be brief or superficial - this is a serious academic work
+- The total length should be appropriate for the document type
 `;
 
     let documentTypeInstruction = '';
@@ -1002,51 +1161,65 @@ This is a ${levelInfo.label} academic document. The content must be COMPREHENSIV
 THIS IS AN ASSIGNMENT - NOT A RESEARCH PAPER.
 You are answering a specific question or prompt. This is ARGUMENT-DRIVEN.
 
-STRUCTURE:
-1.0 INTRODUCTION (10%) - Context, thesis statement, roadmap
-2.0 MAIN BODY (70-75%) - Organized by themes, NOT chronologically. Each paragraph = ONE idea. Topic sentence FIRST stating a claim. Evidence/citation. Analysis. Link to next point. Balance breadth vs depth.
-3.0 CONCLUSION (10-15%) - Synthesize argument, answer the question, no new info
-4.0 REFERENCES - 10-15 APA 7th references
+STRUCTURE (IN ORDER):
+1. TITLE PAGE
+2. 1.0 INTRODUCTION (10%) - Context, thesis, roadmap
+3. 2.0 MAIN BODY (70-75%) - Organized by themes, NOT chronologically. Each paragraph = ONE idea. Topic sentence FIRST stating a claim. Evidence/citation. Analysis. Link to next point.
+4. 3.0 CONCLUSION (10-15%) - Synthesize argument, answer the question, no new info
+5. 4.0 REFERENCES - 12-20 APA 7th references
 
-CRITICAL: Use topic sentences that state a claim, not just a subject. Avoid pure description; always link facts back to the question.`;
+CRITICAL: Use topic sentences that state a claim, not just a subject. Avoid pure description; always link facts back to the question. Each section must be substantial (minimum 500+ words for introduction, 1500+ words for body, 300+ words for conclusion).
+
+TOTAL LENGTH: ${levelInfo.pageCount}`;
     } else if (type === 'report') {
       documentTypeInstruction = `
 THIS IS A REPORT - NOT A RESEARCH PAPER.
 Write for decision-makers who skim.
 
-STRUCTURE:
-EXECUTIVE SUMMARY - One paragraph: purpose, method, key findings, recommendations
-1.0 INTRODUCTION (10%) - Background, purpose, scope, methodology
-2.0 FINDINGS/RESULTS (40-50%) - Objective, factual, use headings, tables/figures. NO interpretation.
-3.0 DISCUSSION (20-25%) - What findings mean, implications, limitations
-4.0 RECOMMENDATIONS (10-15%) - Specific, actionable, tied to findings
-5.0 CONCLUSION (5%) - Brief close, no new info
-6.0 REFERENCES - 10-15 APA 7th references
+STRUCTURE (IN ORDER):
+1. TITLE PAGE
+2. EXECUTIVE SUMMARY - One comprehensive paragraph: purpose, method, key findings, recommendations
+3. 1.0 INTRODUCTION (10%) - Background, purpose, scope, methodology
+4. 2.0 FINDINGS/RESULTS (40-50%) - Objective, factual, use headings, tables/figures. NO interpretation.
+5. 3.0 DISCUSSION (20-25%) - What findings mean, implications, limitations
+6. 4.0 RECOMMENDATIONS (10-15%) - Specific, actionable, tied to findings
+7. 5.0 CONCLUSION (5%) - Brief close, no new info
+8. 6.0 REFERENCES - 12-20 APA 7th references
+9. APPENDICES
 
-CRITICAL: Findings = neutral and factual. Recommendations must be specific ("Increase monitoring in Q3" not "Improve monitoring"). Use headings, bullet points, bolded key figures.`;
+CRITICAL: Findings = neutral and factual. Recommendations must be specific ("Increase monitoring in Q3" not "Improve monitoring"). Use headings for skimmability.
+
+TOTAL LENGTH: ${levelInfo.pageCount}`;
     } else if (type === 'case-study') {
       documentTypeInstruction = `
 THIS IS A CASE STUDY - NOT A RESEARCH PAPER.
-You are analyzing a specific case/patient/situation.
+You are analyzing a specific case/patient/situation. This should be LONG and DETAILED like a research paper.
 
-STRUCTURE:
-1.0 INTRODUCTION (8-10%) - Why this case matters, objective
-2.0 CASE PRESENTATION (15-20%) - Facts ONLY: signalment, history, exam, diagnostics. NO interpretation.
-3.0 DISCUSSION/ANALYSIS (35-40%) - Interpret findings, differential diagnoses, compare to literature. Justify every diagnosis/treatment with "why".
-4.0 MANAGEMENT/OUTCOME (15-20%) - Treatment, rationale, prognosis, follow-up
-5.0 CONCLUSION (5-8%) - Summary, tie back to objective, no new info
-6.0 REFERENCES - 10-15 APA 7th references
-7.0 APPENDICES - Raw data, images, lab reports
+STRUCTURE (IN ORDER):
+1. TITLE PAGE
+2. 1.0 INTRODUCTION (8-10%) - Why this case matters, objective
+3. 2.0 CASE PRESENTATION (15-20%) - FACTS ONLY: signalment, history, exam, diagnostics. NO interpretation. Be detailed.
+4. 3.0 DISCUSSION/ANALYSIS (35-40%) - THIS IS THE CORE. Interpret findings, differential diagnoses, compare to literature. Justify every diagnosis/treatment with "why".
+5. 4.0 MANAGEMENT/OUTCOME (15-20%) - Treatment, rationale, prognosis, follow-up
+6. 5.0 CONCLUSION (5-8%) - Summary, tie back to objective, no new info
+7. 6.0 REFERENCES - 12-20 APA 7th references
+8. 7.0 APPENDICES - Raw data, images, lab reports
 
-CRITICAL: STRICTLY separate description (Section 2.0) from interpretation (Section 3.0). Every diagnosis or treatment choice needs a "why" - justify against literature.`;
+CRITICAL: STRICTLY separate description (Section 2.0) from interpretation (Section 3.0). Every diagnosis or treatment choice needs a "why" - justify against literature. This should be comprehensive and detailed.
+
+TOTAL LENGTH: ${levelInfo.pageCount} (should be as long as a research paper)`;
     } else if (type === 'proposal') {
       documentTypeInstruction = `
 THIS IS A RESEARCH PROPOSAL.
-STRUCTURE: Chapters 1-3 (Introduction, Literature Review, Methodology), References, Work Plan, Budget, Appendices.`;
+STRUCTURE (IN ORDER): CHAPTER ONE, CHAPTER TWO, CHAPTER THREE, REFERENCES, WORK PLAN, BUDGET, APPENDICES.
+
+TOTAL LENGTH: ${levelInfo.pageCount}`;
     } else {
       documentTypeInstruction = `
 THIS IS A RESEARCH PAPER (Full Dissertation).
-STRUCTURE: Chapters 1-6 (Introduction, Literature Review, Methodology, Findings, Discussion, Conclusions), References, Appendices.`;
+STRUCTURE (IN ORDER): DECLARATION, DEDICATION, ACKNOWLEDGEMENTS, ABSTRACT, LIST OF ABBREVIATIONS, CHAPTER ONE, CHAPTER TWO, CHAPTER THREE, CHAPTER FOUR, CHAPTER FIVE, CHAPTER SIX, REFERENCES, APPENDICES.
+
+TOTAL LENGTH: ${levelInfo.pageCount}`;
     }
 
     let chapterSpecificInstruction = '';
@@ -1055,8 +1228,8 @@ STRUCTURE: Chapters 1-6 (Introduction, Literature Review, Methodology, Findings,
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER ONE SPECIFICS:
-- 1.1 Background: 4-8 substantial paragraphs
-- 1.2 Statement of Problem: 1-2 paragraphs
+- 1.1 Background: 6-8 substantial paragraphs
+- 1.2 Statement of Problem: 2-3 substantial paragraphs
 - 1.3.2 Specific Objectives: 3-5 objectives
 - 1.4 Research Questions: 3-5 questions
 - 1.7 Operational Definitions: 5-8 terms`;
@@ -1065,25 +1238,26 @@ PROPOSAL CHAPTER ONE SPECIFICS:
       if (chapter.id === 'chapter2') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER TWO SPECIFICS:
-- 2.1.0 Empirical Review: 100-150 words, NO citations
-- 2.1.1, 2.1.2, 2.1.3: Each 3-5 substantial paragraphs
-- 2.2 Theoretical Framework: 4-6 substantial paragraphs`;
+- 2.1.0 Empirical Review: 150-200 words, NO citations
+- 2.1.1, 2.1.2, 2.1.3: Each 4-5 substantial paragraphs
+- 2.2 Theoretical Framework: 5-6 paragraphs`;
       }
 
       if (chapter.id === 'chapter3') {
         chapterSpecificInstruction = `
 PROPOSAL CHAPTER THREE SPECIFICS:
-- 3.1 Research Approach: 60-80 words
-- 3.2 Research Design: 90-120 words, cite Creswell
+- Each subsection should be 2-3 substantial paragraphs
+- 3.2 Research Design: cite Creswell
 - 3.5 Sample Size: Show formula
-- 3.6 Data Collection: 100-150 words, cite sources
-- 3.7 Data Analysis: 90-120 words, justify, cite`;
+- 3.6 Data Collection: cite sources
+- 3.7 Data Analysis: justify, cite`;
       }
     } else if (type === 'research') {
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 RESEARCH CHAPTER ONE SPECIFICS:
-- 1.1 Background: 4-8 substantial paragraphs
+- 1.1 Background: 6-8 substantial paragraphs
+- 1.2 Statement of Problem: 2-3 substantial paragraphs
 - 1.3.2 Specific Objectives: 3-5 objectives
 - 1.4 Research Questions: 3-5 questions
 - 1.7 Operational Definitions: 5-8 terms`;
@@ -1112,18 +1286,18 @@ TASK: ${chapter.instructions}
 ${chapterSpecificInstruction}
 
 CRITICAL RULES:
-- This is a ${typeLabel} - use the structure for ${type}.
-- Start with the chapter label exactly as specified.
-- The numbered introduction heading IS the introduction - do NOT add a separate subsection.
+- This is a ${typeLabel} - follow the structure for ${type}.
+- Start with the section heading exactly as specified.
 - Write SUBSTANTIAL, DETAILED content - never brief or superficial.
 - Use APA 7th style in-text citations throughout.
 - Never use numbered bracket citations like [1].
 - Use plain text only. No markdown, no asterisks, no underscores.
 - Avoid the use of hyphens or dashes throughout.
 - Write out full content. Never use placeholders.
-- The document must demonstrate ${levelInfo.depth} academic writing.`;
+- The document must demonstrate ${levelInfo.depth} academic writing.
+- For assignments, case studies, and reports: WRITE SUBSTANTIAL CONTENT. 1500+ words minimum.`;
 
-    const chapterTokenBudget = chapter.id === 'references' ? 6000 : 3500;
+    const chapterTokenBudget = chapter.id === 'references' ? 6000 : 4000;
 
     const { text, apiUsed, error } = await generateSection(prompt, chapterTokenBudget);
 
@@ -1138,7 +1312,7 @@ CRITICAL RULES:
     const isLastChapter = idx === chapters.length - 1;
 
     const contextForNextChapter =
-      chapter.id === 'frontmatter' || chapter.id === 'chapter1'
+      chapter.id === 'frontmatter' || chapter.id === 'chapter1' || chapter.id === 'title'
         ? `${previousContext}\n\n${cleaned}`.trim()
         : `${previousContext}\n\n${cleaned.slice(0, 1000)}...`.trim();
 
