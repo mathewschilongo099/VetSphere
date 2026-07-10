@@ -140,14 +140,10 @@ CITATIONS: Use APA 7th style throughout.
 
 CRITICAL RULES:
 - Topic sentences must state a claim, not just a subject
-- Example: "Antibiotic overuse in livestock accelerates resistance" NOT "This section discusses antibiotics"
 - Always link facts back to the question
 - References appear ONLY at the end - NOT in the introduction
 - Do NOT include a concluding or summary subsection (e.g. "2.6 Conclusion") within the Main Body.
   The document's Conclusion is a separate chapter that comes after this one - do not duplicate it here.
-- Only cite specific statistics (percentages, rates, counts) that are well-established in the
-  literature. If uncertain of an exact figure, describe the relationship qualitatively
-  (e.g. "a substantial proportion of") rather than inventing a precise number.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -185,20 +181,14 @@ REQUIREMENTS:
 
 FORMAT: APA 7th edition
 
-EXAMPLE FORMATS:
-- Journal Article: Author, A. A. (Year). Title of article. Journal Name, Volume(Issue), page-page. https://doi.org/xxxx
-- Book: Author, A. A. (Year). Title of book. Publisher.
-- Book Chapter: Author, A. A. (Year). Title of chapter. In A. A. Editor (Ed.), Title of book (pp. xx-xx). Publisher.
-
 CRITICAL: Write out every reference in full. DO NOT include website URLs. Use proper APA format.
-CRITICAL: Only include references you are highly confident actually exist. If uncertain whether a specific paper exists, prefer a well-known foundational text or review article in the field over inventing a specific study, author, or year.
 ${NO_META_COMMENTARY}`,
     },
   ];
 }
 
 // ============================================================
-// CASE STUDY SPECS - WITH CHAPTERS LIKE RESEARCH PAPER
+// CASE STUDY SPECS - WITH CHAPTERS AS HEADINGS
 // ============================================================
 function buildCaseStudySpecs(topic: string): ChapterSpec[] {
   return [
@@ -210,15 +200,19 @@ function buildCaseStudySpecs(topic: string): ChapterSpec[] {
       instructions: `Write ONLY the following front-matter sections:
 
 TITLE PAGE: Case Study title, author name, student ID, course, institution, date
-TABLE OF CONTENTS: List all section titles in order. Do NOT include page numbers -
-  since chapters are generated independently, exact page numbers cannot be known yet.
-  Use no trailing numbers, or write "[page]" as a placeholder if a number is required by format.
+TABLE OF CONTENTS: List ONLY the chapter labels and section titles in order:
+  CHAPTER ONE: INTRODUCTION
+  CHAPTER TWO: CASE PRESENTATION
+  CHAPTER THREE: DISCUSSION AND ANALYSIS
+  CHAPTER FOUR: MANAGEMENT AND OUTCOME
+  CHAPTER FIVE: CONCLUSION
+  REFERENCES
+  APPENDICES
+Do NOT include page numbers.
 LIST OF ABBREVIATIONS: Any abbreviations used
 
 Do NOT write any chapter content yet. Stop after the front matter.
 ${NO_META_COMMENTARY}
-Do NOT ask the reader for permission to continue. Do NOT add any note, comment, or
-question about what comes next. Simply end the output after the front matter content.
 
 CRITICAL: Use plain text only. No markdown.`,
     },
@@ -252,7 +246,7 @@ ${NO_META_COMMENTARY}`,
 CRITICAL: FACTS ONLY - NO INTERPRETATION.
 
 CONTENT REQUIREMENTS:
-- Signalment (species, breed, age, sex, neuter status) - state this clearly and precisely, it will be referenced in Chapter Three
+- Signalment (species, breed, age, sex, neuter status)
 - History (presenting complaint, duration, previous treatments)
 - Clinical examination findings (physical exam, vital signs)
 - Diagnostics and test results (lab findings, imaging)
@@ -283,30 +277,19 @@ CONTENT REQUIREMENTS:
 - Compare to literature - reference relevant studies
 - Justify every diagnosis with "why" (refer to literature)
 
-CRITICAL - SIGNALMENT CONSISTENCY CHECK (do this before listing differentials):
+CRITICAL - SIGNALMENT CONSISTENCY CHECK:
 - Reason from basic anatomy and physiology first: for conditions where sex-based anatomical
-  differences are clinically significant (e.g. urethral obstruction is overwhelmingly a male-cat
-  problem because the male urethra is longer and narrower than the female urethra), you MUST
-  explicitly state this anatomical fact and explain how it changes the probability ranking for
-  THIS patient's sex.
-- Do NOT cite or invent a statistic to make the leading diagnosis fit the signalment. If a specific
-  numeric claim about sex-based prevalence cannot be attributed to a real, well-known source, do not
-  state a number at all - describe the relationship qualitatively instead (e.g. "obstruction is rare
-  in female cats due to their wider, shorter urethra") rather than fabricating a precise incidence ratio.
-- If the presenting complaint or requested focus (e.g. "possible urethral obstruction") is less
-  consistent with this patient's signalment than with a different sex/age/breed, say so explicitly
-  and rank differentials accordingly - do not let the framing of the question override the anatomy.
+  differences are clinically significant, explicitly state this anatomical fact.
+- Do NOT cite or invent statistics - describe relationships qualitatively.
 
 LENGTH: 800-1200 words
 FORMAT: Plain text only. No markdown.
 CITATIONS: Use APA 7th style throughout.
 
 CRITICAL RULES:
-- Every diagnosis needs a "why", justified against literature, not just stated
+- Every diagnosis needs a "why", justified against literature
 - Use real clinical terminology correctly
 - Do NOT discuss treatment rationale here - that belongs in Chapter Four only
-- Only cite specific statistics you are highly confident are accurate. If uncertain of an exact
-  figure, describe the relationship qualitatively rather than inventing a precise number.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -319,7 +302,7 @@ ${NO_META_COMMENTARY}`,
 CONTENT REQUIREMENTS:
 - Treatment provided (specific details)
 - Rationale for treatment (refer to literature) - this is the ONLY place treatment rationale belongs
-- Prognosis - explain expected outcome, tied to specific findings from Chapter Two (not a generic statement)
+- Prognosis - explain expected outcome
 - Follow-up and actual outcome
 - Any complications or challenges
 
@@ -363,7 +346,6 @@ REQUIREMENTS:
 FORMAT: APA 7th edition
 
 CRITICAL: Write out every reference in full.
-CRITICAL: Only include references you are highly confident actually exist. If uncertain whether a specific paper exists, prefer a well-known foundational veterinary text or review article over inventing a specific study, author, or year.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -377,7 +359,6 @@ CONTENT REQUIREMENTS:
 - Describe any raw data (lab results, test values)
 - Describe any images (radiographs, ultrasound images)
 - Describe any additional supporting documents
-- Include relevant details that support the case
 
 FORMAT: Plain text only. No markdown.
 ${NO_META_COMMENTARY}`,
@@ -422,7 +403,7 @@ CONTENT REQUIREMENTS:
 LENGTH: 150-200 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: This is for decision-makers who skim. Be concise but comprehensive. No citations here.
+CRITICAL: No citations here.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -455,7 +436,7 @@ CRITICAL: Present findings objectively and factually. NO INTERPRETATION.
 
 CONTENT REQUIREMENTS:
 - Organized under clear subheadings
-- Use tables where numeric data supports the point (see TABLE FORMAT below)
+- Use tables where numeric data supports the point
 - Present data logically
 - Be neutral and factual
 
@@ -465,11 +446,6 @@ ${TABLE_FORMAT_RULE}
 CRITICAL RULES:
 - This section is NEUTRAL and FACTUAL
 - Save opinion/interpretation for Discussion
-- If specific numeric data (percentages, case counts, rates) was not provided to you as part of
-  the topic/case data, do NOT invent precise figures and present them as real statistics. Either
-  use clearly qualitative language (e.g. "coverage remains well below the recommended threshold")
-  or explicitly label illustrative figures as such (e.g. "for illustration, a hypothetical scenario
-  might show..."). Never present fabricated numbers as though they came from a real data source.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -487,8 +463,7 @@ CONTENT REQUIREMENTS:
 LENGTH: 400-600 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: This is where you interpret the findings from Section 2.0. Do not introduce new
-numeric data here that did not appear in Section 2.0.
+CRITICAL: This is where you interpret the findings from Section 2.0.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -501,7 +476,7 @@ ${NO_META_COMMENTARY}`,
 CONTENT REQUIREMENTS:
 - Specific, actionable recommendations
 - Tied directly to findings
-- Be specific (e.g., "Increase monitoring in Q3" not "Improve monitoring")
+- Be specific
 
 LENGTH: 300-400 words
 FORMAT: Plain text only. No markdown.
@@ -538,7 +513,6 @@ REQUIREMENTS:
 - NO website URLs - use proper APA format
 
 FORMAT: APA 7th edition
-CRITICAL: Only include references you are highly confident actually exist. If uncertain, prefer a well-known foundational source over inventing a specific study.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -571,18 +545,15 @@ function buildProposalSpecs(topic: string): ChapterSpec[] {
       instructions: `Write ONLY the following front-matter sections for a RESEARCH PROPOSAL:
 
 TITLE PAGE (with the research title, author name, degree, date)
-TABLE OF CONTENTS: List all section titles in order. Do NOT include page numbers -
-  since chapters are generated independently, exact page numbers cannot be known yet.
+TABLE OF CONTENTS: List all section titles in order. Do NOT include page numbers.
 LIST OF ABBREVIATIONS AND ACRONYMS
 
 Do NOT write any chapter content yet. Stop after the abbreviations list.
 ${NO_META_COMMENTARY}
-Do NOT ask the reader for permission to continue.
 
 CRITICAL: Use plain text only. No markdown, no asterisks.
 CRITICAL: This is a PROPOSAL for research that has NOT yet been conducted. Do not write
-an Abstract, and do not state or imply that any data has been collected or any findings
-exist - everything here describes what WILL be done, not what WAS done or found.`,
+an Abstract, and do not state or imply that any data has been collected.`,
     },
     {
       id: 'chapter1',
@@ -603,12 +574,11 @@ CHAPTER ONE
 
 1.3 Research Objectives
 1.3.1 General Objective
-[One clear sentence stating the overall aim of the proposed study - THIS MUST NOT BE LEFT BLANK OR GENERIC]
 1.3.2 Specific Objectives
-[3-5 objectives, each a separate numbered statement]
+[3-5 objectives]
 
 1.4 Research Questions
-[3-5 questions, each directly mapped to a specific objective above]
+[3-5 questions]
 
 1.5 Significance of the Study
 [3-4 paragraphs]
@@ -619,11 +589,9 @@ CHAPTER ONE
 1.7 Operational Definitions
 [5-8 key terms]
 
-CRITICAL: Every numbered subsection (1.0 through 1.7) MUST contain real, complete content.
-Do not leave any subsection as a heading only or with placeholder text.
-CRITICAL: This is a PROPOSAL - use future/conditional tense throughout ("this study will
-investigate", "data will be collected"), never past tense as if the research already happened.
-Use APA 7th style in-text citations. References go at the end. Use plain text only.
+CRITICAL: Every numbered subsection MUST contain real, complete content.
+CRITICAL: Use future/conditional tense throughout. Use APA 7th style in-text citations.
+References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -655,9 +623,7 @@ CHAPTER TWO
 2.3 Conceptual Framework
 [Detailed explanation with variables]
 
-CRITICAL: This chapter reviews EXISTING literature about the topic - it does not report
-any findings from this proposed study, since this study has not been conducted yet.
-Use APA 7th style in-text citations. References go at the end. Use plain text only.
+CRITICAL: Use APA 7th style in-text citations. References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -676,15 +642,13 @@ CHAPTER THREE
 3.3 Study Location
 3.4 Target Population
 3.5 Sample Size
-[Show the actual formula used (e.g. Yamane's or Cochran's) with the calculation worked through,
-not just a final number with no derivation]
 3.6 Data Collection Instruments and Procedures
 3.7 Data Analysis Plan
 3.8 Reliability and Validity
 3.9 Ethical Considerations
 
-CRITICAL: Use future/conditional tense throughout - this describes what WILL be done.
-CRITICAL: Cite Creswell. References go at the end. Use plain text only.
+CRITICAL: Use future/conditional tense throughout. Cite Creswell.
+References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -696,8 +660,6 @@ ${NO_META_COMMENTARY}`,
 
 REFERENCES
 Provide 30 complete APA 7th references. NO website URLs. Use proper APA format.
-CRITICAL: Only include references you are highly confident actually exist. If uncertain
-whether a specific paper exists, prefer a well-known foundational text over inventing one.
 
 WORK PLAN
 Month 1-2: Literature Review
@@ -709,18 +671,7 @@ Month 8: Revision and Submission
 
 BUDGET
 ${TABLE_FORMAT_RULE}
-Present the budget as a properly formed markdown pipe table with these rows:
-| Item | Quantity | Unit Cost (ZMW) | Total (ZMW) |
-|------|----------|------------------|-------------|
-| Stationery | 1 set | 2,000 | 2,000 |
-| Internet Data | 6 months | 500 | 3,000 |
-| Assistant Allowance | 2 assistants | 3,000 | 6,000 |
-| Transport | 6 months | 1,500 | 9,000 |
-| Printing | 400 copies | 2 | 800 |
-| Equipment | 2 devices | 1,500 | 3,000 |
-| Software | 1 license | 2,000 | 2,000 |
-| Contingency | 10% |  | 2,580 |
-| TOTAL |  |  | 28,380 |
+Present the budget as a properly formed markdown pipe table.
 
 APPENDICES
 APPENDIX A: STUDENT QUESTIONNAIRE
@@ -753,8 +704,7 @@ LIST OF ABBREVIATIONS AND ACRONYMS
 Do NOT write a Table of Contents section.
 
 CRITICAL: Use plain text only. No markdown, no asterisks.
-${NO_META_COMMENTARY}
-Do NOT ask the reader for permission to continue.`,
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter1',
@@ -765,35 +715,26 @@ Do NOT ask the reader for permission to continue.`,
 
 CHAPTER ONE
 1.0 Introduction
-[1 paragraph explaining what the chapter covers - NO citations here]
-
+[1 paragraph - NO citations here]
 1.1 Background of the Study
 [6-8 substantial paragraphs with citations]
-
 1.2 Statement of the Problem
 [2-3 substantial paragraphs with citations]
-
 1.3 Research Objectives
 1.3.1 General Objective
-[One clear sentence stating the overall aim of the study - THIS MUST NOT BE LEFT BLANK OR GENERIC]
 1.3.2 Specific Objectives
-[3-5 specific, measurable objectives, each as a separate numbered statement]
-
+[3-5 objectives]
 1.4 Research Questions
-[3-5 questions, each directly mapped to a specific objective above]
-
+[3-5 questions]
 1.5 Significance of the Study
-[3-4 paragraphs explaining who benefits and how]
-
+[3-4 paragraphs]
 1.6 Scope of Study
-[2 paragraphs defining geographic, population, and topical boundaries]
-
+[2 paragraphs]
 1.7 Operational Definitions
-[5-8 key terms, each with a working definition specific to this study]
+[5-8 key terms]
 
-CRITICAL: Every numbered subsection (1.0 through 1.7) MUST contain real, complete content.
-Do not leave any subsection as a heading only or with placeholder text.
-Use APA 7th style in-text citations. References go at the end. Use plain text only.
+CRITICAL: Every numbered subsection MUST contain real, complete content.
+Use APA 7th style in-text citations. References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -810,7 +751,7 @@ CHAPTER TWO
 2.2 Theoretical Framework
 2.3 Conceptual Framework
 
-CRITICAL: Use APA 7th style in-text citations. References go at the end. Use plain text only.
+CRITICAL: Use APA 7th style in-text citations. References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -828,13 +769,12 @@ CHAPTER THREE
 3.3 Study Location
 3.4 Target Population
 3.5 Sample Size
-[Show the actual formula used with the calculation worked through, not just a final number]
 3.6 Data Collection Instruments and Procedures
 3.7 Data Analysis Plan
 3.8 Reliability and Validity
 3.9 Ethical Considerations
 
-CRITICAL: Cite Creswell. References go at the end. Use plain text only.
+CRITICAL: Cite Creswell. References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -846,16 +786,11 @@ ${NO_META_COMMENTARY}`,
 
 CHAPTER FOUR
 4.0 Introduction
-[Short paragraph]
 4.1 Descriptive and Demographic Results
 4.2 Key Thematic or Statistical Findings
 4.3 Summary of Findings
 
 ${TABLE_FORMAT_RULE}
-
-CRITICAL: If specific numeric data was not provided to you as part of the topic, do NOT
-invent precise figures and present them as real study results. Use clearly qualitative or
-illustrative framing instead of fabricated statistics.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -867,7 +802,6 @@ ${NO_META_COMMENTARY}`,
 
 CHAPTER FIVE
 5.0 Introduction
-[Short paragraph]
 5.1 Interpretation of Key Findings
 5.2 Comparison with Previous Studies
 5.3 Implications for Practice and Policy
@@ -883,7 +817,6 @@ ${NO_META_COMMENTARY}`,
 
 CHAPTER SIX
 6.0 Introduction
-[Short paragraph]
 6.1 Conclusions
 6.2 Recommendations
 ${NO_META_COMMENTARY}`,
@@ -897,7 +830,6 @@ ${NO_META_COMMENTARY}`,
 
 REFERENCES
 Provide 30 complete APA 7th references. NO website URLs. Use proper APA format.
-CRITICAL: Only include references you are highly confident actually exist.
 
 APPENDICES
 APPENDIX A: DATA EXTRACTION TOOL
@@ -1304,11 +1236,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
     }
 
-    // Guard against an unrecognized document type silently falling through to
-    // the research-paper default (this was likely why "Research Proposal" in
-    // your UI produced a Research Paper with fabricated findings - if the
-    // frontend ever sends an unexpected `type` value, this will now surface
-    // as a clear 400 error instead of silently generating the wrong document).
     const validTypes = ['essay', 'report', 'case-study', 'proposal', 'research'];
     if (!validTypes.includes(type)) {
       return NextResponse.json(
@@ -1360,12 +1287,11 @@ STRUCTURE (IN ORDER):
 2. 1.0 INTRODUCTION (2-3 paragraphs, 300-400 words max, NO citations)
 3. 2.0 MAIN BODY (6-10 paragraphs, 1000-1500 words, WITH citations)
 4. 3.0 CONCLUSION (2-3 paragraphs, 200-300 words, NO new citations)
-5. 4.0 REFERENCES (12-20 APA 7th references, NO website URLs)
+5. 4.0 REFERENCES (12-20 APA 7th references)
 
 CRITICAL RULES:
 - NO references in the Introduction or Conclusion
 - References ONLY in the Main Body and the Reference List
-- NO website URLs in references - use proper APA format
 - Introduction should be concise (max 400 words)
 - Total length: ${levelInfo.pageCount}`;
     } else if (type === 'report') {
@@ -1392,37 +1318,32 @@ STRUCTURE (IN ORDER):
 1. FRONT MATTER (Title Page, Table of Contents, List of Abbreviations)
 2. CHAPTER ONE: INTRODUCTION (300-400 words, NO citations)
 3. CHAPTER TWO: CASE PRESENTATION (500-700 words, NO citations - FACTS ONLY)
-4. CHAPTER THREE: DISCUSSION AND ANALYSIS (800-1200 words, WITH citations - CORE SECTION)
+4. CHAPTER THREE: DISCUSSION AND ANALYSIS (800-1200 words, WITH citations)
 5. CHAPTER FOUR: MANAGEMENT AND OUTCOME (400-600 words, WITH citations)
 6. CHAPTER FIVE: CONCLUSION (200-300 words, NO citations)
-7. REFERENCES (12-20 APA 7th references, NO website URLs)
+7. REFERENCES (12-20 APA 7th references)
 8. APPENDICES
 
 CRITICAL RULES:
 - Chapter Two = FACTS ONLY, NO interpretation, NO citations
-- Chapter Three = differential diagnosis and literature comparison ONLY, WITH citations. Do NOT discuss treatment rationale here.
+- Chapter Three = differential diagnosis and literature comparison ONLY, WITH citations
 - Chapter Four = the ONLY place treatment rationale belongs
 - NO citations in Introduction or Conclusion
 - NO website URLs in references
-- Use CHAPTER format like a research paper
-
-TOTAL LENGTH: ${levelInfo.pageCount}`;
+- Total length: ${levelInfo.pageCount}`;
     } else if (type === 'proposal') {
       documentTypeInstruction = `
 THIS IS A RESEARCH PROPOSAL - NOT A COMPLETED RESEARCH PAPER.
 STRUCTURE (IN ORDER): CHAPTER ONE (with 1.0-1.7), CHAPTER TWO (with 2.0-2.3), CHAPTER THREE (with 3.0-3.9), REFERENCES, WORK PLAN, BUDGET, APPENDICES.
 
-CRITICAL: No research has been conducted yet. Use future/conditional tense throughout
-("this study will investigate", "data will be collected") - NEVER past tense as if
-findings already exist. Do NOT include a Declaration, Dedication, Acknowledgements, or
-Abstract - those belong to a completed research paper, not a proposal.
-NO citations in Introduction sections. References only in body and reference list. NO website URLs.`;
+CRITICAL: Use future/conditional tense throughout. NO citations in Introduction sections.
+References only in body and reference list. NO website URLs.`;
     } else {
       documentTypeInstruction = `
 THIS IS A RESEARCH PAPER (Full Dissertation).
 STRUCTURE (IN ORDER): FRONT MATTER, CHAPTER ONE, CHAPTER TWO, CHAPTER THREE, CHAPTER FOUR, CHAPTER FIVE, CHAPTER SIX, REFERENCES, APPENDICES.
 
-CRITICAL: NO citations in Introduction sections. References only in body and reference list. NO website URLs.`;
+CRITICAL: NO citations in Introduction sections. References only in body and reference list.`;
     }
 
     let chapterSpecificInstruction = '';
@@ -1434,7 +1355,7 @@ PROPOSAL CHAPTER ONE SPECIFICS:
 - 1.0 Introduction: 1-2 paragraphs, NO citations
 - 1.1 Background: 6-8 substantial paragraphs WITH citations
 - 1.2 Statement of Problem: 2-3 substantial paragraphs WITH citations
-- 1.3.1 General Objective: one full sentence, must not be blank
+- 1.3.1 General Objective: one full sentence
 - 1.3.2 Specific Objectives: 3-5 objectives
 - 1.4 Research Questions: 3-5 questions
 - 1.5 Significance: 3-4 paragraphs
@@ -1467,7 +1388,7 @@ RESEARCH CHAPTER ONE SPECIFICS:
 - 1.0 Introduction: 1 paragraph, NO citations
 - 1.1 Background: 6-8 substantial paragraphs WITH citations
 - 1.2 Statement of Problem: 2-3 substantial paragraphs WITH citations
-- 1.3.1 General Objective: one full sentence, must not be blank
+- 1.3.1 General Objective: one full sentence
 - 1.3.2 Specific Objectives: 3-5 objectives
 - 1.4 Research Questions: 3-5 questions
 - 1.5 Significance: 3-4 paragraphs
@@ -1504,14 +1425,13 @@ CRITICAL RULES:
 - Write SUBSTANTIAL, DETAILED content - never brief or superficial.
 - Use APA 7th style in-text citations throughout the BODY only.
 - NO citations in Introduction, Conclusion, or Executive Summary.
-- NO website URLs in references - use proper APA format (Author, Year, Title, Publisher/Journal).
+- NO website URLs in references - use proper APA format.
 - Never use numbered bracket citations like [1].
-- Use plain text only. No markdown, no asterisks, no underscores, EXCEPT for well-formed
-  pipe tables when presenting numeric data (see TABLE FORMAT instructions if provided above).
+- Use plain text only. No markdown, no asterisks, no underscores, EXCEPT for
+  well-formed pipe tables when presenting numeric data.
 - Avoid the use of hyphens or dashes throughout.
 - Write out full content. Never use placeholders.
 - Never include conversational meta-commentary, permission-asking, or process narration.
-  Output ONLY the requested document content.
 - The document must demonstrate ${levelInfo.depth} academic writing.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 4000;
