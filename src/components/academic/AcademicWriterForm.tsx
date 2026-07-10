@@ -49,36 +49,43 @@ function parseBlocks(content: string): Block[] {
       continue;
     }
 
+    // CHAPTER ONE, CHAPTER TWO, etc. (main chapter labels)
     if (/^CHAPTER\s+(ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN)\b/i.test(trimmed)) {
       blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
       continue;
     }
 
+    // REFERENCES (as a main heading)
     if (/^REFERENCES\s*$/i.test(trimmed)) {
       blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
       continue;
     }
 
+    // APPENDICES (as a main heading)
     if (/^APPENDICES\s*$/i.test(trimmed)) {
       blocks.push({ type: 'chapter', text: trimmed.toUpperCase() });
       continue;
     }
 
+    // Main numbered headings: "1.0 INTRODUCTION", "2.0 LITERATURE REVIEW", etc.
     if (/^\d+\.0\s+[A-Z]/.test(trimmed)) {
       blocks.push({ type: 'h1', text: trimmed });
       continue;
     }
 
+    // Subsection headings: "1.1 Background", "2.1 Empirical Review", etc.
     if (/^\d+\.\d+(\.\d+)?\s+[A-Z]/.test(trimmed)) {
       blocks.push({ type: 'h2', text: trimmed });
       continue;
     }
 
+    // Sub-subsections: "2.1.1 Theme from Objective 1"
     if (/^\d+\.\d+\.\d+\s+[A-Z]/.test(trimmed)) {
       blocks.push({ type: 'h3', text: trimmed });
       continue;
     }
 
+    // Regular paragraph text
     blocks.push({ type: 'para', text: trimmed });
   }
 
@@ -246,6 +253,7 @@ async function generateAcademicPdf(
   const doc = new JsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const pageWidth = doc.internal.pageSize.getWidth();
 
+  // Title Page
   doc.setFont('times', 'bold');
   doc.setFontSize(18);
   const titleLines = doc.splitTextToSize(topic.toUpperCase(), pageWidth - PAGE_MARGIN * 2) as string[];
@@ -264,16 +272,19 @@ async function generateAcademicPdf(
     }
   );
 
+  // Front matter
   if (front.length > 0) {
     doc.addPage();
     drawBlocks(doc, front, PAGE_MARGIN, false);
   }
   const frontMatterPageCount = doc.getNumberOfPages();
 
+  // Measure body headings for TOC
   const { default: ScratchJsPDF } = await import('jspdf');
   const scratchDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   const { headings: bodyHeadings } = drawBlocks(scratchDoc, body, PAGE_MARGIN, true);
 
+  // Measure TOC
   const scratchTocDoc = new ScratchJsPDF({ unit: 'pt', format: 'letter' }) as jsPDF;
   scratchTocDoc.setFont('times', 'bold');
   scratchTocDoc.setFontSize(14);
@@ -287,6 +298,7 @@ async function generateAcademicPdf(
   );
   const tocPageCount = scratchTocDoc.getNumberOfPages();
 
+  // Real TOC
   doc.addPage();
   doc.setFont('times', 'bold');
   doc.setFontSize(14);
@@ -297,9 +309,11 @@ async function generateAcademicPdf(
   }));
   renderToc(doc, realEntries, PAGE_MARGIN + 30);
 
+  // Real body
   doc.addPage();
   drawBlocks(doc, body, PAGE_MARGIN, false);
 
+  // Page numbers
   const totalPages = doc.getNumberOfPages();
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p);
@@ -465,7 +479,7 @@ export default function AcademicWriterForm() {
   };
 
   // ============================================================
-  // DOWNLOAD PPTX - AI summarizes research paper into presentation
+  // DOWNLOAD PPTX - Uses Presenton API
   // ============================================================
   const downloadAsPPTX = async () => {
     if (!result) return;
@@ -736,7 +750,7 @@ export default function AcademicWriterForm() {
                 disabled={pptxGenerating}
                 className="px-4 py-2 bg-orange-600 hover:bg-orange-700 disabled:opacity-60 text-white rounded-lg text-sm font-medium transition"
               >
-                {pptxGenerating ? 'AI Generating Slides...' : 'PPTX'}
+                {pptxGenerating ? 'Generating Slides...' : 'PPTX'}
               </button>
             </div>
           </div>
