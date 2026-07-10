@@ -791,7 +791,6 @@ async function generatePptxFromPaper(content: string, topic: string, level: stri
     const presentonUrl = process.env.PRESENTON_URL || 'http://localhost:5000';
     const presentonKey = process.env.PRESENTON_API_KEY;
 
-    // Prepare the prompt for Presenton
     const prompt = `
     Create a professional academic presentation on "${topic}".
     Academic Level: ${level}
@@ -883,7 +882,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: result.error || 'PPTX generation failed' }, { status: 502 });
       }
 
-      return new NextResponse(result.buffer, {
+      // Convert Buffer to Uint8Array for NextResponse
+      const uint8Array = new Uint8Array(result.buffer);
+
+      return new NextResponse(uint8Array, {
         status: 200,
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
