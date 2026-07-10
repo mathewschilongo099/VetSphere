@@ -784,77 +784,26 @@ function cleanText(text: string): string {
 }
 
 // ============================================================
-// PPTX GENERATOR USING PRESENTON API
+// PPTX GENERATOR - Python-pptx ONLY
 // ============================================================
+
 async function generatePptxFromPaper(content: string, topic: string, level: string): Promise<{ buffer: Buffer; error: string }> {
   try {
-    const presentonUrl = process.env.PRESENTON_URL || 'http://localhost:5000';
-    const presentonKey = process.env.PRESENTON_API_KEY;
-
-    const prompt = `
-    Create a professional academic presentation on "${topic}".
-    Academic Level: ${level}
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
     
-    Content from the research paper:
-    ${content.slice(0, 8000)}
-    
-    Required Slides:
-    1. Title Slide - "${topic}"
-    2. Outline
-    3. Introduction
-    4. Background
-    5. Problem Statement
-    6. Research Objectives
-    7. Research Questions
-    8. Literature Review
-    9. Methodology
-    10. Findings
-    11. Discussion
-    12. Conclusions
-    13. Recommendations
-    14. References
-    15. Thank You
-    
-    Each slide should have 3-6 clear bullet points.
-    Use professional academic language.
-    `;
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
-    if (presentonKey) {
-      headers['Authorization'] = `Bearer ${presentonKey}`;
-    }
-
-    const response = await fetch(`${presentonUrl}/api/generate`, {
+    const response = await fetch(`${baseUrl}/api/python-pptx`, {
       method: 'POST',
-      headers,
-      body: JSON.stringify({
-        prompt: prompt,
-        template: 'academic',
-        exportFormat: 'pptx',
-        title: topic,
-      }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, topic, level }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      return { buffer: Buffer.from(''), error: `Presenton API error: ${response.status} - ${errorText}` };
+      return { buffer: Buffer.from(''), error: `Python PPTX error: ${response.status} - ${errorText}` };
     }
 
-    const data = await response.json();
-    
-    let pptxBuffer: Buffer;
-    if (data.pptx_url) {
-      const pptxResponse = await fetch(data.pptx_url);
-      pptxBuffer = Buffer.from(await pptxResponse.arrayBuffer());
-    } else if (data.pptx_data) {
-      pptxBuffer = Buffer.from(data.pptx_data, 'base64');
-    } else {
-      return { buffer: Buffer.from(''), error: 'No PPTX data returned from Presenton' };
-    }
-    
-    return { buffer: pptxBuffer, error: '' };
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return { buffer, error: '' };
   } catch (error: any) {
     console.error('PPTX generation error:', error);
     return { buffer: Buffer.from(''), error: error.message || 'PPTX generation failed' };
@@ -870,7 +819,7 @@ export async function POST(request: NextRequest) {
     const { topic, level = 'degree', type = 'research', chapterIndex = 0, previousContext = '', action = 'generate', content = '' } = body;
 
     // ============================================================
-    // ACTION: PPTX (using Presenton API)
+    // ACTION: PPTX
     // ============================================================
     if (action === 'pptx') {
       if (!content) {
@@ -878,14 +827,12 @@ export async function POST(request: NextRequest) {
       }
 
       const result = await generatePptxFromPaper(content, topic || 'Research Presentation', level || 'Master\'s Degree');
+      
       if (result.error || !result.buffer || result.buffer.length === 0) {
         return NextResponse.json({ error: result.error || 'PPTX generation failed' }, { status: 502 });
       }
 
-      // Convert Buffer to Uint8Array for NextResponse
-      const uint8Array = new Uint8Array(result.buffer);
-
-      return new NextResponse(uint8Array, {
+      return new NextResponse(new Uint8Array(result.buffer), {
         status: 200,
         headers: {
           'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
