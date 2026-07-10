@@ -1,0 +1,251 @@
+// src/app/api/python-pptx/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import fs from 'fs';
+import path from 'path';
+
+const execAsync = promisify(exec);
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { content, topic, level } = body;
+
+    if (!content) {
+      return NextResponse.json({ error: 'Content is required' }, { status: 400 });
+    }
+
+    // Extract sections from the research paper
+    const sections = extractSections(content);
+
+    // Build the Python script
+    const pythonScript = `
+import sys
+import json
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.enum.text import PP_ALIGN
+from pptx.dml.color import RGBColor
+
+def create_presentation(data):
+    prs = Presentation()
+    prs.slide_width = Inches(13.33)
+    prs.slide_height = Inches(7.5)
+    
+    topic = data.get('topic', 'Research Presentation')
+    level = data.get('level', 'Master\'s Degree')
+    slides_data = data.get('slides', [])
+    
+    PRIMARY = RGBColor(11, 92, 255)
+    DARK = RGBColor(26, 26, 46)
+    LIGHT = RGBColor(102, 102, 102)
+    WHITE = RGBColor(255, 255, 255)
+    
+    # TITLE SLIDE
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    fill = slide.background.fill
+    fill.solid()
+    fill.fore_color.rgb = PRIMARY
+    
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(1.5), Inches(12.33), Inches(2))
+    p = box.text_frame.paragraphs[0]
+    p.text = topic.upper()
+    p.font.size = Pt(36)
+    p.font.bold = True
+    p.font.color.rgb = WHITE
+    p.alignment = PP_ALIGN.CENTER
+    
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(3.8), Inches(12.33), Inches(0.8))
+    p = box.text_frame.paragraphs[0]
+    p.text = 'Research Presentation'
+    p.font.size = Pt(24)
+    p.font.italic = True
+    p.font.color.rgb = WHITE
+    p.alignment = PP_ALIGN.CENTER
+    
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(5.5), Inches(12.33), Inches(0.6))
+    p = box.text_frame.paragraphs[0]
+    p.text = f'VetSphere Academic Writer • {level} • {data.get("date", "")}'
+    p.font.size = Pt(16)
+    p.font.color.rgb = WHITE
+    p.alignment = PP_ALIGN.CENTER
+    
+    # OUTLINE SLIDE
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(0.3), Inches(12.33), Inches(0.8))
+    p = box.text_frame.paragraphs[0]
+    p.text = 'Presentation Outline'
+    p.font.size = Pt(28)
+    p.font.bold = True
+    p.font.color.rgb = PRIMARY
+    
+    y = 1.5
+    for i, s in enumerate(slides_data[:12], 1):
+        box = slide.shapes.add_textbox(Inches(1), Inches(y), Inches(11), Inches(0.5))
+        p = box.text_frame.paragraphs[0]
+        p.text = f'{i}. {s.get("title", "Slide")}'
+        p.font.size = Pt(16)
+        p.font.color.rgb = DARK
+        y += 0.6
+    
+    # CONTENT SLIDES
+    for idx, slide_data in enumerate(slides_data):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])
+        
+        box = slide.shapes.add_textbox(Inches(0.5), Inches(0.2), Inches(12.33), Inches(0.4))
+        p = box.text_frame.paragraphs[0]
+        p.text = f'Slide {idx + 3}'
+        p.font.size = Pt(12)
+        p.font.color.rgb = LIGHT
+        
+        box = slide.shapes.add_textbox(Inches(0.5), Inches(0.7), Inches(12.33), Inches(0.8))
+        p = box.text_frame.paragraphs[0]
+        p.text = slide_data.get('title', 'Section')
+        p.font.size = Pt(24)
+        p.font.bold = True
+        p.font.color.rgb = PRIMARY
+        
+        bullets = slide_data.get('bullets', ['Key information not available'])
+        y = 1.8
+        for bullet in bullets[:6]:
+            if y > 6.5:
+                break
+            box = slide.shapes.add_textbox(Inches(0.8), Inches(y), Inches(11.5), Inches(0.6))
+            p = box.text_frame.paragraphs[0]
+            p.text = f'● {bullet}'
+            p.font.size = Pt(14)
+            p.font.color.rgb = DARK
+            y += 0.7
+    
+    # THANK YOU SLIDE
+    slide = prs.slides.add_slide(prs.slide_layouts[6])
+    fill = slide.background.fill
+    fill.solid()
+    fill.fore_color.rgb = PRIMARY
+    
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(2), Inches(12.33), Inches(1.5))
+    p = box.text_frame.paragraphs[0]
+    p.text = 'Thank You'
+    p.font.size = Pt(48)
+    p.font.bold = True
+    p.font.color.rgb = WHITE
+    p.alignment = PP_ALIGN.CENTER
+    
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(3.8), Inches(12.33), Inches(0.8))
+    p = box.text_frame.paragraphs[0]
+    p.text = 'Questions & Discussion'
+    p.font.size = Pt(20)
+    p.font.italic = True
+    p.font.color.rgb = WHITE
+    p.alignment = PP_ALIGN.CENTER
+    
+    box = slide.shapes.add_textbox(Inches(0.5), Inches(4.8), Inches(12.33), Inches(0.6))
+    p = box.text_frame.paragraphs[0]
+    p.text = 'Generated by VetSphere Academic Writer'
+    p.font.size = Pt(14)
+    p.font.color.rgb = WHITE
+    p.alignment = PP_ALIGN.CENTER
+    
+    prs.save('/tmp/presentation.pptx')
+    print('SUCCESS')
+
+if __name__ == "__main__":
+    data = json.loads(sys.stdin.read())
+    create_presentation(data)
+`;
+
+    // Write Python script to temp file
+    const scriptPath = '/tmp/generate_pptx.py';
+    fs.writeFileSync(scriptPath, pythonScript);
+
+    // Prepare data
+    const data = {
+      topic: topic || 'Research Presentation',
+      level: level || 'Master\'s Degree',
+      date: new Date().toLocaleDateString(),
+      slides: sections.map(s => ({
+        title: s.title,
+        bullets: s.bullets.slice(0, 6)
+      }))
+    };
+
+    // Run Python
+    const { stdout, stderr } = await execAsync(
+      `python3 ${scriptPath} '${JSON.stringify(data)}'`
+    );
+
+    if (stderr && !stderr.includes('SUCCESS')) {
+      console.error('Python error:', stderr);
+      return NextResponse.json({ error: 'Python generation failed' }, { status: 500 });
+    }
+
+    // Read the generated file
+    const pptxPath = '/tmp/presentation.pptx';
+    const buffer = fs.readFileSync(pptxPath);
+
+    // Clean up
+    fs.unlinkSync(scriptPath);
+    fs.unlinkSync(pptxPath);
+
+    return new NextResponse(buffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(topic || 'presentation')}.pptx"`,
+      },
+    });
+
+  } catch (error: any) {
+    console.error('PPTX generation error:', error);
+    return NextResponse.json(
+      { error: error.message || 'Failed to generate PPTX' },
+      { status: 500 }
+    );
+  }
+}
+
+function extractSections(content: string): { title: string; bullets: string[] }[] {
+  const sections: { title: string; bullets: string[] }[] = [];
+  const lines = content.split('\n');
+  let currentSection: { title: string; bullets: string[] } | null = null;
+
+  const keywords = [
+    'ABSTRACT', 'INTRODUCTION', 'BACKGROUND', 'PROBLEM', 'OBJECTIVES',
+    'QUESTIONS', 'LITERATURE REVIEW', 'THEORETICAL', 'METHODOLOGY',
+    'FINDINGS', 'DISCUSSION', 'CONCLUSIONS', 'RECOMMENDATIONS'
+  ];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const isSection = keywords.some(k =>
+      trimmed.toUpperCase().includes(k) && trimmed.length < 100
+    );
+
+    if (isSection && !trimmed.startsWith('●') && !trimmed.startsWith('-')) {
+      if (currentSection && currentSection.bullets.length > 0) {
+        sections.push(currentSection);
+      }
+      currentSection = { title: trimmed.slice(0, 60), bullets: [] };
+      continue;
+    }
+
+    if (currentSection && trimmed.length > 20 && trimmed.length < 200) {
+      let bullet = trimmed
+        .replace(/^[0-9. ]+/, '')
+        .replace(/^[-•*]\s*/, '')
+        .trim();
+      if (bullet.length > 10 && bullet.length < 150) {
+        currentSection.bullets.push(bullet.slice(0, 120));
+      }
+    }
+  }
+
+  if (currentSection && currentSection.bullets.length > 0) {
+    sections.push(currentSection);
+  }
+
+  return sections;
+}
