@@ -4,15 +4,11 @@ import { NextRequest, NextResponse } from 'next/server';
 export const maxDuration = 60;
 export const dynamic = 'force-dynamic';
 
-// FIX #7: reverted back to the correct model name from your memory notes
 const GEMINI_MODEL = 'gemini-3.1-flash-lite';
 
-// FIX #8: single source of truth for base URL (was BASE_URL in one place, NEXT_PUBLIC_BASE_URL in another)
 const APP_BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL || process.env.BASE_URL || 'http://localhost:3000';
 
-// FIX #5: how much prior-chapter context to carry forward. 1000 chars was truncating
-// case data (labs, diagnostics) before the Discussion chapter ever saw it.
 const MAX_CONTEXT_CHARS = 4000;
 
 const typeLabels: Record<string, string> = {
@@ -46,6 +42,27 @@ const levelMap: Record<string, { label: string; pageCount: string; depth: string
   },
 };
 
+// Shared rules injected into every chapter's front-matter / continuation instructions
+// to stop the model from asking permission to continue or narrating its own process.
+const NO_META_COMMENTARY = `
+CRITICAL: NEVER include conversational meta-commentary, permission-asking, or narration
+about what you are about to do (e.g. "Please let me know when to proceed", "Now I will
+write the next chapter", "I will stop here"). Output ONLY the requested document content
+itself - nothing else. Do not address the reader about the writing process.`;
+
+// Shared table-formatting rule, used wherever a chapter may need to present numeric data.
+const TABLE_FORMAT_RULE = `
+TABLE FORMAT: Plain text only, EXCEPT when presenting numeric or comparative data, where a
+properly formed markdown pipe table is allowed:
+- Header row, then a separator row of dashes (|---|---|), then data rows
+- Each row on its own single line, no blank lines between rows
+- Every row must have the same number of columns as the header
+Example:
+| District | Coverage (%) |
+|----------|--------------|
+| Lusaka Central | 32 |
+| Lusaka East | 41 |`;
+
 interface ChapterSpec {
   id: string;
   title: string;
@@ -74,7 +91,8 @@ COURSE CODE: [Course Code]
 INSTITUTION: [Institution Name]
 DATE: [Current Date]
 
-CRITICAL: Use plain text only. No markdown. NO references here.`,
+CRITICAL: Use plain text only. No markdown. NO references here.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'introduction',
@@ -92,7 +110,8 @@ CONTENT REQUIREMENTS:
 LENGTH: 2-3 paragraphs (maximum 300-400 words)
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: This is an ARGUMENT-DRIVEN assignment. Keep it focused and concise. DO NOT include references in the introduction - references go at the end.`,
+CRITICAL: This is an ARGUMENT-DRIVEN assignment. Keep it focused and concise. DO NOT include references in the introduction - references go at the end.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'body',
@@ -123,7 +142,13 @@ CRITICAL RULES:
 - Topic sentences must state a claim, not just a subject
 - Example: "Antibiotic overuse in livestock accelerates resistance" NOT "This section discusses antibiotics"
 - Always link facts back to the question
-- References appear ONLY at the end - NOT in the introduction`,
+- References appear ONLY at the end - NOT in the introduction
+- Do NOT include a concluding or summary subsection (e.g. "2.6 Conclusion") within the Main Body.
+  The document's Conclusion is a separate chapter that comes after this one - do not duplicate it here.
+- Only cite specific statistics (percentages, rates, counts) that are well-established in the
+  literature. If uncertain of an exact figure, describe the relationship qualitatively
+  (e.g. "a substantial proportion of") rather than inventing a precise number.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'conclusion',
@@ -141,7 +166,8 @@ CONTENT REQUIREMENTS:
 LENGTH: 2-3 paragraphs (maximum 200-300 words)
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: Do NOT introduce new ideas, evidence, or citations in the conclusion.`,
+CRITICAL: Do NOT introduce new ideas, evidence, or citations in the conclusion.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'references',
@@ -165,7 +191,8 @@ EXAMPLE FORMATS:
 - Book Chapter: Author, A. A. (Year). Title of chapter. In A. A. Editor (Ed.), Title of book (pp. xx-xx). Publisher.
 
 CRITICAL: Write out every reference in full. DO NOT include website URLs. Use proper APA format.
-CRITICAL: Only include references you are highly confident actually exist. If uncertain whether a specific paper exists, prefer a well-known foundational text or review article in the field over inventing a specific study, author, or year.`,
+CRITICAL: Only include references you are highly confident actually exist. If uncertain whether a specific paper exists, prefer a well-known foundational text or review article in the field over inventing a specific study, author, or year.
+${NO_META_COMMENTARY}`,
     },
   ];
 }
@@ -183,10 +210,15 @@ function buildCaseStudySpecs(topic: string): ChapterSpec[] {
       instructions: `Write ONLY the following front-matter sections:
 
 TITLE PAGE: Case Study title, author name, student ID, course, institution, date
-TABLE OF CONTENTS: List all sections with page numbers
+TABLE OF CONTENTS: List all section titles in order. Do NOT include page numbers -
+  since chapters are generated independently, exact page numbers cannot be known yet.
+  Use no trailing numbers, or write "[page]" as a placeholder if a number is required by format.
 LIST OF ABBREVIATIONS: Any abbreviations used
 
 Do NOT write any chapter content yet. Stop after the front matter.
+${NO_META_COMMENTARY}
+Do NOT ask the reader for permission to continue. Do NOT add any note, comment, or
+question about what comes next. Simply end the output after the front matter content.
 
 CRITICAL: Use plain text only. No markdown.`,
     },
@@ -207,7 +239,8 @@ CHAPTER ONE
 LENGTH: 300-400 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: NO references in the introduction. References go at the end.`,
+CRITICAL: NO references in the introduction. References go at the end.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter2',
@@ -232,7 +265,8 @@ CRITICAL RULES:
 - DO NOT interpret findings here
 - DO NOT discuss differentials here
 - Present facts as facts only
-- NO citations in this section - this is pure description`,
+- NO citations in this section - this is pure description
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter3',
@@ -250,11 +284,18 @@ CONTENT REQUIREMENTS:
 - Justify every diagnosis with "why" (refer to literature)
 
 CRITICAL - SIGNALMENT CONSISTENCY CHECK (do this before listing differentials):
-- Explicitly evaluate whether the patient's signalment (species, breed, age, sex, reproductive status)
-  makes the leading/suspected diagnosis more or less likely than the literature would predict.
-- If the presenting complaint is typically associated with a different sex, age group, or breed than
-  this patient, state that explicitly and adjust the ranking of differentials accordingly.
-- Do not accept the referring complaint's framing uncritically - reason from the signalment first.
+- Reason from basic anatomy and physiology first: for conditions where sex-based anatomical
+  differences are clinically significant (e.g. urethral obstruction is overwhelmingly a male-cat
+  problem because the male urethra is longer and narrower than the female urethra), you MUST
+  explicitly state this anatomical fact and explain how it changes the probability ranking for
+  THIS patient's sex.
+- Do NOT cite or invent a statistic to make the leading diagnosis fit the signalment. If a specific
+  numeric claim about sex-based prevalence cannot be attributed to a real, well-known source, do not
+  state a number at all - describe the relationship qualitatively instead (e.g. "obstruction is rare
+  in female cats due to their wider, shorter urethra") rather than fabricating a precise incidence ratio.
+- If the presenting complaint or requested focus (e.g. "possible urethral obstruction") is less
+  consistent with this patient's signalment than with a different sex/age/breed, say so explicitly
+  and rank differentials accordingly - do not let the framing of the question override the anatomy.
 
 LENGTH: 800-1200 words
 FORMAT: Plain text only. No markdown.
@@ -263,7 +304,10 @@ CITATIONS: Use APA 7th style throughout.
 CRITICAL RULES:
 - Every diagnosis needs a "why", justified against literature, not just stated
 - Use real clinical terminology correctly
-- Do NOT discuss treatment rationale here - that belongs in Chapter Four only`,
+- Do NOT discuss treatment rationale here - that belongs in Chapter Four only
+- Only cite specific statistics you are highly confident are accurate. If uncertain of an exact
+  figure, describe the relationship qualitatively rather than inventing a precise number.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter4',
@@ -281,7 +325,8 @@ CONTENT REQUIREMENTS:
 
 LENGTH: 400-600 words
 FORMAT: Plain text only. No markdown.
-CITATIONS: Use APA 7th style where appropriate.`,
+CITATIONS: Use APA 7th style where appropriate.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter5',
@@ -299,7 +344,8 @@ CONTENT REQUIREMENTS:
 LENGTH: 200-300 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: No new citations in the conclusion.`,
+CRITICAL: No new citations in the conclusion.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'references',
@@ -317,7 +363,8 @@ REQUIREMENTS:
 FORMAT: APA 7th edition
 
 CRITICAL: Write out every reference in full.
-CRITICAL: Only include references you are highly confident actually exist. If uncertain whether a specific paper exists, prefer a well-known foundational veterinary text or review article over inventing a specific study, author, or year.`,
+CRITICAL: Only include references you are highly confident actually exist. If uncertain whether a specific paper exists, prefer a well-known foundational veterinary text or review article over inventing a specific study, author, or year.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'appendices',
@@ -332,7 +379,8 @@ CONTENT REQUIREMENTS:
 - Describe any additional supporting documents
 - Include relevant details that support the case
 
-FORMAT: Plain text only. No markdown.`,
+FORMAT: Plain text only. No markdown.
+${NO_META_COMMENTARY}`,
     },
   ];
 }
@@ -354,7 +402,8 @@ AUTHOR NAME: [Author Name]
 ORGANIZATION: [Organization Name]
 DATE: [Current Date]
 
-CRITICAL: Use plain text only. No markdown.`,
+CRITICAL: Use plain text only. No markdown.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'executive',
@@ -373,7 +422,8 @@ CONTENT REQUIREMENTS:
 LENGTH: 150-200 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: This is for decision-makers who skim. Be concise but comprehensive. No citations here.`,
+CRITICAL: This is for decision-makers who skim. Be concise but comprehensive. No citations here.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'introduction',
@@ -391,7 +441,8 @@ CONTENT REQUIREMENTS:
 LENGTH: 300-400 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: NO citations in the introduction - references go at the end.`,
+CRITICAL: NO citations in the introduction - references go at the end.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'findings',
@@ -404,16 +455,22 @@ CRITICAL: Present findings objectively and factually. NO INTERPRETATION.
 
 CONTENT REQUIREMENTS:
 - Organized under clear subheadings
-- Use tables/figures where numeric data supports the point
+- Use tables where numeric data supports the point (see TABLE FORMAT below)
 - Present data logically
 - Be neutral and factual
 
 LENGTH: 600-900 words
-FORMAT: Plain text only. No markdown.
+${TABLE_FORMAT_RULE}
 
 CRITICAL RULES:
 - This section is NEUTRAL and FACTUAL
-- Save opinion/interpretation for Discussion`,
+- Save opinion/interpretation for Discussion
+- If specific numeric data (percentages, case counts, rates) was not provided to you as part of
+  the topic/case data, do NOT invent precise figures and present them as real statistics. Either
+  use clearly qualitative language (e.g. "coverage remains well below the recommended threshold")
+  or explicitly label illustrative figures as such (e.g. "for illustration, a hypothetical scenario
+  might show..."). Never present fabricated numbers as though they came from a real data source.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'discussion',
@@ -430,7 +487,9 @@ CONTENT REQUIREMENTS:
 LENGTH: 400-600 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: This is where you interpret the findings from Section 2.0.`,
+CRITICAL: This is where you interpret the findings from Section 2.0. Do not introduce new
+numeric data here that did not appear in Section 2.0.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'recommendations',
@@ -447,7 +506,8 @@ CONTENT REQUIREMENTS:
 LENGTH: 300-400 words
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: Recommendations must be SPECIFIC and ACTIONABLE.`,
+CRITICAL: Recommendations must be SPECIFIC and ACTIONABLE.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'conclusion',
@@ -462,7 +522,8 @@ CONTENT REQUIREMENTS:
 - Tie back to purpose
 
 LENGTH: 100-150 words
-FORMAT: Plain text only. No markdown.`,
+FORMAT: Plain text only. No markdown.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'references',
@@ -477,7 +538,8 @@ REQUIREMENTS:
 - NO website URLs - use proper APA format
 
 FORMAT: APA 7th edition
-CRITICAL: Only include references you are highly confident actually exist. If uncertain, prefer a well-known foundational source over inventing a specific study.`,
+CRITICAL: Only include references you are highly confident actually exist. If uncertain, prefer a well-known foundational source over inventing a specific study.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'appendices',
@@ -490,7 +552,8 @@ CONTENT REQUIREMENTS:
 - Describe any supporting documents
 - Describe any raw data or detailed analysis
 
-FORMAT: Plain text only. No markdown.`,
+FORMAT: Plain text only. No markdown.
+${NO_META_COMMENTARY}`,
     },
   ];
 }
@@ -508,12 +571,18 @@ function buildProposalSpecs(topic: string): ChapterSpec[] {
       instructions: `Write ONLY the following front-matter sections for a RESEARCH PROPOSAL:
 
 TITLE PAGE (with the research title, author name, degree, date)
-TABLE OF CONTENTS (list all sections with page numbers as placeholders)
+TABLE OF CONTENTS: List all section titles in order. Do NOT include page numbers -
+  since chapters are generated independently, exact page numbers cannot be known yet.
 LIST OF ABBREVIATIONS AND ACRONYMS
 
 Do NOT write any chapter content yet. Stop after the abbreviations list.
+${NO_META_COMMENTARY}
+Do NOT ask the reader for permission to continue.
 
-CRITICAL: Use plain text only. No markdown, no asterisks.`,
+CRITICAL: Use plain text only. No markdown, no asterisks.
+CRITICAL: This is a PROPOSAL for research that has NOT yet been conducted. Do not write
+an Abstract, and do not state or imply that any data has been collected or any findings
+exist - everything here describes what WILL be done, not what WAS done or found.`,
     },
     {
       id: 'chapter1',
@@ -534,11 +603,12 @@ CHAPTER ONE
 
 1.3 Research Objectives
 1.3.1 General Objective
+[One clear sentence stating the overall aim of the proposed study - THIS MUST NOT BE LEFT BLANK OR GENERIC]
 1.3.2 Specific Objectives
-[3-5 objectives]
+[3-5 objectives, each a separate numbered statement]
 
 1.4 Research Questions
-[3-5 questions]
+[3-5 questions, each directly mapped to a specific objective above]
 
 1.5 Significance of the Study
 [3-4 paragraphs]
@@ -549,7 +619,12 @@ CHAPTER ONE
 1.7 Operational Definitions
 [5-8 key terms]
 
-CRITICAL: Use APA 7th style in-text citations. References go at the end. Use plain text only.`,
+CRITICAL: Every numbered subsection (1.0 through 1.7) MUST contain real, complete content.
+Do not leave any subsection as a heading only or with placeholder text.
+CRITICAL: This is a PROPOSAL - use future/conditional tense throughout ("this study will
+investigate", "data will be collected"), never past tense as if the research already happened.
+Use APA 7th style in-text citations. References go at the end. Use plain text only.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter2',
@@ -580,7 +655,10 @@ CHAPTER TWO
 2.3 Conceptual Framework
 [Detailed explanation with variables]
 
-CRITICAL: Use APA 7th style in-text citations. References go at the end. Use plain text only.`,
+CRITICAL: This chapter reviews EXISTING literature about the topic - it does not report
+any findings from this proposed study, since this study has not been conducted yet.
+Use APA 7th style in-text citations. References go at the end. Use plain text only.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter3',
@@ -598,12 +676,16 @@ CHAPTER THREE
 3.3 Study Location
 3.4 Target Population
 3.5 Sample Size
+[Show the actual formula used (e.g. Yamane's or Cochran's) with the calculation worked through,
+not just a final number with no derivation]
 3.6 Data Collection Instruments and Procedures
 3.7 Data Analysis Plan
 3.8 Reliability and Validity
 3.9 Ethical Considerations
 
-CRITICAL: Cite Creswell. References go at the end. Use plain text only.`,
+CRITICAL: Use future/conditional tense throughout - this describes what WILL be done.
+CRITICAL: Cite Creswell. References go at the end. Use plain text only.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'references',
@@ -614,7 +696,8 @@ CRITICAL: Cite Creswell. References go at the end. Use plain text only.`,
 
 REFERENCES
 Provide 30 complete APA 7th references. NO website URLs. Use proper APA format.
-CRITICAL: Only include references you are highly confident actually exist.
+CRITICAL: Only include references you are highly confident actually exist. If uncertain
+whether a specific paper exists, prefer a well-known foundational text over inventing one.
 
 WORK PLAN
 Month 1-2: Literature Review
@@ -625,8 +708,10 @@ Month 7: Report Writing
 Month 8: Revision and Submission
 
 BUDGET
+${TABLE_FORMAT_RULE}
+Present the budget as a properly formed markdown pipe table with these rows:
 | Item | Quantity | Unit Cost (ZMW) | Total (ZMW) |
-|------|----------|-----------------|-------------|
+|------|----------|------------------|-------------|
 | Stationery | 1 set | 2,000 | 2,000 |
 | Internet Data | 6 months | 500 | 3,000 |
 | Assistant Allowance | 2 assistants | 3,000 | 6,000 |
@@ -634,14 +719,15 @@ BUDGET
 | Printing | 400 copies | 2 | 800 |
 | Equipment | 2 devices | 1,500 | 3,000 |
 | Software | 1 license | 2,000 | 2,000 |
-| Contingency | 10% | | 2,580 |
-| TOTAL | | | 28,380 |
+| Contingency | 10% |  | 2,580 |
+| TOTAL |  |  | 28,380 |
 
 APPENDICES
 APPENDIX A: STUDENT QUESTIONNAIRE
 APPENDIX B: SEMI-STRUCTURED INTERVIEW GUIDE
 APPENDIX C: INFORMED CONSENT FORM
-APPENDIX D: INTRODUCTORY LETTER`,
+APPENDIX D: INTRODUCTORY LETTER
+${NO_META_COMMENTARY}`,
     },
   ];
 }
@@ -666,7 +752,9 @@ LIST OF ABBREVIATIONS AND ACRONYMS
 
 Do NOT write a Table of Contents section.
 
-CRITICAL: Use plain text only. No markdown, no asterisks.`,
+CRITICAL: Use plain text only. No markdown, no asterisks.
+${NO_META_COMMENTARY}
+Do NOT ask the reader for permission to continue.`,
     },
     {
       id: 'chapter1',
@@ -677,18 +765,36 @@ CRITICAL: Use plain text only. No markdown, no asterisks.`,
 
 CHAPTER ONE
 1.0 Introduction
-[Short paragraph - NO citations here]
+[1 paragraph explaining what the chapter covers - NO citations here]
+
 1.1 Background of the Study
+[6-8 substantial paragraphs with citations]
+
 1.2 Statement of the Problem
+[2-3 substantial paragraphs with citations]
+
 1.3 Research Objectives
 1.3.1 General Objective
+[One clear sentence stating the overall aim of the study - THIS MUST NOT BE LEFT BLANK OR GENERIC]
 1.3.2 Specific Objectives
-1.4 Research Questions
-1.5 Significance of the Study
-1.6 Scope of Study
-1.7 Operational Definitions
+[3-5 specific, measurable objectives, each as a separate numbered statement]
 
-CRITICAL: Use APA 7th style in-text citations. References go at the end. Use plain text only.`,
+1.4 Research Questions
+[3-5 questions, each directly mapped to a specific objective above]
+
+1.5 Significance of the Study
+[3-4 paragraphs explaining who benefits and how]
+
+1.6 Scope of Study
+[2 paragraphs defining geographic, population, and topical boundaries]
+
+1.7 Operational Definitions
+[5-8 key terms, each with a working definition specific to this study]
+
+CRITICAL: Every numbered subsection (1.0 through 1.7) MUST contain real, complete content.
+Do not leave any subsection as a heading only or with placeholder text.
+Use APA 7th style in-text citations. References go at the end. Use plain text only.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter2',
@@ -704,7 +810,8 @@ CHAPTER TWO
 2.2 Theoretical Framework
 2.3 Conceptual Framework
 
-CRITICAL: Use APA 7th style in-text citations. References go at the end. Use plain text only.`,
+CRITICAL: Use APA 7th style in-text citations. References go at the end. Use plain text only.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter3',
@@ -721,12 +828,14 @@ CHAPTER THREE
 3.3 Study Location
 3.4 Target Population
 3.5 Sample Size
+[Show the actual formula used with the calculation worked through, not just a final number]
 3.6 Data Collection Instruments and Procedures
 3.7 Data Analysis Plan
 3.8 Reliability and Validity
 3.9 Ethical Considerations
 
-CRITICAL: Cite Creswell. References go at the end. Use plain text only.`,
+CRITICAL: Cite Creswell. References go at the end. Use plain text only.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter4',
@@ -740,7 +849,14 @@ CHAPTER FOUR
 [Short paragraph]
 4.1 Descriptive and Demographic Results
 4.2 Key Thematic or Statistical Findings
-4.3 Summary of Findings`,
+4.3 Summary of Findings
+
+${TABLE_FORMAT_RULE}
+
+CRITICAL: If specific numeric data was not provided to you as part of the topic, do NOT
+invent precise figures and present them as real study results. Use clearly qualitative or
+illustrative framing instead of fabricated statistics.
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter5',
@@ -755,7 +871,8 @@ CHAPTER FIVE
 5.1 Interpretation of Key Findings
 5.2 Comparison with Previous Studies
 5.3 Implications for Practice and Policy
-5.4 Limitations of the Study`,
+5.4 Limitations of the Study
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter6',
@@ -768,7 +885,8 @@ CHAPTER SIX
 6.0 Introduction
 [Short paragraph]
 6.1 Conclusions
-6.2 Recommendations`,
+6.2 Recommendations
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'references',
@@ -783,7 +901,8 @@ CRITICAL: Only include references you are highly confident actually exist.
 
 APPENDICES
 APPENDIX A: DATA EXTRACTION TOOL
-APPENDIX B: PARTICIPANT INFORMATION SHEET AND INFORMED CONSENT`,
+APPENDIX B: PARTICIPANT INFORMATION SHEET AND INFORMED CONSENT
+${NO_META_COMMENTARY}`,
     },
   ];
 }
@@ -906,7 +1025,6 @@ async function callOpenRouter(
           headers: {
             Authorization: `Bearer ${openRouterKey}`,
             'Content-Type': 'application/json',
-            // FIX #8: use the single unified base URL constant
             'HTTP-Referer': APP_BASE_URL,
             'X-Title': 'VetSphere Academic Writer',
           },
@@ -1057,10 +1175,6 @@ async function callCerebras(
   return { text: '', error: `Cerebras: ${errors.join(' | ')}` };
 }
 
-// FIX #2: for reference chapters, try Gemini first instead of last.
-// Free/small models (Groq's 70B on free tier, OpenRouter's free 8B) hallucinate
-// citations more readily than Gemini, so put the more reliable provider first
-// specifically for the references chapter.
 async function generateSection(
   sectionPrompt: string,
   maxOutputTokens: number,
@@ -1112,6 +1226,8 @@ async function generateSection(
   };
 }
 
+// Only strip markdown emphasis/heading syntax - table pipe syntax is now allowed
+// and must survive this cleaning step so it can be rendered as a real table downstream.
 function cleanText(text: string): string {
   return text
     .replace(/\*\*/g, '')
@@ -1131,7 +1247,6 @@ function cleanText(text: string): string {
 // ============================================================
 async function generatePptxFromPaper(content: string, topic: string, level: string): Promise<{ buffer: Buffer; error: string }> {
   try {
-    // FIX #8: unified base URL constant
     const response = await fetch(`${APP_BASE_URL}/api/python-pptx`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1189,6 +1304,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Topic is required' }, { status: 400 });
     }
 
+    // Guard against an unrecognized document type silently falling through to
+    // the research-paper default (this was likely why "Research Proposal" in
+    // your UI produced a Research Paper with fabricated findings - if the
+    // frontend ever sends an unexpected `type` value, this will now surface
+    // as a clear 400 error instead of silently generating the wrong document).
+    const validTypes = ['essay', 'report', 'case-study', 'proposal', 'research'];
+    if (!validTypes.includes(type)) {
+      return NextResponse.json(
+        { error: `Invalid document type "${type}". Must be one of: ${validTypes.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
     const cleanTopic = topic
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
@@ -1199,16 +1327,8 @@ export async function POST(request: NextRequest) {
     const typeLabel = typeLabels[type] || 'Research Paper';
 
     const chapters = buildChapterSpecs(cleanTopic, type);
-
-    // FIX #6: derive totalChapters from the actual array instead of a hardcoded
-    // number that can drift out of sync with the specs and silently mask an
-    // off-by-one in the frontend's chapter loop.
     const totalChapters = chapters.length;
 
-    // FIX #6: explicitly reject an out-of-range chapterIndex instead of silently
-    // clamping to the last chapter and re-returning it (this was a likely cause
-    // of the duplicated Introduction / duplicated References you saw earlier,
-    // if the frontend loop ever requested an index >= chapters.length).
     if (chapterIndex < 0 || chapterIndex >= chapters.length) {
       return NextResponse.json(
         { error: `Invalid chapterIndex ${chapterIndex}. This document type has ${chapters.length} chapters (0-${chapters.length - 1}).` },
@@ -1289,10 +1409,14 @@ CRITICAL RULES:
 TOTAL LENGTH: ${levelInfo.pageCount}`;
     } else if (type === 'proposal') {
       documentTypeInstruction = `
-THIS IS A RESEARCH PROPOSAL.
+THIS IS A RESEARCH PROPOSAL - NOT A COMPLETED RESEARCH PAPER.
 STRUCTURE (IN ORDER): CHAPTER ONE (with 1.0-1.7), CHAPTER TWO (with 2.0-2.3), CHAPTER THREE (with 3.0-3.9), REFERENCES, WORK PLAN, BUDGET, APPENDICES.
 
-CRITICAL: NO citations in Introduction sections. References only in body and reference list. NO website URLs.`;
+CRITICAL: No research has been conducted yet. Use future/conditional tense throughout
+("this study will investigate", "data will be collected") - NEVER past tense as if
+findings already exist. Do NOT include a Declaration, Dedication, Acknowledgements, or
+Abstract - those belong to a completed research paper, not a proposal.
+NO citations in Introduction sections. References only in body and reference list. NO website URLs.`;
     } else {
       documentTypeInstruction = `
 THIS IS A RESEARCH PAPER (Full Dissertation).
@@ -1310,8 +1434,11 @@ PROPOSAL CHAPTER ONE SPECIFICS:
 - 1.0 Introduction: 1-2 paragraphs, NO citations
 - 1.1 Background: 6-8 substantial paragraphs WITH citations
 - 1.2 Statement of Problem: 2-3 substantial paragraphs WITH citations
+- 1.3.1 General Objective: one full sentence, must not be blank
 - 1.3.2 Specific Objectives: 3-5 objectives
 - 1.4 Research Questions: 3-5 questions
+- 1.5 Significance: 3-4 paragraphs
+- 1.6 Scope: 2 paragraphs
 - 1.7 Operational Definitions: 5-8 terms`;
       }
 
@@ -1329,7 +1456,7 @@ PROPOSAL CHAPTER TWO SPECIFICS:
 PROPOSAL CHAPTER THREE SPECIFICS:
 - 3.0 Introduction: 1 paragraph, NO citations
 - 3.2 Research Design: cite Creswell
-- 3.5 Sample Size: Show formula
+- 3.5 Sample Size: Show formula and worked calculation
 - 3.6 Data Collection: cite sources
 - 3.7 Data Analysis: justify, cite`;
       }
@@ -1340,8 +1467,11 @@ RESEARCH CHAPTER ONE SPECIFICS:
 - 1.0 Introduction: 1 paragraph, NO citations
 - 1.1 Background: 6-8 substantial paragraphs WITH citations
 - 1.2 Statement of Problem: 2-3 substantial paragraphs WITH citations
+- 1.3.1 General Objective: one full sentence, must not be blank
 - 1.3.2 Specific Objectives: 3-5 objectives
 - 1.4 Research Questions: 3-5 questions
+- 1.5 Significance: 3-4 paragraphs
+- 1.6 Scope: 2 paragraphs
 - 1.7 Operational Definitions: 5-8 terms`;
       }
 
@@ -1376,14 +1506,15 @@ CRITICAL RULES:
 - NO citations in Introduction, Conclusion, or Executive Summary.
 - NO website URLs in references - use proper APA format (Author, Year, Title, Publisher/Journal).
 - Never use numbered bracket citations like [1].
-- Use plain text only. No markdown, no asterisks, no underscores.
+- Use plain text only. No markdown, no asterisks, no underscores, EXCEPT for well-formed
+  pipe tables when presenting numeric data (see TABLE FORMAT instructions if provided above).
 - Avoid the use of hyphens or dashes throughout.
 - Write out full content. Never use placeholders.
+- Never include conversational meta-commentary, permission-asking, or process narration.
+  Output ONLY the requested document content.
 - The document must demonstrate ${levelInfo.depth} academic writing.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 4000;
-
-    // FIX #2: prioritize Gemini specifically for the references chapter
     const prioritizeGemini = chapter.id === 'references';
 
     const { text, apiUsed, error } = await generateSection(prompt, chapterTokenBudget, prioritizeGemini);
@@ -1398,9 +1529,6 @@ CRITICAL RULES:
     const cleaned = cleanText(text);
     const isLastChapter = idx === chapters.length - 1;
 
-    // FIX #5: carry forward more context (up to MAX_CONTEXT_CHARS) instead of
-    // hard-truncating every non-frontmatter chapter to 1000 chars, which was
-    // cutting off case data (labs, diagnostics) before the Discussion chapter saw it.
     const combinedContext = `${previousContext}\n\n${cleaned}`.trim();
     const contextForNextChapter =
       combinedContext.length > MAX_CONTEXT_CHARS
