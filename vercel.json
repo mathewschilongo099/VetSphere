@@ -1,7 +1,17 @@
 {
   "functions": {
-    "api/python-pptx/route.ts": {
-      "runtime": "nodejs20.x"
+    "src/app/api/python-pptx/route.ts": {
+      "runtime": "python3.11"
     }
-  }
+  },
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    },
+    {
+      "src": "src/app/api/python-pptx/route.ts",
+      "use": "@vercel/python"
+    }
+  ]
 }
