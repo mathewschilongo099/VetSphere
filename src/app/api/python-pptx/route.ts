@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
-import path from 'path';
 
 const execAsync = promisify(exec);
 
@@ -39,7 +38,6 @@ def create_presentation(data):
     
     PRIMARY = RGBColor(11, 92, 255)
     DARK = RGBColor(26, 26, 46)
-    LIGHT = RGBColor(102, 102, 102)
     WHITE = RGBColor(255, 255, 255)
     
     # TITLE SLIDE
@@ -97,7 +95,7 @@ def create_presentation(data):
         p = box.text_frame.paragraphs[0]
         p.text = f'Slide {idx + 3}'
         p.font.size = Pt(12)
-        p.font.color.rgb = LIGHT
+        p.font.color.rgb = RGBColor(102, 102, 102)
         
         box = slide.shapes.add_textbox(Inches(0.5), Inches(0.7), Inches(12.33), Inches(0.8))
         p = box.text_frame.paragraphs[0]
