@@ -155,7 +155,15 @@ export default function AdminPage() {
   // ── LOGIN ──
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'ChihAna21*';
+    setLoginError('');
+
+    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
+
+    if (!adminPassword) {
+      setLoginError('Admin password not configured. Please set NEXT_PUBLIC_ADMIN_PASSWORD in Vercel.');
+      return;
+    }
+
     if (password === adminPassword) {
       setAuthenticated(true);
       loadStats();
@@ -255,10 +263,7 @@ ${article}
       const slug = file.name.replace('.md', '');
       const res = await fetch(`/api/articles/${slug}`);
       const data = await res.json();
-      if (data.error) {
-        setEditMessage('❌ Failed to load article.');
-        return;
-      }
+      if (data.error) { setEditMessage('❌ Failed to load article.'); return; }
       setEditContent(data.content);
       setEditingFile({ name: file.name, sha: data.sha });
     } catch {
@@ -382,7 +387,10 @@ ${article}
               placeholder="Enter admin password"
               className="w-full px-4 py-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
             />
-            <button type="submit" className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition">
+            <button
+              type="submit"
+              className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-xl transition"
+            >
               Login
             </button>
             {loginError && <p className="text-red-400 text-center text-sm">{loginError}</p>}
@@ -421,8 +429,13 @@ ${article}
             ] as { id: Tab; label: string }[]).map(tab => (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id); if (tab.id === 'write') { setWriteMode('generate'); setEditingFile(null); } }}
-                className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${activeTab === tab.id ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id === 'write') { setWriteMode('generate'); setEditingFile(null); }
+                }}
+                className={`px-4 py-2 rounded-xl font-semibold text-sm transition ${
+                  activeTab === tab.id ? 'bg-green-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                }`}
               >
                 {tab.label}
               </button>
@@ -473,8 +486,6 @@ ${article}
           {/* ── WRITE / EDIT ARTICLE ── */}
           {activeTab === 'write' && (
             <div className="space-y-4">
-
-              {/* Mode Toggle */}
               <div className="flex gap-2">
                 <button
                   onClick={() => { setWriteMode('generate'); setEditingFile(null); setEditMessage(''); }}
@@ -487,12 +498,12 @@ ${article}
                     onClick={() => setWriteMode('edit')}
                     className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${writeMode === 'edit' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-400'}`}
                   >
-                    ✏️ Editing: {editingFile.name.replace('.md', '').replace(/-/g, ' ').slice(0, 30)}...
+                    ✏️ Editing: {editingFile.name.replace('.md', '').replace(/-/g, ' ').slice(0, 25)}...
                   </button>
                 )}
               </div>
 
-              {/* ── GENERATE MODE ── */}
+              {/* Generate Mode */}
               {writeMode === 'generate' && (
                 <>
                   <form onSubmit={handleGenerate} className="flex gap-3">
@@ -513,7 +524,11 @@ ${article}
                   </form>
 
                   {writeMessage && (
-                    <p className={`text-center text-sm py-2 px-4 rounded-xl ${writeMessage.includes('✅') ? 'bg-green-900/30 text-green-400' : writeMessage.includes('⚠️') ? 'bg-yellow-900/30 text-yellow-400' : 'bg-red-900/30 text-red-400'}`}>
+                    <p className={`text-center text-sm py-2 px-4 rounded-xl ${
+                      writeMessage.includes('✅') ? 'bg-green-900/30 text-green-400' :
+                      writeMessage.includes('⚠️') ? 'bg-yellow-900/30 text-yellow-400' :
+                      'bg-red-900/30 text-red-400'
+                    }`}>
                       {writeMessage}
                     </p>
                   )}
@@ -557,10 +572,16 @@ ${article}
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        <button onClick={() => setShowPreview(false)} className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${!showPreview ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}>
+                        <button
+                          onClick={() => setShowPreview(false)}
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${!showPreview ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
+                        >
                           ✏️ Edit
                         </button>
-                        <button onClick={() => setShowPreview(true)} className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${showPreview ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}>
+                        <button
+                          onClick={() => setShowPreview(true)}
+                          className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${showPreview ? 'bg-green-600 text-white' : 'bg-gray-700 text-gray-400'}`}
+                        >
                           👁️ Preview
                         </button>
                       </div>
@@ -588,7 +609,7 @@ ${article}
                 </>
               )}
 
-              {/* ── EDIT MODE ── */}
+              {/* Edit Mode */}
               {writeMode === 'edit' && editingFile && (
                 <div className="space-y-4">
                   <div className="bg-blue-900/30 border border-blue-700 rounded-xl p-3">
@@ -596,15 +617,14 @@ ${article}
                       ✏️ Editing: <strong>{editingFile.name.replace('.md', '').replace(/-/g, ' ')}</strong>
                     </p>
                   </div>
-
                   {loadingEdit && <p className="text-center text-gray-400 py-8">⏳ Loading article...</p>}
-
                   {editMessage && (
-                    <p className={`text-center text-sm py-2 px-4 rounded-xl ${editMessage.includes('✅') ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'}`}>
+                    <p className={`text-center text-sm py-2 px-4 rounded-xl ${
+                      editMessage.includes('✅') ? 'bg-green-900/30 text-green-400' : 'bg-red-900/30 text-red-400'
+                    }`}>
                       {editMessage}
                     </p>
                   )}
-
                   {!loadingEdit && (
                     <>
                       <div>
@@ -647,7 +667,6 @@ ${article}
                   {loadingArticles ? '⏳' : '🔄 Refresh'}
                 </button>
               </div>
-
               <input
                 type="text"
                 value={searchQuery}
@@ -655,7 +674,6 @@ ${article}
                 placeholder="🔍 Search articles..."
                 className="w-full px-5 py-3 rounded-xl bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-400"
               />
-
               <div className="flex gap-2 flex-wrap">
                 <button onClick={selectAll} className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded-xl transition">Select All</button>
                 <button onClick={deselectAll} className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded-xl transition">Deselect All</button>
@@ -670,25 +688,30 @@ ${article}
                   🔄 Refresh
                 </button>
               </div>
-
               {manageMessage && (
-                <p className={`text-center text-sm py-2 px-4 rounded-xl ${manageMessage.includes('✅') ? 'bg-green-900/30 text-green-400' : manageMessage.includes('⚠️') ? 'bg-yellow-900/30 text-yellow-400' : 'bg-red-900/30 text-red-400'}`}>
+                <p className={`text-center text-sm py-2 px-4 rounded-xl ${
+                  manageMessage.includes('✅') ? 'bg-green-900/30 text-green-400' :
+                  manageMessage.includes('⚠️') ? 'bg-yellow-900/30 text-yellow-400' :
+                  'bg-red-900/30 text-red-400'
+                }`}>
                   {manageMessage}
                 </p>
               )}
-
               {loadingArticles && <p className="text-center text-gray-400 py-8">⏳ Loading articles...</p>}
               {!loadingArticles && filteredArticles.length === 0 && <p className="text-center text-gray-400 py-8">No articles found.</p>}
-
               <div className="space-y-2">
                 {paginatedArticles.map((a) => (
                   <div
                     key={a.name}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${a.selected ? 'bg-red-900/40 border border-red-500' : 'bg-gray-800 hover:bg-gray-700'}`}
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition ${
+                      a.selected ? 'bg-red-900/40 border border-red-500' : 'bg-gray-800 hover:bg-gray-700'
+                    }`}
                   >
                     <div
                       onClick={() => toggleSelect(a.name)}
-                      className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer transition ${a.selected ? 'bg-red-500 border-red-500' : 'border-gray-500 hover:border-gray-300'}`}
+                      className={`w-5 h-5 rounded border-2 flex items-center justify-center shrink-0 cursor-pointer transition ${
+                        a.selected ? 'bg-red-500 border-red-500' : 'border-gray-500 hover:border-gray-300'
+                      }`}
                     >
                       {a.selected && <span className="text-white text-xs font-bold">✓</span>}
                     </div>
@@ -715,11 +738,13 @@ ${article}
                   </div>
                 ))}
               </div>
-
-              {/* Pagination */}
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-2 pt-4 flex-wrap">
-                  <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl transition">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl transition"
+                  >
                     ← Prev
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -734,12 +759,20 @@ ${article}
                         key={i}
                         onClick={() => typeof p === 'number' && setCurrentPage(p)}
                         disabled={p === '...'}
-                        className={`w-9 h-9 rounded-xl text-sm font-semibold transition ${p === currentPage ? 'bg-green-600 text-white' : p === '...' ? 'text-gray-500 cursor-default' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
+                        className={`w-9 h-9 rounded-xl text-sm font-semibold transition ${
+                          p === currentPage ? 'bg-green-600 text-white' :
+                          p === '...' ? 'text-gray-500 cursor-default' :
+                          'bg-gray-700 hover:bg-gray-600 text-white'
+                        }`}
                       >
                         {p}
                       </button>
                     ))}
-                  <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl transition">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white text-sm px-4 py-2 rounded-xl transition"
+                  >
                     Next →
                   </button>
                 </div>
@@ -825,16 +858,21 @@ ${article}
                   {autoPublishRunning ? '⏳ Running...' : '▶️ Run Auto-Publish Now'}
                 </button>
                 {autoPublishMessage && (
-                  <p className={`text-center text-sm mt-3 py-2 px-4 rounded-xl ${autoPublishMessage.includes('✅') ? 'bg-green-900/30 text-green-400' : autoPublishMessage.includes('⚠️') ? 'bg-yellow-900/30 text-yellow-400' : autoPublishMessage.includes('⏳') ? 'bg-gray-700 text-gray-300' : 'bg-red-900/30 text-red-400'}`}>
+                  <p className={`text-center text-sm mt-3 py-2 px-4 rounded-xl ${
+                    autoPublishMessage.includes('✅') ? 'bg-green-900/30 text-green-400' :
+                    autoPublishMessage.includes('⚠️') ? 'bg-yellow-900/30 text-yellow-400' :
+                    autoPublishMessage.includes('⏳') ? 'bg-gray-700 text-gray-300' :
+                    'bg-red-900/30 text-red-400'
+                  }`}>
                     {autoPublishMessage}
                   </p>
                 )}
               </div>
 
               <div className="bg-gray-800 rounded-2xl p-6">
-                <h2 className="text-lg font-bold mb-1">🔐 Security</h2>
-                <div className="bg-yellow-900/30 border border-yellow-700 rounded-xl p-4 text-sm text-yellow-300">
-                  ⚠️ Store your admin password in Vercel as <code className="bg-gray-700 px-1 rounded">NEXT_PUBLIC_ADMIN_PASSWORD</code> — never hardcode it in your source code.
+                <h2 className="text-lg font-bold mb-3">🔐 Security</h2>
+                <div className="bg-green-900/30 border border-green-700 rounded-xl p-4 text-sm text-green-300">
+                  ✅ Admin password is loaded from <code className="bg-gray-700 px-1 rounded">NEXT_PUBLIC_ADMIN_PASSWORD</code> environment variable. Your password is secure and not hardcoded in the source code.
                 </div>
               </div>
 
@@ -844,6 +882,7 @@ ${article}
                   {[
                     { key: 'GEMINI_API_KEY', desc: 'AI article generation' },
                     { key: 'YOU_API_KEY', desc: 'Fallback AI + chatbot' },
+                    { key: 'GROQ_API_KEY', desc: 'Chatbot fallback' },
                     { key: 'UNSPLASH_ACCESS_KEY', desc: 'Article images' },
                     { key: 'PEXELS_API_KEY', desc: 'Article images fallback' },
                     { key: 'GITHUB_TOKEN', desc: 'Publishing articles' },
