@@ -12,7 +12,7 @@ export default function AskPage() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'ai',
-      text: 'Hello! I am VetAssist, the AI assistant for VetSphere. Ask me anything about your livestock, pets, or animal health and I will do my best to help you.',
+      text: 'Hello! I am VetAssist, the AI assistant for VetSphere. Ask me anything about animal health, livestock, pets, or any other question and I will do my best to help you.',
     },
   ]);
   const [loading, setLoading] = useState(false);
@@ -33,7 +33,6 @@ export default function AskPage() {
 
     const userMessage = query.trim();
     setQuery('');
-
     setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
     setLoading(true);
 
@@ -41,25 +40,18 @@ export default function AskPage() {
       const res = await fetch(
         `/api/search?query=${encodeURIComponent(userMessage)}`
       );
-
       const data = await res.json();
-
       setMessages(prev => [
         ...prev,
         {
           role: 'ai',
-          text:
-            data.answer ||
-            'Sorry, I could not find an answer. Please try again.',
+          text: data.answer || 'Sorry, I could not find an answer. Please try again.',
         },
       ]);
     } catch {
       setMessages(prev => [
         ...prev,
-        {
-          role: 'ai',
-          text: 'Something went wrong. Please try again.',
-        },
+        { role: 'ai', text: 'Something went wrong. Please try again.' },
       ]);
     } finally {
       setLoading(false);
@@ -83,7 +75,7 @@ export default function AskPage() {
           Ask <span className="text-green-400">VetAssist</span>
         </h1>
         <p className="text-gray-300 text-base max-w-xl mx-auto">
-          Get instant answers to your animal health questions — powered by AI, built for farmers and pet owners.
+          Get instant answers to your questions — powered by AI, built for farmers and pet owners.
         </p>
       </div>
 
@@ -111,16 +103,13 @@ export default function AskPage() {
           {messages.map((msg, i) => (
             <div
               key={i}
-              className={`flex ${
-                msg.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               {msg.role === 'ai' && (
                 <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold mr-2 shrink-0 mt-1">
                   VA
                 </div>
               )}
-
               <div
                 className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === 'user'
@@ -140,14 +129,13 @@ export default function AskPage() {
               </div>
               <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
                 <div className="flex gap-1 items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" />
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>
           )}
-
           <div ref={bottomRef} />
         </div>
 
@@ -157,10 +145,9 @@ export default function AskPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask any animal health question..."
+            placeholder="Ask any question..."
             className="flex-1 px-5 py-4 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
           />
-
           <button
             type="submit"
             disabled={loading || !query.trim()}
