@@ -1,4 +1,6 @@
 // src/app/api/academic-writer/route.ts
+// COMPLETE FILE - COPY AND PASTE
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export const maxDuration = 60;
@@ -50,13 +52,11 @@ const TABLE_FORMAT_RULE = `
 CRITICAL TABLE FORMAT RULE:
 When presenting numeric or comparative data, use a PROPERLY FORMED MARKDOWN PIPE TABLE.
 
-FORMAT EXAMPLE (copy this exact format):
+FORMAT EXAMPLE:
 | Variable | Category | Frequency | Percentage (%) |
 |----------|----------|-----------|----------------|
 | Gender | Male | 225 | 45.0 |
 | Gender | Female | 275 | 55.0 |
-| Age Group | 15-17 years | 200 | 40.0 |
-| Age Group | 18-24 years | 300 | 60.0 |
 
 RULES:
 - Each row must be on its own line
@@ -64,36 +64,27 @@ RULES:
 - Header row, then separator row (|---|---|---|), then data rows
 - Every row must have the same number of columns
 - No blank lines between rows
-- Percentages should add up sensibly
 
-NEVER use dashes or hyphens to simulate a table. Use proper pipe table format ONLY.
+NEVER use dashes or hyphens to simulate a table.
 `;
 
 const CITATION_RULES = `
 CRITICAL CITATION RULES:
-- CITATIONS ARE ALLOWED in: 1.1 Background to the Study, 1.2 Statement of the Problem,
-  1.5 Justification of the Study, 1.6 Scope of Study, 1.7 Operational Definitions,
-  2.1 Empirical Review, 2.2 Theoretical Framework, 3.0 Research Methodology (Creswell),
-  and 5.0 Discussion.
-- CITATIONS ARE NOT ALLOWED in: 1.0 Introduction, 1.3 Research Objectives,
-  1.4 Research Questions, 4.0 Presentation of Findings, 6.0 Conclusions, and 6.2 Recommendations.
+- CITATIONS ARE ALLOWED in: Background, Problem Statement, Significance, Scope, Operational Definitions, Literature Review, Theoretical Framework, Discussion
+- CITATIONS ARE NOT ALLOWED in: 1.0 Introduction, Research Objectives, Research Questions, Findings, Conclusions, Recommendations
 - Use APA 7th style: (Author, Year) or Author (Year).
 - DO NOT use numbered brackets like [1] or [[2]].
 `;
 
 const ABBREVIATION_RULE = `
 CRITICAL ABBREVIATION RULE:
-- ONLY include abbreviations that are ACTUALLY USED in the paper.
-- DO NOT include dozens of unnecessary abbreviations.
-- Keep the List of Abbreviations to 10-15 items MAXIMUM.
-- Only abbreviate terms that appear frequently (more than 3 times).
-- If you only use a term once or twice, write it out in full.
-- Examples of GOOD abbreviations: HIV, AIDS, WHO, UNZA, SPSS, SD
-- Examples of BAD (unnecessary) abbreviations: HC, WC, WHR, BFP, SBP, DBP, PR, RR, OS, ECG, EEG, PSG, ACT, etc.
+- ONLY include abbreviations that are ACTUALLY USED in the paper (3+ times)
+- Keep the List of Abbreviations to 10-15 items MAXIMUM
+- Format: | Abbreviation | Full Form |
 `;
 
 // ============================================================
-// INTERFACE DEFINITION - MUST BE BEFORE FUNCTIONS THAT USE IT
+// INTERFACE DEFINITION
 // ============================================================
 interface ChapterSpec {
   id: string;
@@ -104,7 +95,7 @@ interface ChapterSpec {
 }
 
 // ============================================================
-// RESEARCH PAPER SPECS - COMPLETE
+// RESEARCH PAPER SPECS - FLEXIBLE STRUCTURE
 // ============================================================
 function buildResearchSpecs(topic: string): ChapterSpec[] {
   return [
@@ -135,33 +126,35 @@ ${CITATION_RULES}
 
 CHAPTER ONE
 1.0 Introduction
-[Write 2-3 substantial paragraphs introducing the topic. NO citations here. Describe the importance of the topic, why it matters, and what the chapter covers.]
+[Write 2-3 substantial paragraphs. ABSOLUTELY NO CITATIONS HERE. Describe the importance of the topic, why it matters, and what the chapter covers.]
 
 1.1 Background to the Study
-[Write 4-6 substantial paragraphs. CITATIONS ARE ALLOWED HERE. Describe the global, regional, and national context of the issue. Support claims with citations like (Author, Year). Use multiple citations to support key points.]
+[Write 4-6 substantial paragraphs. CITATIONS ARE ALLOWED HERE. Describe the global, regional, and national context with supporting citations. USE HEADINGS THAT ARE RELEVANT TO THE SPECIFIC TOPIC - do not use generic headings.]
 
 1.2 Statement of the Problem
-[Write 2-3 substantial paragraphs. CITATIONS ARE ALLOWED HERE. Clearly state the research problem, the gap in knowledge, and why this study is needed. Support with evidence.]
+[Write 2-3 substantial paragraphs. CITATIONS ARE ALLOWED HERE. Clearly state the research problem with evidence.]
 
 1.3 Research Objectives
+[Write a short introductory sentence]
 1.3.1 General Objective
-[Write ONE clear overarching objective - 15-20 words - MUST NOT BE EMPTY]
+[ONE clear overarching objective - 15-25 words - MUST NOT BE EMPTY]
 1.3.2 Specific Objectives
-[Write 4-6 specific objectives, each numbered. Each must be a complete sentence. MUST NOT BE EMPTY]
+[3-5 specific objectives ONLY. Each numbered. MUST NOT BE EMPTY]
 
 1.4 Research Questions
-[Write 4-6 research questions corresponding to the objectives. Each must be a complete question.]
+[3-5 research questions corresponding to the objectives]
 
 1.5 Significance of the Study
-[Write 2-3 substantial paragraphs. CITATIONS ARE ALLOWED HERE. Explain who will benefit from this research and how.]
+[2-3 substantial paragraphs. CITATIONS ARE ALLOWED HERE.]
 
 1.6 Scope of Study
-[Write 1-2 substantial paragraphs. CITATIONS ARE ALLOWED HERE. Define the boundaries of the study.]
+[1-2 substantial paragraphs. CITATIONS ARE ALLOWED HERE.]
 
 1.7 Operational Definitions
-[Define 5-8 key terms specific to the study. CITATIONS ARE ALLOWED HERE. Each definition should be 1-2 sentences and cite a source if applicable.]
+[Define 5-8 key terms. CITATIONS ARE ALLOWED HERE.]
 
-CRITICAL: 1.3.1 General Objective and 1.3.2 Specific Objectives MUST have actual content. Do not leave them blank or as placeholders.`,
+CRITICAL: Make the Background section RELEVANT to the SPECIFIC topic. Use appropriate sub-headings that match the content.
+CRITICAL: 1.0 Introduction MUST NOT contain any (Author, Year) citations.`,
     },
     {
       id: 'chapter2',
@@ -174,17 +167,18 @@ ${CITATION_RULES}
 
 CHAPTER TWO
 2.0 Introduction
-[1-2 paragraphs introducing what the literature review covers. NO citations here.]
+[1-2 paragraphs - NO citations]
 
 2.1 Empirical Review
-[Write 5-8 substantial paragraphs with citations. THIS IS WHERE MOST CITATIONS BELONG. Organize by themes relevant to the research objectives. Compare and contrast different studies. Identify research gaps. Use APA 7th style throughout.]
+[Write 5-8 substantial paragraphs with citations. Organize by themes relevant to the SPECIFIC topic. Use appropriate sub-headings.]
 
 2.2 Theoretical Framework
-[Write 3-5 substantial paragraphs with citations. Explain 1-2 theories relevant to the study. State the theory, who developed it, what it explains, and how it applies to this study.]
+[3-5 substantial paragraphs with citations. Explain 1-2 theories relevant to the topic.]
 
 2.3 Conceptual Framework
-[Explain the relationship between variables in the study. Describe the conceptual model. Include a description of the framework diagram.]
+[Explain relationships between variables. NO citations here.]
 
+${TABLE_FORMAT_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -196,35 +190,17 @@ ${NO_META_COMMENTARY}`,
 
 CHAPTER THREE
 3.0 Introduction
-[1 paragraph introducing what the chapter covers. NO citations here.]
-
 3.1 Research Approach
-[Explain the research approach and why it is appropriate. Cite Creswell if relevant.]
-
 3.2 Research Design
-[Explain the research design. Cite Creswell (2014) or similar.]
-
 3.3 Study Location
-[Describe where the study was conducted.]
-
 3.4 Target Population
-[Define the target population.]
-
 3.5 Sampling Strategy and Sample Size
-[Explain the sampling method and sample size with justification.]
-
 3.6 Data Collection Techniques
-[Describe instruments and procedures. Cite sources if relevant.]
-
 3.7 Analysis of Data
-[Explain how data was analyzed.]
-
 3.8 Validity and Reliability
-[Explain measures taken to ensure validity and reliability.]
-
 3.9 Ethical Considerations
-[Describe ethical protocols followed.]
 
+${TABLE_FORMAT_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -238,19 +214,20 @@ ${TABLE_FORMAT_RULE}
 
 CHAPTER FOUR
 4.0 Introduction
-[1 paragraph introducing what the chapter covers. NO citations here.]
+[1 paragraph - NO citations]
 
 4.1 Descriptive and Demographic Results
-[Present demographic data with proper tables. Use the TABLE FORMAT specified above. Include percentages and frequencies.]
+[Present demographic data with PROPER MARKDOWN PIPE TABLES.]
 
 4.2 Key Thematic or Statistical Findings
-[Present the main findings organized by research objectives. Use proper tables where data is presented.]
+[Present findings with proper tables. NO citations.]
 
 4.3 Summary of Findings
-[Summarize the key findings in 2-3 paragraphs.]
+[2-3 paragraphs summarizing key findings. NO citations.]
 
-CRITICAL: All tables MUST be properly formatted markdown pipe tables. NEVER use dashes or hyphens to simulate tables.
-${NO_META_COMMENTARY}`,
+CRITICAL: ALL tables MUST be properly formatted markdown pipe tables.
+NEVER use dashes to simulate tables. Use | pipe format ONLY.
+NO citations in this chapter.`,
     },
     {
       id: 'chapter5',
@@ -259,21 +236,23 @@ ${NO_META_COMMENTARY}`,
       chapterNumber: '5',
       instructions: `Write a COMPLETE and DETAILED Chapter Five.
 
+${CITATION_RULES}
+
 CHAPTER FIVE
 5.0 Introduction
-[1 paragraph introducing what the chapter covers. NO citations here.]
+[1 paragraph - NO citations]
 
 5.1 Interpretation of Key Findings
-[Interpret the findings from Chapter Four. Use citations to support interpretations.]
+[Interpret findings. Use citations to support interpretations.]
 
 5.2 Comparison with Previous Studies
-[Compare findings with literature from Chapter Two. THIS SECTION MUST HAVE CITATIONS.]
+[Compare with literature from Chapter Two. MUST HAVE CITATIONS.]
 
 5.3 Implications for Practice and Policy
 [Discuss implications. Use citations where relevant.]
 
 5.4 Limitations of the Study
-[Discuss limitations. NO new citations here.]
+[Discuss limitations. NO new citations.]
 
 ${NO_META_COMMENTARY}`,
     },
@@ -284,17 +263,18 @@ ${NO_META_COMMENTARY}`,
       chapterNumber: '6',
       instructions: `Write a COMPLETE and DETAILED Chapter Six.
 
+${CITATION_RULES}
+
 CHAPTER SIX
 6.0 Introduction
-[1 paragraph introducing what the chapter covers. NO citations here.]
+[1 paragraph - NO citations]
 
 6.1 Conclusions
-[4-6 substantial paragraphs synthesizing the findings. NO new citations.]
+[4-6 substantial paragraphs. NO new citations.]
 
 6.2 Recommendations
-[3-5 substantial paragraphs with specific recommendations. NO citations.]
+[3-5 substantial paragraphs. NO citations.]
 
-${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -302,10 +282,10 @@ ${NO_META_COMMENTARY}`,
       title: 'REFERENCES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write ONLY the following:
+      instructions: `Write the following:
 
 REFERENCES
-Provide 25-35 complete APA 7th references. ONLY include sources cited in the paper.
+Provide 25-35 complete APA 7th references.
 
 APPENDICES
 APPENDIX A: DATA EXTRACTION TOOL
@@ -328,8 +308,8 @@ function buildProposalSpecs(topic: string): ChapterSpec[] {
       chapterNumber: '',
       instructions: `Write ONLY the following front-matter sections:
 
-TITLE PAGE (with research title, author name, student number, institution, supervisor, degree, date)
-TABLE OF CONTENTS (list all sections with page numbers as placeholders)
+TITLE PAGE
+TABLE OF CONTENTS
 LIST OF ABBREVIATIONS AND ACRONYMS
 
 ${ABBREVIATION_RULE}
@@ -340,60 +320,49 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER ONE: INTRODUCTION',
       chapterLabel: 'CHAPTER ONE',
       chapterNumber: '1',
-      instructions: `Write a COMPLETE and DETAILED Chapter One for a RESEARCH PROPOSAL.
+      instructions: `Write a COMPLETE Chapter One.
 
 ${CITATION_RULES}
 
 CHAPTER ONE
 1.0 Introduction
-[2-3 paragraphs - NO citations]
+[NO citations - describe only]
 
 1.1 Background to the Study
-[4-6 substantial paragraphs - CITATIONS ALLOWED. Describe the global, regional, and national context with supporting citations.]
+[CITATIONS ALLOWED - use relevant sub-headings for the specific topic]
 
 1.2 Statement of the Problem
-[2-3 paragraphs - CITATIONS ALLOWED. Clearly state the research problem with evidence.]
+[CITATIONS ALLOWED]
 
 1.3 Research Objectives
-[Write a short introductory sentence]
 1.3.1 General Objective
-[ONE clear overarching objective - MUST NOT BE EMPTY]
 1.3.2 Specific Objectives
-[3-5 specific objectives, each numbered - MUST NOT BE EMPTY]
+[3-5 objectives]
 
 1.4 Research Questions
-[3-5 research questions corresponding to the objectives]
 
 1.5 Justification of the Study
-[2-3 paragraphs - CITATIONS ALLOWED]
 
 1.6 Scope of Study
-[1-2 paragraphs - CITATIONS ALLOWED]
 
 1.7 Operational Definitions
-[5-8 terms with definitions - CITATIONS ALLOWED]
 
-CRITICAL: 1.3.1 and 1.3.2 MUST have actual content. Do not leave them empty.`,
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter2',
       title: 'CHAPTER TWO: LITERATURE REVIEW',
       chapterLabel: 'CHAPTER TWO',
       chapterNumber: '2',
-      instructions: `Write a COMPLETE and DETAILED Chapter Two.
+      instructions: `Write Chapter Two.
+
+${CITATION_RULES}
 
 CHAPTER TWO
 2.0 Introduction
-[1-2 paragraphs - NO citations]
-
 2.1 Empirical Review
-[5-8 substantial paragraphs WITH citations - THIS IS WHERE MOST LITERATURE GOES]
-
 2.2 Theoretical Framework
-[3-5 paragraphs WITH citations]
-
 2.3 Conceptual Framework
-[Explain variables and relationships]
 
 ${NO_META_COMMENTARY}`,
     },
@@ -402,7 +371,7 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
       chapterLabel: 'CHAPTER THREE',
       chapterNumber: '3',
-      instructions: `Write a COMPLETE and DETAILED Chapter Three.
+      instructions: `Write Chapter Three.
 
 CHAPTER THREE
 3.0 Introduction
@@ -423,14 +392,7 @@ ${NO_META_COMMENTARY}`,
       title: 'REFERENCES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write the following:
-
-REFERENCES
-Provide 25-35 complete APA 7th references. ONLY include sources cited in the paper.
-
-APPENDICES
-APPENDIX A: [Data Collection Instrument]
-APPENDIX B: [Interview Guide]
+      instructions: `Write REFERENCES and APPENDICES.
 
 ${NO_META_COMMENTARY}`,
     },
@@ -447,16 +409,7 @@ function buildAssignmentSpecs(topic: string): ChapterSpec[] {
       title: 'TITLE PAGE',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write a COMPLETE TITLE PAGE for an ASSIGNMENT.
-
-TITLE: Clear, descriptive title
-STUDENT NAME: [Student Name]
-STUDENT ID: [Student ID]
-COURSE NAME: [Course Name]
-COURSE CODE: [Course Code]
-INSTITUTION: [Institution Name]
-DATE: [Current Date]
-
+      instructions: `Write TITLE PAGE.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -464,14 +417,7 @@ ${NO_META_COMMENTARY}`,
       title: '1.0 INTRODUCTION',
       chapterLabel: '',
       chapterNumber: '1',
-      instructions: `Write an INTRODUCTION for an ASSIGNMENT.
-
-CONTENT:
-- Brief context (2-3 sentences)
-- Thesis statement
-- Roadmap
-
-LENGTH: 2-3 paragraphs
+      instructions: `Write INTRODUCTION.
 
 ${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
@@ -481,16 +427,9 @@ ${NO_META_COMMENTARY}`,
       title: '2.0 MAIN BODY',
       chapterLabel: '',
       chapterNumber: '2',
-      instructions: `Write the MAIN BODY for an ASSIGNMENT.
+      instructions: `Write MAIN BODY.
 
-CONTENT:
-- Organized by themes
-- Each paragraph has topic sentence + evidence + analysis
-- Use citations to support claims
-
-LENGTH: 6-10 paragraphs
-
-CITATIONS: Use APA 7th style throughout.
+Use APA 7th style citations.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -498,14 +437,7 @@ ${NO_META_COMMENTARY}`,
       title: '3.0 CONCLUSION',
       chapterLabel: '',
       chapterNumber: '3',
-      instructions: `Write a CONCLUSION for an ASSIGNMENT.
-
-CONTENT:
-- Synthesize argument
-- Answer the question
-- NO new information
-
-LENGTH: 2-3 paragraphs
+      instructions: `Write CONCLUSION.
 
 ${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
@@ -515,12 +447,7 @@ ${NO_META_COMMENTARY}`,
       title: '4.0 REFERENCES',
       chapterLabel: '',
       chapterNumber: '4',
-      instructions: `Write a REFERENCE LIST.
-
-REQUIREMENTS:
-- 12-20 APA 7th references
-- Only sources cited in Main Body
-
+      instructions: `Write REFERENCE LIST.
 ${NO_META_COMMENTARY}`,
     },
   ];
@@ -536,8 +463,7 @@ function buildCaseStudySpecs(topic: string): ChapterSpec[] {
       title: 'FRONT MATTER',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write front-matter sections only.
-
+      instructions: `Write front-matter sections.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -557,7 +483,7 @@ ${NO_META_COMMENTARY}`,
       chapterNumber: '2',
       instructions: `Write Chapter Two.
 
-CITATIONS: Use APA 7th style.
+Use APA 7th style citations.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -566,7 +492,6 @@ ${NO_META_COMMENTARY}`,
       chapterLabel: 'CHAPTER THREE',
       chapterNumber: '3',
       instructions: `Write Chapter Three.
-
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -575,7 +500,6 @@ ${NO_META_COMMENTARY}`,
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
       instructions: `Write REFERENCE LIST.
-
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -583,8 +507,7 @@ ${NO_META_COMMENTARY}`,
       title: 'APPENDICES',
       chapterLabel: 'APPENDICES',
       chapterNumber: '',
-      instructions: `Write APPENDICES section.
-
+      instructions: `Write APPENDICES.
 ${NO_META_COMMENTARY}`,
     },
   ];
@@ -601,7 +524,6 @@ function buildReportSpecs(topic: string): ChapterSpec[] {
       chapterLabel: '',
       chapterNumber: '',
       instructions: `Write TITLE PAGE.
-
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -640,7 +562,6 @@ ${NO_META_COMMENTARY}`,
       chapterLabel: '',
       chapterNumber: '3',
       instructions: `Write DISCUSSION.
-
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -649,7 +570,6 @@ ${NO_META_COMMENTARY}`,
       chapterLabel: '',
       chapterNumber: '4',
       instructions: `Write RECOMMENDATIONS.
-
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -668,7 +588,6 @@ ${NO_META_COMMENTARY}`,
       chapterLabel: '',
       chapterNumber: '6',
       instructions: `Write REFERENCE LIST.
-
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -677,14 +596,13 @@ ${NO_META_COMMENTARY}`,
       chapterLabel: '',
       chapterNumber: '',
       instructions: `Write APPENDICES.
-
 ${NO_META_COMMENTARY}`,
     },
   ];
 }
 
 // ============================================================
-// BUILD CHAPTER SPECS BASED ON TYPE
+// BUILD CHAPTER SPECS
 // ============================================================
 function buildChapterSpecs(topic: string, docType: string): ChapterSpec[] {
   switch (docType) {
@@ -1122,28 +1040,40 @@ This is a ${levelInfo.label} academic document.
       documentTypeInstruction = `
 THIS IS A RESEARCH PAPER (Full Dissertation).
 
+THE STRUCTURE SHOULD BE UNIQUE TO THE TOPIC - NOT A TEMPLATE.
+
+CRITICAL: DO NOT copy the exact same headings from other papers.
+- The BACKGROUND section should have sub-headings RELEVANT to the SPECIFIC topic
+- Example: For a medical topic: "1.1.1 Global Burden", "1.1.2 Regional Epidemiology", "1.1.3 National Context"
+- Example: For a social topic: "1.1.1 Socioeconomic Factors", "1.1.2 Cultural Influences", "1.1.3 Policy Environment"
+- Example: For an education topic: "1.1.1 Educational Context", "1.1.2 Student Demographics", "1.1.3 Learning Outcomes"
+
+EACH RESEARCH PAPER SHOULD BE DIFFERENT based on the topic.
+
 STRUCTURE:
-1. FRONT MATTER (Declaration, Dedication, Acknowledgements, Abstract, List of Abbreviations)
-2. CHAPTER ONE: INTRODUCTION (1.0-1.7)
-3. CHAPTER TWO: LITERATURE REVIEW (2.0-2.3)
-4. CHAPTER THREE: RESEARCH METHODOLOGY (3.0-3.9)
-5. CHAPTER FOUR: PRESENTATION OF FINDINGS (4.0-4.3 WITH PROPER TABLES)
-6. CHAPTER FIVE: DISCUSSION (5.0-5.4)
-7. CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS (6.0-6.2)
+1. FRONT MATTER
+2. CHAPTER ONE: INTRODUCTION (with topic-appropriate sub-headings)
+3. CHAPTER TWO: LITERATURE REVIEW
+4. CHAPTER THREE: RESEARCH METHODOLOGY
+5. CHAPTER FOUR: PRESENTATION OF FINDINGS
+6. CHAPTER FIVE: DISCUSSION
+7. CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS
 8. REFERENCES
 9. APPENDICES
 
 ${CITATION_RULES}
-${TABLE_FORMAT_RULE}`;
+${TABLE_FORMAT_RULE}
+
+CRITICAL: DO NOT MAKE EVERY PAPER THE SAME. The headings in 1.1 Background should be RELEVANT to the specific topic. DO NOT use "1.1.1 Global Context", "1.1.2 Regional Context", "1.1.3 National Context" for EVERY paper - those are just examples. Use headings that match the actual CONTENT of the topic.`;
     } else if (type === 'proposal') {
       documentTypeInstruction = `
 THIS IS A RESEARCH PROPOSAL.
 
 STRUCTURE:
-1. FRONT MATTER (Title Page, Table of Contents, List of Abbreviations)
-2. CHAPTER ONE: INTRODUCTION (1.0-1.7)
-3. CHAPTER TWO: LITERATURE REVIEW (2.0-2.3)
-4. CHAPTER THREE: RESEARCH METHODOLOGY (3.0-3.9)
+1. FRONT MATTER
+2. CHAPTER ONE: INTRODUCTION
+3. CHAPTER TWO: LITERATURE REVIEW
+4. CHAPTER THREE: RESEARCH METHODOLOGY
 5. REFERENCES
 6. APPENDICES
 
@@ -1198,8 +1128,21 @@ ${CITATION_RULES}`;
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 CRITICAL: This is CHAPTER ONE.
-- 1.3.1 General Objective MUST have content (ONE sentence, 15-20 words)
-- 1.3.2 Specific Objectives MUST have content (4-6 complete sentences)
+- DO NOT use the exact same headings as other papers.
+- The sub-headings in 1.1 Background should be RELEVANT to the SPECIFIC topic.
+- For example, if the topic is about HIV/TB coinfection, use headings like:
+  1.1.1 Global Burden of HIV/TB
+  1.1.2 Regional Epidemiology
+  1.1.3 The Zambian Context
+  1.1.4 Health System Challenges
+- If the topic is about social media and sleep, use headings like:
+  1.1.1 Social Media Use Among Adolescents
+  1.1.2 Sleep Patterns in High School Students
+  1.1.3 The Digital Age and Health
+- MAKE IT UNIQUE TO THE TOPIC.
+
+- 1.3.1 General Objective MUST have content (ONE sentence, 15-25 words)
+- 1.3.2 Specific Objectives MUST have content (3-5 complete sentences)
 - Do NOT leave these empty or as placeholders
 - CITATIONS ARE ALLOWED in 1.1, 1.2, 1.5, 1.6, 1.7
 - NO citations in 1.0, 1.3, 1.4`;
@@ -1208,19 +1151,14 @@ CRITICAL: This is CHAPTER ONE.
       if (chapter.id === 'chapter2') {
         chapterSpecificInstruction = `
 CRITICAL: This is CHAPTER TWO - LITERATURE REVIEW.
-Use APA 7th style citations throughout.`;
+Use APA 7th style citations throughout.
+Organize themes relevant to the SPECIFIC topic.`;
       }
 
       if (chapter.id === 'chapter4') {
         chapterSpecificInstruction = `
 CRITICAL: This is CHAPTER FOUR - PRESENTATION OF FINDINGS.
 - Use PROPER MARKDOWN PIPE TABLES for data presentation.
-- Format example:
-| Variable | Category | Frequency | Percentage (%) |
-|----------|----------|-----------|----------------|
-| Gender | Male | 225 | 45.0 |
-| Gender | Female | 275 | 55.0 |
-- Each row must have the same number of columns.
 - NO citations in this chapter.
 - DO NOT use dashes or hyphens to simulate tables.`;
       }
@@ -1257,7 +1195,10 @@ CRITICAL RULES:
 - Start with the section heading exactly as specified.
 - Write SUBSTANTIAL, DETAILED content.
 - Write out full content. Never use placeholders.
-- Never include conversational meta-commentary.`;
+- Never include conversational meta-commentary.
+- MAKE EACH PAPER UNIQUE - do not copy the same headings from other papers.
+- The headings in 1.1 Background should be RELEVANT to the SPECIFIC topic.
+- DO NOT use generic headings - use topic-appropriate headings.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 4000;
     const prioritizeGemini = chapter.id === 'references';
