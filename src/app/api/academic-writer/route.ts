@@ -43,8 +43,7 @@ const levelMap: Record<string, { label: string; pageCount: string; depth: string
 };
 
 const NO_META_COMMENTARY = `
-CRITICAL: NEVER include conversational meta-commentary, permission-asking, or narration.
-Output ONLY the requested document content itself.
+CRITICAL: NEVER include conversational meta-commentary. Output ONLY the requested document content.
 `;
 
 const CITATION_RULES = `
@@ -55,49 +54,75 @@ CRITICAL CITATION RULES:
 `;
 
 // ============================================================
-// SIMPLE ABBREVIATION RULE - ONLY 3-5 STANDARD ABBREVIATIONS
+// STRICT RULES - MUST FOLLOW EXACTLY
 // ============================================================
-const SIMPLE_ABBREVIATION_RULE = `
-SIMPLE ABBREVIATION RULE - FOLLOW THIS EXACTLY:
 
-1. ONLY include 3-5 standard abbreviations that are ACTUALLY used in the paper.
-2. Use this EXACT format for the abbreviations list:
-   | Abbreviation | Full Form |
-   |--------------|-----------|
-   | WHO | World Health Organization |
-   | UNZA | University of Zambia |
-   | SPSS | Statistical Package for the Social Sciences |
+const STRICT_ABBREVIATION_RULE = `
+⚠️ ABBREVIATION RULE - YOU MUST FOLLOW THIS EXACTLY ⚠️
 
-3. NEVER include these made-up abbreviations:
-   - SMDU (Social Media Daily Use) → just write "social media use"
-   - SQ (Sleep Quality) → just write "sleep quality"
-   - HSS (High School Students) → just write "high school students"
-   - SRS (Sleep-Related Symptoms) → just write "sleep-related symptoms"
-   - IQR, CB, BLD, SRS, SRS → NEVER use these
+1. ONLY include 2-3 abbreviations MAXIMUM.
+2. ONLY include abbreviations that are ACTUALLY used in the paper.
+3. If you are not sure, DO NOT include it.
 
-4. If a term appears only 1-2 times, write it out in full.
-5. The abbreviations list should be at the beginning ONLY. DO NOT repeat abbreviations anywhere else in the paper.
+GOOD abbreviations: WHO, SPSS
+BAD abbreviations: UNZA (unless the study is about UNZA), SMDU, SQ, SRS, IQR, CB, BLD
 
-CRITICAL: Most academic papers do not need abbreviations. Write terms in full.
+EXAMPLE of what the list should look like (if you even need abbreviations):
+| Abbreviation | Full Form |
+|--------------|-----------|
+| WHO | World Health Organization |
+| SPSS | Statistical Package for the Social Sciences |
+
+CRITICAL: Do NOT include UNZA unless your topic is specifically about the University of Zambia.
+Most papers do NOT need abbreviations. When in doubt, leave it out.
 `;
 
-// ============================================================
-// OBJECTIVE FILL RULE WITH EXAMPLES
-// ============================================================
-const OBJECTIVE_FILL_RULE = `
-CRITICAL OBJECTIVE RULE:
+const STRICT_OBJECTIVE_RULE = `
+⚠️ OBJECTIVE RULE - YOU MUST FOLLOW THIS EXACTLY ⚠️
 
+1. General Objective: ONE sentence ONLY (15-25 words).
+2. Specific Objectives: 3-4 objectives MAXIMUM.
+3. DO NOT write 5 objectives.
+4. DO NOT write more than 4 objectives.
+
+GOOD EXAMPLE:
 1.3.1 General Objective
-Write ONE complete sentence. Example:
-"To investigate the relationship between social media use and sleep quality among high school students."
+To investigate the relationship between social media use and sleep quality among high school students.
 
 1.3.2 Specific Objectives
-Write 3-5 complete sentences, each numbered. Example:
-"1. To examine the frequency of social media use among high school students."
-"2. To investigate the relationship between social media use and sleep quality."
-"3. To identify predictors of poor sleep quality."
+1. To examine the frequency and duration of social media use among high school students.
+2. To investigate the relationship between social media use and sleep quality.
+3. To identify the predictors of poor sleep quality among high school students.
 
-CRITICAL: DO NOT leave 1.3.1 or 1.3.2 empty.
+BAD EXAMPLE (DO NOT DO THIS):
+1.3.2 Specific Objectives
+1. To examine...
+2. To investigate...
+3. To identify...
+4. To explore...
+5. To examine... (TOO MANY - MAXIMUM 4)
+`;
+
+const STRICT_QUESTION_RULE = `
+⚠️ QUESTION RULE - YOU MUST FOLLOW THIS EXACTLY ⚠️
+
+1. Write 3-4 research questions MAXIMUM.
+2. Each question must correspond to a specific objective.
+3. DO NOT write 5 questions.
+
+GOOD EXAMPLE:
+1.4 Research Questions
+1. What is the relationship between social media use and sleep quality among high school students?
+2. What are the predictors of poor sleep quality among high school students?
+3. How does social media use impact sleep-related symptoms?
+
+BAD EXAMPLE (DO NOT DO THIS):
+1.4 Research Questions
+1. What is...
+2. Does...
+3. What are...
+4. How...
+5. What is... (TOO MANY - MAXIMUM 4)
 `;
 
 // ============================================================
@@ -129,17 +154,8 @@ ACKNOWLEDGEMENTS
 ABSTRACT (200-250 words with keywords)
 
 LIST OF ABBREVIATIONS AND ACRONYMS
-[Use this EXACT format - only 3-5 standard abbreviations]
-| Abbreviation | Full Form |
-|--------------|-----------|
-| WHO | World Health Organization |
-| UNZA | University of Zambia |
-| SPSS | Statistical Package for the Social Sciences |
+${STRICT_ABBREVIATION_RULE}
 
-DO NOT add more than 5 abbreviations. DO NOT invent abbreviations.
-DO NOT repeat abbreviations anywhere else in the paper.
-
-${SIMPLE_ABBREVIATION_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -150,7 +166,8 @@ ${NO_META_COMMENTARY}`,
       instructions: `Write a COMPLETE and DETAILED Chapter One.
 
 ${CITATION_RULES}
-${OBJECTIVE_FILL_RULE}
+${STRICT_OBJECTIVE_RULE}
+${STRICT_QUESTION_RULE}
 
 CHAPTER ONE
 1.0 Introduction
@@ -164,12 +181,12 @@ CHAPTER ONE
 
 1.3 Research Objectives
 1.3.1 General Objective
-[YOU MUST WRITE ONE COMPLETE SENTENCE - SEE OBJECTIVE FILL RULE ABOVE]
+[ONE sentence ONLY - 15-25 words]
 1.3.2 Specific Objectives
-[YOU MUST WRITE 3-5 COMPLETE SENTENCES - SEE OBJECTIVE FILL RULE ABOVE]
+[3-4 objectives MAXIMUM - each numbered]
 
 1.4 Research Questions
-[Write 3-5 questions]
+[3-4 questions MAXIMUM - each numbered]
 
 1.5 Significance of the Study
 [2-3 substantial paragraphs]
@@ -180,7 +197,7 @@ CHAPTER ONE
 1.7 Operational Definitions
 [Define 5-8 key terms]
 
-CRITICAL: 1.3.1 and 1.3.2 MUST have content.`,
+CRITICAL: You MUST have exactly 3-4 specific objectives and 3-4 research questions. NOT 5.`,
     },
     {
       id: 'chapter2',
@@ -196,15 +213,14 @@ CHAPTER TWO
 [1-2 paragraphs - NO citations]
 
 2.1 Empirical Review
-[Write 5-8 substantial paragraphs with citations.]
+[5-8 substantial paragraphs with citations.]
 
 2.2 Theoretical Framework
 [3-5 substantial paragraphs with citations.]
 
 2.3 Conceptual Framework
-[Explain relationships between variables. NO citations here.]
+[Explain relationships between variables. NO citations.]
 
-${SIMPLE_ABBREVIATION_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -333,7 +349,7 @@ TITLE PAGE
 TABLE OF CONTENTS
 LIST OF ABBREVIATIONS AND ACRONYMS
 
-${SIMPLE_ABBREVIATION_RULE}
+${STRICT_ABBREVIATION_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -344,7 +360,8 @@ ${NO_META_COMMENTARY}`,
       instructions: `Write a COMPLETE Chapter One.
 
 ${CITATION_RULES}
-${OBJECTIVE_FILL_RULE}
+${STRICT_OBJECTIVE_RULE}
+${STRICT_QUESTION_RULE}
 
 CHAPTER ONE
 1.0 Introduction
@@ -358,11 +375,12 @@ CHAPTER ONE
 
 1.3 Research Objectives
 1.3.1 General Objective
-[WRITE ONE COMPLETE SENTENCE]
+[ONE sentence ONLY]
 1.3.2 Specific Objectives
-[WRITE 3-5 COMPLETE SENTENCES]
+[3-4 objectives MAXIMUM]
 
 1.4 Research Questions
+[3-4 questions MAXIMUM]
 
 1.5 Justification of the Study
 
@@ -423,7 +441,7 @@ ${NO_META_COMMENTARY}`,
 }
 
 // ============================================================
-// ASSIGNMENT SPECS
+// ASSIGNMENT, CASE STUDY, REPORT SPECS
 // ============================================================
 function buildAssignmentSpecs(topic: string): ChapterSpec[] {
   return [
@@ -435,9 +453,6 @@ function buildAssignmentSpecs(topic: string): ChapterSpec[] {
   ];
 }
 
-// ============================================================
-// CASE STUDY SPECS
-// ============================================================
 function buildCaseStudySpecs(topic: string): ChapterSpec[] {
   return [
     { id: 'frontmatter', title: 'FRONT MATTER', chapterLabel: '', chapterNumber: '', instructions: `Write front-matter sections. ${NO_META_COMMENTARY}` },
@@ -449,9 +464,6 @@ function buildCaseStudySpecs(topic: string): ChapterSpec[] {
   ];
 }
 
-// ============================================================
-// REPORT SPECS
-// ============================================================
 function buildReportSpecs(topic: string): ChapterSpec[] {
   return [
     { id: 'title', title: 'TITLE PAGE', chapterLabel: '', chapterNumber: '', instructions: `Write TITLE PAGE. ${NO_META_COMMENTARY}` },
@@ -899,12 +911,13 @@ This is a ${levelInfo.label} academic document.
       documentTypeInstruction = `
 THIS IS A RESEARCH PAPER.
 
-${SIMPLE_ABBREVIATION_RULE}
-${OBJECTIVE_FILL_RULE}
+${STRICT_ABBREVIATION_RULE}
+${STRICT_OBJECTIVE_RULE}
+${STRICT_QUESTION_RULE}
 
 STRUCTURE:
 1. FRONT MATTER
-2. CHAPTER ONE: INTRODUCTION
+2. CHAPTER ONE: INTRODUCTION (with 3-4 objectives MAX and 3-4 questions MAX)
 3. CHAPTER TWO: LITERATURE REVIEW
 4. CHAPTER THREE: RESEARCH METHODOLOGY
 5. CHAPTER FOUR: PRESENTATION OF FINDINGS
@@ -918,8 +931,9 @@ ${CITATION_RULES}`;
       documentTypeInstruction = `
 THIS IS A RESEARCH PROPOSAL.
 
-${SIMPLE_ABBREVIATION_RULE}
-${OBJECTIVE_FILL_RULE}
+${STRICT_ABBREVIATION_RULE}
+${STRICT_OBJECTIVE_RULE}
+${STRICT_QUESTION_RULE}
 
 STRUCTURE:
 1. FRONT MATTER
@@ -979,9 +993,10 @@ ${CITATION_RULES}`;
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
 CRITICAL: CHAPTER ONE.
-- 1.3.1 General Objective: WRITE ONE COMPLETE SENTENCE (15-25 words). MUST NOT BE EMPTY.
-- 1.3.2 Specific Objectives: WRITE 3-5 COMPLETE SENTENCES. MUST NOT BE EMPTY.
-- DO NOT leave these blank.`;
+- Specific Objectives: MAXIMUM 4. NOT 5.
+- Research Questions: MAXIMUM 4. NOT 5.
+- General Objective: ONE sentence only.
+- DO NOT write more than 4 objectives or 4 questions.`;
       }
 
       if (chapter.id === 'chapter2') {
@@ -1016,17 +1031,19 @@ ${previousContext || 'This is the first section.'}
 TASK: ${chapter.instructions}
 ${chapterSpecificInstruction}
 
-${SIMPLE_ABBREVIATION_RULE}
-${OBJECTIVE_FILL_RULE}
+${STRICT_ABBREVIATION_RULE}
+${STRICT_OBJECTIVE_RULE}
+${STRICT_QUESTION_RULE}
 ${CITATION_RULES}
 
 CRITICAL RULES:
 - Write SUBSTANTIAL, DETAILED content.
-- NEVER use placeholders or leave sections empty.
-- 1.3.1 and 1.3.2 MUST have actual content.
-- ONLY use 3-5 standard abbreviations.
+- NEVER use placeholders.
+- Specific Objectives: 3-4 MAXIMUM.
+- Research Questions: 3-4 MAXIMUM.
+- Abbreviations: 2-3 MAXIMUM.
+- DO NOT include UNZA unless the topic is about UNZA.
 - DO NOT invent abbreviations like SMDU, SQ, SRS.
-- NEVER repeat the abbreviation list anywhere else in the paper.
 - NEVER include conversational meta-commentary.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 4000;
