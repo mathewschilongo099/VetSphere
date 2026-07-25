@@ -93,6 +93,17 @@ CRITICAL ABBREVIATION RULE:
 `;
 
 // ============================================================
+// INTERFACE DEFINITION - MUST BE BEFORE FUNCTIONS THAT USE IT
+// ============================================================
+interface ChapterSpec {
+  id: string;
+  title: string;
+  chapterLabel: string;
+  chapterNumber: string;
+  instructions: string;
+}
+
+// ============================================================
 // RESEARCH PAPER SPECS - COMPLETE
 // ============================================================
 function buildResearchSpecs(topic: string): ChapterSpec[] {
