@@ -55,41 +55,49 @@ CRITICAL CITATION RULES:
 `;
 
 // ============================================================
-// STRICT ABBREVIATION RULE
+// SIMPLE ABBREVIATION RULE - ONLY 3-5 STANDARD ABBREVIATIONS
 // ============================================================
-const STRICT_ABBREVIATION_RULE = `
-CRITICAL ABBREVIATION RULE - MUST FOLLOW STRICTLY:
+const SIMPLE_ABBREVIATION_RULE = `
+SIMPLE ABBREVIATION RULE - FOLLOW THIS EXACTLY:
 
-1. ONLY abbreviate terms that appear 3 or more times in the paper.
-2. ONLY use STANDARD abbreviations like: HIV, AIDS, WHO, UNZA, SPSS, SD, CI, OR
-3. DO NOT invent abbreviations like: SMDU, SQ, SRS, IQR, CB, BLD, HSS, SRS, etc.
+1. ONLY include 3-5 standard abbreviations that are ACTUALLY used in the paper.
+2. Use this EXACT format for the abbreviations list:
+   | Abbreviation | Full Form |
+   |--------------|-----------|
+   | WHO | World Health Organization |
+   | UNZA | University of Zambia |
+   | SPSS | Statistical Package for the Social Sciences |
+
+3. NEVER include these made-up abbreviations:
+   - SMDU (Social Media Daily Use) → just write "social media use"
+   - SQ (Sleep Quality) → just write "sleep quality"
+   - HSS (High School Students) → just write "high school students"
+   - SRS (Sleep-Related Symptoms) → just write "sleep-related symptoms"
+   - IQR, CB, BLD, SRS, SRS → NEVER use these
+
 4. If a term appears only 1-2 times, write it out in full.
-5. The List of Abbreviations should have 3-5 items MAXIMUM.
+5. The abbreviations list should be at the beginning ONLY. DO NOT repeat abbreviations anywhere else in the paper.
 
-GOOD examples: HIV, AIDS, WHO, UNZA, SPSS, SD
-BAD examples: SMDU (Social Media Daily Use), SQ (Sleep Quality), SRS (Sleep-Related Symptoms)
-
-CRITICAL: When you write the paper, avoid creating new abbreviations. Just write terms in full.
+CRITICAL: Most academic papers do not need abbreviations. Write terms in full.
 `;
 
 // ============================================================
-// OBJECTIVE FILL RULE - STRICT ENFORCEMENT
+// OBJECTIVE FILL RULE WITH EXAMPLES
 // ============================================================
 const OBJECTIVE_FILL_RULE = `
-CRITICAL OBJECTIVE RULE - MUST FOLLOW STRICTLY:
+CRITICAL OBJECTIVE RULE:
 
 1.3.1 General Objective
-- MUST contain ONE complete sentence (15-25 words)
-- Example: "To investigate the relationship between social media use and sleep quality among high school students."
-- DO NOT leave this blank. DO NOT write "To be determined" or "N/A".
+Write ONE complete sentence. Example:
+"To investigate the relationship between social media use and sleep quality among high school students."
 
 1.3.2 Specific Objectives
-- MUST contain 3-5 complete sentences, each numbered
-- Each objective must be specific, measurable, and actionable
-- Example: "1. To examine the frequency and duration of social media use among high school students."
-- DO NOT leave this blank. DO NOT write "To be determined" or "N/A".
+Write 3-5 complete sentences, each numbered. Example:
+"1. To examine the frequency of social media use among high school students."
+"2. To investigate the relationship between social media use and sleep quality."
+"3. To identify predictors of poor sleep quality."
 
-CRITICAL: If you leave 1.3.1 or 1.3.2 empty, the paper will be invalid. ALWAYS fill them with meaningful content.
+CRITICAL: DO NOT leave 1.3.1 or 1.3.2 empty.
 `;
 
 // ============================================================
@@ -119,9 +127,19 @@ DECLARATION
 DEDICATION
 ACKNOWLEDGEMENTS
 ABSTRACT (200-250 words with keywords)
-LIST OF ABBREVIATIONS AND ACRONYMS
 
-${STRICT_ABBREVIATION_RULE}
+LIST OF ABBREVIATIONS AND ACRONYMS
+[Use this EXACT format - only 3-5 standard abbreviations]
+| Abbreviation | Full Form |
+|--------------|-----------|
+| WHO | World Health Organization |
+| UNZA | University of Zambia |
+| SPSS | Statistical Package for the Social Sciences |
+
+DO NOT add more than 5 abbreviations. DO NOT invent abbreviations.
+DO NOT repeat abbreviations anywhere else in the paper.
+
+${SIMPLE_ABBREVIATION_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -139,31 +157,30 @@ CHAPTER ONE
 [Write 2-3 substantial paragraphs. ABSOLUTELY NO CITATIONS HERE.]
 
 1.1 Background to the Study
-[Write 4-6 substantial paragraphs. CITATIONS ARE ALLOWED HERE. Use topic-appropriate headings.]
+[Write 4-6 substantial paragraphs. CITATIONS ARE ALLOWED HERE.]
 
 1.2 Statement of the Problem
 [Write 2-3 substantial paragraphs. CITATIONS ARE ALLOWED HERE.]
 
 1.3 Research Objectives
-[Write a short introductory sentence]
 1.3.1 General Objective
-[WRITE ONE COMPLETE SENTENCE HERE - 15-25 WORDS - MUST NOT BE EMPTY]
+[YOU MUST WRITE ONE COMPLETE SENTENCE - SEE OBJECTIVE FILL RULE ABOVE]
 1.3.2 Specific Objectives
-[WRITE 3-5 COMPLETE SENTENCES HERE - EACH NUMBERED - MUST NOT BE EMPTY]
+[YOU MUST WRITE 3-5 COMPLETE SENTENCES - SEE OBJECTIVE FILL RULE ABOVE]
 
 1.4 Research Questions
-[Write 3-5 questions corresponding to the objectives]
+[Write 3-5 questions]
 
 1.5 Significance of the Study
-[2-3 substantial paragraphs. CITATIONS ARE ALLOWED.]
+[2-3 substantial paragraphs]
 
 1.6 Scope of Study
-[1-2 substantial paragraphs. CITATIONS ARE ALLOWED.]
+[1-2 substantial paragraphs]
 
 1.7 Operational Definitions
-[Define 5-8 key terms. CITATIONS ARE ALLOWED.]
+[Define 5-8 key terms]
 
-CRITICAL: 1.3.1 and 1.3.2 MUST have content. Do NOT leave them blank.`,
+CRITICAL: 1.3.1 and 1.3.2 MUST have content.`,
     },
     {
       id: 'chapter2',
@@ -179,7 +196,7 @@ CHAPTER TWO
 [1-2 paragraphs - NO citations]
 
 2.1 Empirical Review
-[Write 5-8 substantial paragraphs with citations. Organize by themes relevant to the SPECIFIC topic.]
+[Write 5-8 substantial paragraphs with citations.]
 
 2.2 Theoretical Framework
 [3-5 substantial paragraphs with citations.]
@@ -187,7 +204,7 @@ CHAPTER TWO
 2.3 Conceptual Framework
 [Explain relationships between variables. NO citations here.]
 
-${STRICT_ABBREVIATION_RULE}
+${SIMPLE_ABBREVIATION_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -223,13 +240,13 @@ CHAPTER FOUR
 [1 paragraph - NO citations]
 
 4.1 Descriptive and Demographic Results
-[Present demographic data in text format. Use natural language.]
+[Present demographic data in text format.]
 
 4.2 Key Thematic or Statistical Findings
-[Present findings organized by research objectives. NO citations.]
+[Present findings. NO citations.]
 
 4.3 Summary of Findings
-[2-3 paragraphs summarizing key findings. NO citations.]
+[2-3 paragraphs. NO citations.]
 
 ${NO_META_COMMENTARY}`,
     },
@@ -316,7 +333,7 @@ TITLE PAGE
 TABLE OF CONTENTS
 LIST OF ABBREVIATIONS AND ACRONYMS
 
-${STRICT_ABBREVIATION_RULE}
+${SIMPLE_ABBREVIATION_RULE}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -341,9 +358,9 @@ CHAPTER ONE
 
 1.3 Research Objectives
 1.3.1 General Objective
-[WRITE ONE COMPLETE SENTENCE - 15-25 WORDS - MUST NOT BE EMPTY]
+[WRITE ONE COMPLETE SENTENCE]
 1.3.2 Specific Objectives
-[WRITE 3-5 COMPLETE SENTENCES - EACH NUMBERED - MUST NOT BE EMPTY]
+[WRITE 3-5 COMPLETE SENTENCES]
 
 1.4 Research Questions
 
@@ -410,52 +427,11 @@ ${NO_META_COMMENTARY}`,
 // ============================================================
 function buildAssignmentSpecs(topic: string): ChapterSpec[] {
   return [
-    {
-      id: 'title',
-      title: 'TITLE PAGE',
-      chapterLabel: '',
-      chapterNumber: '',
-      instructions: `Write TITLE PAGE.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'introduction',
-      title: '1.0 INTRODUCTION',
-      chapterLabel: '',
-      chapterNumber: '1',
-      instructions: `Write INTRODUCTION.
-
-${CITATION_RULES}
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'body',
-      title: '2.0 MAIN BODY',
-      chapterLabel: '',
-      chapterNumber: '2',
-      instructions: `Write MAIN BODY.
-
-Use APA 7th style citations.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'conclusion',
-      title: '3.0 CONCLUSION',
-      chapterLabel: '',
-      chapterNumber: '3',
-      instructions: `Write CONCLUSION.
-
-${CITATION_RULES}
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'references',
-      title: '4.0 REFERENCES',
-      chapterLabel: '',
-      chapterNumber: '4',
-      instructions: `Write REFERENCE LIST.
-${NO_META_COMMENTARY}`,
-    },
+    { id: 'title', title: 'TITLE PAGE', chapterLabel: '', chapterNumber: '', instructions: `Write TITLE PAGE. ${NO_META_COMMENTARY}` },
+    { id: 'introduction', title: '1.0 INTRODUCTION', chapterLabel: '', chapterNumber: '1', instructions: `Write INTRODUCTION. ${CITATION_RULES} ${NO_META_COMMENTARY}` },
+    { id: 'body', title: '2.0 MAIN BODY', chapterLabel: '', chapterNumber: '2', instructions: `Write MAIN BODY. Use APA 7th style citations. ${NO_META_COMMENTARY}` },
+    { id: 'conclusion', title: '3.0 CONCLUSION', chapterLabel: '', chapterNumber: '3', instructions: `Write CONCLUSION. ${CITATION_RULES} ${NO_META_COMMENTARY}` },
+    { id: 'references', title: '4.0 REFERENCES', chapterLabel: '', chapterNumber: '4', instructions: `Write REFERENCE LIST. ${NO_META_COMMENTARY}` },
   ];
 }
 
@@ -464,58 +440,12 @@ ${NO_META_COMMENTARY}`,
 // ============================================================
 function buildCaseStudySpecs(topic: string): ChapterSpec[] {
   return [
-    {
-      id: 'frontmatter',
-      title: 'FRONT MATTER',
-      chapterLabel: '',
-      chapterNumber: '',
-      instructions: `Write front-matter sections.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'chapter1',
-      title: 'CHAPTER ONE: INTRODUCTION',
-      chapterLabel: 'CHAPTER ONE',
-      chapterNumber: '1',
-      instructions: `Write Chapter One.
-
-${CITATION_RULES}
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'chapter2',
-      title: 'CHAPTER TWO: LITERATURE REVIEW',
-      chapterLabel: 'CHAPTER TWO',
-      chapterNumber: '2',
-      instructions: `Write Chapter Two.
-
-Use APA 7th style citations.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'chapter3',
-      title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
-      chapterLabel: 'CHAPTER THREE',
-      chapterNumber: '3',
-      instructions: `Write Chapter Three.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'references',
-      title: 'REFERENCES',
-      chapterLabel: 'REFERENCES',
-      chapterNumber: '',
-      instructions: `Write REFERENCE LIST.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'appendices',
-      title: 'APPENDICES',
-      chapterLabel: 'APPENDICES',
-      chapterNumber: '',
-      instructions: `Write APPENDICES.
-${NO_META_COMMENTARY}`,
-    },
+    { id: 'frontmatter', title: 'FRONT MATTER', chapterLabel: '', chapterNumber: '', instructions: `Write front-matter sections. ${NO_META_COMMENTARY}` },
+    { id: 'chapter1', title: 'CHAPTER ONE: INTRODUCTION', chapterLabel: 'CHAPTER ONE', chapterNumber: '1', instructions: `Write Chapter One. ${CITATION_RULES} ${NO_META_COMMENTARY}` },
+    { id: 'chapter2', title: 'CHAPTER TWO: LITERATURE REVIEW', chapterLabel: 'CHAPTER TWO', chapterNumber: '2', instructions: `Write Chapter Two. Use APA 7th style citations. ${NO_META_COMMENTARY}` },
+    { id: 'chapter3', title: 'CHAPTER THREE: RESEARCH METHODOLOGY', chapterLabel: 'CHAPTER THREE', chapterNumber: '3', instructions: `Write Chapter Three. ${NO_META_COMMENTARY}` },
+    { id: 'references', title: 'REFERENCES', chapterLabel: 'REFERENCES', chapterNumber: '', instructions: `Write REFERENCE LIST. ${NO_META_COMMENTARY}` },
+    { id: 'appendices', title: 'APPENDICES', chapterLabel: 'APPENDICES', chapterNumber: '', instructions: `Write APPENDICES. ${NO_META_COMMENTARY}` },
   ];
 }
 
@@ -524,84 +454,15 @@ ${NO_META_COMMENTARY}`,
 // ============================================================
 function buildReportSpecs(topic: string): ChapterSpec[] {
   return [
-    {
-      id: 'title',
-      title: 'TITLE PAGE',
-      chapterLabel: '',
-      chapterNumber: '',
-      instructions: `Write TITLE PAGE.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'executive',
-      title: 'EXECUTIVE SUMMARY',
-      chapterLabel: '',
-      chapterNumber: '',
-      instructions: `Write EXECUTIVE SUMMARY.
-
-${CITATION_RULES}
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'introduction',
-      title: '1.0 INTRODUCTION',
-      chapterLabel: '',
-      chapterNumber: '1',
-      instructions: `Write INTRODUCTION.
-
-${CITATION_RULES}
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'findings',
-      title: '2.0 FINDINGS / RESULTS',
-      chapterLabel: '',
-      chapterNumber: '2',
-      instructions: `Write FINDINGS/RESULTS.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'discussion',
-      title: '3.0 DISCUSSION',
-      chapterLabel: '',
-      chapterNumber: '3',
-      instructions: `Write DISCUSSION.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'recommendations',
-      title: '4.0 RECOMMENDATIONS',
-      chapterLabel: '',
-      chapterNumber: '4',
-      instructions: `Write RECOMMENDATIONS.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'conclusion',
-      title: '5.0 CONCLUSION',
-      chapterLabel: '',
-      chapterNumber: '5',
-      instructions: `Write CONCLUSION.
-
-${CITATION_RULES}
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'references',
-      title: '6.0 REFERENCES',
-      chapterLabel: '',
-      chapterNumber: '6',
-      instructions: `Write REFERENCE LIST.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'appendices',
-      title: 'APPENDICES',
-      chapterLabel: '',
-      chapterNumber: '',
-      instructions: `Write APPENDICES.
-${NO_META_COMMENTARY}`,
-    },
+    { id: 'title', title: 'TITLE PAGE', chapterLabel: '', chapterNumber: '', instructions: `Write TITLE PAGE. ${NO_META_COMMENTARY}` },
+    { id: 'executive', title: 'EXECUTIVE SUMMARY', chapterLabel: '', chapterNumber: '', instructions: `Write EXECUTIVE SUMMARY. ${CITATION_RULES} ${NO_META_COMMENTARY}` },
+    { id: 'introduction', title: '1.0 INTRODUCTION', chapterLabel: '', chapterNumber: '1', instructions: `Write INTRODUCTION. ${CITATION_RULES} ${NO_META_COMMENTARY}` },
+    { id: 'findings', title: '2.0 FINDINGS / RESULTS', chapterLabel: '', chapterNumber: '2', instructions: `Write FINDINGS/RESULTS. ${NO_META_COMMENTARY}` },
+    { id: 'discussion', title: '3.0 DISCUSSION', chapterLabel: '', chapterNumber: '3', instructions: `Write DISCUSSION. ${NO_META_COMMENTARY}` },
+    { id: 'recommendations', title: '4.0 RECOMMENDATIONS', chapterLabel: '', chapterNumber: '4', instructions: `Write RECOMMENDATIONS. ${NO_META_COMMENTARY}` },
+    { id: 'conclusion', title: '5.0 CONCLUSION', chapterLabel: '', chapterNumber: '5', instructions: `Write CONCLUSION. ${CITATION_RULES} ${NO_META_COMMENTARY}` },
+    { id: 'references', title: '6.0 REFERENCES', chapterLabel: '', chapterNumber: '6', instructions: `Write REFERENCE LIST. ${NO_META_COMMENTARY}` },
+    { id: 'appendices', title: 'APPENDICES', chapterLabel: '', chapterNumber: '', instructions: `Write APPENDICES. ${NO_META_COMMENTARY}` },
   ];
 }
 
@@ -610,17 +471,12 @@ ${NO_META_COMMENTARY}`,
 // ============================================================
 function buildChapterSpecs(topic: string, docType: string): ChapterSpec[] {
   switch (docType) {
-    case 'essay':
-      return buildAssignmentSpecs(topic);
-    case 'report':
-      return buildReportSpecs(topic);
-    case 'case-study':
-      return buildCaseStudySpecs(topic);
-    case 'proposal':
-      return buildProposalSpecs(topic);
+    case 'essay': return buildAssignmentSpecs(topic);
+    case 'report': return buildReportSpecs(topic);
+    case 'case-study': return buildCaseStudySpecs(topic);
+    case 'proposal': return buildProposalSpecs(topic);
     case 'research':
-    default:
-      return buildResearchSpecs(topic);
+    default: return buildResearchSpecs(topic);
   }
 }
 
@@ -1043,7 +899,7 @@ This is a ${levelInfo.label} academic document.
       documentTypeInstruction = `
 THIS IS A RESEARCH PAPER.
 
-${STRICT_ABBREVIATION_RULE}
+${SIMPLE_ABBREVIATION_RULE}
 ${OBJECTIVE_FILL_RULE}
 
 STRUCTURE:
@@ -1062,7 +918,7 @@ ${CITATION_RULES}`;
       documentTypeInstruction = `
 THIS IS A RESEARCH PROPOSAL.
 
-${STRICT_ABBREVIATION_RULE}
+${SIMPLE_ABBREVIATION_RULE}
 ${OBJECTIVE_FILL_RULE}
 
 STRUCTURE:
@@ -1125,7 +981,7 @@ ${CITATION_RULES}`;
 CRITICAL: CHAPTER ONE.
 - 1.3.1 General Objective: WRITE ONE COMPLETE SENTENCE (15-25 words). MUST NOT BE EMPTY.
 - 1.3.2 Specific Objectives: WRITE 3-5 COMPLETE SENTENCES. MUST NOT BE EMPTY.
-- DO NOT leave these blank. If you leave them blank, the paper is incomplete.`;
+- DO NOT leave these blank.`;
       }
 
       if (chapter.id === 'chapter2') {
@@ -1160,7 +1016,7 @@ ${previousContext || 'This is the first section.'}
 TASK: ${chapter.instructions}
 ${chapterSpecificInstruction}
 
-${STRICT_ABBREVIATION_RULE}
+${SIMPLE_ABBREVIATION_RULE}
 ${OBJECTIVE_FILL_RULE}
 ${CITATION_RULES}
 
@@ -1168,7 +1024,9 @@ CRITICAL RULES:
 - Write SUBSTANTIAL, DETAILED content.
 - NEVER use placeholders or leave sections empty.
 - 1.3.1 and 1.3.2 MUST have actual content.
-- DO NOT invent unnecessary abbreviations.
+- ONLY use 3-5 standard abbreviations.
+- DO NOT invent abbreviations like SMDU, SQ, SRS.
+- NEVER repeat the abbreviation list anywhere else in the paper.
 - NEVER include conversational meta-commentary.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 4000;
