@@ -42,26 +42,24 @@ const levelMap: Record<string, { label: string; pageCount: string; depth: string
   },
 };
 
-// Shared rules injected into every chapter's front-matter / continuation instructions
-// to stop the model from asking permission to continue or narrating its own process.
 const NO_META_COMMENTARY = `
-CRITICAL: NEVER include conversational meta-commentary, permission-asking, or narration
-about what you are about to do (e.g. "Please let me know when to proceed", "Now I will
-write the next chapter", "I will stop here"). Output ONLY the requested document content
-itself - nothing else. Do not address the reader about the writing process.`;
+CRITICAL: NEVER include conversational meta-commentary, permission-asking, or narration.
+Output ONLY the requested document content itself.`;
 
-// Shared table-formatting rule, used wherever a chapter may need to present numeric data.
 const TABLE_FORMAT_RULE = `
 TABLE FORMAT: Plain text only, EXCEPT when presenting numeric or comparative data, where a
-properly formed markdown pipe table is allowed:
-- Header row, then a separator row of dashes (|---|---|), then data rows
-- Each row on its own single line, no blank lines between rows
-- Every row must have the same number of columns as the header
-Example:
-| District | Coverage (%) |
-|----------|--------------|
-| Lusaka Central | 32 |
-| Lusaka East | 41 |`;
+properly formed markdown pipe table is allowed.`;
+
+const CITATION_RULES = `
+CRITICAL CITATION RULES (MUST FOLLOW STRICTLY):
+- ABSOLUTELY NO CITATIONS in: Introduction, Background to the Study, Statement of the Problem,
+  Justification/Significance, Scope of Study, Operational Definitions, Conclusion, or any
+  section in Chapter One.
+- CITATIONS ARE ONLY ALLOWED in: Literature Review (Chapter Two), Empirical Review,
+  Theoretical Framework, and Discussion sections.
+- DO NOT use (Author, Year) format in Chapter One at all.
+- References should ONLY appear in Chapter Two and the final Reference List.
+- The Reference List at the end should ONLY contain sources cited in Chapter Two.`;
 
 interface ChapterSpec {
   id: string;
@@ -72,7 +70,7 @@ interface ChapterSpec {
 }
 
 // ============================================================
-// ASSIGNMENT SPECS - CORRECT STRUCTURE
+// ASSIGNMENT SPECS
 // ============================================================
 function buildAssignmentSpecs(topic: string): ChapterSpec[] {
   return [
@@ -81,7 +79,7 @@ function buildAssignmentSpecs(topic: string): ChapterSpec[] {
       title: 'TITLE PAGE',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write a COMPLETE TITLE PAGE for an ASSIGNMENT:
+      instructions: `Write a COMPLETE TITLE PAGE for an ASSIGNMENT.
 
 TITLE: Create a clear, descriptive title based on the topic
 STUDENT NAME: [Student Name]
@@ -91,7 +89,7 @@ COURSE CODE: [Course Code]
 INSTITUTION: [Institution Name]
 DATE: [Current Date]
 
-CRITICAL: Use plain text only. No markdown. NO references here.
+CRITICAL: NO references anywhere on this page.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -99,18 +97,17 @@ ${NO_META_COMMENTARY}`,
       title: '1.0 INTRODUCTION',
       chapterLabel: '',
       chapterNumber: '1',
-      instructions: `Write a CONCISE INTRODUCTION (approximately 10% of total length) for this ASSIGNMENT.
+      instructions: `Write a CONCISE INTRODUCTION for this ASSIGNMENT.
 
 CONTENT REQUIREMENTS:
 - Brief context and background (1-2 sentences)
-- Clear thesis statement or purpose (the argument you will make)
-- Brief roadmap of what follows (1 sentence)
-- NO detailed citations here - just set up the argument
+- Clear thesis statement or purpose
+- Brief roadmap of what follows
 
-LENGTH: 2-3 paragraphs (maximum 300-400 words)
+LENGTH: 2-3 paragraphs (300-400 words)
 FORMAT: Plain text only. No markdown.
 
-CRITICAL: This is an ARGUMENT-DRIVEN assignment. Keep it focused and concise. DO NOT include references in the introduction - references go at the end.
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -118,32 +115,18 @@ ${NO_META_COMMENTARY}`,
       title: '2.0 MAIN BODY',
       chapterLabel: '',
       chapterNumber: '2',
-      instructions: `Write a COMPREHENSIVE MAIN BODY (70-75% of total length) for this ASSIGNMENT.
+      instructions: `Write a COMPREHENSIVE MAIN BODY for this ASSIGNMENT.
 
 CONTENT REQUIREMENTS:
-- Organized by themes or sub-questions, NOT chronologically
-- Each paragraph = ONE idea
-- Topic sentence FIRST stating a claim (not just a subject)
+- Organized by themes or sub-questions
+- Each paragraph = ONE idea with a topic sentence
 - Evidence/citation to support each claim
 - Analysis explaining the significance
-- Link to next point
-- Balance breadth vs depth - cover 3-5 points well
 
-STRUCTURE:
-2.1 [Theme/Sub-topic 1] - 3-4 paragraphs
-2.2 [Theme/Sub-topic 2] - 3-4 paragraphs
-2.3 [Theme/Sub-topic 3] - 3-4 paragraphs
+LENGTH: 6-10 substantial paragraphs (1000-1500 words)
+CITATIONS: Use APA 7th style throughout this section ONLY.
 
-LENGTH: 6-10 substantial paragraphs (minimum 1000-1500 words)
-FORMAT: Plain text only. No markdown.
-CITATIONS: Use APA 7th style throughout.
-
-CRITICAL RULES:
-- Topic sentences must state a claim, not just a subject
-- Always link facts back to the question
-- References appear ONLY at the end - NOT in the introduction
-- Do NOT include a concluding or summary subsection (e.g. "2.6 Conclusion") within the Main Body.
-  The document's Conclusion is a separate chapter that comes after this one - do not duplicate it here.
+CRITICAL: This is the ONLY section where citations should appear.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -151,18 +134,16 @@ ${NO_META_COMMENTARY}`,
       title: '3.0 CONCLUSION',
       chapterLabel: '',
       chapterNumber: '3',
-      instructions: `Write a CONCISE CONCLUSION (10-15% of total length) for this ASSIGNMENT.
+      instructions: `Write a CONCISE CONCLUSION for this ASSIGNMENT.
 
 CONTENT REQUIREMENTS:
-- Synthesize the argument made in the body
-- Answer the question posed in the introduction
+- Synthesize the argument
+- Answer the question posed
 - NO new information
-- No new citations
 
-LENGTH: 2-3 paragraphs (maximum 200-300 words)
-FORMAT: Plain text only. No markdown.
+LENGTH: 2-3 paragraphs (200-300 words)
 
-CRITICAL: Do NOT introduce new ideas, evidence, or citations in the conclusion.
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -170,25 +151,21 @@ ${NO_META_COMMENTARY}`,
       title: '4.0 REFERENCES',
       chapterLabel: '',
       chapterNumber: '4',
-      instructions: `Write a COMPLETE REFERENCE LIST for this ASSIGNMENT.
+      instructions: `Write a COMPLETE REFERENCE LIST.
 
 REQUIREMENTS:
-- 12-20 credible references in APA 7th edition format
-- Alphabetical order by author surname
-- Mix of books, journal articles, and credible sources
-- NO website URLs - use proper APA format
-- All references must be cited in the text above
+- 12-20 APA 7th references
+- Alphabetical order
+- NO website URLs
+- Only include sources cited in the Main Body
 
-FORMAT: APA 7th edition
-
-CRITICAL: Write out every reference in full. DO NOT include website URLs. Use proper APA format.
 ${NO_META_COMMENTARY}`,
     },
   ];
 }
 
 // ============================================================
-// CASE STUDY SPECS - WITH CHAPTERS AS HEADINGS
+// CASE STUDY SPECS
 // ============================================================
 function buildCaseStudySpecs(topic: string): ChapterSpec[] {
   return [
@@ -199,135 +176,84 @@ function buildCaseStudySpecs(topic: string): ChapterSpec[] {
       chapterNumber: '',
       instructions: `Write ONLY the following front-matter sections:
 
-TITLE PAGE: Case Study title, author name, student ID, course, institution, date
-TABLE OF CONTENTS: List ONLY the chapter labels and section titles in order:
-  CHAPTER ONE: INTRODUCTION
-  CHAPTER TWO: CASE PRESENTATION
-  CHAPTER THREE: DISCUSSION AND ANALYSIS
-  CHAPTER FOUR: MANAGEMENT AND OUTCOME
-  CHAPTER FIVE: CONCLUSION
-  REFERENCES
-  APPENDICES
-Do NOT include page numbers.
-LIST OF ABBREVIATIONS: Any abbreviations used
+TITLE PAGE
+TABLE OF CONTENTS
+LIST OF ABBREVIATIONS AND ACRONYMS
 
-Do NOT write any chapter content yet. Stop after the front matter.
-${NO_META_COMMENTARY}
-
-CRITICAL: Use plain text only. No markdown.`,
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter1',
       title: 'CHAPTER ONE: INTRODUCTION',
       chapterLabel: 'CHAPTER ONE',
       chapterNumber: '1',
-      instructions: `Write a COMPREHENSIVE Chapter One for a CASE STUDY.
+      instructions: `Write Chapter One: INTRODUCTION.
 
 CHAPTER ONE
-1.0 INTRODUCTION
-[Write 2-3 paragraphs]
-- Why this case matters - significance and relevance
-- Clear objective of the case study
-- Brief overview of the case
+1.0 Introduction
+[2-3 paragraphs - NO citations]
 
-LENGTH: 300-400 words
-FORMAT: Plain text only. No markdown.
+1.1 Background to the Study
+[4-6 paragraphs - NO citations - describe context without referencing studies]
 
-CRITICAL: NO references in the introduction. References go at the end.
+1.2 Statement of the Problem
+[2-3 paragraphs - NO citations]
+
+1.3 Research Objectives
+1.3.1 General Objective
+1.3.2 Specific Objectives
+
+1.4 Research Questions
+
+1.5 Justification of the Study
+
+1.6 Scope of Study
+
+1.7 Operational Definitions
+
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter2',
-      title: 'CHAPTER TWO: CASE PRESENTATION',
+      title: 'CHAPTER TWO: LITERATURE REVIEW',
       chapterLabel: 'CHAPTER TWO',
       chapterNumber: '2',
-      instructions: `Write a COMPREHENSIVE Chapter Two: CASE PRESENTATION.
+      instructions: `Write Chapter Two: LITERATURE REVIEW.
 
-CRITICAL: FACTS ONLY - NO INTERPRETATION.
+CHAPTER TWO
+2.0 Introduction
+[1-2 paragraphs - NO citations]
 
-CONTENT REQUIREMENTS:
-- Signalment (species, breed, age, sex, neuter status)
-- History (presenting complaint, duration, previous treatments)
-- Clinical examination findings (physical exam, vital signs)
-- Diagnostics and test results (lab findings, imaging)
-- Present all facts objectively and in detail
+2.1 Empirical Review
+[4-6 substantial paragraphs WITH citations - THIS IS WHERE ALL CITATIONS BELONG]
 
-LENGTH: 500-700 words
-FORMAT: Plain text only. No markdown.
+2.2 Theoretical Framework
+[WITH citations]
 
-CRITICAL RULES:
-- DO NOT interpret findings here
-- DO NOT discuss differentials here
-- Present facts as facts only
-- NO citations in this section - this is pure description
+2.3 Conceptual Framework
+
 ${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter3',
-      title: 'CHAPTER THREE: DISCUSSION AND ANALYSIS',
+      title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
       chapterLabel: 'CHAPTER THREE',
       chapterNumber: '3',
-      instructions: `Write a COMPREHENSIVE Chapter Three: DISCUSSION AND ANALYSIS.
+      instructions: `Write Chapter Three: RESEARCH METHODOLOGY.
 
-THIS IS THE CORE MARKED SECTION.
+CHAPTER THREE
+3.0 Introduction
+3.1 Research Approach
+3.2 Research Design
+3.3 Study Location
+3.4 Target Population
+3.5 Sampling Strategy and Sample Size
+3.6 Data Collection Techniques
+3.7 Analysis of Data
+3.8 Validity and Reliability
+3.9 Ethical Considerations
 
-CONTENT REQUIREMENTS:
-- Interpret the findings from Chapter Two
-- Discuss differential diagnoses - rule in and rule out
-- Compare to literature - reference relevant studies
-- Justify every diagnosis with "why" (refer to literature)
-
-CRITICAL - SIGNALMENT CONSISTENCY CHECK:
-- Reason from basic anatomy and physiology first: for conditions where sex-based anatomical
-  differences are clinically significant, explicitly state this anatomical fact.
-- Do NOT cite or invent statistics - describe relationships qualitatively.
-
-LENGTH: 800-1200 words
-FORMAT: Plain text only. No markdown.
-CITATIONS: Use APA 7th style throughout.
-
-CRITICAL RULES:
-- Every diagnosis needs a "why", justified against literature
-- Use real clinical terminology correctly
-- Do NOT discuss treatment rationale here - that belongs in Chapter Four only
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'chapter4',
-      title: 'CHAPTER FOUR: MANAGEMENT AND OUTCOME',
-      chapterLabel: 'CHAPTER FOUR',
-      chapterNumber: '4',
-      instructions: `Write a COMPREHENSIVE Chapter Four: MANAGEMENT AND OUTCOME.
-
-CONTENT REQUIREMENTS:
-- Treatment provided (specific details)
-- Rationale for treatment (refer to literature) - this is the ONLY place treatment rationale belongs
-- Prognosis - explain expected outcome
-- Follow-up and actual outcome
-- Any complications or challenges
-
-LENGTH: 400-600 words
-FORMAT: Plain text only. No markdown.
-CITATIONS: Use APA 7th style where appropriate.
-${NO_META_COMMENTARY}`,
-    },
-    {
-      id: 'chapter5',
-      title: 'CHAPTER FIVE: CONCLUSION',
-      chapterLabel: 'CHAPTER FIVE',
-      chapterNumber: '5',
-      instructions: `Write a CONCISE Chapter Five: CONCLUSION.
-
-CONTENT REQUIREMENTS:
-- Summary of key points
-- Tie back to the objective from Chapter One
-- What was learned from this case
-- No new information
-
-LENGTH: 200-300 words
-FORMAT: Plain text only. No markdown.
-
-CRITICAL: No new citations in the conclusion.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -335,17 +261,12 @@ ${NO_META_COMMENTARY}`,
       title: 'REFERENCES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write a COMPLETE REFERENCE LIST for this CASE STUDY.
+      instructions: `Write a COMPLETE REFERENCE LIST.
 
 REQUIREMENTS:
-- 12-20 credible references in APA 7th edition format
-- Mix of veterinary journals, textbooks, and clinical guidelines
-- All references must be cited in the text above
-- NO website URLs - use proper APA format
+- 15-25 APA 7th references
+- Only include sources cited in Chapter Two
 
-FORMAT: APA 7th edition
-
-CRITICAL: Write out every reference in full.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -353,21 +274,15 @@ ${NO_META_COMMENTARY}`,
       title: 'APPENDICES',
       chapterLabel: 'APPENDICES',
       chapterNumber: '',
-      instructions: `Write a COMPLETE APPENDICES section for this CASE STUDY.
+      instructions: `Write APPENDICES section.
 
-CONTENT REQUIREMENTS:
-- Describe any raw data (lab results, test values)
-- Describe any images (radiographs, ultrasound images)
-- Describe any additional supporting documents
-
-FORMAT: Plain text only. No markdown.
 ${NO_META_COMMENTARY}`,
     },
   ];
 }
 
 // ============================================================
-// REPORT SPECS - CORRECT STRUCTURE
+// REPORT SPECS
 // ============================================================
 function buildReportSpecs(topic: string): ChapterSpec[] {
   return [
@@ -376,14 +291,7 @@ function buildReportSpecs(topic: string): ChapterSpec[] {
       title: 'TITLE PAGE',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write a COMPLETE TITLE PAGE for a REPORT:
-
-TITLE: Create a clear, descriptive report title
-AUTHOR NAME: [Author Name]
-ORGANIZATION: [Organization Name]
-DATE: [Current Date]
-
-CRITICAL: Use plain text only. No markdown.
+      instructions: `Write TITLE PAGE. NO references.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -391,19 +299,9 @@ ${NO_META_COMMENTARY}`,
       title: 'EXECUTIVE SUMMARY',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write a COMPLETE EXECUTIVE SUMMARY for this REPORT.
+      instructions: `Write EXECUTIVE SUMMARY (150-200 words).
 
-CONTENT REQUIREMENTS:
-- One comprehensive paragraph
-- Purpose of the report
-- Method/approach
-- Key findings
-- Main recommendations
-
-LENGTH: 150-200 words
-FORMAT: Plain text only. No markdown.
-
-CRITICAL: No citations here.
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -411,18 +309,9 @@ ${NO_META_COMMENTARY}`,
       title: '1.0 INTRODUCTION',
       chapterLabel: '',
       chapterNumber: '1',
-      instructions: `Write a COMPREHENSIVE INTRODUCTION for this REPORT.
+      instructions: `Write INTRODUCTION.
 
-CONTENT REQUIREMENTS:
-- Background and context
-- Purpose of the report
-- Scope of the report
-- Methodology (if applicable)
-
-LENGTH: 300-400 words
-FORMAT: Plain text only. No markdown.
-
-CRITICAL: NO citations in the introduction - references go at the end.
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -430,22 +319,9 @@ ${NO_META_COMMENTARY}`,
       title: '2.0 FINDINGS / RESULTS',
       chapterLabel: '',
       chapterNumber: '2',
-      instructions: `Write a COMPREHENSIVE FINDINGS/RESULTS section.
+      instructions: `Write FINDINGS/RESULTS section.
 
-CRITICAL: Present findings objectively and factually. NO INTERPRETATION.
-
-CONTENT REQUIREMENTS:
-- Organized under clear subheadings
-- Use tables where numeric data supports the point
-- Present data logically
-- Be neutral and factual
-
-LENGTH: 600-900 words
 ${TABLE_FORMAT_RULE}
-
-CRITICAL RULES:
-- This section is NEUTRAL and FACTUAL
-- Save opinion/interpretation for Discussion
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -453,17 +329,9 @@ ${NO_META_COMMENTARY}`,
       title: '3.0 DISCUSSION',
       chapterLabel: '',
       chapterNumber: '3',
-      instructions: `Write a COMPREHENSIVE DISCUSSION section.
+      instructions: `Write DISCUSSION section.
 
-CONTENT REQUIREMENTS:
-- What the findings mean
-- Implications of the findings
-- Limitations of the study/report
-
-LENGTH: 400-600 words
-FORMAT: Plain text only. No markdown.
-
-CRITICAL: This is where you interpret the findings from Section 2.0.
+CITATIONS: Allowed where comparing to literature.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -471,17 +339,7 @@ ${NO_META_COMMENTARY}`,
       title: '4.0 RECOMMENDATIONS',
       chapterLabel: '',
       chapterNumber: '4',
-      instructions: `Write a COMPREHENSIVE RECOMMENDATIONS section.
-
-CONTENT REQUIREMENTS:
-- Specific, actionable recommendations
-- Tied directly to findings
-- Be specific
-
-LENGTH: 300-400 words
-FORMAT: Plain text only. No markdown.
-
-CRITICAL: Recommendations must be SPECIFIC and ACTIONABLE.
+      instructions: `Write RECOMMENDATIONS section.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -489,15 +347,9 @@ ${NO_META_COMMENTARY}`,
       title: '5.0 CONCLUSION',
       chapterLabel: '',
       chapterNumber: '5',
-      instructions: `Write a BRIEF CONCLUSION for this REPORT.
+      instructions: `Write CONCLUSION.
 
-CONTENT REQUIREMENTS:
-- Brief close
-- No new information
-- Tie back to purpose
-
-LENGTH: 100-150 words
-FORMAT: Plain text only. No markdown.
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -505,14 +357,7 @@ ${NO_META_COMMENTARY}`,
       title: '6.0 REFERENCES',
       chapterLabel: '',
       chapterNumber: '6',
-      instructions: `Write a COMPLETE REFERENCE LIST for this REPORT.
-
-REQUIREMENTS:
-- 12-20 credible references in APA 7th edition format
-- All references must be cited in the text above
-- NO website URLs - use proper APA format
-
-FORMAT: APA 7th edition
+      instructions: `Write REFERENCE LIST.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -520,20 +365,14 @@ ${NO_META_COMMENTARY}`,
       title: 'APPENDICES',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write a COMPLETE APPENDICES section for this REPORT.
-
-CONTENT REQUIREMENTS:
-- Describe any supporting documents
-- Describe any raw data or detailed analysis
-
-FORMAT: Plain text only. No markdown.
+      instructions: `Write APPENDICES section.
 ${NO_META_COMMENTARY}`,
     },
   ];
 }
 
 // ============================================================
-// RESEARCH PROPOSAL SPECS
+// RESEARCH PROPOSAL SPECS - MATCHES YOUR SAMPLE
 // ============================================================
 function buildProposalSpecs(topic: string): ChapterSpec[] {
   return [
@@ -542,56 +381,51 @@ function buildProposalSpecs(topic: string): ChapterSpec[] {
       title: 'FRONT MATTER',
       chapterLabel: '',
       chapterNumber: '',
-      instructions: `Write ONLY the following front-matter sections for a RESEARCH PROPOSAL:
+      instructions: `Write ONLY the following front-matter sections:
 
-TITLE PAGE (with the research title, author name, degree, date)
-TABLE OF CONTENTS: List all section titles in order. Do NOT include page numbers.
+TITLE PAGE (with research title, author name, student number, institution, supervisor name, degree, date)
+TABLE OF CONTENTS (list all sections with page numbers as placeholders)
 LIST OF ABBREVIATIONS AND ACRONYMS
 
-Do NOT write any chapter content yet. Stop after the abbreviations list.
-${NO_META_COMMENTARY}
-
-CRITICAL: Use plain text only. No markdown, no asterisks.
-CRITICAL: This is a PROPOSAL for research that has NOT yet been conducted. Do not write
-an Abstract, and do not state or imply that any data has been collected.`,
+${NO_META_COMMENTARY}`,
     },
     {
       id: 'chapter1',
       title: 'CHAPTER ONE: INTRODUCTION',
       chapterLabel: 'CHAPTER ONE',
       chapterNumber: '1',
-      instructions: `Write a COMPREHENSIVE Chapter One for a RESEARCH PROPOSAL.
+      instructions: `Write Chapter One: INTRODUCTION.
 
 CHAPTER ONE
-1.0 INTRODUCTION
-[Short paragraph explaining what the chapter covers - NO citations here]
+1.0 Introduction
+[2-3 paragraphs explaining what the chapter covers - NO citations]
 
-1.1 Background of the Study
-[6-8 substantial paragraphs with citations]
+1.1 Background to the Study
+[4-6 substantial paragraphs - NO citations - describe the global, regional, and national context without referencing specific studies]
 
 1.2 Statement of the Problem
-[2-3 substantial paragraphs]
+[2-3 paragraphs - NO citations - clearly state the research problem]
 
 1.3 Research Objectives
+[Write a short introductory sentence]
 1.3.1 General Objective
+[One clear overarching objective - 15-20 words]
 1.3.2 Specific Objectives
-[3-5 objectives]
+[3-5 specific objectives, each numbered]
 
 1.4 Research Questions
-[3-5 questions]
+[3-5 research questions corresponding to the objectives]
 
-1.5 Significance of the Study
-[3-4 paragraphs]
+1.5 Justification of the Study
+[2-3 paragraphs - NO citations]
 
 1.6 Scope of Study
-[2 paragraphs]
+[1-2 paragraphs defining boundaries]
 
 1.7 Operational Definitions
-[5-8 key terms]
+[5-8 key terms with definitions]
 
-CRITICAL: Every numbered subsection MUST contain real, complete content.
-CRITICAL: Use future/conditional tense throughout. Use APA 7th style in-text citations.
-References go at the end.
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -599,31 +433,24 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER TWO: LITERATURE REVIEW',
       chapterLabel: 'CHAPTER TWO',
       chapterNumber: '2',
-      instructions: `Write a COMPREHENSIVE Chapter Two for a RESEARCH PROPOSAL.
+      instructions: `Write Chapter Two: LITERATURE REVIEW.
 
 CHAPTER TWO
-2.0 INTRODUCTION
-[Short paragraph - NO citations here]
+2.0 Introduction
+[1-2 paragraphs - NO citations]
 
-2.1.0 Empirical Review
-[150-200 words with NO citations]
-
-2.1.1 [Theme from Objective 1]
-[4-5 substantial paragraphs with citations]
-
-2.1.2 [Theme from Objective 2]
-[4-5 substantial paragraphs with citations]
-
-2.1.3 [Theme from Objective 3]
-[4-5 substantial paragraphs with citations]
+2.1 Empirical Review
+[4-6 substantial paragraphs WITH citations - THIS IS WHERE ALL LITERATURE REFERENCES GO]
+[Cover key themes related to the research objectives]
+[Compare and contrast different studies]
+[Identify research gaps]
 
 2.2 Theoretical Framework
-[5-6 paragraphs using 2 theories]
+[WITH citations - explain theories relevant to the study]
 
 2.3 Conceptual Framework
-[Detailed explanation with variables]
+[Explain the relationship between variables with a diagram description]
 
-CRITICAL: Use APA 7th style in-text citations. References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -631,24 +458,39 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
       chapterLabel: 'CHAPTER THREE',
       chapterNumber: '3',
-      instructions: `Write a COMPREHENSIVE Chapter Three for a RESEARCH PROPOSAL.
+      instructions: `Write Chapter Three: RESEARCH METHODOLOGY.
 
 CHAPTER THREE
-3.0 INTRODUCTION
-[Short paragraph - NO citations here]
+3.0 Introduction
+[1 paragraph - NO citations]
 
 3.1 Research Approach
-3.2 Research Design
-3.3 Study Location
-3.4 Target Population
-3.5 Sample Size
-3.6 Data Collection Instruments and Procedures
-3.7 Data Analysis Plan
-3.8 Reliability and Validity
-3.9 Ethical Considerations
+[Explain the research approach and why it's appropriate]
 
-CRITICAL: Use future/conditional tense throughout. Cite Creswell.
-References go at the end.
+3.2 Research Design
+[Explain the design, cite Creswell if relevant]
+
+3.3 Study Location
+[Describe where the study will be conducted]
+
+3.4 Target Population
+[Define the target population]
+
+3.5 Sampling Strategy and Sample Size
+[Explain sampling method and sample size with justification]
+
+3.6 Data Collection Techniques
+[Describe instruments and procedures]
+
+3.7 Analysis of Data
+[Explain how data will be analyzed]
+
+3.8 Validity and Reliability
+[Explain measures to ensure validity and reliability]
+
+3.9 Ethical Considerations
+[Describe ethical protocols]
+
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -656,28 +498,16 @@ ${NO_META_COMMENTARY}`,
       title: 'REFERENCES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write ONLY the following sections:
+      instructions: `Write the following sections:
 
 REFERENCES
-Provide 30 complete APA 7th references. NO website URLs. Use proper APA format.
-
-WORK PLAN
-Month 1-2: Literature Review
-Month 3: Instrument Development
-Month 4-5: Data Collection
-Month 6: Data Analysis
-Month 7: Report Writing
-Month 8: Revision and Submission
-
-BUDGET
-${TABLE_FORMAT_RULE}
-Present the budget as a properly formed markdown pipe table.
+Provide 25-35 complete APA 7th references. Only include sources cited in Chapter Two.
 
 APPENDICES
-APPENDIX A: STUDENT QUESTIONNAIRE
-APPENDIX B: SEMI-STRUCTURED INTERVIEW GUIDE
-APPENDIX C: INFORMED CONSENT FORM
-APPENDIX D: INTRODUCTORY LETTER
+APPENDIX A: [Data Collection Instrument]
+APPENDIX B: [Interview Guide]
+APPENDIX C: [Budget - optional]
+
 ${NO_META_COMMENTARY}`,
     },
   ];
@@ -701,9 +531,6 @@ ACKNOWLEDGEMENTS
 ABSTRACT (with keywords)
 LIST OF ABBREVIATIONS AND ACRONYMS
 
-Do NOT write a Table of Contents section.
-
-CRITICAL: Use plain text only. No markdown, no asterisks.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -711,30 +538,31 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER ONE: INTRODUCTION',
       chapterLabel: 'CHAPTER ONE',
       chapterNumber: '1',
-      instructions: `Write a COMPREHENSIVE Chapter One for a RESEARCH PAPER.
+      instructions: `Write Chapter One: INTRODUCTION.
 
 CHAPTER ONE
 1.0 Introduction
-[1 paragraph - NO citations here]
-1.1 Background of the Study
-[6-8 substantial paragraphs with citations]
+[2-3 paragraphs - NO citations]
+
+1.1 Background to the Study
+[4-6 paragraphs - NO citations - describe context without references]
+
 1.2 Statement of the Problem
-[2-3 substantial paragraphs with citations]
+[2-3 paragraphs - NO citations]
+
 1.3 Research Objectives
 1.3.1 General Objective
 1.3.2 Specific Objectives
-[3-5 objectives]
-1.4 Research Questions
-[3-5 questions]
-1.5 Significance of the Study
-[3-4 paragraphs]
-1.6 Scope of Study
-[2 paragraphs]
-1.7 Operational Definitions
-[5-8 key terms]
 
-CRITICAL: Every numbered subsection MUST contain real, complete content.
-Use APA 7th style in-text citations. References go at the end.
+1.4 Research Questions
+
+1.5 Significance of the Study
+
+1.6 Scope of Study
+
+1.7 Operational Definitions
+
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -742,16 +570,20 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER TWO: LITERATURE REVIEW',
       chapterLabel: 'CHAPTER TWO',
       chapterNumber: '2',
-      instructions: `Write a COMPREHENSIVE Chapter Two for a RESEARCH PAPER.
+      instructions: `Write Chapter Two: LITERATURE REVIEW.
 
 CHAPTER TWO
 2.0 Introduction
-[Short paragraph - NO citations here]
+[1-2 paragraphs - NO citations]
+
 2.1 Empirical Review
+[WITH citations - this is where ALL literature goes]
+
 2.2 Theoretical Framework
+[WITH citations]
+
 2.3 Conceptual Framework
 
-CRITICAL: Use APA 7th style in-text citations. References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -759,22 +591,20 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER THREE: RESEARCH METHODOLOGY',
       chapterLabel: 'CHAPTER THREE',
       chapterNumber: '3',
-      instructions: `Write a COMPREHENSIVE Chapter Three for a RESEARCH PAPER.
+      instructions: `Write Chapter Three: RESEARCH METHODOLOGY.
 
 CHAPTER THREE
 3.0 Introduction
-[Short paragraph - NO citations here]
 3.1 Research Approach
 3.2 Research Design
 3.3 Study Location
 3.4 Target Population
-3.5 Sample Size
-3.6 Data Collection Instruments and Procedures
-3.7 Data Analysis Plan
-3.8 Reliability and Validity
+3.5 Sampling Strategy and Sample Size
+3.6 Data Collection Techniques
+3.7 Analysis of Data
+3.8 Validity and Reliability
 3.9 Ethical Considerations
 
-CRITICAL: Cite Creswell. References go at the end.
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -782,7 +612,7 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER FOUR: PRESENTATION OF FINDINGS',
       chapterLabel: 'CHAPTER FOUR',
       chapterNumber: '4',
-      instructions: `Write a COMPREHENSIVE Chapter Four for a RESEARCH PAPER.
+      instructions: `Write Chapter Four: PRESENTATION OF FINDINGS.
 
 CHAPTER FOUR
 4.0 Introduction
@@ -798,14 +628,21 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER FIVE: DISCUSSION',
       chapterLabel: 'CHAPTER FIVE',
       chapterNumber: '5',
-      instructions: `Write a COMPREHENSIVE Chapter Five for a RESEARCH PAPER.
+      instructions: `Write Chapter Five: DISCUSSION.
 
 CHAPTER FIVE
 5.0 Introduction
+[1 paragraph - NO citations]
+
 5.1 Interpretation of Key Findings
+
 5.2 Comparison with Previous Studies
+[THIS SECTION MUST HAVE CITATIONS]
+
 5.3 Implications for Practice and Policy
+
 5.4 Limitations of the Study
+
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -813,12 +650,19 @@ ${NO_META_COMMENTARY}`,
       title: 'CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS',
       chapterLabel: 'CHAPTER SIX',
       chapterNumber: '6',
-      instructions: `Write a COMPREHENSIVE Chapter Six for a RESEARCH PAPER.
+      instructions: `Write Chapter Six: CONCLUSIONS AND RECOMMENDATIONS.
 
 CHAPTER SIX
 6.0 Introduction
+[1 paragraph - NO citations]
+
 6.1 Conclusions
+[NO citations - synthesize previous findings]
+
 6.2 Recommendations
+[NO citations]
+
+${CITATION_RULES}
 ${NO_META_COMMENTARY}`,
     },
     {
@@ -826,14 +670,15 @@ ${NO_META_COMMENTARY}`,
       title: 'REFERENCES',
       chapterLabel: 'REFERENCES',
       chapterNumber: '',
-      instructions: `Write ONLY the following:
+      instructions: `Write REFERENCE LIST and APPENDICES.
 
 REFERENCES
-Provide 30 complete APA 7th references. NO website URLs. Use proper APA format.
+Provide 30 complete APA 7th references. Only include sources cited in Chapter Two and Chapter Five.
 
 APPENDICES
 APPENDIX A: DATA EXTRACTION TOOL
 APPENDIX B: PARTICIPANT INFORMATION SHEET AND INFORMED CONSENT
+
 ${NO_META_COMMENTARY}`,
     },
   ];
@@ -1132,7 +977,7 @@ async function generateSection(
     return {
       text: '',
       apiUsed: 'none',
-      error: `All providers failed: Gemini (${gemini.error}), Groq (${groq.error}), OpenRouter (${openRouter.error}), Cerebras (${cerebras.error}), You.com (${youCom.error})`,
+      error: `All providers failed`,
     };
   }
 
@@ -1154,12 +999,10 @@ async function generateSection(
   return {
     text: '',
     apiUsed: 'none',
-    error: `All providers failed: Groq (${groq.error}), OpenRouter (${openRouter.error}), Gemini (${gemini.error}), Cerebras (${cerebras.error}), You.com (${youCom.error})`,
+    error: `All providers failed`,
   };
 }
 
-// Only strip markdown emphasis/heading syntax - table pipe syntax is now allowed
-// and must survive this cleaning step so it can be rendered as a real table downstream.
 function cleanText(text: string): string {
   return text
     .replace(/\*\*/g, '')
@@ -1175,7 +1018,7 @@ function cleanText(text: string): string {
 }
 
 // ============================================================
-// PPTX GENERATOR - Calls Python-pptx route
+// PPTX GENERATOR
 // ============================================================
 async function generatePptxFromPaper(content: string, topic: string, level: string): Promise<{ buffer: Buffer; error: string }> {
   try {
@@ -1258,7 +1101,7 @@ export async function POST(request: NextRequest) {
 
     if (chapterIndex < 0 || chapterIndex >= chapters.length) {
       return NextResponse.json(
-        { error: `Invalid chapterIndex ${chapterIndex}. This document type has ${chapters.length} chapters (0-${chapters.length - 1}).` },
+        { error: `Invalid chapterIndex ${chapterIndex}. This document type has ${chapters.length} chapters.` },
         { status: 400 }
       );
     }
@@ -1268,144 +1111,142 @@ export async function POST(request: NextRequest) {
 
     let depthInstruction = `
 CRITICAL DEPTH REQUIREMENT:
-This is a ${levelInfo.label} academic document. The content must be COMPREHENSIVE and THOROUGH.
+This is a ${levelInfo.label} academic document.
 - Write SUBSTANTIAL paragraphs (minimum 5-7 sentences per paragraph)
 - Provide detailed analysis, not brief summaries
-- Include specific examples, statistics, and evidence
 - The document should reflect ${levelInfo.depth}
-- Do not be brief or superficial - this is a serious academic work
 `;
 
     let documentTypeInstruction = '';
 
     if (type === 'essay') {
       documentTypeInstruction = `
-THIS IS AN ASSIGNMENT - NOT A RESEARCH PAPER.
+THIS IS AN ASSIGNMENT.
 
-STRUCTURE (IN ORDER):
-1. TITLE PAGE (NO citations)
-2. 1.0 INTRODUCTION (2-3 paragraphs, 300-400 words max, NO citations)
-3. 2.0 MAIN BODY (6-10 paragraphs, 1000-1500 words, WITH citations)
-4. 3.0 CONCLUSION (2-3 paragraphs, 200-300 words, NO new citations)
-5. 4.0 REFERENCES (12-20 APA 7th references)
+STRUCTURE:
+1. TITLE PAGE
+2. 1.0 INTRODUCTION (NO citations)
+3. 2.0 MAIN BODY (WITH citations)
+4. 3.0 CONCLUSION (NO citations)
+5. 4.0 REFERENCES
 
-CRITICAL RULES:
-- NO references in the Introduction or Conclusion
-- References ONLY in the Main Body and the Reference List
-- Introduction should be concise (max 400 words)
-- Total length: ${levelInfo.pageCount}`;
+${CITATION_RULES}`;
     } else if (type === 'report') {
       documentTypeInstruction = `
-THIS IS A REPORT - NOT A RESEARCH PAPER.
+THIS IS A REPORT.
 
-STRUCTURE (IN ORDER):
+STRUCTURE:
 1. TITLE PAGE
-2. EXECUTIVE SUMMARY (150-200 words, NO citations)
-3. 1.0 INTRODUCTION (300-400 words, NO citations)
-4. 2.0 FINDINGS/RESULTS (600-900 words, WITH citations as needed)
-5. 3.0 DISCUSSION (400-600 words, WITH citations)
-6. 4.0 RECOMMENDATIONS (300-400 words, WITH citations)
-7. 5.0 CONCLUSION (100-150 words, NO citations)
-8. 6.0 REFERENCES (12-20 APA 7th references)
+2. EXECUTIVE SUMMARY
+3. 1.0 INTRODUCTION
+4. 2.0 FINDINGS/RESULTS
+5. 3.0 DISCUSSION
+6. 4.0 RECOMMENDATIONS
+7. 5.0 CONCLUSION
+8. 6.0 REFERENCES
 9. APPENDICES
 
-CRITICAL: NO citations in Introduction or Conclusion. NO website URLs.`;
+${CITATION_RULES}`;
     } else if (type === 'case-study') {
       documentTypeInstruction = `
-THIS IS A CASE STUDY - Should be as long as a research paper.
+THIS IS A CASE STUDY.
 
-STRUCTURE (IN ORDER):
-1. FRONT MATTER (Title Page, Table of Contents, List of Abbreviations)
-2. CHAPTER ONE: INTRODUCTION (300-400 words, NO citations)
-3. CHAPTER TWO: CASE PRESENTATION (500-700 words, NO citations - FACTS ONLY)
-4. CHAPTER THREE: DISCUSSION AND ANALYSIS (800-1200 words, WITH citations)
-5. CHAPTER FOUR: MANAGEMENT AND OUTCOME (400-600 words, WITH citations)
-6. CHAPTER FIVE: CONCLUSION (200-300 words, NO citations)
-7. REFERENCES (12-20 APA 7th references)
-8. APPENDICES
+STRUCTURE:
+1. FRONT MATTER
+2. CHAPTER ONE: INTRODUCTION (NO citations)
+3. CHAPTER TWO: LITERATURE REVIEW (WITH citations)
+4. CHAPTER THREE: RESEARCH METHODOLOGY
+5. REFERENCES
+6. APPENDICES
 
-CRITICAL RULES:
-- Chapter Two = FACTS ONLY, NO interpretation, NO citations
-- Chapter Three = differential diagnosis and literature comparison ONLY, WITH citations
-- Chapter Four = the ONLY place treatment rationale belongs
-- NO citations in Introduction or Conclusion
-- NO website URLs in references
-- Total length: ${levelInfo.pageCount}`;
+${CITATION_RULES}`;
     } else if (type === 'proposal') {
       documentTypeInstruction = `
-THIS IS A RESEARCH PROPOSAL - NOT A COMPLETED RESEARCH PAPER.
-STRUCTURE (IN ORDER): CHAPTER ONE (with 1.0-1.7), CHAPTER TWO (with 2.0-2.3), CHAPTER THREE (with 3.0-3.9), REFERENCES, WORK PLAN, BUDGET, APPENDICES.
+THIS IS A RESEARCH PROPOSAL.
 
-CRITICAL: Use future/conditional tense throughout. NO citations in Introduction sections.
-References only in body and reference list. NO website URLs.`;
+STRUCTURE:
+1. FRONT MATTER
+2. CHAPTER ONE: INTRODUCTION (NO citations anywhere in this chapter)
+3. CHAPTER TWO: LITERATURE REVIEW (WITH citations - this is where ALL literature goes)
+4. CHAPTER THREE: RESEARCH METHODOLOGY
+5. REFERENCES
+6. APPENDICES
+
+${CITATION_RULES}
+
+CRITICAL: Chapter One has ABSOLUTELY NO CITATIONS. All citations belong in Chapter Two.`;
     } else {
       documentTypeInstruction = `
-THIS IS A RESEARCH PAPER (Full Dissertation).
-STRUCTURE (IN ORDER): FRONT MATTER, CHAPTER ONE, CHAPTER TWO, CHAPTER THREE, CHAPTER FOUR, CHAPTER FIVE, CHAPTER SIX, REFERENCES, APPENDICES.
+THIS IS A RESEARCH PAPER.
 
-CRITICAL: NO citations in Introduction sections. References only in body and reference list.`;
+STRUCTURE:
+1. FRONT MATTER
+2. CHAPTER ONE: INTRODUCTION (NO citations)
+3. CHAPTER TWO: LITERATURE REVIEW (WITH citations - ALL literature here)
+4. CHAPTER THREE: RESEARCH METHODOLOGY
+5. CHAPTER FOUR: PRESENTATION OF FINDINGS
+6. CHAPTER FIVE: DISCUSSION
+7. CHAPTER SIX: CONCLUSIONS AND RECOMMENDATIONS (NO citations)
+8. REFERENCES
+9. APPENDICES
+
+${CITATION_RULES}`;
     }
 
     let chapterSpecificInstruction = '';
 
-    if (type === 'proposal') {
+    if (type === 'proposal' || type === 'research') {
       if (chapter.id === 'chapter1') {
         chapterSpecificInstruction = `
-PROPOSAL CHAPTER ONE SPECIFICS:
-- 1.0 Introduction: 1-2 paragraphs, NO citations
-- 1.1 Background: 6-8 substantial paragraphs WITH citations
-- 1.2 Statement of Problem: 2-3 substantial paragraphs WITH citations
-- 1.3.1 General Objective: one full sentence
-- 1.3.2 Specific Objectives: 3-5 objectives
-- 1.4 Research Questions: 3-5 questions
-- 1.5 Significance: 3-4 paragraphs
-- 1.6 Scope: 2 paragraphs
-- 1.7 Operational Definitions: 5-8 terms`;
+CRITICAL: This is CHAPTER ONE - ABSOLUTELY NO CITATIONS ALLOWED.
+Do not use (Author, Year) format anywhere in this chapter.
+Describe the context, problem, and objectives without referencing specific studies.
+Save all citations for Chapter Two.`;
       }
 
       if (chapter.id === 'chapter2') {
         chapterSpecificInstruction = `
-PROPOSAL CHAPTER TWO SPECIFICS:
-- 2.0 Introduction: 1 paragraph, NO citations
-- 2.1.0 Empirical Review: 150-200 words, NO citations
-- 2.1.1, 2.1.2, 2.1.3: Each 4-5 substantial paragraphs WITH citations
-- 2.2 Theoretical Framework: 5-6 paragraphs WITH citations`;
+CRITICAL: This is CHAPTER TWO - LITERATURE REVIEW.
+THIS IS WHERE ALL CITATIONS BELONG.
+Use APA 7th style throughout.`;
       }
 
-      if (chapter.id === 'chapter3') {
+      if (chapter.id === 'chapter6' && type === 'research') {
         chapterSpecificInstruction = `
-PROPOSAL CHAPTER THREE SPECIFICS:
-- 3.0 Introduction: 1 paragraph, NO citations
-- 3.2 Research Design: cite Creswell
-- 3.5 Sample Size: Show formula and worked calculation
-- 3.6 Data Collection: cite sources
-- 3.7 Data Analysis: justify, cite`;
-      }
-    } else if (type === 'research') {
-      if (chapter.id === 'chapter1') {
-        chapterSpecificInstruction = `
-RESEARCH CHAPTER ONE SPECIFICS:
-- 1.0 Introduction: 1 paragraph, NO citations
-- 1.1 Background: 6-8 substantial paragraphs WITH citations
-- 1.2 Statement of Problem: 2-3 substantial paragraphs WITH citations
-- 1.3.1 General Objective: one full sentence
-- 1.3.2 Specific Objectives: 3-5 objectives
-- 1.4 Research Questions: 3-5 questions
-- 1.5 Significance: 3-4 paragraphs
-- 1.6 Scope: 2 paragraphs
-- 1.7 Operational Definitions: 5-8 terms`;
-      }
-
-      if (chapter.id === 'chapter6') {
-        chapterSpecificInstruction = `
-RESEARCH CHAPTER SIX SPECIFICS:
-- 6.0 Introduction: 1 paragraph, NO citations
-- 6.1 Conclusions: 4-6 substantial paragraphs, NO new citations
-- 6.2 Recommendations: 3-5 substantial paragraphs grouped by stakeholder`;
+CRITICAL: This is CHAPTER SIX - NO CITATIONS ALLOWED.
+Synthesize previous findings without introducing new references.`;
       }
     }
 
-    const prompt = `You are an expert academic writer producing a ${levelInfo.depth} ${typeLabel} for ${levelInfo.label}.
+    if (type === 'case-study') {
+      if (chapter.id === 'chapter1') {
+        chapterSpecificInstruction = `
+CRITICAL: CHAPTER ONE - NO CITATIONS ALLOWED.`;
+      }
+      if (chapter.id === 'chapter2') {
+        chapterSpecificInstruction = `
+CRITICAL: CHAPTER TWO - THIS IS WHERE CITATIONS BELONG.
+Use APA 7th style throughout.`;
+      }
+    }
+
+    if (type === 'essay') {
+      if (chapter.id === 'introduction') {
+        chapterSpecificInstruction = `
+CRITICAL: INTRODUCTION - NO CITATIONS ALLOWED.`;
+      }
+      if (chapter.id === 'body') {
+        chapterSpecificInstruction = `
+CRITICAL: MAIN BODY - THIS IS WHERE CITATIONS BELONG.
+Use APA 7th style throughout.`;
+      }
+      if (chapter.id === 'conclusion') {
+        chapterSpecificInstruction = `
+CRITICAL: CONCLUSION - NO CITATIONS ALLOWED.`;
+      }
+    }
+
+    const prompt = `You are an expert academic writer producing a ${levelInfo.depth} ${typeLabel}.
 
 TOPIC: "${cleanTopic}"
 
@@ -1413,26 +1254,25 @@ ${documentTypeInstruction}
 
 ${depthInstruction}
 
-PREVIOUS CONTENT (for continuity):
+PREVIOUS CONTENT:
 ${previousContext || 'This is the first section.'}
 
 TASK: ${chapter.instructions}
 ${chapterSpecificInstruction}
 
+${CITATION_RULES}
+
 CRITICAL RULES:
 - This is a ${typeLabel} - follow the correct structure.
 - Start with the section heading exactly as specified.
-- Write SUBSTANTIAL, DETAILED content - never brief or superficial.
-- Use APA 7th style in-text citations throughout the BODY only.
-- NO citations in Introduction, Conclusion, or Executive Summary.
-- NO website URLs in references - use proper APA format.
-- Never use numbered bracket citations like [1].
-- Use plain text only. No markdown, no asterisks, no underscores, EXCEPT for
-  well-formed pipe tables when presenting numeric data.
-- Avoid the use of hyphens or dashes throughout.
+- Write SUBSTANTIAL, DETAILED content.
+- Use APA 7th style in-text citations ONLY in Chapter Two / Literature Review.
+- NO citations in Chapter One, Introduction, Background, Statement of the Problem, Justification, Scope, Operational Definitions, or Conclusion.
+- NEVER use numbered bracket citations like [1].
+- Use plain text only. No markdown, no asterisks.
+- Avoid hyphens or dashes throughout.
 - Write out full content. Never use placeholders.
-- Never include conversational meta-commentary, permission-asking, or process narration.
-- The document must demonstrate ${levelInfo.depth} academic writing.`;
+- Never include conversational meta-commentary.`;
 
     const chapterTokenBudget = chapter.id === 'references' ? 6000 : 4000;
     const prioritizeGemini = chapter.id === 'references';
