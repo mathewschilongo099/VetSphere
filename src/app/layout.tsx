@@ -4,6 +4,8 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://vet-sphere.vercel.app'),
+  applicationName: 'VetSphere',
   title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
   description:
     'Expert veterinary articles for farmers and pet owners. Learn about cattle diseases, livestock management, poultry health, dog and cat care — practical, reliable and free.',
@@ -35,16 +37,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-white">
-
-        {/* GLOBAL HEADER */}
         <Header />
-
-        {/* PAGE CONTENT */}
         <main className="w-full">{children}</main>
-
-        {/* GLOBAL FOOTER */}
         <Footer />
-
       </body>
     </html>
   );
