@@ -187,6 +187,81 @@ const insertAfterHeading = (
   return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
 };
 
+// Cleans a raw title string returned by the model: strips quotes, markdown
+// bold/heading markers, trailing punctuation noise, and enforces a sane
+// max length so it stays SEO-friendly.
+function sanitizeTitle(raw: string, topic: string): string | null {
+  if (!raw) return null;
+
+  let title = raw
+    .split('\n')[0] // just in case the model added extra lines
+    .replace(/^#+\s*/, '') // leading markdown heading hashes
+    .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '') // wrapping quotes
+    .replace(/\*\*/g, '') // bold markers
+    .replace(/^Title:\s*/i, '') // stray "Title:" prefix
+    .trim();
+
+  if (title.length < 5) return null;
+  if (title.length > 120) {
+    title = title.slice(0, 117).trim() + '...';
+  }
+
+  return title;
+}
+
+function fallbackTitle(topic: string): string {
+  return topic
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ') + ': Causes, Symptoms, Treatment & Prevention';
+}
+
+// Generates a title that matches the style/structure of the article that
+// was actually produced, rather than forcing every topic into the same
+// "Causes, Symptoms, Treatment & Prevention" template.
+async function generateTitle(
+  model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>,
+  topic: string,
+  articleContent: string
+): Promise<string> {
+  const contentPreview = articleContent.slice(0, 600);
+
+  const titlePrompt = `
+You are an expert SEO editor for a veterinary/animal-health website.
+
+Below is the topic and the opening of an article that was already written about it.
+Write ONE compelling, SEO-friendly title for this specific article.
+
+RULES:
+- The title must match the actual style and structure of the article content below
+  (e.g. if it's a how-to/guide, the title should read like a guide; if it's a news piece,
+  the title should read like a headline; if it genuinely is about a disease/condition
+  with causes/symptoms/treatment, that structure is fine)
+- Do NOT default to "Causes, Symptoms, Treatment & Prevention" unless the article content
+  genuinely covers all of those things as its main structure
+- Keep it under 70 characters if possible, no more than 100
+- No quotation marks, no markdown, no trailing punctuation like colons dangling at the end
+- Return ONLY the title text, nothing else
+
+Topic: "${topic}"
+
+Article opening:
+"""
+${contentPreview}
+"""
+`.trim();
+
+  const result = await model.generateContent(titlePrompt);
+  const response = await result.response;
+  const rawTitle = response.text();
+
+  const cleaned = sanitizeTitle(rawTitle, topic);
+  if (!cleaned) {
+    throw new Error('Title generation returned unusable output');
+  }
+  return cleaned;
+}
+
 export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic');
 
@@ -325,10 +400,18 @@ Write only the article content with appropriate headings.`;
     };
 
     const excerpt = buildExcerpt(plainText, 155);
-    const seoTitle = topic
-      .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ') + ': Causes, Symptoms, Treatment & Prevention';
+
+    // Let Gemini choose the title based on the actual article content and
+    // style, instead of always forcing the disease-template title. Falls
+    // back to the old hardcoded format only if this step fails.
+    let seoTitle: string;
+    try {
+      seoTitle = await generateTitle(model, topic, content);
+    } catch (titleError) {
+      console.error('Title generation failed, using fallback title:', titleError);
+      seoTitle = fallbackTitle(topic);
+    }
+
     const metaDescription = buildExcerpt(plainText, 160);
     const tags = buildFallbackTags(topic);
 
