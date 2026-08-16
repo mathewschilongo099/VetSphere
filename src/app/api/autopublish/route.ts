@@ -194,7 +194,70 @@ STYLE RULES:
   return content;
 }
 
-async function getTrendingVetTopic(): Promise<string> {
+function topicToSlug(topic: string): string {
+  return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+const FALLBACK_TOPICS = [
+  'Mastitis in Dairy Cows',
+  'Tick Fever in Cattle',
+  'East Coast Fever in Cattle',
+  'Lumpy Skin Disease in Cattle',
+  'Anthrax in Livestock',
+  'Bloat in Cattle',
+  'Foot and Mouth Disease in Cattle',
+  'Newcastle Disease in Poultry',
+  'Avian Influenza in Poultry',
+  'Coccidiosis in Poultry',
+  'Foot Rot in Goats',
+  'Peste des Petits Ruminants in Goats',
+  'Contagious Caprine Pleuropneumonia in Goats',
+  'African Swine Fever',
+  'Rabies Prevention in Dogs',
+  'Parvovirus in Dogs',
+  'Canine Distemper',
+  'Feline Panleukopenia in Cats',
+  'Feline Leukemia Virus',
+  'Poultry Feed Formulation for Farmers',
+  'Biosecurity Measures on Livestock Farms',
+  'Milk Fever in Dairy Cows',
+  'Bovine Tuberculosis',
+  'Ringworm in Cattle',
+  'Pneumonia in Calves',
+  'How to Keep Your Dog Healthy',
+  'Puppy Care and Vaccination Schedule',
+  'Cat Vaccination Schedule for Pet Owners',
+  'Nutrition for Pregnant Cows',
+  'Deworming Programs for Cattle and Goats',
+  'Signs of Heat in Dairy Cows',
+  'Dystocia and Difficult Births in Cattle',
+  'Heat Stress in Livestock During Summer',
+  'How to Spot a Sick Animal Early',
+  'Water Quality and Animal Health',
+  'First Aid for Farm Animals',
+  'Zoonotic Diseases Farmers Should Know',
+];
+
+// Picks a fallback topic that hasn't been published yet. `existingSlugs` is
+// passed in (already fetched once by the caller) so we don't refetch GitHub
+// contents on every attempt. Returns null if every fallback topic is
+// already published (caller decides what to do in that case).
+function pickUnpublishedFallbackTopic(existingSlugs: string[]): string | null {
+  const unpublished = FALLBACK_TOPICS.filter((topic) => {
+    const slug = topicToSlug(topic);
+    return !existingSlugs.some((s) => s.startsWith(slug));
+  });
+
+  if (unpublished.length === 0) return null;
+
+  return unpublished[Math.floor(Math.random() * unpublished.length)];
+}
+
+// Fetches trending topics from Google News RSS, filtered for vet relevance
+// AND filtered against already-published slugs, so the very first candidate
+// returned is guaranteed fresh. Falls back to the hardcoded topic list
+// (also filtered against existingSlugs) if RSS yields nothing usable.
+async function getTrendingVetTopic(existingSlugs: string[]): Promise<string | null> {
   try {
     console.log('📡 Fetching veterinary news from Google News RSS...');
     const feedUrl = 'https://news.google.com/rss/search?q=veterinary+OR+livestock+disease+OR+animal+health+OR+cattle+disease+OR+poultry+disease&hl=en-US&gl=US&ceid=US:en';
@@ -206,59 +269,20 @@ async function getTrendingVetTopic(): Promise<string> {
       .filter(t => t !== 'Google News' && !t.includes(' - Google News'));
 
     for (const title of titles.slice(0, 30)) {
-      if (isValidVeterinaryTopic(title)) {
+      if (!isValidVeterinaryTopic(title)) continue;
+      const slug = topicToSlug(title);
+      const alreadyPublished = existingSlugs.some((s) => s.startsWith(slug));
+      if (!alreadyPublished) {
         return title;
       }
     }
 
-    return getFallbackTopic();
+    // No fresh RSS candidate — try the fallback list, also pre-filtered.
+    return pickUnpublishedFallbackTopic(existingSlugs);
   } catch (error) {
     console.error('Error fetching trending topic:', error);
-    return getFallbackTopic();
+    return pickUnpublishedFallbackTopic(existingSlugs);
   }
-}
-
-function getFallbackTopic(): string {
-  const fallbackTopics = [
-    'Mastitis in Dairy Cows',
-    'Tick Fever in Cattle',
-    'East Coast Fever in Cattle',
-    'Lumpy Skin Disease in Cattle',
-    'Anthrax in Livestock',
-    'Bloat in Cattle',
-    'Foot and Mouth Disease in Cattle',
-    'Newcastle Disease in Poultry',
-    'Avian Influenza in Poultry',
-    'Coccidiosis in Poultry',
-    'Foot Rot in Goats',
-    'Peste des Petits Ruminants in Goats',
-    'Contagious Caprine Pleuropneumonia in Goats',
-    'African Swine Fever',
-    'Rabies Prevention in Dogs',
-    'Parvovirus in Dogs',
-    'Canine Distemper',
-    'Feline Panleukopenia in Cats',
-    'Feline Leukemia Virus',
-    'Poultry Feed Formulation for Farmers',
-    'Biosecurity Measures on Livestock Farms',
-    'Milk Fever in Dairy Cows',
-    'Bovine Tuberculosis',
-    'Ringworm in Cattle',
-    'Pneumonia in Calves',
-    'How to Keep Your Dog Healthy',
-    'Puppy Care and Vaccination Schedule',
-    'Cat Vaccination Schedule for Pet Owners',
-    'Nutrition for Pregnant Cows',
-    'Deworming Programs for Cattle and Goats',
-    'Signs of Heat in Dairy Cows',
-    'Dystocia and Difficult Births in Cattle',
-    'Heat Stress in Livestock During Summer',
-    'How to Spot a Sick Animal Early',
-    'Water Quality and Animal Health',
-    'First Aid for Farm Animals',
-    'Zoonotic Diseases Farmers Should Know',
-  ];
-  return fallbackTopics[Math.floor(Math.random() * fallbackTopics.length)];
 }
 
 async function getExistingSlugs(): Promise<string[]> {
@@ -279,13 +303,8 @@ async function getExistingSlugs(): Promise<string[]> {
   }
 }
 
-function topicToSlug(topic: string): string {
-  return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
-async function findRelatedArticles(topic: string, currentSlug: string): Promise<string[]> {
+async function findRelatedArticles(topic: string, currentSlug: string, existingSlugs: string[]): Promise<string[]> {
   try {
-    const existingSlugs = await getExistingSlugs();
     const keywords = topic.toLowerCase().split(' ');
     const scored = existingSlugs.map(slug => {
       if (slug === currentSlug) return { slug, score: 0 };
@@ -338,19 +357,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const topic = await getTrendingVetTopic();
-
+    // Fetch existing slugs ONCE up front, then filter candidates against
+    // this list before picking — instead of picking randomly and checking
+    // afterward. This is what prevents "skipped, already published" results.
     const existingSlugs = await getExistingSlugs();
-    const slug = topicToSlug(topic);
-    const alreadyPublished = existingSlugs.some(s => s.startsWith(slug));
 
-    if (alreadyPublished) {
+    const topic = await getTrendingVetTopic(existingSlugs);
+
+    if (!topic) {
       return NextResponse.json({
         success: false,
         skipped: true,
-        reason: `Topic "${topic}" already published. Skipping.`,
+        reason: 'All known topics (RSS + fallback list) are already published. Add more fallback topics or expand the RSS query.',
       });
     }
+
+    const slug = topicToSlug(topic);
 
     const apiKey = process.env.GEMINI_API_KEY;
     let content: string;
@@ -418,7 +440,7 @@ STYLE RULES:
     content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
     content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
 
-    const relatedSlugs = await findRelatedArticles(topic, slug);
+    const relatedSlugs = await findRelatedArticles(topic, slug, existingSlugs);
     let relatedSection = '';
     if (relatedSlugs.length > 0) {
       relatedSection = '\n\n## Related Articles\n\n';
@@ -447,7 +469,6 @@ STYLE RULES:
 
     const excerpt = buildExcerpt(plainText, 155);
 
-    // ✅ FIXED — natural title, no forced "Causes, Symptoms, Treatment and Prevention" suffix
     const seoTitle = topic.charAt(0).toUpperCase() + topic.slice(1);
 
     const metaDescription = buildExcerpt(plainText, 160);
@@ -521,6 +542,9 @@ ${content}
     return NextResponse.json({ success: true, topic, title: seoTitle });
   } catch (error) {
     console.error('Auto-publish failed:', error);
-    return NextResponse.json({ success: false, error: 'Auto-publish failed' }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
+    );
   }
 }
