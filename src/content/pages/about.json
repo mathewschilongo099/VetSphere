@@ -1,0 +1,36 @@
+{
+  "hero": {
+    "title": "About VetSphere",
+    "subtitle": "Dedicated to providing trusted veterinary knowledge for farmers and pet owners worldwide."
+  },
+  "founder": {
+    "name": "Mathews Chilongo",
+    "title": "Founder & Author",
+    "role": "Veterinary Practitioner & Freelancer",
+    "bio": "I created VetSphere out of a passion for animal health and a desire to make reliable veterinary knowledge accessible to everyone — whether you're a farmer in rural Africa, a pet owner in a city, or anywhere in between. My goal is to provide practical, accurate, and free information that helps you take better care of your animals."
+  },
+  "mission": "Empowering farmers and pet owners worldwide with accurate veterinary knowledge and practical tools for better animal health outcomes.",
+  "vision": "A world where every farmer and pet owner has free access to reliable, professional veterinary guidance regardless of their location.",
+  "values": [
+    {
+      "icon": "🐄",
+      "title": "Livestock Focus",
+      "desc": "Practical advice for cattle, goats, poultry, pigs and more — covering disease prevention, nutrition, and herd management."
+    },
+    {
+      "icon": "🐾",
+      "title": "Pet Care",
+      "desc": "Trusted guidance for dogs, cats and small animals to keep your pets healthy, happy and living their best lives."
+    },
+    {
+      "icon": "🌍",
+      "title": "Worldwide Reach",
+      "desc": "While rooted in African veterinary challenges, our content is relevant and useful for farmers and pet owners across the globe."
+    },
+    {
+      "icon": "💡",
+      "title": "Always Free",
+      "desc": "All our articles and resources are completely free. We believe quality veterinary knowledge should be accessible to everyone."
+    }
+  ]
+}
