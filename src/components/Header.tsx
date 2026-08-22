@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -22,19 +23,19 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2 shrink-0">
+        <Link href="/" className="flex items-center gap-2 shrink-0">
           <span className="text-2xl">🐾</span>
           <span className="text-xl font-extrabold text-gray-900">Vet<span className="text-green-600">Sphere</span></span>
-        </a>
+        </Link>
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-600">
-          <a href="/" className="hover:text-green-600 transition">Home</a>
-          <a href="/articles" className="hover:text-green-600 transition">Articles</a>
-          <a href="/services" className="hover:text-green-600 transition">Services</a>
-          <a href="/quiz" className="hover:text-green-600 transition font-medium text-green-700">🩺 Quiz</a>
-          <a href="/about" className="hover:text-green-600 transition">About</a>
-          <a href="/ask" className="hover:text-green-600 transition text-green-600 font-semibold">Ask VetAssist</a>
+          <Link href="/" className="hover:text-green-600 transition">Home</Link>
+          <Link href="/articles" className="hover:text-green-600 transition">Articles</Link>
+          <Link href="/services" className="hover:text-green-600 transition">Services</Link>
+          <Link href="/quiz" className="hover:text-green-600 transition font-medium text-green-700">🩺 Quiz</Link>
+          <Link href="/about" className="hover:text-green-600 transition">About</Link>
+          <Link href="/ask" className="hover:text-green-600 transition text-green-600 font-semibold">Ask VetAssist</Link>
         </nav>
 
         {/* Right Side */}
@@ -48,9 +49,9 @@ export default function Header() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
-          <a href="/contact" className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition">
+          <Link href="/contact" className="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition">
             Contact Us
-          </a>
+          </Link>
         </div>
 
         {/* Mobile Right */}
@@ -116,22 +117,22 @@ export default function Header() {
               { href: '/about', label: 'About' },
               { href: '/ask', label: '🤖 Ask VetAssist' },
             ].map(({ href, label }) => (
-              <a
+              <Link
                 key={href}
                 href={href}
                 className="py-3 px-2 text-gray-700 font-medium border-b border-gray-50 hover:text-green-600 transition"
                 onClick={() => setMenuOpen(false)}
               >
                 {label}
-              </a>
+              </Link>
             ))}
-            <a
+            <Link
               href="/contact"
               className="mt-3 mb-2 bg-green-600 text-white text-center font-semibold py-3 rounded-xl hover:bg-green-700 transition"
               onClick={() => setMenuOpen(false)}
             >
               Contact Us
-            </a>
+            </Link>
           </div>
         </div>
       )}
