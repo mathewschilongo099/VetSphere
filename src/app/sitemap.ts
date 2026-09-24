@@ -2,7 +2,7 @@ import { getAllPosts } from '@/lib/blog';
 
 export default function sitemap() {
   const posts = getAllPosts();
-  const baseUrl = 'https://vet-sphere.vercel.app';
+  const baseUrl = 'https://vetsphere.cc.cd';
 
   const articleUrls = posts.map((post) => ({
     url: `${baseUrl}/articles/${post.slug}`,
