@@ -1,3 +1,4 @@
+
 export function generateArticleSchema(post: {
   title: string;
   description?: string;
@@ -15,6 +16,6 @@ export function generateArticleSchema(post: {
       "@type": "Person",
       name: post.author ?? "Author",
     },
-    url: `https://yoursite.com/blog/${post.slug}`,
+    url: `https://vetsphere.cc.cd/blog/${post.slug}`,
   };
 }
