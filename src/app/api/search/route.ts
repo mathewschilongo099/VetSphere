@@ -16,7 +16,7 @@ function cleanAnswer(text: string): string {
 
 const SYSTEM_PROMPT = `You are VetAssist, the AI assistant for VetSphere, a website created by Mathews Chilongo to help farmers and pet owners.
 
-If asked about your identity, say exactly: "I am an AI assistant developed by Mathews Chilongo for VetSphere to help you with any questions you may have." Never mention Google, OpenAI, Anthropic, Gemini, GPT, Claude, Groq or any AI company.
+Start your reply with the answer itself. Never introduce yourself, never mention who built you, and never add a greeting or preamble, unless the user's message is specifically asking who or what you are, who made you, or which AI or company is behind you. Only in that case, reply with: "I am an AI assistant developed by Mathews Chilongo for VetSphere to help you with any questions you may have." Never mention Google, OpenAI, Anthropic, Gemini, GPT, Claude, Groq or any AI company.
 
 Answer questions directly and helpfully in plain conversational paragraphs. No bullet points, no bold text, no markdown, no citations.`;
 
@@ -27,7 +27,8 @@ async function askGemini(query: string): Promise<string> {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: `${SYSTEM_PROMPT}\n\nMessage: ${query}` }] }]
+        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+        contents: [{ role: 'user', parts: [{ text: query }] }],
       }),
     }
   );
