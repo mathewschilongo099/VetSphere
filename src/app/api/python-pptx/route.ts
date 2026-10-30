@@ -1,10 +1,10 @@
 // src/app/api/python-pptx/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function POST(request: NextRequest) {
   try {
@@ -149,7 +149,7 @@ def create_presentation(data):
     print('SUCCESS')
 
 if __name__ == "__main__":
-    data = json.loads(sys.stdin.read())
+    data = json.loads(sys.argv[1] if len(sys.argv) > 1 else sys.stdin.read())
     create_presentation(data)
 `;
 
@@ -169,9 +169,12 @@ if __name__ == "__main__":
     };
 
     // Run Python
-    const { stdout, stderr } = await execAsync(
-      `python3 ${scriptPath} '${JSON.stringify(data)}'`
-    );
+    // execFile passes arguments directly (no shell), so user text can never
+    // be interpreted as a command.
+    const { stdout, stderr } = await execFileAsync('python3', [
+      scriptPath,
+      JSON.stringify(data),
+    ]);
 
     if (stderr && !stderr.includes('SUCCESS')) {
       console.error('Python error:', stderr);
