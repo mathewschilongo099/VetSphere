@@ -18,19 +18,20 @@ export async function generateMetadata(
 
   const imageUrl = post.image?.startsWith('http')
     ? post.image
-    : `https://vet-sphere.vercel.app${post.image}`;
+    : `https://vetsphere.cc.cd${post.image}`;
 
   return {
     title: `${post.title} | VetSphere`,
     description: post.description,
     keywords: post.tags?.join(', ') || '',
+    alternates: { canonical: `/articles/${post.slug}` },
     openGraph: {
       title: post.title,
       description: post.description,
       type: 'article',
       publishedTime: post.date,
       authors: ['Mathews Chilongo'],
-      url: `https://vet-sphere.vercel.app/articles/${post.slug}`,
+      url: `https://vetsphere.cc.cd/articles/${post.slug}`,
       images: [{ url: imageUrl, alt: post.imageAlt || post.title }],
     },
     twitter: {
