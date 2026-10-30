@@ -6,6 +6,6 @@ export default function robots() {
         allow: '/',
       },
     ],
-    sitemap: 'https://vet-sphere.vercel.app/sitemap.xml',
+    sitemap: 'https://vetsphere.cc.cd/sitemap.xml',
   };
 }
