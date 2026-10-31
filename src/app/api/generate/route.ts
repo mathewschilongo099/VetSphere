@@ -1,7 +1,10 @@
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { callGemini, GeminiError, publicGeminiMessage } from '@/lib/pipeline/gemini';
+
+const MAX_TOPIC_LENGTH = 200;
 
 const FALLBACK_IMAGES = [
   'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
@@ -115,6 +118,8 @@ STYLE RULES:
 - Use simple, clear English
 - Include relevant keywords naturally
 - Include at least 5 FAQs
+- Do not invent statistics, studies, drug doses or references
+- Treatment information is general education only; tell readers to consult a qualified veterinarian
 - No citations
 - No references section
 - No images or image descriptions
@@ -174,6 +179,14 @@ function cleanContent(content: string): string {
   return content;
 }
 
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 const insertAfterHeading = (
   text: string,
   headingPattern: RegExp,
@@ -184,7 +197,7 @@ const insertAfterHeading = (
   const match = text.match(headingPattern);
   if (!match) return text;
   const heading = match[0];
-  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
+  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${escapeAttr(altText)}" loading="lazy" />\n`);
 };
 
 // Cleans a raw title string returned by the model: strips quotes, markdown
@@ -219,11 +232,7 @@ function fallbackTitle(topic: string): string {
 // Generates a title that matches the style/structure of the article that
 // was actually produced, rather than forcing every topic into the same
 // "Causes, Symptoms, Treatment & Prevention" template.
-async function generateTitle(
-  model: ReturnType<GoogleGenerativeAI['getGenerativeModel']>,
-  topic: string,
-  articleContent: string
-): Promise<string> {
+async function generateTitle(topic: string, articleContent: string): Promise<string> {
   const contentPreview = articleContent.slice(0, 600);
 
   const titlePrompt = `
@@ -251,11 +260,14 @@ ${contentPreview}
 """
 `.trim();
 
-  const result = await model.generateContent(titlePrompt);
-  const response = await result.response;
-  const rawTitle = response.text();
+  const result = await callGemini({
+    prompt: titlePrompt,
+    maxOutputTokens: 200,
+    thinkingLevel: 'low',
+    timeoutMs: 15000,
+  });
 
-  const cleaned = sanitizeTitle(rawTitle, topic);
+  const cleaned = sanitizeTitle(result.text, topic);
   if (!cleaned) {
     throw new Error('Title generation returned unusable output');
   }
@@ -263,26 +275,25 @@ ${contentPreview}
 }
 
 export async function GET(request: NextRequest) {
-  const topic = request.nextUrl.searchParams.get('topic');
+  const topic = request.nextUrl.searchParams.get('topic')?.trim();
 
   if (!topic) {
     return NextResponse.json({ error: 'Topic required' }, { status: 400 });
   }
+  if (topic.length > MAX_TOPIC_LENGTH) {
+    return NextResponse.json(
+      { error: `Topic is too long (maximum ${MAX_TOPIC_LENGTH} characters)` },
+      { status: 400 }
+    );
+  }
 
   try {
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
+    if (!process.env.GEMINI_API_KEY?.trim()) {
       return NextResponse.json(
         { error: 'Missing Gemini API key' },
         { status: 500 }
       );
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
-    });
 
     const seoPrompt = `
 Return ONLY valid JSON, with no markdown code fences and no extra commentary.
@@ -308,12 +319,21 @@ Topic: "${topic}"
 
     let seo;
     try {
-      const seoResult = await model.generateContent(seoPrompt);
-      const seoResponse = await seoResult.response;
-      const seoText = extractJson(seoResponse.text());
-      seo = JSON.parse(seoText);
+      const seoResult = await callGemini({
+        prompt: seoPrompt,
+        json: true,
+        maxOutputTokens: 800,
+        thinkingLevel: 'low',
+        timeoutMs: 15000,
+      });
+      seo = JSON.parse(extractJson(seoResult.text));
+      seo.secondary_keywords = Array.isArray(seo.secondary_keywords) ? seo.secondary_keywords : [];
+      seo.long_tail_keywords = Array.isArray(seo.long_tail_keywords) ? seo.long_tail_keywords : [];
     } catch (seoError) {
-      console.error('SEO keyword step failed:', seoError);
+      console.error(
+        'SEO keyword step failed:',
+        seoError instanceof GeminiError ? seoError.kind : seoError instanceof Error ? seoError.message : 'unknown'
+      );
       seo = {
         primary_keyword: topic,
         secondary_keywords: [],
@@ -355,6 +375,8 @@ STYLE RULES:
 - Use simple, clear English
 - Include relevant keywords naturally
 - Include at least 5 FAQs at the end
+- Do not invent statistics, studies, drug doses or references; only state well-established veterinary facts
+- Treatment information is general education only, not a diagnosis; tell readers to consult a qualified veterinarian or animal health professional for a sick animal
 - No citations
 - No references section
 - No images or image descriptions
@@ -365,23 +387,28 @@ Write only the article content with appropriate headings.`;
     let content: string;
     let usedFallback = false;
     try {
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      content = response.text();
+      const result = await callGemini({
+        prompt,
+        maxOutputTokens: 8192,
+        thinkingLevel: 'low',
+        timeoutMs: 45000,
+      });
+      content = result.text;
 
       if (!content || content.trim().length < 200) {
         throw new Error('Gemini returned empty or too-short content');
       }
     } catch (genError) {
-      console.error('Gemini generation failed, falling back to you.com:', genError);
+      console.error(
+        'Gemini generation failed, falling back to you.com:',
+        genError instanceof GeminiError ? `${genError.kind} (${genError.status ?? 'n/a'})` : genError instanceof Error ? genError.message : 'unknown'
+      );
       try {
         content = await generateWithYouCom(topic);
         usedFallback = true;
       } catch (fallbackError) {
-        console.error('you.com fallback also failed:', fallbackError);
-        throw new Error(
-          `Both Gemini and you.com fallback failed. Gemini: ${genError instanceof Error ? genError.message : 'unknown'}. you.com: ${fallbackError instanceof Error ? fallbackError.message : 'unknown'}`
-        );
+        console.error('you.com fallback also failed:', fallbackError instanceof Error ? fallbackError.message : 'unknown');
+        throw genError;
       }
     }
 
@@ -406,9 +433,12 @@ Write only the article content with appropriate headings.`;
     // back to the old hardcoded format only if this step fails.
     let seoTitle: string;
     try {
-      seoTitle = await generateTitle(model, topic, content);
+      seoTitle = await generateTitle(topic, content);
     } catch (titleError) {
-      console.error('Title generation failed, using fallback title:', titleError);
+      console.error(
+        'Title generation failed, using fallback title:',
+        titleError instanceof GeminiError ? titleError.kind : titleError instanceof Error ? titleError.message : 'unknown'
+      );
       seoTitle = fallbackTitle(topic);
     }
 
@@ -438,10 +468,11 @@ Write only the article content with appropriate headings.`;
     });
 
   } catch (error) {
-    console.error('Generate route failed:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Generation failed' },
-      { status: 500 }
+    console.error(
+      'Generate route failed:',
+      error instanceof GeminiError ? `${error.kind} (${error.status ?? 'n/a'})` : error instanceof Error ? error.message : 'unknown'
     );
+    const status = error instanceof GeminiError && error.kind === 'rate_limited' ? 429 : 500;
+    return NextResponse.json({ error: publicGeminiMessage(error) }, { status });
   }
 }
