@@ -2,16 +2,63 @@ name: Auto Publish Article
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # Runs at 6:00 AM UTC
-    - cron: '0 12 * * *'  # Runs at 12:00 PM UTC
-    - cron: '0 18 * * *'  # Runs at 6:00 PM UTC
-  workflow_dispatch:  # Also allows manual trigger
+    - cron: '0 6 * * *'
+    - cron: '0 12 * * *'
+    - cron: '0 18 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run every check but do not publish'
+        type: boolean
+        default: false
 
 jobs:
   autopublish:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SITE: https://vetsphere.cc.cd
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '1' || '0' }}
     steps:
-      - name: Trigger Auto Publish
+      - name: Research, write and publish
         run: |
-          curl -X GET "https://vet-sphere.vercel.app/api/autopublish" \
-            -H "Content-Type: application/json"
+          set -euo pipefail
+          if [ -z "${CRON_SECRET}" ]; then
+            echo "::error::The CRON_SECRET repository secret is not set."
+            exit 1
+          fi
+          call() {
+            local stage="$1" input="$2" output="$3" query=""
+            [ "$stage" = "publish" ] && [ "$DRY_RUN" = "1" ] && query="?dryRun=1"
+            local args=(-sS --max-time 90 -o "$output" -w '%{http_code}' -X POST
+              "$SITE/api/autopublish/${stage}${query}"
+              -H "Authorization: Bearer ${CRON_SECRET}"
+              -H "Content-Type: application/json")
+            [ "$input" != "-" ] && args+=(--data-binary "@${input}")
+            local code
+            code=$(curl "${args[@]}")
+            if [ "$code" != "200" ]; then
+              echo "::error::Stage '${stage}' returned HTTP ${code}"
+              jq -r '.error // .' "$output" 2>/dev/null || cat "$output"
+              exit 1
+            fi
+            if [ "$(jq -r '.ok' "$output")" != "true" ]; then
+              echo "::notice::Stage '${stage}' did not continue: $(jq -r '.reason // .error // "unknown"' "$output")"
+              exit 0
+            fi
+          }
+          echo "1/4 Choosing a topic"
+          call topic - topic.json
+          echo "Topic: $(jq -r '.topic.topic' topic.json)"
+          echo "2/4 Researching"
+          jq '{topic: .topic}' topic.json > research-input.json
+          call research research-input.json research.json
+          echo "3/4 Writing"
+          jq '{research: .research}' research.json > write-input.json
+          call write write-input.json draft.json
+          echo "Words: $(jq -r '.words' draft.json)"
+          echo "4/4 Fact-checking and publishing"
+          jq -s '{research: .[0].research, draft: .[1].draft}' research.json draft.json > publish-input.json
+          call publish publish-input.json result.json
+          jq -r 'if .dryRun then "DRY RUN OK: \(.title) (score \(.score))" else "Published: \(.title) (score \(.score))" end' result.json
