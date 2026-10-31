@@ -1,5 +1,8 @@
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { callGemini, GeminiError, publicGeminiMessage } from '@/lib/pipeline/gemini';
 
 const FALLBACK_IMAGES = [
   'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
@@ -8,6 +11,44 @@ const FALLBACK_IMAGES = [
   'https://images.pexels.com/photos/18351941/pexels-photo-18351941/free-photo-of-a-veterinarian-examining-a-dog.jpeg?w=800&h=400&fit=crop',
   'https://images.pexels.com/photos/18351938/pexels-photo-18351938/free-photo-of-a-veterinarian-holding-a-cat.jpeg?w=800&h=400&fit=crop',
 ];
+
+// Only public http(s) pages may be fetched. This blocks requests to localhost,
+// private networks and cloud metadata addresses (server-side request forgery).
+function isSafePublicUrl(raw: string): URL | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    return null;
+  }
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null;
+  if (parsed.username || parsed.password) return null;
+
+  const host = parsed.hostname.toLowerCase();
+  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') || host.endsWith('.internal')) {
+    return null;
+  }
+  // IPv6 literals (including loopback / link-local) are not needed for article URLs.
+  if (host.startsWith('[') || host.includes(':')) return null;
+
+  const ipv4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+  if (ipv4) {
+    const [a, b] = [Number(ipv4[1]), Number(ipv4[2])];
+    if (
+      a === 0 ||
+      a === 10 ||
+      a === 127 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127) ||
+      a >= 224
+    ) {
+      return null;
+    }
+  }
+  return parsed;
+}
 
 async function getPexelsImage(query: string): Promise<string> {
   try {
@@ -128,6 +169,14 @@ function cleanContent(content: string): string {
   return content;
 }
 
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 const insertAfterHeading = (
   text: string,
   headingPattern: RegExp,
@@ -138,27 +187,61 @@ const insertAfterHeading = (
   const match = text.match(headingPattern);
   if (!match) return text;
   const heading = match[0];
-  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${altText}" loading="lazy" />\n`);
+  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${escapeAttr(altText)}" loading="lazy" />\n`);
 };
 
 export async function POST(request: NextRequest) {
   try {
-    const { url, topic } = await request.json();
+    let body: { url?: unknown; topic?: unknown };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+    const url = body.url;
+    const topic = typeof body.topic === 'string' ? body.topic.slice(0, 200) : undefined;
 
-    if (!url) {
+    if (!url || typeof url !== 'string') {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; VetSphereBot/1.0)',
-      },
-    });
+    const safeUrl = isSafePublicUrl(url);
+    if (!safeUrl) {
+      return NextResponse.json(
+        { error: 'Please provide a public http(s) article URL.' },
+        { status: 400 }
+      );
+    }
+
+    const controller = new AbortController();
+    const fetchTimer = setTimeout(() => controller.abort(), 15000);
+    let response: Response;
+    try {
+      response = await fetch(safeUrl.toString(), {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (compatible; VetSphereBot/1.0)',
+        },
+        // Do not follow redirects automatically: a redirect could point at an internal address.
+        redirect: 'manual',
+        signal: controller.signal,
+      });
+    } catch {
+      return NextResponse.json({ error: 'Could not fetch that URL.' }, { status: 502 });
+    } finally {
+      clearTimeout(fetchTimer);
+    }
+
+    if (response.status >= 300 && response.status < 400) {
+      return NextResponse.json(
+        { error: 'That URL redirects elsewhere. Please paste the final article URL.' },
+        { status: 400 }
+      );
+    }
 
     if (!response.ok) {
       return NextResponse.json(
         { error: `Failed to fetch URL: ${response.status}` },
-        { status: response.status }
+        { status: 502 }
       );
     }
 
@@ -182,13 +265,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
+    if (!process.env.GEMINI_API_KEY?.trim()) {
       return NextResponse.json({ error: 'Missing Gemini API key' }, { status: 500 });
     }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const prompt = `
 You are an expert veterinary SEO writer and content creator. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN blog post.
@@ -219,6 +298,8 @@ STYLE RULES:
 - Use simple, clear English
 - Include relevant keywords naturally
 - Include at least 5 FAQs at the end
+- Only use facts that appear in the source content; do not invent statistics, studies, drug doses or references
+- Treatment information is general education only, not a diagnosis; tell readers to consult a qualified veterinarian or animal health professional for a sick animal
 - No citations
 - No references section
 - No images or image descriptions
@@ -227,8 +308,23 @@ STYLE RULES:
 
 Return ONLY the article content in plain text format.`;
 
-    let content = await model.generateContent(prompt);
-    let result = content.response.text();
+    let result: string;
+    try {
+      const generated = await callGemini({
+        prompt,
+        maxOutputTokens: 8192,
+        thinkingLevel: 'low',
+        timeoutMs: 45000,
+      });
+      result = generated.text;
+    } catch (genError) {
+      console.error(
+        'Rewrite generation failed:',
+        genError instanceof GeminiError ? `${genError.kind} (${genError.status ?? 'n/a'})` : genError instanceof Error ? genError.message : 'unknown'
+      );
+      const status = genError instanceof GeminiError && genError.kind === 'rate_limited' ? 429 : 502;
+      return NextResponse.json({ error: publicGeminiMessage(genError) }, { status });
+    }
 
     if (!result || result.trim().length < 200) {
       return NextResponse.json(
@@ -268,9 +364,9 @@ Return ONLY the article content in plain text format.`;
     });
 
   } catch (error) {
-    console.error('Error rewriting from URL:', error);
+    console.error('Error rewriting from URL:', error instanceof Error ? error.message : 'unknown');
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Failed to process URL' },
+      { error: 'Failed to process URL' },
       { status: 500 }
     );
   }
