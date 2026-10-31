@@ -337,19 +337,27 @@ export default function AdminPage() {
   }, [pagesTab]);
 
   // ── LOGIN ──
-  const handleLogin = (e: React.FormEvent) => {
+  // The password is checked on the server, which then sets a signed,
+  // HTTP-only session cookie. Nothing secret is shipped to the browser.
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-    const adminPassword = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-    if (!adminPassword) {
-      setLoginError('Admin password not configured.');
-      return;
-    }
-    if (password === adminPassword) {
-      setAuthenticated(true);
-      loadStats();
-    } else {
-      setLoginError('Wrong password. Please try again.');
+    try {
+      const res = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success) {
+        setAuthenticated(true);
+        setPassword('');
+        loadStats();
+      } else {
+        setLoginError(data.message || 'Wrong password. Please try again.');
+      }
+    } catch {
+      setLoginError('Could not reach the server. Please try again.');
     }
   };
 
@@ -500,20 +508,69 @@ ${article}
   // ── AUTO-PUBLISH NOW ──
   const handleRunAutoPublish = async () => {
     setAutoPublishRunning(true);
-    setAutoPublishMessage('⏳ Running auto-publish...');
+    // The pipeline runs in four separate server calls so that each one stays
+    // well inside the serverless time limit.
+    const callStage = async (stage: string, body?: unknown) => {
+      const res = await fetch(`/api/autopublish/${stage}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      if (res.status === 401) throw new Error('Your session expired. Please log in again.');
+      return res.json().catch(() => ({ ok: false, error: `Server error (${res.status})` }));
+    };
+
     try {
-      const res = await fetch('/api/autopublish');
-      const data = await res.json();
-      if (data.success) {
-        setAutoPublishMessage(`✅ Published: "${data.title}"`);
-        loadStats();
-      } else if (data.skipped) {
-        setAutoPublishMessage(`⚠️ Skipped: ${data.reason}`);
-      } else {
-        setAutoPublishMessage(`❌ Failed: ${data.error || 'Unknown error'}`);
+      setAutoPublishMessage('⏳ Step 1 of 4: finding a trending livestock topic...');
+      const chosen = await callStage('topic');
+      if (!chosen.ok) {
+        setAutoPublishMessage(
+          chosen.skipped
+            ? `⚠️ Skipped: ${chosen.reason}`
+            : `❌ Topic search failed: ${chosen.error || 'Unknown error'}`
+        );
+        return;
       }
-    } catch {
-      setAutoPublishMessage('❌ Auto-publish failed. Try again.');
+
+      setAutoPublishMessage(`⏳ Step 2 of 4: researching "${chosen.topic.topic}"...`);
+      const researched = await callStage('research', { topic: chosen.topic });
+      if (!researched.ok) {
+        setAutoPublishMessage(
+          researched.skipped
+            ? `⚠️ Skipped: ${researched.reason}`
+            : `❌ Research failed: ${researched.error || 'Unknown error'}`
+        );
+        return;
+      }
+
+      setAutoPublishMessage(`⏳ Step 3 of 4: writing "${researched.research.topic}"...`);
+      const written = await callStage('write', { research: researched.research });
+      if (!written.ok) {
+        setAutoPublishMessage(
+          written.skipped
+            ? `⚠️ Skipped: ${written.reason}`
+            : `❌ Writing failed: ${written.error || 'Unknown error'}`
+        );
+        return;
+      }
+
+      setAutoPublishMessage('⏳ Step 4 of 4: fact-checking and publishing...');
+      const published = await callStage('publish', {
+        research: researched.research,
+        draft: written.draft,
+      });
+      if (published.ok) {
+        setAutoPublishMessage(`✅ Published: "${published.title}"`);
+        loadStats();
+      } else if (published.skipped) {
+        setAutoPublishMessage(`⚠️ Not published: ${published.reason}`);
+      } else {
+        setAutoPublishMessage(`❌ Publish failed: ${published.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      setAutoPublishMessage(
+        `❌ ${error instanceof Error ? error.message : 'Auto-publish failed. Try again.'}`
+      );
     } finally {
       setAutoPublishRunning(false);
     }
@@ -568,7 +625,7 @@ ${article}
             </div>
             <div className="flex items-center gap-3">
               <a href="/articles" target="_blank" className="text-green-400 text-sm hover:underline">View Site →</a>
-              <button onClick={() => setAuthenticated(false)} className="text-gray-400 hover:text-white text-sm transition">Logout</button>
+              <button onClick={async () => { await fetch('/api/admin-logout', { method: 'POST' }).catch(() => {}); setAuthenticated(false); }} className="text-gray-400 hover:text-white text-sm transition">Logout</button>
             </div>
           </div>
 
@@ -1124,9 +1181,10 @@ ${article}
                   {[
                     { label: 'Schedule', value: '3 times daily' },
                     { label: 'Next runs (UTC)', value: '6:00 AM · 12:00 PM · 6:00 PM' },
-                    { label: 'AI Model', value: 'Gemini 2.5 Flash' },
-                    { label: 'Images', value: 'Pexels + Unsplash' },
-                    { label: 'Topic source', value: 'Google News + Fallback list' },
+                    { label: 'AI Model', value: 'Gemini 2.5 Flash (web research)' },
+                    { label: 'Images', value: 'Pexels' },
+                    { label: 'Topic source', value: 'Live news, last 7 days' },
+                    { label: 'Safety', value: 'Fact-check + quality gate' },
                   ].map(({ label, value }) => (
                     <div key={label} className="flex justify-between">
                       <span className="text-gray-400">{label}</span>
@@ -1147,7 +1205,7 @@ ${article}
               <div className="bg-gray-800 rounded-2xl p-6">
                 <h2 className="text-lg font-bold mb-3">🔐 Security</h2>
                 <div className="bg-green-900/30 border border-green-700 rounded-xl p-4 text-sm text-green-300">
-                  ✅ Admin password loaded from <code className="bg-gray-700 px-1 rounded">NEXT_PUBLIC_ADMIN_PASSWORD</code> — not hardcoded in source code.
+                  ✅ Login is checked on the server using <code className="bg-gray-700 px-1 rounded">ADMIN_PASSWORD</code> and a signed, HTTP-only session cookie. All write APIs require it.
                 </div>
               </div>
 
@@ -1164,7 +1222,9 @@ ${article}
                     { key: 'GITHUB_OWNER', desc: 'Your GitHub username' },
                     { key: 'GITHUB_REPO', desc: 'Your GitHub repo name' },
                     { key: 'VERCEL_DEPLOY_HOOK', desc: 'Auto redeploy after publish' },
-                    { key: 'NEXT_PUBLIC_ADMIN_PASSWORD', desc: 'Admin login password' },
+                    { key: 'ADMIN_PASSWORD', desc: 'Admin login password (server only)' },
+                    { key: 'SESSION_SECRET', desc: 'Random string that signs admin sessions' },
+                    { key: 'CRON_SECRET', desc: 'Lets the scheduled GitHub job call autopublish' },
                   ].map(({ key, desc }) => (
                     <div key={key} className="flex items-center justify-between bg-gray-700 rounded-xl px-4 py-2">
                       <code className="text-green-400 text-xs">{key}</code>

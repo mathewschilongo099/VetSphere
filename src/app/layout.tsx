@@ -5,7 +5,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://vet-sphere.vercel.app'),
+  metadataBase: new URL('https://vetsphere.cc.cd'),
   applicationName: 'VetSphere',
   title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
   description:
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
     description:
       'Expert veterinary articles for farmers and pet owners. Practical, reliable and free.',
-    url: 'https://vet-sphere.vercel.app',
+    url: 'https://vetsphere.cc.cd',
     siteName: 'VetSphere',
     type: 'website',
   },

@@ -27,10 +27,6 @@ export default function sitemap() {
       lastModified: new Date(),
     },
     {
-      url: `${baseUrl}/gallery`,
-      lastModified: new Date(),
-    },
-    {
       url: `${baseUrl}/contact`,
       lastModified: new Date(),
     },
