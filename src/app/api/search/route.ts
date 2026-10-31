@@ -1,5 +1,8 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
+import { callGemini } from '@/lib/pipeline/gemini';
+
+const MAX_QUERY_LENGTH = 500;
 
 function cleanAnswer(text: string): string {
   return text
@@ -26,25 +29,19 @@ Reply: I am doing well, thank you. What can I help you with?
 
 Only when the user asks who or what you are, who made you, or which AI is behind you, say that you are VetAssist, an AI assistant for the VetSphere website, made by Mathews Chilongo. Never mention Google, OpenAI, Anthropic, Gemini, GPT, Claude, Groq or any AI company or model.
 
+For questions about animal health, give general educational information only. You cannot diagnose or prescribe. When a question describes a sick or injured animal, or asks about medicines or doses, say clearly that a qualified veterinarian or animal health professional needs to examine the animal, and say so early in the answer if the situation sounds urgent.
+
 Write plain conversational paragraphs. No bullet points, no bold text, no markdown, no citations.`;
 
 async function askGemini(query: string): Promise<string> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [{ role: 'user', parts: [{ text: query }] }],
-      }),
-    }
-  );
-  if (!res.ok) throw new Error(`Gemini failed: ${res.status}`);
-  const data = await res.json();
-  const answer = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  if (!answer) throw new Error('Gemini empty response');
-  return answer;
+  const result = await callGemini({
+    system: SYSTEM_PROMPT,
+    prompt: query,
+    maxOutputTokens: 1024,
+    thinkingLevel: 'low',
+    timeoutMs: 25000,
+  });
+  return result.text;
 }
 
 async function askGroq(query: string): Promise<string> {
@@ -91,10 +88,16 @@ async function askYouCom(query: string): Promise<string> {
 }
 
 export async function GET(request: NextRequest) {
-  const query = request.nextUrl.searchParams.get('query');
+  const query = request.nextUrl.searchParams.get('query')?.trim();
 
   if (!query) {
     return NextResponse.json({ error: 'Query required' }, { status: 400 });
+  }
+  if (query.length > MAX_QUERY_LENGTH) {
+    return NextResponse.json(
+      { error: `Query is too long (maximum ${MAX_QUERY_LENGTH} characters)` },
+      { status: 400 }
+    );
   }
 
   // Try Gemini first
@@ -102,7 +105,7 @@ export async function GET(request: NextRequest) {
     const answer = await askGemini(query);
     return NextResponse.json({ answer: cleanAnswer(answer) });
   } catch (e) {
-    console.error('Gemini failed:', e);
+    console.error('Gemini failed:', e instanceof Error ? e.message : 'unknown error');
   }
 
   // Fallback to Groq
@@ -110,7 +113,7 @@ export async function GET(request: NextRequest) {
     const answer = await askGroq(query);
     return NextResponse.json({ answer: cleanAnswer(answer) });
   } catch (e) {
-    console.error('Groq failed:', e);
+    console.error('Groq failed:', e instanceof Error ? e.message : 'unknown error');
   }
 
   // Fallback to You.com
@@ -118,7 +121,7 @@ export async function GET(request: NextRequest) {
     const answer = await askYouCom(query);
     return NextResponse.json({ answer: cleanAnswer(answer) });
   } catch (e) {
-    console.error('You.com failed:', e);
+    console.error('You.com failed:', e instanceof Error ? e.message : 'unknown error');
   }
 
   // All failed
