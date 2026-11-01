@@ -10,6 +10,8 @@ export interface BlogPost {
   image: string;
   imageAlt: string;
   content: string;
+  /** Questions and answers taken from the article's FAQ section (answers are HTML). */
+  faqs?: { question: string; answerHtml: string }[];
   readingTime: number;
   readTime: string;
   featured: boolean;

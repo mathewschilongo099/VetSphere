@@ -1,57 +1,29 @@
-// Stage 4 of 4: final checks (duplicates, an independent fact-check by a second
-// model call), pick a matching photo, then publish. Add ?dryRun=1 to run
-// every check without publishing anything.
+// Stage 4 of 4: final checks, then publish.
+//  - quality checks and duplicate check
+//  - an independent fact-check (a second AI call)
+//  - pictures: found for the right animal and looked at by an AI, in parallel
+// Nothing is published unless the text AND the lead picture pass. Add
+// ?dryRun=1 to run every check without publishing anything.
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from 'next/server';
-import { callGemini, extractJson } from '@/lib/pipeline/gemini';
+import { generate, extractJson } from '@/lib/ai/client';
 import { checkDraft, findDuplicate, normalizeDraft, slugify, wordCount } from '@/lib/pipeline/gate';
 import { createArticleFile, listExistingArticles, triggerDeployHook } from '@/lib/pipeline/github';
 import { JUDGE_SYSTEM, buildJudgePrompt, type Research } from '@/lib/pipeline/prompts';
-
-const FALLBACK_IMAGE =
-  'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop';
+import { checkBodyImages, insertInlineImages } from '@/lib/images/insert';
+import { pickArticleImages } from '@/lib/images/pick';
+import { detectSubject } from '@/lib/images/subjects';
 
 function isResearch(value: unknown): value is Research {
   const v = value as Research;
   return !!v && typeof v.topic === 'string' && Array.isArray(v.facts) && Array.isArray(v.sources);
 }
 
-function imageQuery(topic: string): string {
-  const t = topic.toLowerCase();
-  if (/(poultry|chicken|avian|bird|newcastle|egg)/.test(t)) return 'chickens farm';
-  if (/(dairy|milk|mastitis)/.test(t)) return 'dairy cows farm';
-  if (/(cattle|cow|bovine|beef|lumpy|foot-and-mouth|fmd)/.test(t)) return 'cattle farm';
-  if (/(goat|ppr|peste)/.test(t)) return 'goats farm';
-  if (/(sheep|lamb)/.test(t)) return 'sheep flock farm';
-  if (/(pig|swine|hog)/.test(t)) return 'pigs farm';
-  return 'livestock farm';
-}
-
-async function pickImage(topic: string): Promise<{ url: string; alt: string }> {
-  const key = process.env.PEXELS_API_KEY;
-  if (!key) return { url: FALLBACK_IMAGE, alt: topic };
-  try {
-    const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(imageQuery(topic))}&per_page=15&orientation=landscape`,
-      { headers: { Authorization: key }, cache: 'no-store' }
-    );
-    if (!res.ok) return { url: FALLBACK_IMAGE, alt: topic };
-    const data = await res.json();
-    const photos: Array<{ src?: { large?: string }; alt?: string; width?: number; height?: number }> =
-      data?.photos ?? [];
-    // Rotate through the top results by day so consecutive articles do not share a photo.
-    const usable = photos.filter((p) => p.src?.large && (p.width ?? 1) >= (p.height ?? 0));
-    const pick = usable[new Date().getUTCDate() % Math.max(usable.length, 1)];
-    if (!pick?.src?.large) return { url: FALLBACK_IMAGE, alt: topic };
-    return { url: pick.src.large, alt: (pick.alt || topic).slice(0, 140) };
-  } catch {
-    return { url: FALLBACK_IMAGE, alt: topic };
-  }
-}
-
 export async function POST(request: NextRequest) {
+  const startedAt = Date.now();
+  const deadlineMs = startedAt + 56000;
   try {
     const dryRun = request.nextUrl.searchParams.get('dryRun') === '1';
     const body = await request.json().catch(() => null);
@@ -62,7 +34,7 @@ export async function POST(request: NextRequest) {
     const draft = normalizeDraft(body.draft);
 
     // 1. Re-run the cheap checks; never trust what arrives over the wire.
-    const gate = checkDraft(draft, JSON.stringify(research));
+    const gate = checkDraft(draft, JSON.stringify(research), { keyword: research.keyword });
     if (!gate.passed) {
       return NextResponse.json({ ok: false, skipped: true, reason: `Quality checks failed: ${gate.issues.join('; ')}` });
     }
@@ -74,15 +46,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ ok: false, skipped: true, reason: `Too similar to the existing article "${duplicate}".` });
     }
 
-    // 3. Independent fact-check. If this call fails we do NOT publish.
-    const judged = await callGemini({
-      system: JUDGE_SYSTEM,
-      prompt: buildJudgePrompt(research, draft.title, draft.body),
-      json: true,
-      temperature: 0,
-      maxOutputTokens: 1500,
-      timeoutMs: 30000,
-    });
+    // 3. Fact-check and pictures at the same time.
+    const subject = detectSubject({ title: draft.title, tags: draft.tags, body: draft.body });
+    const [judged, pictures] = await Promise.all([
+      generate({
+        system: JUDGE_SYSTEM,
+        prompt: buildJudgePrompt(research, draft.title, draft.body),
+        json: true,
+        temperature: 0,
+        maxOutputTokens: 1500,
+        timeoutMs: 28000,
+        deadlineMs,
+      }),
+      pickArticleImages({
+        subject,
+        topic: research.topic,
+        inlineCount: 2,
+        deadlineMs: deadlineMs - 2000,
+        seed: new Date().getUTCDate() + new Date().getUTCHours(),
+      }),
+    ]);
+
     const verdict = extractJson<{
       faithful?: boolean;
       unsupported_claims?: string[];
@@ -99,9 +83,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // 4. Build the file.
-    const image = await pickImage(research.topic);
-    const slug = slugify(draft.title);
+    // 4. A verified lead picture is required.
+    if (!pictures.hero) {
+      return NextResponse.json({
+        ok: false,
+        skipped: true,
+        reason: `No picture of ${subject.label} passed the picture check, so the article was not published. ${pictures.log.slice(-3).join(' | ')}`.trim(),
+      });
+    }
+
+    const bodyWithImages = insertInlineImages(draft.body, pictures.inline);
+    const imageIssues = checkBodyImages(bodyWithImages);
+    if (imageIssues.length > 0) {
+      return NextResponse.json({
+        ok: false,
+        skipped: true,
+        reason: `Picture checks failed: ${imageIssues.map((i) => i.problem).join('; ')}`,
+      });
+    }
+
+    // 5. Build the file.
+    const slug = slugify(research.keyword && research.keyword.length >= 8 ? research.keyword : draft.title);
+    const finalSlug = existing.some((a) => a.slug === slug) ? slugify(draft.title) : slug;
     const date = new Date().toISOString().slice(0, 10);
 
     const sourcesList = research.sources
@@ -115,37 +118,41 @@ date: ${JSON.stringify(date)}
 author: "VetSphere"
 category: ${JSON.stringify(draft.category)}
 tags: ${JSON.stringify(draft.tags)}
-image: ${JSON.stringify(image.url)}
-imageAlt: ${JSON.stringify(image.alt)}
+image: ${JSON.stringify(pictures.hero.url)}
+imageAlt: ${JSON.stringify(pictures.hero.alt)}
 featured: false
 excerpt: ${JSON.stringify(draft.description)}
 ---
 
-${draft.body}
-
-## Sources
-
-${sourcesList}
+${insertSourcesBeforeFaq(bodyWithImages, sourcesList)}
 `;
+
+    const summary = {
+      title: draft.title,
+      slug: finalSlug,
+      words: wordCount(draft.body),
+      score: verdict.score,
+      keyword: research.keyword,
+      images: [pictures.hero, ...pictures.inline].map((i) => ({ url: i.url, alt: i.alt, verified: i.verified })),
+      pictureLog: pictures.log,
+      factCheckedBy: judged.provider,
+    };
 
     if (dryRun) {
       return NextResponse.json({
         ok: true,
         dryRun: true,
-        title: draft.title,
-        slug,
-        words: wordCount(draft.body),
-        score: verdict.score,
+        ...summary,
         toneProblems: verdict.tone_problems ?? [],
         preview: markdown,
       });
     }
 
-    // 5. Publish.
-    await createArticleFile(slug, markdown, `Auto-publish: ${draft.title}`);
+    // 6. Publish.
+    await createArticleFile(finalSlug, markdown, `Auto-publish: ${draft.title}`);
     await triggerDeployHook();
 
-    return NextResponse.json({ ok: true, title: draft.title, slug, words: wordCount(draft.body), score: verdict.score });
+    return NextResponse.json({ ok: true, ...summary });
   } catch (error) {
     console.error('autopublish/publish failed:', error);
     return NextResponse.json(
@@ -153,4 +160,13 @@ ${sourcesList}
       { status: 500 }
     );
   }
+}
+
+/** The sources list goes just before the FAQ, which stays last in the file. */
+function insertSourcesBeforeFaq(body: string, sourcesList: string): string {
+  const lines = body.split('\n');
+  const faqAt = lines.findIndex((l) => /^##\s*frequently asked questions\b/i.test(l.trim()));
+  const sources = `## Sources\n\n${sourcesList}`;
+  if (faqAt === -1) return `${body}\n\n${sources}`;
+  return `${lines.slice(0, faqAt).join('\n').trimEnd()}\n\n${sources}\n\n${lines.slice(faqAt).join('\n')}`;
 }

@@ -4,6 +4,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import FaqAccordion from '@/components/FaqAccordion';
+
+const SITE = 'https://vetsphere.cc.cd';
+
+function jsonLd(data: unknown) {
+  // < is escaped so article text can never close the script tag.
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -49,6 +57,43 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
   const { prev, next } = getAdjacentPosts(params.slug);
   const relatedPosts = getRelatedPosts(params.slug, 3);
+
+  const imageUrl = post.image?.startsWith('http') ? post.image : `${SITE}${post.image}`;
+  const structuredData: Record<string, unknown>[] = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title.slice(0, 110),
+      description: post.description,
+      image: [imageUrl],
+      datePublished: post.date,
+      dateModified: post.date,
+      author: { '@type': 'Person', name: 'Mathews Chilongo' },
+      publisher: { '@type': 'Organization', name: 'VetSphere', logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` } },
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE}/articles/${post.slug}` },
+      keywords: post.tags?.join(', '),
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+        { '@type': 'ListItem', position: 2, name: 'Articles', item: `${SITE}/articles` },
+        { '@type': 'ListItem', position: 3, name: post.title, item: `${SITE}/articles/${post.slug}` },
+      ],
+    },
+  ];
+  if (post.faqs && post.faqs.length > 0) {
+    structuredData.push({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: post.faqs.map((f) => ({
+        '@type': 'Question',
+        name: f.question,
+        acceptedAnswer: { '@type': 'Answer', text: f.answerHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() },
+      })),
+    });
+  }
 
   const cleanContent = post.content
     .replace(/^---\s*$/gm, '')
@@ -134,6 +179,12 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           "
           dangerouslySetInnerHTML={{ __html: cleanContent }}
         />
+
+        <FaqAccordion faqs={post.faqs ?? []} />
+
+        {structuredData.map((data, i) => (
+          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(data) }} />
+        ))}
       </article>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
