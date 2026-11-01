@@ -19,10 +19,6 @@ export interface GeminiOptions {
   /** 0 turns thinking off (fastest). */
   thinkingBudget?: number;
   timeoutMs?: number;
-  /** Pictures to look at (base64), for image checks. */
-  images?: Array<{ mime: string; base64: string }>;
-  /** Override the model (defaults to GEMINI_MODEL or gemini-2.5-flash). */
-  model?: string;
 }
 
 export interface GeminiResult {
@@ -70,7 +66,7 @@ export async function callGemini(options: GeminiOptions): Promise<GeminiResult> 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
 
-  const model = options.model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
   const generationConfig: Record<string, unknown> = {
     temperature: options.temperature ?? 0.7,
     maxOutputTokens: options.maxOutputTokens ?? 4096,
@@ -81,15 +77,7 @@ export async function callGemini(options: GeminiOptions): Promise<GeminiResult> 
   }
 
   const body: Record<string, unknown> = {
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          ...(options.images ?? []).map((img) => ({ inline_data: { mime_type: img.mime, data: img.base64 } })),
-          { text: options.prompt },
-        ],
-      },
-    ],
+    contents: [{ role: 'user', parts: [{ text: options.prompt }] }],
     generationConfig,
   };
   if (options.system) body.systemInstruction = { parts: [{ text: options.system }] };
