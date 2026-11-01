@@ -8,6 +8,8 @@ import type { Source } from './gemini';
 
 export interface TopicChoice {
   topic: string;
+  /** The phrase a person would type into Google to find this story (2 to 5 words). */
+  keyword?: string;
   angle: string;
   whyNow: string;
   headlines: Array<{ title: string; source: string; date: string }>;
@@ -15,6 +17,10 @@ export interface TopicChoice {
 
 export interface Research {
   topic: string;
+  /** The phrase a person would type into Google to find this story. */
+  keyword?: string;
+  /** Real searches people type, from Google autocomplete. */
+  searches?: string[];
   angle: string;
   whyNow: string;
   headlines: Array<{ title: string; source: string; date: string }>;
@@ -43,13 +49,13 @@ Articles VetSphere has ALREADY published (do not repeat these; a genuinely new d
 ${existingTitles.slice(0, 150).join('; ') || '(none)'}
 
 Pick up to 3 topics, best first. A good topic:
-- is covered by 2 or more different outlets (trending), 
+- is covered by 2 or more different outlets (trending),
 - matters to people who keep or look after livestock (disease outbreaks and alerts, vaccines and treatments, feed or water problems, trade or movement rules that affect farmers, climate effects on animals, new farm practices that are backed by evidence),
 - can be explained with practical advice.
 Skip: human health stories, pets, company promotions, stock-market news, opinion about politics, anything you cannot explain with facts.
 
 Return ONLY JSON:
-{"candidates":[{"topic":"short plain topic name","angle":"the specific story to tell, one sentence","why_now":"why it matters this week, one sentence","headline_ids":[numbers of the headlines about this topic]}]}`;
+{"candidates":[{"topic":"short plain topic name","keyword":"the 2 to 5 words a farmer would type into Google to find this, e.g. lumpy skin disease outbreak","angle":"the specific story to tell, one sentence","why_now":"why it matters this week, one sentence","headline_ids":[numbers of the headlines about this topic]}]}`;
 }
 
 // ------------------------------------------------------------- 2. research
@@ -84,6 +90,23 @@ Return ONLY JSON:
 Give 6 to 12 facts.`;
 }
 
+/** Used when the web research came back as prose instead of JSON. */
+export function buildStructurePrompt(topic: TopicChoice, briefing: string): string {
+  return `Below is a research briefing about "${topic.topic}". Turn it into a fact sheet.
+Use ONLY what the briefing says. Copy numbers, dates, places and names exactly. Do not add anything from memory.
+If something is unclear or unconfirmed, put it under "unknowns".
+
+BRIEFING
+${briefing.slice(0, 9000)}
+
+Return ONLY JSON:
+{"summary":"2-3 sentences on what is happening",
+ "facts":[{"fact":"one clear statement","detail":"exact numbers/dates/places that go with it","source":"who reported it"}],
+ "farmer_actions":["practical step the briefing recommends"],
+ "unknowns":["things that are still unclear or unconfirmed"]}
+Give 6 to 12 facts.`;
+}
+
 // --------------------------------------------------------------- 3. writing
 
 export const WRITER_SYSTEM = `You write for VetSphere, a free veterinary knowledge website for livestock farmers, animal-health workers and students around the world.
@@ -98,15 +121,27 @@ TRUTH RULES (most important)
 - Where the research lists unknowns, say plainly what is not yet known.
 
 STYLE RULES
-- 900 to 1,300 words.
+- 900 to 1,300 words for the main article, plus the FAQ section described below.
 - The first two sentences give the news or the single most useful fact. No warm-up, no dictionary definition of the animal or the farm.
 - 4 to 6 sections with "##" headings that sound like a person wrote them: specific and short. Never use the headings "Introduction", "Overview", "Conclusion" or "Final thoughts".
 - Mostly paragraphs. Mix lengths: some one-sentence paragraphs, some longer. At most one short bullet list in the whole article.
 - Plain words. Contractions are fine (don't, it's). Mix short sentences with an occasional longer one. Speak to the reader as "you" when giving advice.
 - Do not use these phrases or anything like them: "in conclusion", "it is important to note", "it's worth noting", "delve", "landscape", "tapestry", "crucial role", "vital role", "comprehensive guide", "ever-evolving", "in today's", "dive into", "game-changer", "stay tuned".
 - Use few em dashes. Avoid lists of exactly three adjectives or three examples every time.
-- Finish with a short, practical section on what a farmer can do this week, then stop. No summary paragraph and no sign-off.
-- No links, no sources section (the site adds sources automatically).
+- Finish the main article with a short, practical section on what a farmer can do this week, then the FAQ. No summary paragraph and no sign-off.
+- No links, no pictures, no sources section (the site adds sources and checked pictures automatically).
+
+SEARCH (SEO) RULES
+- You are given a SEARCH PHRASE: the words people type into Google to find this. Put it, in natural wording, in the title (near the start) and in the first paragraph.
+- The title is 45 to 60 characters, specific and plain. Never more than 70.
+- The description is 140 to 158 characters and contains the search phrase.
+- Where it fits, write at least two "##" headings the way people search, for example "How is lumpy skin disease treated?" or "Signs of foot rot in goats". You are given REAL SEARCHES people type; use the ones the research can answer. Do not use a search whose answer is not in the research.
+- Never repeat the search phrase unnaturally. It must read like a person wrote it.
+
+FAQ (required)
+- After the last section, add "## Frequently Asked Questions" with 4 or 5 questions, each as a "### Question?" heading followed by a 35 to 70 word answer in plain prose.
+- Draw the questions from the REAL SEARCHES and from what a farmer would ask next. Answer ONLY from the research. Leave out any question the research cannot answer. No numbers in answers unless they are in the research.
+- The FAQ is separate from the "what a farmer can do this week" section, which stays last before the FAQ.
 
 OUTPUT
 Return ONLY JSON with these keys:
@@ -114,7 +149,7 @@ Return ONLY JSON with these keys:
 "description": 130 to 158 characters, one sentence saying what the reader will learn
 "category": one of ${CATEGORY_OPTIONS.map((c) => `"${c}"`).join(', ')}
 "tags": 4 to 6 lowercase tags
-"body": the article in markdown, without a title heading`;
+"body": the article in markdown, without a title heading, ending with the FAQ section`;
 
 export function buildWritePrompt(research: Research, feedback?: string[]): string {
   const facts = {
@@ -127,10 +162,13 @@ export function buildWritePrompt(research: Research, feedback?: string[]): strin
     unknowns: research.unknowns,
     sources: research.sources.map((s) => s.title),
   };
+  const seo = `SEARCH PHRASE: ${research.keyword || research.topic}\nREAL SEARCHES PEOPLE TYPE:\n${
+    research.searches && research.searches.length ? research.searches.map((q) => `- ${q}`).join('\n') : '(none available; use common-sense questions a farmer would ask)'
+  }`;
   const fixes = feedback && feedback.length
     ? `\n\nYour previous draft was rejected for these reasons. Fix every one of them. If a number is listed as not found, remove it or replace it with a figure from the research:\n- ${feedback.join('\n- ')}`
     : '';
-  return `Write the article from this research.\n\nRESEARCH JSON\n${JSON.stringify(facts, null, 2)}${fixes}`;
+  return `Write the article from this research.\n\n${seo}\n\nRESEARCH JSON\n${JSON.stringify(facts, null, 2)}${fixes}`;
 }
 
 // ---------------------------------------------------------------- 4. judging

@@ -3,7 +3,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { NextResponse } from 'next/server';
-import { callGemini, extractJson } from '@/lib/pipeline/gemini';
+import { generate, extractJson } from '@/lib/ai/client';
 import { findDuplicate } from '@/lib/pipeline/gate';
 import { listExistingArticles } from '@/lib/pipeline/github';
 import { TOPIC_SYSTEM, buildTopicPrompt, type TopicChoice } from '@/lib/pipeline/prompts';
@@ -11,12 +11,14 @@ import { fetchHeadlines } from '@/lib/pipeline/topics';
 
 interface Candidate {
   topic?: string;
+  keyword?: string;
   angle?: string;
   why_now?: string;
   headline_ids?: number[];
 }
 
 export async function POST() {
+  const startedAt = Date.now();
   try {
     const [existing, headlines] = await Promise.all([listExistingArticles(), fetchHeadlines()]);
 
@@ -28,7 +30,7 @@ export async function POST() {
       });
     }
 
-    const result = await callGemini({
+    const result = await generate({
       system: TOPIC_SYSTEM,
       prompt: buildTopicPrompt(
         headlines,
@@ -37,6 +39,7 @@ export async function POST() {
       json: true,
       temperature: 0.3,
       maxOutputTokens: 1500,
+      deadlineMs: startedAt + 50000,
     });
 
     const parsed = extractJson<{ candidates?: Candidate[] }>(result.text);
@@ -54,11 +57,12 @@ export async function POST() {
 
       const choice: TopicChoice = {
         topic,
+        keyword: (candidate.keyword ?? '').trim().slice(0, 80) || topic,
         angle: (candidate.angle ?? '').trim(),
         whyNow: (candidate.why_now ?? '').trim(),
         headlines: matched.slice(0, 8).map((h) => ({ title: h.title, source: h.source, date: h.date })),
       };
-      return NextResponse.json({ ok: true, topic: choice });
+      return NextResponse.json({ ok: true, topic: choice, provider: result.provider });
     }
 
     return NextResponse.json({
