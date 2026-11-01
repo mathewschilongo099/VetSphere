@@ -12,6 +12,7 @@
 // A provider with no key is skipped silently.
 
 import { callGemini, extractJson, type Source } from '@/lib/pipeline/gemini';
+import { callGeminiVision } from './gemini-vision';
 
 export type ProviderName = 'gemini' | 'groq' | 'cerebras' | 'openrouter' | 'you';
 
@@ -236,14 +237,24 @@ const PROVIDERS: Provider[] = [
     text: true,
     vision: true,
     search: true,
-    available: () => !!process.env.GEMINI_API_KEY,
+    available: () => !!process.env.GEMINI_API_KEY?.trim(),
     run: async (req, timeoutMs) => {
+      if (req.images?.length) {
+        const text = await callGeminiVision({
+          system: req.system,
+          prompt: req.prompt,
+          images: req.images,
+          json: req.json,
+          maxOutputTokens: req.maxOutputTokens,
+          timeoutMs,
+        });
+        return { text };
+      }
       const r = await callGemini({
         system: req.system,
         prompt: req.prompt,
         search: req.search,
         json: req.json,
-        images: req.images,
         temperature: req.temperature,
         maxOutputTokens: req.maxOutputTokens,
         timeoutMs,
@@ -334,7 +345,10 @@ const coolDown = new Map<ProviderName, number>();
 
 function statusOf(error: unknown): number | null {
   if (error instanceof HttpError) return error.status;
-  // The Gemini client reports "Gemini request failed (401): ..."
+  // The Gemini client throws errors that carry the HTTP status.
+  const direct = (error as { status?: unknown } | null)?.status;
+  if (typeof direct === 'number') return direct;
+  // Otherwise the message reads "Gemini request failed (401): ..."
   const match = error instanceof Error ? error.message.match(/failed \((\d{3})\)/) : null;
   return match ? Number(match[1]) : null;
 }
@@ -342,6 +356,7 @@ function statusOf(error: unknown): number | null {
 function remember(provider: ProviderName, error: unknown) {
   const status = statusOf(error);
   if (status === 401 || status === 403) coolDown.set(provider, Date.now() + 10 * 60_000);
+  else if (status === 404) coolDown.set(provider, Date.now() + 5 * 60_000);
   else if (status === 429 || status === 402) coolDown.set(provider, Date.now() + 60_000);
 }
 

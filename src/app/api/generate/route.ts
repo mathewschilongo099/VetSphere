@@ -1,146 +1,16 @@
+// Manual article generator used by the admin "Write" tab. Admin only (the
+// middleware protects every /api route that is not on the public list).
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from 'next/server';
-import { callGemini, GeminiError, publicGeminiMessage } from '@/lib/pipeline/gemini';
+import { AllProvidersFailed, generate, extractJson } from '@/lib/ai/client';
+import { insertInlineImages } from '@/lib/images/insert';
+import { pickArticleImages } from '@/lib/images/pick';
+import { detectSubject } from '@/lib/images/subjects';
+import { fetchSearchPhrases } from '@/lib/pipeline/seo';
 
 const MAX_TOPIC_LENGTH = 200;
-
-const FALLBACK_IMAGES = [
-  'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351947/pexels-photo-18351947/free-photo-of-a-goat-standing-in-a-field.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351941/pexels-photo-18351941/free-photo-of-a-veterinarian-examining-a-dog.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351938/pexels-photo-18351938/free-photo-of-a-veterinarian-holding-a-cat.jpeg?w=800&h=400&fit=crop',
-];
-
-async function getUnsplashImage(query: string): Promise<string> {
-  try {
-    const randomPage = Math.floor(Math.random() * 5) + 1;
-    const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
-      {
-        headers: {
-          Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
-        },
-      }
-    );
-    if (!res.ok) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const data = await res.json();
-    const results = data.results || [];
-    if (results.length === 0) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
-    return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  } catch {
-    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  }
-}
-
-async function getPexelsImage(query: string): Promise<string> {
-  try {
-    const randomPage = Math.floor(Math.random() * 5) + 1;
-    const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
-      {
-        headers: {
-          Authorization: process.env.PEXELS_API_KEY || '',
-        },
-      }
-    );
-    if (!res.ok) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const data = await res.json();
-    const results = data.photos || [];
-    if (results.length === 0) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
-    return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  } catch {
-    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  }
-}
-
-async function getArticleImage(query: string): Promise<string> {
-  const pexelsResult = await getPexelsImage(query);
-  if (pexelsResult && !pexelsResult.includes('fallback')) {
-    return pexelsResult;
-  }
-  const unsplashResult = await getUnsplashImage(query);
-  if (unsplashResult && !unsplashResult.includes('fallback')) {
-    return unsplashResult;
-  }
-  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-}
-
-function extractJson(text: string): string {
-  return text
-    .replace(/^```json\s*/i, '')
-    .replace(/^```\s*/, '')
-    .replace(/```\s*$/, '')
-    .trim();
-}
-
-async function generateWithYouCom(topic: string): Promise<string> {
-  const res = await fetch('https://api.you.com/v1/research', {
-    method: 'POST',
-    headers: {
-      'X-API-Key': process.env.YOU_API_KEY || '',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      input: `You are an expert veterinary SEO writer and content creator. Write a 1500+ word SEO blog about: "${topic}"
-
-IMPORTANT: Choose the BEST writing style for this topic:
-- For news/breaking topics: Write like a news article
-- For educational topics: Write like a helpful guide
-- For how-to topics: Write a step-by-step guide
-- For general topics: Write an engaging blog post
-
-DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
-
-STRUCTURE GUIDELINES:
-- Start with a compelling introduction
-- Use clear headings that make sense for the topic
-- Include practical, actionable information
-- Use bullet points and lists where helpful
-- End with a strong conclusion
-
-STYLE RULES:
-- Write like a helpful expert, not a textbook
-- Use "you" and "your" to speak directly to readers
-- Keep paragraphs short (2-3 sentences)
-- Use simple, clear English
-- Include relevant keywords naturally
-- Include at least 5 FAQs
-- Do not invent statistics, studies, drug doses or references
-- Treatment information is general education only; tell readers to consult a qualified veterinarian
-- No citations
-- No references section
-- No images or image descriptions
-- No horizontal lines (---)`,
-      research_effort: 'standard',
-    }),
-  });
-
-  if (!res.ok) {
-    throw new Error(`you.com fallback request failed with status ${res.status}`);
-  }
-
-  const data = await res.json();
-  const content = data.output?.content || '';
-
-  if (!content || content.trim().length < 200) {
-    throw new Error('you.com fallback returned empty or too-short content');
-  }
-
-  return content;
-}
 
 function buildFallbackTags(topic: string): string[] {
   const cleaned = topic
@@ -153,130 +23,45 @@ function buildFallbackTags(topic: string): string[] {
 }
 
 function cleanContent(content: string): string {
-  content = content.replace(/^# .+?\n/, '');
-  content = content.replace(
-    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
-    ''
-  );
-  content = content.replace(
-    /##\s*Frequently Asked Questions.*$/i,
-    ''
-  );
-  content = content.replace(
-    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|##|$)/g,
-    ''
-  );
-  content = content.replace(
-    /^\s*Frequently Asked Questions\s*$/gim,
-    ''
-  );
-  content = content.replace(
-    /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
-    ''
-  );
-  content = content.replace(/\n{3,}/g, '\n\n');
-  content = content.trim();
-  return content;
-}
-
-function escapeAttr(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-const insertAfterHeading = (
-  text: string,
-  headingPattern: RegExp,
-  imageUrl: string,
-  altText: string
-): string => {
-  if (!imageUrl) return text;
-  const match = text.match(headingPattern);
-  if (!match) return text;
-  const heading = match[0];
-  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${escapeAttr(altText)}" loading="lazy" />\n`);
-};
-
-// Cleans a raw title string returned by the model: strips quotes, markdown
-// bold/heading markers, trailing punctuation noise, and enforces a sane
-// max length so it stays SEO-friendly.
-function sanitizeTitle(raw: string, topic: string): string | null {
-  if (!raw) return null;
-
-  let title = raw
-    .split('\n')[0] // just in case the model added extra lines
-    .replace(/^#+\s*/, '') // leading markdown heading hashes
-    .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '') // wrapping quotes
-    .replace(/\*\*/g, '') // bold markers
-    .replace(/^Title:\s*/i, '') // stray "Title:" prefix
+  return content
+    .replace(/^# .+?\n/, '') // the page already shows the title
+    .replace(/!\[[^\]]*\]\([^)]*\)\s*\n*/g, '') // pictures are added and checked by the site
+    .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
+    .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
+    .replace(/^\s*---\s*$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
+}
 
+function sanitizeTitle(raw: string): string | null {
+  const title = raw
+    .split('\n')[0]
+    .replace(/^#+\s*/, '')
+    .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
+    .replace(/\*\*/g, '')
+    .replace(/^Title:\s*/i, '')
+    .trim();
   if (title.length < 5) return null;
-  if (title.length > 120) {
-    title = title.slice(0, 117).trim() + '...';
-  }
-
-  return title;
+  return title.length > 70 ? title.slice(0, 67).trim() + '...' : title;
 }
 
 function fallbackTitle(topic: string): string {
   return topic
     .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ') + ': Causes, Symptoms, Treatment & Prevention';
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
 
-// Generates a title that matches the style/structure of the article that
-// was actually produced, rather than forcing every topic into the same
-// "Causes, Symptoms, Treatment & Prevention" template.
-async function generateTitle(topic: string, articleContent: string): Promise<string> {
-  const contentPreview = articleContent.slice(0, 600);
-
-  const titlePrompt = `
-You are an expert SEO editor for a veterinary/animal-health website.
-
-Below is the topic and the opening of an article that was already written about it.
-Write ONE compelling, SEO-friendly title for this specific article.
-
-RULES:
-- The title must match the actual style and structure of the article content below
-  (e.g. if it's a how-to/guide, the title should read like a guide; if it's a news piece,
-  the title should read like a headline; if it genuinely is about a disease/condition
-  with causes/symptoms/treatment, that structure is fine)
-- Do NOT default to "Causes, Symptoms, Treatment & Prevention" unless the article content
-  genuinely covers all of those things as its main structure
-- Keep it under 70 characters if possible, no more than 100
-- No quotation marks, no markdown, no trailing punctuation like colons dangling at the end
-- Return ONLY the title text, nothing else
-
-Topic: "${topic}"
-
-Article opening:
-"""
-${contentPreview}
-"""
-`.trim();
-
-  const result = await callGemini({
-    prompt: titlePrompt,
-    maxOutputTokens: 200,
-    thinkingLevel: 'low',
-    timeoutMs: 15000,
-  });
-
-  const cleaned = sanitizeTitle(result.text, topic);
-  if (!cleaned) {
-    throw new Error('Title generation returned unusable output');
-  }
-  return cleaned;
+function buildExcerpt(text: string, maxLength: number): string {
+  const clean = text.replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxLength) return clean;
+  const truncated = clean.substring(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(' ');
+  return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
 }
 
 export async function GET(request: NextRequest) {
   const topic = request.nextUrl.searchParams.get('topic')?.trim();
-
   if (!topic) {
     return NextResponse.json({ error: 'Topic required' }, { status: 400 });
   }
@@ -287,192 +72,110 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const startedAt = Date.now();
+  const deadlineMs = startedAt + 56000;
+
   try {
-    if (!process.env.GEMINI_API_KEY?.trim()) {
-      return NextResponse.json(
-        { error: 'Missing Gemini API key' },
-        { status: 500 }
-      );
-    }
+    // 1. Real searches people type (Google autocomplete). Quick and optional.
+    const searches = await fetchSearchPhrases(topic, 10);
 
-    const seoPrompt = `
-Return ONLY valid JSON, with no markdown code fences and no extra commentary.
+    // 2. The article.
+    const prompt = `You are an expert veterinary SEO writer.
 
-Topic: "${topic}"
+PRIMARY SEARCH PHRASE: ${topic}
+REAL SEARCHES PEOPLE TYPE (use the ones that fit as headings and FAQ questions):
+${searches.length ? searches.map((q) => `- ${q}`).join('\n') : '(none available)'}
 
-{
-  "primary_keyword": "${topic}",
-  "secondary_keywords": ["animal health", "veterinary care"],
-  "long_tail_keywords": [
-    "how to treat ${topic}",
-    "symptoms of ${topic}",
-    "prevention of ${topic}"
-  ],
-  "search_intent": "informational",
-  "questions": [
-    "What causes ${topic}?",
-    "How is ${topic} treated?",
-    "Can ${topic} be prevented?"
-  ]
-}
-`;
+Write a helpful, accurate article of 1,200 to 1,600 words about: "${topic}"
 
-    let seo;
-    try {
-      const seoResult = await callGemini({
-        prompt: seoPrompt,
-        json: true,
-        maxOutputTokens: 800,
-        thinkingLevel: 'low',
-        timeoutMs: 15000,
-      });
-      seo = JSON.parse(extractJson(seoResult.text));
-      seo.secondary_keywords = Array.isArray(seo.secondary_keywords) ? seo.secondary_keywords : [];
-      seo.long_tail_keywords = Array.isArray(seo.long_tail_keywords) ? seo.long_tail_keywords : [];
-    } catch (seoError) {
-      console.error(
-        'SEO keyword step failed:',
-        seoError instanceof GeminiError ? seoError.kind : seoError instanceof Error ? seoError.message : 'unknown'
-      );
-      seo = {
-        primary_keyword: topic,
-        secondary_keywords: [],
-        long_tail_keywords: [],
-        search_intent: 'informational',
-        questions: [],
-      };
-    }
+STRUCTURE
+- Start with a short opening that uses the search phrase and gets straight to the point.
+- Use clear "##" headings. Where it fits, phrase some as questions people search, for example "How is ${topic} treated?".
+- Include practical, actionable information. Use bullet lists only where they really help.
+- End the main article with a short practical section.
+- Then add "## Frequently Asked Questions" with 5 questions, each as a "### Question?" heading followed by a 35 to 70 word answer.
 
-    const prompt = `
-You are an expert veterinary SEO writer and content creator.
+STYLE
+- Plain, simple English. Speak to the reader as "you". Short paragraphs (2 to 3 sentences).
+- Only state facts you are confident are accurate. Do not invent statistics or studies. Never give drug doses.
+- Treatment information is general education only, not a diagnosis; tell readers to consult a qualified veterinarian or animal health professional for a sick animal.
+- No citations, no references section, no pictures, no horizontal lines.
 
-PRIMARY KEYWORD: ${seo.primary_keyword}
-SECONDARY KEYWORDS: ${seo.secondary_keywords.join(', ')}
-LONG TAIL KEYWORDS: ${seo.long_tail_keywords.join(', ')}
-SEARCH INTENT: ${seo.search_intent}
+Write only the article content in markdown, with no title heading.`;
 
-Write a 1500+ word SEO blog about: "${topic}"
-
-IMPORTANT: Choose the BEST writing style for this topic:
-- For news/breaking topics: Write like a news article with a headline, introduction, key facts, and analysis
-- For educational topics: Write like a helpful guide with clear sections
-- For how-to topics: Write a step-by-step guide
-- For general topics: Write an engaging blog post that informs and helps readers
-
-DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
-
-STRUCTURE GUIDELINES:
-- Start with a compelling introduction that hooks the reader
-- Use clear headings (## and ###) that make sense for the topic
-- Include practical, actionable information
-- Use bullet points and lists where helpful
-- End with a strong conclusion
-
-STYLE RULES:
-- Write like a helpful expert, not a textbook
-- Use "you" and "your" to speak directly to readers
-- Keep paragraphs short (2-3 sentences)
-- Use simple, clear English
-- Include relevant keywords naturally
-- Include at least 5 FAQs at the end
-- Do not invent statistics, studies, drug doses or references; only state well-established veterinary facts
-- Treatment information is general education only, not a diagnosis; tell readers to consult a qualified veterinarian or animal health professional for a sick animal
-- No citations
-- No references section
-- No images or image descriptions
-- No horizontal lines (---)
-
-Write only the article content with appropriate headings.`;
-
-    let content: string;
-    let usedFallback = false;
-    try {
-      const result = await callGemini({
-        prompt,
-        maxOutputTokens: 8192,
-        thinkingLevel: 'low',
-        timeoutMs: 45000,
-      });
-      content = result.text;
-
-      if (!content || content.trim().length < 200) {
-        throw new Error('Gemini returned empty or too-short content');
-      }
-    } catch (genError) {
-      console.error(
-        'Gemini generation failed, falling back to you.com:',
-        genError instanceof GeminiError ? `${genError.kind} (${genError.status ?? 'n/a'})` : genError instanceof Error ? genError.message : 'unknown'
-      );
-      try {
-        content = await generateWithYouCom(topic);
-        usedFallback = true;
-      } catch (fallbackError) {
-        console.error('you.com fallback also failed:', fallbackError instanceof Error ? fallbackError.message : 'unknown');
-        throw genError;
-      }
-    }
-
-    content = cleanContent(content);
-    content = content.replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '');
-    content = content.replace(/\[\d+(?:,\s*\d+)*\]/g, '');
-
+    const article = await generate({
+      prompt,
+      temperature: 0.7,
+      maxOutputTokens: 6000,
+      timeoutMs: 35000,
+      deadlineMs,
+      validate: (text) => {
+        if (text.trim().length < 1500) throw new Error('article is too short');
+      },
+    });
+    const content = cleanContent(article.text);
     const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
-    const buildExcerpt = (text: string, maxLength: number): string => {
-      const clean = text.replace(/\s+/g, ' ').trim();
-      if (clean.length <= maxLength) return clean;
-      const truncated = text.substring(0, maxLength);
-      const lastSpace = truncated.lastIndexOf(' ');
-      return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
-    };
-
-    const excerpt = buildExcerpt(plainText, 155);
-
-    // Let Gemini choose the title based on the actual article content and
-    // style, instead of always forcing the disease-template title. Falls
-    // back to the old hardcoded format only if this step fails.
-    let seoTitle: string;
+    // 3. Title and tags, in one quick call. Falls back to plain defaults.
+    let seoTitle = fallbackTitle(topic);
+    let tags = buildFallbackTags(topic);
     try {
-      seoTitle = await generateTitle(topic, content);
-    } catch (titleError) {
-      console.error(
-        'Title generation failed, using fallback title:',
-        titleError instanceof GeminiError ? titleError.kind : titleError instanceof Error ? titleError.message : 'unknown'
-      );
-      seoTitle = fallbackTitle(topic);
+      const meta = await generate({
+        system: 'You are an SEO editor for a veterinary website.',
+        prompt: `Topic: "${topic}"
+Article opening:
+"""
+${content.slice(0, 700)}
+"""
+Return ONLY JSON: {"title":"45 to 60 characters, includes the phrase \\"${topic}\\" near the start, plain and specific, no clickbait","tags":["4 to 6 lowercase search keywords"]}`,
+        json: true,
+        temperature: 0.3,
+        maxOutputTokens: 300,
+        timeoutMs: 12000,
+        deadlineMs,
+      });
+      const parsed = extractJson<{ title?: string; tags?: string[] }>(meta.text);
+      seoTitle = sanitizeTitle(String(parsed.title ?? '')) ?? seoTitle;
+      if (Array.isArray(parsed.tags) && parsed.tags.length >= 3) {
+        tags = parsed.tags.map((t) => String(t).toLowerCase().trim()).filter(Boolean).slice(0, 6);
+      }
+    } catch (metaError) {
+      console.error('Title step failed, using defaults:', metaError instanceof Error ? metaError.message : 'unknown');
     }
 
-    const metaDescription = buildExcerpt(plainText, 160);
-    const tags = buildFallbackTags(topic);
-
-    const heroImage = await getArticleImage(`${topic} livestock farm`);
-    const causesImage = await getArticleImage(`${topic} cause infection`);
-    const symptomsImage = await getArticleImage(`${topic} symptoms sick animal`);
-    const treatmentImage = await getArticleImage(`${topic} veterinarian treatment`);
-    const preventionImage = await getArticleImage(`${topic} prevention vaccine biosecurity`);
-
-    content = insertAfterHeading(content, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${topic}`);
-    content = insertAfterHeading(content, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${topic}`);
+    // 4. Pictures: found for the right animal and checked by an AI.
+    const subject = detectSubject({ title: `${topic} ${seoTitle}`, tags, body: content });
+    const pictures = await pickArticleImages({
+      subject,
+      topic,
+      inlineCount: 2,
+      deadlineMs: deadlineMs - 1000,
+      seed: new Date().getUTCMinutes(),
+    });
+    const contentWithImages = insertInlineImages(content, pictures.inline);
 
     return NextResponse.json({
-      content,
+      content: contentWithImages,
       title: seoTitle,
-      excerpt,
-      metaDescription,
+      excerpt: buildExcerpt(plainText, 155),
+      metaDescription: buildExcerpt(plainText, 158),
       tags,
-      heroImage,
-      seo,
-      usedFallback,
+      heroImage: pictures.hero?.url ?? '',
+      heroAlt: pictures.hero?.alt ?? '',
+      seo: { primary_keyword: topic, questions: searches },
+      provider: article.provider,
+      usedFallback: article.provider !== 'gemini',
+      pictureLog: pictures.log,
+      warning: pictures.hero ? undefined : `No checked picture of ${subject.label} was found. Add one from the Media tab before publishing.`,
     });
-
   } catch (error) {
-    console.error(
-      'Generate route failed:',
-      error instanceof GeminiError ? `${error.kind} (${error.status ?? 'n/a'})` : error instanceof Error ? error.message : 'unknown'
-    );
-    const status = error instanceof GeminiError && error.kind === 'rate_limited' ? 429 : 500;
-    return NextResponse.json({ error: publicGeminiMessage(error) }, { status });
+    console.error('Generate route failed:', error instanceof Error ? error.message : 'unknown');
+    if (error instanceof AllProvidersFailed) {
+      return NextResponse.json(
+        { error: 'Every AI service is busy or unavailable right now. Please try again in a minute.' },
+        { status: 503 }
+      );
+    }
+    return NextResponse.json({ error: 'Generation failed. Please try again.' }, { status: 500 });
   }
 }
