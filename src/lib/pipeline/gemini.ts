@@ -12,11 +12,13 @@ export interface Source {
 }
 
 /**
- * Current stable Flash model. Google's deprecation page and model docs list
- * gemini-3.8-flash as the current Flash model; gemini-2.5-flash now returns
- * 404 "no longer available to new users" for new keys/projects.
+ * Default model. gemini-3.8-flash is valid but was taking about a minute per
+ * reply on this project's key (autopublish topic stage timed out in runs
+ * #374, #377 and #378; the chatbot took ~60 s), so the default is the fast
+ * Flash-Lite model. To go back to 3.8 Flash, set GEMINI_MODEL=gemini-3.8-flash
+ * in Vercel. gemini-2.5-flash returns 404 "no longer available to new users".
  */
-export const DEFAULT_GEMINI_MODEL = 'gemini-3.8-flash';
+export const DEFAULT_GEMINI_MODEL = 'gemini-3.5-flash-lite';
 
 // Older families that Google has restricted or retired for new users. If the
 // GEMINI_MODEL env var still points at one of these (for example a leftover
@@ -85,8 +87,8 @@ export interface GeminiOptions {
   temperature?: number;
   maxOutputTokens?: number;
   /**
-   * How much the model reasons before answering. Gemini 3.8 Flash supports
-   * low | medium | high (not "minimal"). Default is low for speed and cost.
+   * How much the model reasons before answering. Gemini 3.x Flash models support
+   * low | medium | high (not "minimal" on 3.8). Default is low for speed and cost.
    */
   thinkingLevel?: 'low' | 'medium' | 'high';
   /** @deprecated thinkingBudget is not supported on Gemini 3+. Ignored. */
