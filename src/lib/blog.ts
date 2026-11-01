@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
 import { BlogPost } from '@/types';
+import { extractFaq } from '@/lib/faq';
 
 const md = new MarkdownIt({
   html: true,
@@ -47,7 +48,11 @@ export function getPostBySlug(slug: string): BlogPost | null {
       .replace(/\*Photo:[^\n]*via Unsplash[^\n]*\*\n*/gi, '')
       .replace(/Photo:[^\n]*via Unsplash[^\n]*\n*/gi, '');
 
-    const contentHtml = md.render(contentWithoutFirstImage);
+    // The FAQ section is shown as click-to-open questions, so it is taken out
+    // of the main text here.
+    const { faqs, rest } = extractFaq(contentWithoutFirstImage);
+    const contentHtml = md.render(rest);
+    const faqItems = faqs.map((f) => ({ question: f.question, answerHtml: md.render(f.answer) }));
 
     return {
       slug: realSlug,
@@ -61,6 +66,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       image: data.image || '/images/placeholder.jpg',
       imageAlt: data.imageAlt || data.title,
       content: contentHtml,
+      faqs: faqItems,
       readingTime,
       readTime: `${readingTime} min read`,
       featured: data.featured || false,

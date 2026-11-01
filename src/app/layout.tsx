@@ -33,6 +33,24 @@ export const metadata: Metadata = {
   },
 };
 
+const siteData = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'VetSphere',
+    url: 'https://vetsphere.cc.cd',
+    description: 'Free veterinary knowledge for livestock farmers, animal-health workers and pet owners.',
+    inLanguage: 'en',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'VetSphere',
+    url: 'https://vetsphere.cc.cd',
+    logo: 'https://vetsphere.cc.cd/logo.png',
+  },
+];
+
 export default function RootLayout({
   children,
 }: {
@@ -47,6 +65,9 @@ export default function RootLayout({
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+        {siteData.map((data, i) => (
+          <script key={i} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+        ))}
         <Header />
         <main className="w-full">{children}</main>
         <Footer />

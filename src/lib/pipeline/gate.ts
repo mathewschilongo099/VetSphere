@@ -184,20 +184,90 @@ export function normalizeDraft(raw: unknown): Draft {
   return { title, description, category, tags, body };
 }
 
-export function checkDraft(draft: Draft, researchText: string): GateResult {
+export interface CheckOptions {
+  /** The phrase people search for; the title and opening must contain it. */
+  keyword?: string;
+}
+
+function stem(word: string): string {
+  return word.replace(/ies$/, 'y').replace(/s$/, '');
+}
+
+function keywordCoverage(keyword: string, text: string): number {
+  const wanted = keyword
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length >= 3 && !['the', 'and', 'for', 'how', 'what', 'new'].includes(w))
+    .map(stem);
+  if (wanted.length === 0) return 1;
+  const have = new Set(
+    text
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .map(stem)
+  );
+  return wanted.filter((w) => have.has(w)).length / wanted.length;
+}
+
+const FAQ_HEADING_RE = /^##\s*frequently asked questions\b.*$/im;
+
+/** Splits the body into the FAQ section and everything else. */
+export function splitFaq(body: string): { main: string; faqQuestions: string[]; faqWords: number } {
+  const lines = body.split('\n');
+  const start = lines.findIndex((l) => FAQ_HEADING_RE.test(l.trim()));
+  if (start === -1) return { main: body, faqQuestions: [], faqWords: 0 };
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++) {
+    if (/^##\s+\S/.test(lines[i])) {
+      end = i;
+      break;
+    }
+  }
+  const section = lines.slice(start + 1, end);
+  const faqQuestions = section.filter((l) => /^###\s+\S/.test(l)).map((l) => l.replace(/^###\s+/, '').trim());
+  return {
+    main: [...lines.slice(0, start), ...lines.slice(end)].join('\n'),
+    faqQuestions,
+    faqWords: wordCount(section.join('\n')),
+  };
+}
+
+export function checkDraft(draft: Draft, researchText: string, options: CheckOptions = {}): GateResult {
   const issues: string[] = [];
   const { title, description, body } = draft;
 
-  if (title.length < 20 || title.length > 90) issues.push(`Title length ${title.length} is outside 20–90 characters`);
-  if (description.length < 70) issues.push('Meta description is too short');
+  if (title.length < 20 || title.length > 70) issues.push(`Title length ${title.length} is outside 20–70 characters (Google cuts titles near 60)`);
+  if (description.length < 110) issues.push(`Meta description is too short (${description.length} characters, aim for 140 to 158)`);
   if (draft.tags.length < 3) issues.push('Need at least 3 tags');
 
-  const words = wordCount(body);
-  if (words < 700) issues.push(`Article is too short (${words} words, minimum 700)`);
-  if (words > 1800) issues.push(`Article is too long (${words} words, maximum 1800)`);
+  if (options.keyword) {
+    if (keywordCoverage(options.keyword, title) < 0.6) {
+      issues.push(`The title must contain the search phrase "${options.keyword}"`);
+    }
+    const intro = body.split('\n').filter((l) => l.trim() && !l.startsWith('#')).slice(0, 2).join(' ');
+    if (keywordCoverage(options.keyword, intro) < 0.5) {
+      issues.push(`The first paragraph must use the search phrase "${options.keyword}"`);
+    }
+  }
 
-  const h2Count = (body.match(/^##\s+\S/gm) ?? []).length;
-  if (h2Count < 3) issues.push('Needs at least 3 section headings (##)');
+  const faq = splitFaq(body);
+  if (faq.faqQuestions.length < 3) {
+    issues.push('Needs a "## Frequently Asked Questions" section with at least 3 questions written as "### Question?" headings');
+  } else if (faq.faqQuestions.length > 6) {
+    issues.push('Keep the FAQ to 6 questions at most');
+  }
+  if (faq.faqQuestions.some((q) => !q.endsWith('?'))) issues.push('Every FAQ question must end with a question mark');
+
+  if (/<img\b|!\[[^\]]*\]\(/.test(body)) issues.push('Do not put pictures in the article; the site adds checked pictures itself');
+
+  const words = wordCount(faq.main);
+  if (words < 700) issues.push(`Article is too short (${words} words before the FAQ, minimum 700)`);
+  if (words > 1800) issues.push(`Article is too long (${words} words before the FAQ, maximum 1800)`);
+
+  const h2Count = (faq.main.match(/^##\s+\S/gm) ?? []).length;
+  if (h2Count < 3) issues.push('Needs at least 3 section headings (##) besides the FAQ');
   if (/^#\s+\S/m.test(body)) issues.push('Body must not contain a top-level # heading');
 
   const banned = findBannedPhrases(`${title}\n${description}\n${body}`);

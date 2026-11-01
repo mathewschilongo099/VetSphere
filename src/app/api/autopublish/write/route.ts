@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from 'next/server';
-import { callGemini, extractJson } from '@/lib/pipeline/gemini';
+import { generate, extractJson } from '@/lib/ai/client';
 import { checkDraft, normalizeDraft, wordCount, type Draft } from '@/lib/pipeline/gate';
 import { WRITER_SYSTEM, buildWritePrompt, type Research } from '@/lib/pipeline/prompts';
 
@@ -26,22 +26,30 @@ export async function POST(request: NextRequest) {
     let feedback: string[] | undefined;
     let lastIssues: string[] = [];
     let draft: Draft | null = null;
+    let provider = '';
 
     for (let attempt = 1; attempt <= 2; attempt++) {
       // Do not start a second attempt if the first one used most of the time budget.
       if (attempt === 2 && Date.now() - startedAt > 28000) break;
 
-      const result = await callGemini({
+      const result = await generate({
         system: WRITER_SYSTEM,
         prompt: buildWritePrompt(research, feedback),
         json: true,
         temperature: 0.85,
-        maxOutputTokens: 6000,
-        timeoutMs: attempt === 1 ? 35000 : 25000,
+        maxOutputTokens: 7000,
+        timeoutMs: attempt === 1 ? 32000 : 22000,
+        deadlineMs: startedAt + 56000,
+        // A reply that is not a usable article moves on to the next AI.
+        validate: (text) => {
+          const d = normalizeDraft(extractJson(text));
+          if (!d.title || d.body.length < 1500) throw new Error('reply is not a full article');
+        },
       });
+      provider = result.provider;
 
       const candidate = normalizeDraft(extractJson(result.text));
-      const gate = checkDraft(candidate, researchText);
+      const gate = checkDraft(candidate, researchText, { keyword: research.keyword });
       if (gate.passed) {
         draft = candidate;
         lastIssues = [];
@@ -59,7 +67,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ ok: true, draft, words: wordCount(draft.body) });
+    return NextResponse.json({ ok: true, draft, words: wordCount(draft.body), provider });
   } catch (error) {
     console.error('autopublish/write failed:', error);
     return NextResponse.json(

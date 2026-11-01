@@ -8,7 +8,6 @@ const PUBLIC_API_PREFIXES = [
   '/api/admin-logout',
   '/api/search', // Ask VetSphere chatbot
   '/api/quiz',
-  '/api/generate-faqs', // used by public article pages
   '/api/academic-writer',
   '/api/python-pptx', // called server-to-server by academic-writer
   '/api/posts',

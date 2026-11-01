@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from 'next/server';
-import { callGemini } from '@/lib/pipeline/gemini';
+import { generate } from '@/lib/ai/client';
 
 const MAX_QUERY_LENGTH = 500;
 
@@ -33,60 +33,6 @@ For questions about animal health, give general educational information only. Yo
 
 Write plain conversational paragraphs. No bullet points, no bold text, no markdown, no citations.`;
 
-async function askGemini(query: string): Promise<string> {
-  const result = await callGemini({
-    system: SYSTEM_PROMPT,
-    prompt: query,
-    maxOutputTokens: 1024,
-    thinkingLevel: 'low',
-    timeoutMs: 25000,
-  });
-  return result.text;
-}
-
-async function askGroq(query: string): Promise<string> {
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: query },
-      ],
-      max_tokens: 1024,
-      temperature: 0.7,
-    }),
-  });
-  if (!res.ok) throw new Error(`Groq failed: ${res.status}`);
-  const data = await res.json();
-  const answer = data?.choices?.[0]?.message?.content || '';
-  if (!answer) throw new Error('Groq empty response');
-  return answer;
-}
-
-async function askYouCom(query: string): Promise<string> {
-  const res = await fetch('https://api.you.com/v1/research', {
-    method: 'POST',
-    headers: {
-      'X-API-Key': process.env.YOU_API_KEY || '',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      input: `${SYSTEM_PROMPT}\n\nQuestion: ${query}`,
-      research_effort: 'lite',
-    }),
-  });
-  if (!res.ok) throw new Error(`You.com failed: ${res.status}`);
-  const data = await res.json();
-  const answer = data?.output?.content || '';
-  if (!answer) throw new Error('You.com empty response');
-  return answer;
-}
-
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('query')?.trim();
 
@@ -100,32 +46,22 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // Try Gemini first
+  // Gemini first; if it fails Groq, Cerebras, OpenRouter and You.com answer instead.
   try {
-    const answer = await askGemini(query);
-    return NextResponse.json({ answer: cleanAnswer(answer) });
+    const result = await generate({
+      system: SYSTEM_PROMPT,
+      prompt: query,
+      temperature: 0.7,
+      maxOutputTokens: 1024,
+      timeoutMs: 15000,
+      deadlineMs: Date.now() + 40000,
+    });
+    return NextResponse.json({ answer: cleanAnswer(result.text) });
   } catch (e) {
-    console.error('Gemini failed:', e instanceof Error ? e.message : 'unknown error');
+    console.error('All AI providers failed for the chatbot:', e instanceof Error ? e.message : 'unknown error');
   }
 
-  // Fallback to Groq
-  try {
-    const answer = await askGroq(query);
-    return NextResponse.json({ answer: cleanAnswer(answer) });
-  } catch (e) {
-    console.error('Groq failed:', e instanceof Error ? e.message : 'unknown error');
-  }
-
-  // Fallback to You.com
-  try {
-    const answer = await askYouCom(query);
-    return NextResponse.json({ answer: cleanAnswer(answer) });
-  } catch (e) {
-    console.error('You.com failed:', e instanceof Error ? e.message : 'unknown error');
-  }
-
-  // All failed
   return NextResponse.json({
-    answer: 'Sorry, I am unable to answer right now. Please try again in a moment.'
+    answer: 'Sorry, I am unable to answer right now. Please try again in a moment.',
   });
 }

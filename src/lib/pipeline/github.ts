@@ -78,3 +78,37 @@ export async function triggerDeployHook(): Promise<void> {
     // A failed hook must never fail the publish.
   }
 }
+
+// ---------------------------------------------------------------- read / update
+
+export async function getArticleFile(slug: string): Promise<{ content: string; sha: string }> {
+  const { owner, repo, token } = githubConfig();
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${ARTICLES_DIR}/${slug}.md`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' },
+    cache: 'no-store',
+  });
+  if (!res.ok) throw new Error(`Could not read ${slug} (GitHub ${res.status})`);
+  const data = await res.json();
+  return { content: Buffer.from(String(data.content ?? ''), 'base64').toString('utf8'), sha: String(data.sha) };
+}
+
+export async function updateArticleFile(slug: string, markdown: string, sha: string, commitMessage: string): Promise<void> {
+  const { owner, repo, token } = githubConfig();
+  const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${ARTICLES_DIR}/${slug}.md`, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: commitMessage,
+      sha,
+      content: Buffer.from(markdown, 'utf8').toString('base64'),
+    }),
+  });
+  if (!res.ok) {
+    const detail = await res.json().catch(() => ({ message: 'Unknown GitHub error' }));
+    throw new Error(`GitHub update failed: ${detail.message || res.status}`);
+  }
+}

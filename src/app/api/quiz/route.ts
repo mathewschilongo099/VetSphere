@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+import { generate } from '@/lib/ai/client';
 
 function getMotivation(score: number, total: number) {
   const percent = (score / total) * 100;
@@ -22,9 +22,6 @@ function getMotivation(score: number, total: number) {
 export async function POST(req: Request) {
   const { topic, score = 0, total = 0 } = await req.json();
 
-  const groqKey = process.env.GROQ_API_KEY;
-  const openRouterKey = process.env.OPENROUTER_API_KEY;
-
   const prompt = `
 Create 5 multiple choice veterinary questions about "${topic}".
 
@@ -42,65 +39,42 @@ Return ONLY valid JSON:
 No markdown. No extra text.
 `;
 
-  // -----------------------------
-  // 🧠 1. GROQ (PRIMARY)
-  // -----------------------------
+  // Every AI provider is tried in turn; a reply that is not a valid quiz
+  // moves on to the next one.
   try {
-    if (groqKey) {
-      const groq = new Groq({ apiKey: groqKey });
-
-      const completion = await groq.chat.completions.create({
-        model: 'llama3-8b-8192',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-      });
-
-      const text = completion.choices[0]?.message?.content || '';
-      const match = text.match(/\[[\s\S]*\]/);
-
-      if (match) {
-        return NextResponse.json({
-          questions: JSON.parse(match[0]),
-          source: 'groq',
-          message: getMotivation(score, total),
-        });
-      }
-    }
+    const result = await generate({
+      prompt,
+      temperature: 0.7,
+      maxOutputTokens: 1800,
+      timeoutMs: 20000,
+      deadlineMs: Date.now() + 50000,
+      validate: (text) => {
+        const match = text.match(/\[[\s\S]*\]/);
+        if (!match) throw new Error('no quiz found in the reply');
+        const questions = JSON.parse(match[0]);
+        const valid =
+          Array.isArray(questions) &&
+          questions.length >= 3 &&
+          questions.every(
+            (q) =>
+              typeof q?.question === 'string' &&
+              Array.isArray(q?.options) &&
+              q.options.length === 4 &&
+              Number.isInteger(q?.correctIndex) &&
+              q.correctIndex >= 0 &&
+              q.correctIndex < 4
+          );
+        if (!valid) throw new Error('quiz is not in the expected format');
+      },
+    });
+    const match = result.text.match(/\[[\s\S]*\]/)!;
+    return NextResponse.json({
+      questions: JSON.parse(match[0]),
+      source: result.provider,
+      message: getMotivation(score, total),
+    });
   } catch (err) {
-    console.log('Groq failed, switching to OpenRouter...');
-  }
-
-  // -----------------------------
-  // 🌐 2. OPENROUTER (FALLBACK)
-  // -----------------------------
-  try {
-    if (openRouterKey) {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openRouterKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-        }),
-      });
-
-      const data = await res.json();
-      const text = data.choices?.[0]?.message?.content || '';
-      const match = text.match(/\[[\s\S]*\]/);
-
-      if (match) {
-        return NextResponse.json({
-          questions: JSON.parse(match[0]),
-          source: 'openrouter',
-          message: getMotivation(score, total),
-        });
-      }
-    }
-  } catch (err) {
-    console.log('OpenRouter failed, using fallback quiz...');
+    console.log('All AI providers failed, using the built-in quiz.');
   }
 
   // -----------------------------

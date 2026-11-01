@@ -1,16 +1,14 @@
+// Rewrites an article from a web page in VetSphere's own words. Admin only.
+// Uses the shared AI client (every provider is tried in turn) and the same
+// checked-picture finder as the other generators.
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from 'next/server';
-import { callGemini, GeminiError, publicGeminiMessage } from '@/lib/pipeline/gemini';
-
-const FALLBACK_IMAGES = [
-  'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351947/pexels-photo-18351947/free-photo-of-a-goat-standing-in-a-field.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351941/pexels-photo-18351941/free-photo-of-a-veterinarian-examining-a-dog.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351938/pexels-photo-18351938/free-photo-of-a-veterinarian-holding-a-cat.jpeg?w=800&h=400&fit=crop',
-];
+import { AllProvidersFailed, generate, extractJson } from '@/lib/ai/client';
+import { insertInlineImages } from '@/lib/images/insert';
+import { pickArticleImages } from '@/lib/images/pick';
+import { detectSubject } from '@/lib/images/subjects';
 
 // Only public http(s) pages may be fetched. This blocks requests to localhost,
 // private networks and cloud metadata addresses (server-side request forgery).
@@ -50,147 +48,43 @@ function isSafePublicUrl(raw: string): URL | null {
   return parsed;
 }
 
-async function getPexelsImage(query: string): Promise<string> {
-  try {
-    const randomPage = Math.floor(Math.random() * 5) + 1;
-    const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
-      {
-        headers: {
-          Authorization: process.env.PEXELS_API_KEY || '',
-        },
-      }
-    );
-    if (!res.ok) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const data = await res.json();
-    const results = data.photos || [];
-    if (results.length === 0) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
-    return results[randomIndex]?.src?.large || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  } catch {
-    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  }
-}
-
-async function getUnsplashImage(query: string): Promise<string> {
-  try {
-    const randomPage = Math.floor(Math.random() * 5) + 1;
-    const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&page=${randomPage}&orientation=landscape`,
-      {
-        headers: {
-          Authorization: `Client-ID ${process.env.UNSPLASH_ACCESS_KEY}`,
-        },
-      }
-    );
-    if (!res.ok) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const data = await res.json();
-    const results = data.results || [];
-    if (results.length === 0) {
-      return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-    }
-    const randomIndex = Math.floor(Math.random() * Math.min(results.length, 5));
-    return results[randomIndex]?.urls?.regular || FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  } catch {
-    return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-  }
-}
-
-async function getArticleImage(query: string): Promise<string> {
-  const cleanQuery = query
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-  
-  const searchQueries = [
-    cleanQuery,
-    `${cleanQuery} animal`,
-    `${cleanQuery} livestock`,
-    'farm animal',
-    'veterinary care'
-  ];
-
-  for (const searchQuery of searchQueries.slice(0, 3)) {
-    const pexelsResult = await getPexelsImage(searchQuery);
-    if (pexelsResult && !pexelsResult.includes('fallback')) {
-      return pexelsResult;
-    }
-  }
-
-  for (const searchQuery of searchQueries.slice(0, 3)) {
-    const unsplashResult = await getUnsplashImage(searchQuery);
-    if (unsplashResult && !unsplashResult.includes('fallback')) {
-      return unsplashResult;
-    }
-  }
-
-  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
-}
-
 function buildExcerpt(text: string, maxLength: number): string {
   const clean = text.replace(/\s+/g, ' ').trim();
   if (clean.length <= maxLength) return clean;
-  const truncated = text.substring(0, maxLength);
+  const truncated = clean.substring(0, maxLength);
   const lastSpace = truncated.lastIndexOf(' ');
   return (lastSpace > 0 ? truncated.substring(0, lastSpace) : truncated) + '...';
 }
 
 function cleanContent(content: string): string {
-  content = content.replace(/^# .+?\n/, '');
-  content = content.replace(
-    /##\s*Frequently Asked Questions About.*?([\s\S]*?)(?=##|$)/gi,
-    ''
-  );
-  content = content.replace(
-    /##\s*Frequently Asked Questions.*$/i,
-    ''
-  );
-  content = content.replace(
-    /\d+\.\s*\*\*.*?\?\*\*[\s\S]*?(?=\d+\.\s*\*\*|##|$)/g,
-    ''
-  );
-  content = content.replace(
-    /^\s*Frequently Asked Questions\s*$/gim,
-    ''
-  );
-  content = content.replace(
-    /!\[[^\]]*\]\([^)]*\)\s*\n*/g,
-    ''
-  );
-  content = content.replace(/\n{3,}/g, '\n\n');
-  content = content.trim();
-  return content;
+  return content
+    .replace(/```markdown/g, '')
+    .replace(/```/g, '')
+    .replace(/^# .+?\n/, '') // the page already shows the title
+    .replace(/!\[[^\]]*\]\([^)]*\)\s*\n*/g, '') // pictures are added and checked by the site
+    .replace(/\[\[\d+(?:,\s*\d+)*\]\]/g, '')
+    .replace(/\[\d+(?:,\s*\d+)*\]/g, '')
+    .replace(/^\s*---\s*$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
 }
 
-function escapeAttr(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+function cleanTitle(raw: string): string {
+  const title = raw
+    .split('\n')[0]
+    .replace(/^#+\s*/, '')
+    .replace(/^["'“”‘’]+|["'“”‘’]+$/g, '')
+    .replace(/\*\*/g, '')
+    .replace(/^Title:\s*/i, '')
+    .replace(/\s+[|–—-]\s+[^|–—-]{2,40}$/, '') // site name after the title
+    .replace(/\s+/g, ' ')
+    .trim();
+  return title.length > 70 ? title.slice(0, 67).trim() + '...' : title;
 }
-
-const insertAfterHeading = (
-  text: string,
-  headingPattern: RegExp,
-  imageUrl: string,
-  altText: string
-): string => {
-  if (!imageUrl) return text;
-  const match = text.match(headingPattern);
-  if (!match) return text;
-  const heading = match[0];
-  return text.replace(heading, `${heading}\n\n<img src="${imageUrl}" alt="${escapeAttr(altText)}" loading="lazy" />\n`);
-};
 
 export async function POST(request: NextRequest) {
+  const startedAt = Date.now();
+  const deadlineMs = startedAt + 57000;
   try {
     let body: { url?: unknown; topic?: unknown };
     try {
@@ -214,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     const controller = new AbortController();
-    const fetchTimer = setTimeout(() => controller.abort(), 15000);
+    const fetchTimer = setTimeout(() => controller.abort(), 12000);
     let response: Response;
     try {
       response = await fetch(safeUrl.toString(), {
@@ -265,109 +159,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.GEMINI_API_KEY?.trim()) {
-      return NextResponse.json({ error: 'Missing Gemini API key' }, { status: 500 });
-    }
-
-    const prompt = `
-You are an expert veterinary SEO writer and content creator. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN blog post.
+    const prompt = `You are an expert veterinary SEO writer and content creator. Based on the following source content, create a NEW, ORIGINAL, and COMPLETELY REWRITTEN blog post.
 
 Source Title: ${extractedTitle}
 Source Content:
 ${textContent}
 
-IMPORTANT: Choose the BEST writing style for this topic:
-- For news/breaking topics: Write like a news article with a headline, introduction, key facts, and analysis
-- For educational topics: Write like a helpful guide with clear sections
-- For how-to topics: Write a step-by-step guide
-- For general topics: Write an engaging blog post that informs and helps readers
+STRUCTURE
+- Start with a short opening that gets straight to the point.
+- Use clear "##" headings that make sense for the topic. Where it fits, phrase some as questions people search.
+- Include practical, actionable information. Use bullet lists only where they really help.
+- End the main article with a short practical section.
+- Then add "## Frequently Asked Questions" with 5 questions, each as a "### Question?" heading followed by a 35 to 70 word answer.
 
-DO NOT use the rigid "Causes, Symptoms, Treatment, Prevention" structure unless it genuinely fits the topic.
+STYLE
+- Plain, simple English. Speak to the reader as "you". Short paragraphs (2 to 3 sentences).
+- Only use facts that appear in the source content; do not invent statistics, studies, drug doses or references.
+- Treatment information is general education only, not a diagnosis; tell readers to consult a qualified veterinarian or animal health professional for a sick animal.
+- Do NOT copy sentences from the source. Rewrite everything in your own words.
+- No citations, no references section, no pictures, no horizontal lines.
 
-STRUCTURE GUIDELINES:
-- Start with a compelling introduction that hooks the reader
-- Use clear headings (## and ###) that make sense for the topic
-- Include practical, actionable information
-- Use bullet points and lists where helpful
-- End with a strong conclusion
+Write only the article content in markdown, with no title heading.`;
 
-STYLE RULES:
-- Write like a helpful expert, not a textbook
-- Use "you" and "your" to speak directly to readers
-- Keep paragraphs short (2-3 sentences)
-- Use simple, clear English
-- Include relevant keywords naturally
-- Include at least 5 FAQs at the end
-- Only use facts that appear in the source content; do not invent statistics, studies, drug doses or references
-- Treatment information is general education only, not a diagnosis; tell readers to consult a qualified veterinarian or animal health professional for a sick animal
-- No citations
-- No references section
-- No images or image descriptions
-- DO NOT copy sentences directly from the source
-- Rewrite everything in your own words
+    const article = await generate({
+      prompt,
+      temperature: 0.7,
+      maxOutputTokens: 6000,
+      timeoutMs: 30000,
+      deadlineMs: deadlineMs - 14000,
+      validate: (text) => {
+        if (text.trim().length < 1200) throw new Error('article is too short');
+      },
+    });
+    const content = cleanContent(article.text);
+    const plainText = content.replace(/[#*![\]()]/g, '').trim();
 
-Return ONLY the article content in plain text format.`;
-
-    let result: string;
+    // A clean, original title (not the source page's own title).
+    let seoTitle = cleanTitle(extractedTitle) || 'Veterinary article';
     try {
-      const generated = await callGemini({
-        prompt,
-        maxOutputTokens: 8192,
-        thinkingLevel: 'low',
-        timeoutMs: 45000,
+      const meta = await generate({
+        system: 'You are an SEO editor for a veterinary website.',
+        prompt: `Write a new title for this article. 45 to 60 characters, plain and specific, no clickbait, not copied from "${extractedTitle}".
+Article opening:
+"""
+${content.slice(0, 600)}
+"""
+Return ONLY JSON: {"title":"..."}`,
+        json: true,
+        temperature: 0.3,
+        maxOutputTokens: 200,
+        timeoutMs: 10000,
+        deadlineMs: deadlineMs - 8000,
       });
-      result = generated.text;
-    } catch (genError) {
-      console.error(
-        'Rewrite generation failed:',
-        genError instanceof GeminiError ? `${genError.kind} (${genError.status ?? 'n/a'})` : genError instanceof Error ? genError.message : 'unknown'
-      );
-      const status = genError instanceof GeminiError && genError.kind === 'rate_limited' ? 429 : 502;
-      return NextResponse.json({ error: publicGeminiMessage(genError) }, { status });
+      const parsed = extractJson<{ title?: string }>(meta.text);
+      const cleaned = cleanTitle(String(parsed.title ?? ''));
+      if (cleaned.length >= 10) seoTitle = cleaned;
+    } catch (titleError) {
+      console.error('Title step failed, using the page title:', titleError instanceof Error ? titleError.message : 'unknown');
     }
 
-    if (!result || result.trim().length < 200) {
-      return NextResponse.json(
-        { error: 'Generated content is too short. Please try again.' },
-        { status: 500 }
-      );
-    }
-
-    result = cleanContent(result)
-      .replace(/```markdown/g, '')
-      .replace(/```/g, '')
-      .trim();
-
-    const plainText = result.replace(/[#*![\]()]/g, '').trim();
-    const metaDescription = buildExcerpt(plainText, 160);
-    const seoTitle = extractedTitle + ': Causes, Symptoms, Treatment and Prevention';
-
-    const heroImage = await getArticleImage(extractedTitle);
-    const causesImage = await getArticleImage(`${extractedTitle} cause`);
-    const symptomsImage = await getArticleImage(`${extractedTitle} symptoms`);
-    const treatmentImage = await getArticleImage(`${extractedTitle} treatment`);
-    const preventionImage = await getArticleImage(`${extractedTitle} prevention`);
-
-    result = insertAfterHeading(result, /^##\s*Causes? of .*$/im, causesImage, `Causes of ${extractedTitle}`);
-    result = insertAfterHeading(result, /^##\s*Clinical Signs? and Symptoms? of .*$/im, symptomsImage, `Symptoms of ${extractedTitle}`);
-    result = insertAfterHeading(result, /^##\s*Treatment of .*$/im, treatmentImage, `Treatment of ${extractedTitle}`);
-    result = insertAfterHeading(result, /^##\s*Prevention and? Control? of .*$/im, preventionImage, `Prevention of ${extractedTitle}`);
+    // Pictures: found for the right animal and checked by an AI.
+    const subject = detectSubject({ title: `${seoTitle} ${extractedTitle}`, tags: [], body: content });
+    const pictures = await pickArticleImages({
+      subject,
+      topic: seoTitle,
+      inlineCount: 2,
+      deadlineMs: deadlineMs - 1000,
+      seed: new Date().getUTCMinutes(),
+    });
+    const contentWithImages = insertInlineImages(content, pictures.inline);
 
     return NextResponse.json({
       success: true,
       title: seoTitle,
-      content: result,
-      metaDescription: metaDescription,
-      heroImage: heroImage,
+      content: contentWithImages,
+      metaDescription: buildExcerpt(plainText, 158),
+      heroImage: pictures.hero?.url ?? '',
+      heroAlt: pictures.hero?.alt ?? '',
       sourceUrl: url,
       sourceTitle: extractedTitle,
+      provider: article.provider,
+      pictureLog: pictures.log,
+      warning: pictures.hero ? undefined : `No checked picture of ${subject.label} was found. Add one from the Media tab before publishing.`,
     });
-
   } catch (error) {
     console.error('Error rewriting from URL:', error instanceof Error ? error.message : 'unknown');
-    return NextResponse.json(
-      { error: 'Failed to process URL' },
-      { status: 500 }
-    );
+    if (error instanceof AllProvidersFailed) {
+      return NextResponse.json(
+        { error: 'Every AI service is busy or unavailable right now. Please try again in a minute.' },
+        { status: 503 }
+      );
+    }
+    return NextResponse.json({ error: 'Failed to process URL' }, { status: 500 });
   }
 }
