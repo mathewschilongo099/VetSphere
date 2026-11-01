@@ -28,6 +28,7 @@ export async function POST() {
       });
     }
 
+    // Headlines take up to ~7 s, so two 22 s attempts still fit in the 60 s limit.
     const result = await callGemini({
       system: TOPIC_SYSTEM,
       prompt: buildTopicPrompt(
@@ -37,6 +38,8 @@ export async function POST() {
       json: true,
       temperature: 0.3,
       maxOutputTokens: 1500,
+      timeoutMs: 22000,
+      retryOnTimeout: true,
     });
 
     const parsed = extractJson<{ candidates?: Candidate[] }>(result.text);

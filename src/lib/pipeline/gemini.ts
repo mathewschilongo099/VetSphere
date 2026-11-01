@@ -91,7 +91,14 @@ export interface GeminiOptions {
   thinkingLevel?: 'low' | 'medium' | 'high';
   /** @deprecated thinkingBudget is not supported on Gemini 3+. Ignored. */
   thinkingBudget?: number;
+  /** Time allowed for EACH attempt (a retry gets the same allowance). */
   timeoutMs?: number;
+  /**
+   * Gemini 3.x latency is uneven: the same small request can take 4 s or 30 s.
+   * When true, a request that times out is sent once more instead of failing.
+   * Keep timeoutMs small enough that two attempts fit in the route's time limit.
+   */
+  retryOnTimeout?: boolean;
 }
 
 export interface GeminiResult {
@@ -177,11 +184,11 @@ export async function callGemini(options: GeminiOptions): Promise<GeminiResult> 
   if (options.search) body.tools = [{ google_search: {} }];
 
   const timeoutMs = options.timeoutMs ?? 40000;
-  const startedAt = Date.now();
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
 
   let data: any;
   for (let attempt = 0; ; attempt++) {
+    const attemptStartedAt = Date.now();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -194,8 +201,8 @@ export async function callGemini(options: GeminiOptions): Promise<GeminiResult> 
       if (!res.ok) {
         const detail = (await res.text().catch(() => '')).slice(0, 300);
         const error = classify(res.status, detail);
-        // One quick retry for transient problems, only if there is time left.
-        if (attempt === 0 && RETRYABLE.has(res.status) && Date.now() - startedAt < timeoutMs / 2) {
+        // One quick retry for transient problems, only if this attempt was fast.
+        if (attempt === 0 && RETRYABLE.has(res.status) && Date.now() - attemptStartedAt < timeoutMs / 2) {
           await new Promise((r) => setTimeout(r, 1500));
           continue;
         }
@@ -206,6 +213,11 @@ export async function callGemini(options: GeminiOptions): Promise<GeminiResult> 
     } catch (error) {
       if (error instanceof GeminiError) throw error;
       if (error instanceof Error && error.name === 'AbortError') {
+        // Gemini 3.x sometimes stalls on a request that normally takes a few seconds.
+        if (attempt === 0 && options.retryOnTimeout) {
+          console.warn(`Gemini request timed out after ${timeoutMs} ms; retrying once.`);
+          continue;
+        }
         throw new GeminiError('timeout', 'Gemini request timed out');
       }
       throw error;
