@@ -3,16 +3,26 @@ import { NextRequest, NextResponse } from 'next/server';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 const execFileAsync = promisify(execFile);
 
+const MAX_CONTENT_CHARS = 100000;
+
 export async function POST(request: NextRequest) {
+  // Every request gets its own temp folder so two people generating a deck at
+  // the same time can never overwrite or receive each other's file.
+  let workDir = '';
   try {
     const body = await request.json();
     const { content, topic, level } = body;
 
-    if (!content) {
+    if (!content || typeof content !== 'string') {
       return NextResponse.json({ error: 'Content is required' }, { status: 400 });
+    }
+    if (content.length > MAX_CONTENT_CHARS) {
+      return NextResponse.json({ error: 'Content is too long' }, { status: 413 });
     }
 
     // Extract sections from the research paper
@@ -33,7 +43,7 @@ def create_presentation(data):
     prs.slide_height = Inches(7.5)
     
     topic = data.get('topic', 'Research Presentation')
-    level = data.get('level', 'Master\'s Degree')
+    level = data.get('level', "Master's Degree")
     slides_data = data.get('slides', [])
     
     PRIMARY = RGBColor(11, 92, 255)
@@ -145,7 +155,7 @@ def create_presentation(data):
     p.font.color.rgb = WHITE
     p.alignment = PP_ALIGN.CENTER
     
-    prs.save('/tmp/presentation.pptx')
+    prs.save(data['out'])
     print('SUCCESS')
 
 if __name__ == "__main__":
@@ -153,15 +163,17 @@ if __name__ == "__main__":
     create_presentation(data)
 `;
 
-    // Write Python script to temp file
-    const scriptPath = '/tmp/generate_pptx.py';
+    workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pptx-'));
+    const scriptPath = path.join(workDir, 'generate_pptx.py');
+    const pptxPath = path.join(workDir, 'presentation.pptx');
     fs.writeFileSync(scriptPath, pythonScript);
 
     // Prepare data
     const data = {
-      topic: topic || 'Research Presentation',
-      level: level || 'Master\'s Degree',
+      topic: typeof topic === 'string' && topic ? topic : 'Research Presentation',
+      level: typeof level === 'string' && level ? level : "Master's Degree",
       date: new Date().toLocaleDateString(),
+      out: pptxPath,
       slides: sections.map(s => ({
         title: s.title,
         bullets: s.bullets.slice(0, 6)
@@ -171,10 +183,11 @@ if __name__ == "__main__":
     // Run Python
     // execFile passes arguments directly (no shell), so user text can never
     // be interpreted as a command.
-    const { stdout, stderr } = await execFileAsync('python3', [
-      scriptPath,
-      JSON.stringify(data),
-    ]);
+    const { stderr } = await execFileAsync(
+      'python3',
+      [scriptPath, JSON.stringify(data)],
+      { timeout: 30000, maxBuffer: 1024 * 1024 }
+    );
 
     if (stderr && !stderr.includes('SUCCESS')) {
       console.error('Python error:', stderr);
@@ -182,27 +195,28 @@ if __name__ == "__main__":
     }
 
     // Read the generated file
-    const pptxPath = '/tmp/presentation.pptx';
     const buffer = fs.readFileSync(pptxPath);
 
-    // Clean up
-    fs.unlinkSync(scriptPath);
-    fs.unlinkSync(pptxPath);
-
-    return new NextResponse(buffer, {
+    return new NextResponse(new Uint8Array(buffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'Content-Disposition': `attachment; filename="${encodeURIComponent(topic || 'presentation')}.pptx"`,
+        'Content-Disposition': `attachment; filename="${encodeURIComponent(data.topic)}.pptx"`,
       },
     });
 
   } catch (error: any) {
     console.error('PPTX generation error:', error);
-    return NextResponse.json(
-      { error: error.message || 'Failed to generate PPTX' },
-      { status: 500 }
-    );
+    // Do not return error.message: it can contain server paths and command output.
+    return NextResponse.json({ error: 'Failed to generate PPTX' }, { status: 500 });
+  } finally {
+    if (workDir) {
+      try {
+        fs.rmSync(workDir, { recursive: true, force: true });
+      } catch {
+        // best-effort cleanup
+      }
+    }
   }
 }
 
