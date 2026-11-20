@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
 import { BlogPost } from '@/types';
+import { buildSummary } from '@/lib/excerpt';
 
 const md = new MarkdownIt({
   html: true,
@@ -38,22 +39,32 @@ export function getPostBySlug(slug: string): BlogPost | null {
     const readingTime = calculateReadingTime(content);
 
     // Remove the first image and its caption from content since the
-    // hero image is already shown above the article body — this fixes
-    // the duplicate image that appears at the top of old articles.
-    const contentWithoutFirstImage = content
+    // hero image is already shown above the article body, which avoids
+    // the duplicate image at the top of older articles.
+    const cleaned = content
       // Remove markdown image followed by optional Photo: caption line
       .replace(/!\[[^\]]*\]\([^)]*\)\s*\n*\*?Photo:[^\n]*\n*/g, '')
       // Remove any remaining standalone Photo: ... via Unsplash lines
       .replace(/\*Photo:[^\n]*via Unsplash[^\n]*\*\n*/gi, '')
-      .replace(/Photo:[^\n]*via Unsplash[^\n]*\n*/gi, '');
+      .replace(/Photo:[^\n]*via Unsplash[^\n]*\n*/gi, '')
+      // Older articles end with a plain-text "Related Articles" list that often
+      // links to unrelated topics. The article page shows a proper related
+      // section instead, so the in-body list is dropped.
+      .replace(/\n##\s+Related Articles[\s\S]*?(?=\n##\s|$)/gi, '\n');
 
-    const contentHtml = md.render(contentWithoutFirstImage);
+    const contentHtml = md.render(cleaned);
+
+    // Older descriptions were cut off mid-sentence with "...". For those, build a
+    // clean summary from the opening paragraph. Complete descriptions are kept.
+    const rawDescription = String(data.description || '').trim();
+    const wasCutOff = !rawDescription || /(\.{3}|…)\s*$/.test(rawDescription);
+    const description = wasCutOff ? buildSummary(cleaned) : rawDescription;
 
     return {
       slug: realSlug,
       title: data.title || '',
-      description: data.description || '',
-      excerpt: data.description || '',
+      description,
+      excerpt: description,
       date: data.date || '',
       author: data.author || 'VetSphere Team',
       category: data.category || '',

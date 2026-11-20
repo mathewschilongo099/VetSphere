@@ -1,7 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Menu, PawPrint, Search, X } from 'lucide-react';
+
+const NAV_LINKS = [
+  { href: '/', label: 'Home' },
+  { href: '/articles', label: 'Articles' },
+  { href: '/ask', label: 'Ask VetAssist' },
+  { href: '/quiz', label: 'Quiz' },
+  { href: '/academic-writer', label: 'Academic Writer' },
+  { href: '/services', label: 'Services' },
+  { href: '/about', label: 'About' },
+];
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -10,12 +22,18 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
 
   const router = useRouter();
+  const pathname = usePathname() ?? '';
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close the mobile menu whenever the page changes.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -26,74 +44,75 @@ export default function Header() {
     }
   }
 
+  function isActive(href: string) {
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  }
+
   return (
     <header
       className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
         scrolled
-          ? 'bg-white/95 backdrop-blur-xl shadow-md border-gray-200'
+          ? 'bg-white/95 backdrop-blur-xl shadow-sm border-gray-200'
           : 'bg-white border-gray-100'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-
-        {/* LOGO */}
-        <a href="/" className="flex items-center gap-2">
-          <span className="text-2xl">🐾</span>
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2" aria-label="VetSphere home">
+          <PawPrint className="w-6 h-6 text-green-600" aria-hidden="true" />
           <span className="text-xl font-extrabold text-gray-900">
             Vet<span className="text-green-600">Sphere</span>
           </span>
-        </a>
+        </Link>
 
-        {/* DESKTOP NAV */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-          <a href="/">Home</a>
-          <a href="/articles">Articles</a>
-          <a href="/services">Services</a>
-          <a href="/about">About</a>
-          <a href="/ask" className="text-green-600 font-semibold">Ask VetAssist</a>
-          <a href="/quiz" className="text-blue-600 font-semibold">Quiz</a>
-          <a href="/academic-writer" className="text-purple-600 font-semibold">✍️ Academic Writer</a> {/* NEW */}
+        {/* Desktop navigation (large screens only, so it never gets cramped) */}
+        <nav className="hidden lg:flex items-center gap-7 text-sm font-medium" aria-label="Main">
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              aria-current={isActive(link.href) ? 'page' : undefined}
+              className={`transition-colors ${
+                isActive(link.href)
+                  ? 'text-green-700 font-semibold'
+                  : 'text-gray-700 hover:text-green-700'
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* DESKTOP RIGHT */}
-        <div className="hidden md:flex items-center gap-3">
+        {/* Right side */}
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setSearchOpen(!searchOpen)}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-700"
+            aria-label="Search articles"
           >
-            🔍
+            <Search className="w-5 h-5" aria-hidden="true" />
           </button>
 
-          <a
+          <Link
             href="/contact"
-            className="bg-green-600 text-white px-5 py-2.5 rounded-lg font-semibold"
+            className="hidden sm:inline-block bg-green-600 hover:bg-green-500 text-white px-5 py-2.5 rounded-lg font-semibold text-sm transition"
           >
             Contact
-          </a>
-        </div>
+          </Link>
 
-        {/* MOBILE RIGHT (FIXED ICON VISIBILITY) */}
-        <div className="flex md:hidden items-center gap-3">
-
-          {/* SEARCH ICON */}
-          <button
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-900"
-          >
-            🔍
-          </button>
-
-          {/* HAMBURGER (FIXED VISIBILITY) */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 rounded-lg bg-gray-100 text-gray-900 shadow-sm"
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-900"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={menuOpen}
           >
-            ☰
+            {menuOpen ? <X className="w-6 h-6" aria-hidden="true" /> : <Menu className="w-6 h-6" aria-hidden="true" />}
           </button>
         </div>
       </div>
 
-      {/* SEARCH */}
+      {/* Search */}
       {searchOpen && (
         <div className="border-t bg-white px-4 py-3">
           <form onSubmit={handleSearch} className="max-w-2xl mx-auto flex gap-2">
@@ -101,46 +120,40 @@ export default function Header() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search articles..."
-              className="flex-1 px-4 py-2 border rounded-lg text-sm"
+              aria-label="Search articles"
+              autoFocus
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
             />
-            <button className="bg-green-600 text-white px-4 rounded-lg text-sm">
+            <button className="bg-green-600 hover:bg-green-500 text-white px-5 rounded-lg text-sm font-semibold transition">
               Search
             </button>
           </form>
         </div>
       )}
 
-      {/* MOBILE MENU */}
+      {/* Mobile and tablet menu */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t shadow-lg">
-          <div className="px-4 py-3 flex flex-col gap-2 text-gray-800">
-
-            <a href="/" onClick={() => setMenuOpen(false)}>🏠 Home</a>
-            <a href="/articles" onClick={() => setMenuOpen(false)}>📚 Articles</a>
-            <a href="/services" onClick={() => setMenuOpen(false)}>🧰 Services</a>
-            <a href="/about" onClick={() => setMenuOpen(false)}>ℹ️ About</a>
-
-            <a href="/ask" className="text-green-600 font-semibold" onClick={() => setMenuOpen(false)}>
-              🤖 Ask VetAssist
-            </a>
-
-            <a href="/quiz" className="text-blue-600 font-semibold" onClick={() => setMenuOpen(false)}>
-              🧠 Quiz
-            </a>
-
-            <a href="/academic-writer" className="text-purple-600 font-semibold" onClick={() => setMenuOpen(false)}>
-              ✍️ Academic Writer
-            </a> {/* NEW */}
-
-            <a
+        <div className="lg:hidden bg-white border-t shadow-lg">
+          <nav className="px-4 py-3 flex flex-col text-gray-800" aria-label="Mobile">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={isActive(link.href) ? 'page' : undefined}
+                className={`py-3 border-b border-gray-100 text-base ${
+                  isActive(link.href) ? 'text-green-700 font-semibold' : ''
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+            <Link
               href="/contact"
-              className="bg-green-600 text-white text-center py-3 rounded-lg mt-2"
-              onClick={() => setMenuOpen(false)}
+              className="bg-green-600 text-white text-center py-3 rounded-lg mt-4 font-semibold"
             >
               Contact Us
-            </a>
-
-          </div>
+            </Link>
+          </nav>
         </div>
       )}
     </header>
