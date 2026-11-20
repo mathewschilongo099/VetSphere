@@ -1,6 +1,16 @@
 'use client';
 import { useState } from 'react';
 
+// Explicit text/background colors on every field so typed text stays visible
+// even when the site is in dark mode (body sets text-white there).
+const field =
+  'w-full rounded-2xl bg-[#e6e9ef] px-4 py-3.5 text-sm text-[#2b3040] caret-[#2b3040] ' +
+  'placeholder:text-[#8a91a3] outline-none [color-scheme:light] ' +
+  'shadow-[inset_5px_5px_10px_#c5cad6,inset_-5px_-5px_10px_#ffffff] ' +
+  'focus-visible:ring-2 focus-visible:ring-green-600 ' +
+  '[&:-webkit-autofill]:[-webkit-text-fill-color:#2b3040] ' +
+  '[&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#e6e9ef_inset]';
+
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
@@ -30,125 +40,104 @@ export default function ContactPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white w-full overflow-x-hidden">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#e6e9ef] px-4 py-16 text-[#2b3040]">
+      {/* Floating circles */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute left-[6%] top-[8%] hidden h-48 w-48 rounded-full bg-[#e6e9ef] shadow-[12px_12px_24px_#c5cad6,-12px_-12px_24px_#ffffff] sm:block"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute bottom-[8%] right-[8%] hidden h-32 w-32 rounded-full bg-[#e6e9ef] shadow-[12px_12px_24px_#c5cad6,-12px_-12px_24px_#ffffff] sm:block"
+      />
 
-      {/* Hero */}
-      <section className="bg-gray-900 text-white py-20 w-full">
-        <div className="max-w-4xl mx-auto px-4 text-center">
-          <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-5 uppercase tracking-widest">
-            Get In Touch
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-4">Contact Us</h1>
-          <p className="text-gray-400 text-base sm:text-xl">
-            Have a question, suggestion or want to collaborate? We'd love to hear from you.
-          </p>
+      <div className="relative z-10 mx-auto w-full max-w-md rounded-[28px] bg-[#e6e9ef] p-6 shadow-[14px_14px_30px_#c5cad6,-14px_-14px_30px_#ffffff] sm:p-9">
+        <div
+          aria-hidden="true"
+          className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e6e9ef] text-green-700 shadow-[6px_6px_12px_#c5cad6,-6px_-6px_12px_#ffffff]"
+        >
+          <svg
+            width="26"
+            height="26"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="3" />
+            <path d="m4 7 8 6 8-6" />
+          </svg>
         </div>
-      </section>
 
-      {/* Contact Section */}
-      <section className="max-w-5xl mx-auto px-4 py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <h1 className="text-center text-2xl font-extrabold text-[#2b3040]">Contact Us</h1>
+        <p className="mb-7 mt-2 text-center text-sm text-[#8a91a3]">
+          Questions, article ideas or collaboration? We reply within 24–48 hours.
+        </p>
 
-          {/* Info */}
-          <div className="sm:col-span-1 space-y-6">
-            <div>
-              <h2 className="text-xl font-extrabold text-gray-900 mb-4">Reach Out</h2>
-              <p className="text-gray-500 text-sm leading-relaxed">
-                Whether you have a question about animal health, want to suggest an article topic, or are interested in collaborating — we're happy to hear from you.
-              </p>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {status === 'success' && (
+            <div
+              role="status"
+              className="rounded-2xl bg-[#e6e9ef] p-4 text-sm font-medium text-green-700 shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff]"
+            >
+              Message sent. We’ll get back to you within 24–48 hours.
             </div>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-lg shrink-0">📧</div>
-                <div>
-                  <p className="font-semibold text-gray-900 text-sm">Email</p>
-                  <p className="text-gray-500 text-sm">Via the contact form</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-lg shrink-0">⏱️</div>
-                <div>
-                  <p className="font-semibold text-gray-900 text-sm">Response Time</p>
-                  <p className="text-gray-500 text-sm">Within 24-48 hours</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center text-lg shrink-0">🌍</div>
-                <div>
-                  <p className="font-semibold text-gray-900 text-sm">Worldwide</p>
-                  <p className="text-gray-500 text-sm">We welcome messages from anywhere</p>
-                </div>
-              </div>
+          )}
+
+          {status === 'error' && (
+            <div
+              role="alert"
+              className="rounded-2xl bg-[#e6e9ef] p-4 text-sm font-medium text-red-600 shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff]"
+            >
+              Message not sent. Check your connection and try again.
             </div>
-          </div>
+          )}
 
-          {/* Form */}
-          <div className="sm:col-span-2">
-            <form onSubmit={handleSubmit} className="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 sm:p-8 space-y-5">
+          <input
+            type="text"
+            name="name"
+            required
+            placeholder="Full name"
+            aria-label="Full name"
+            autoComplete="name"
+            className={field}
+          />
+          <input
+            type="email"
+            name="email"
+            required
+            placeholder="Email address"
+            aria-label="Email address"
+            autoComplete="email"
+            className={field}
+          />
+          <input
+            type="text"
+            name="subject"
+            required
+            placeholder="Subject"
+            aria-label="Subject"
+            className={field}
+          />
+          <textarea
+            name="message"
+            required
+            placeholder="How can we help?"
+            aria-label="Message"
+            className={`${field} h-36 resize-none`}
+          />
 
-              {status === 'success' && (
-                <div className="bg-green-50 border border-green-200 text-green-700 rounded-xl p-4 text-sm font-medium">
-                  ✅ Message sent successfully! We'll get back to you within 24-48 hours.
-                </div>
-              )}
-
-              {status === 'error' && (
-                <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-4 text-sm font-medium">
-                  ❌ Something went wrong. Please try again or email us directly.
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Your Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  placeholder="John Doe"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  placeholder="john@example.com"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Subject</label>
-                <input
-                  type="text"
-                  name="subject"
-                  required
-                  placeholder="What is this about?"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Message</label>
-                <textarea
-                  name="message"
-                  required
-                  placeholder="How can we help?"
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm h-36 focus:outline-none focus:ring-2 focus:ring-green-500 resize-none"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={status === 'sending'}
-                className="w-full bg-green-700 hover:bg-green-800 disabled:bg-green-400 text-white py-4 rounded-xl font-bold text-base transition"
-              >
-                {status === 'sending' ? 'Sending...' : 'Send Message'}
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
+          <button
+            type="submit"
+            disabled={status === 'sending'}
+            className="w-full rounded-2xl bg-[#e6e9ef] py-4 text-base font-bold text-green-700 shadow-[6px_6px_12px_#c5cad6,-6px_-6px_12px_#ffffff] transition-shadow hover:shadow-[8px_8px_16px_#c5cad6,-8px_-8px_16px_#ffffff] active:shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-600 disabled:opacity-60"
+          >
+            {status === 'sending' ? 'Sending…' : 'Send message'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
