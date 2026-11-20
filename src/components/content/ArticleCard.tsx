@@ -17,7 +17,7 @@ export default function ArticleCard({ post, priority = false }: ArticleCardProps
   return (
     <Link
       href={`/articles/${post.slug}`}
-      className="block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border border-gray-100 h-full flex flex-col"
+      className="article-card block bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all group border border-gray-100 h-full flex flex-col"
     >
       {/* Image - smaller */}
       <div className="relative h-40 w-full bg-gradient-to-br from-emerald-500 to-teal-600 overflow-hidden">
@@ -44,7 +44,7 @@ export default function ArticleCard({ post, priority = false }: ArticleCardProps
         </div>
 
         {/* Title - 2 lines max */}
-        <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition-colors mb-1">
+        <h3 className="article-card-title font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-green-600 transition-colors mb-1">
           {post.title}
         </h3>
 
@@ -54,7 +54,7 @@ export default function ArticleCard({ post, priority = false }: ArticleCardProps
         </p>
 
         {/* Author & Date - one line, smaller */}
-        <div className="flex items-center justify-between mt-3 pt-2.5 border-t border-gray-50">
+        <div className="article-card-footer flex items-center justify-between mt-3 pt-2.5 border-t border-gray-100">
           <span className="text-[10px] text-gray-400">{post.author || 'Mathews Chilongo'}</span>
           <span className="text-green-600 font-semibold text-[11px] group-hover:underline">
             Read more →
