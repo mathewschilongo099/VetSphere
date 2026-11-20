@@ -26,7 +26,8 @@ const TOPICS = [
 ];
 
 export default function HomePage() {
-  const latestPosts = getAllPosts().slice(0, 3);
+  // Six cards fill the grid evenly at both 2 and 3 columns.
+  const latestPosts = getAllPosts().slice(0, 6);
 
   return (
     <div className="min-h-screen bg-white w-full overflow-x-hidden">

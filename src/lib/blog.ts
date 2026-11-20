@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
 import { BlogPost } from '@/types';
+import { buildSummary } from '@/lib/excerpt';
 
 const md = new MarkdownIt({
   html: true,
@@ -53,8 +54,11 @@ export function getPostBySlug(slug: string): BlogPost | null {
 
     const contentHtml = md.render(cleaned);
 
-    // Some older descriptions were cut off with a trailing "...".
-    const description = String(data.description || '').replace(/\s*(\.{3}|…)\s*$/, '');
+    // Older descriptions were cut off mid-sentence with "...". For those, build a
+    // clean summary from the opening paragraph. Complete descriptions are kept.
+    const rawDescription = String(data.description || '').trim();
+    const wasCutOff = !rawDescription || /(\.{3}|…)\s*$/.test(rawDescription);
+    const description = wasCutOff ? buildSummary(cleaned) : rawDescription;
 
     return {
       slug: realSlug,
