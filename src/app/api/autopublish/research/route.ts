@@ -4,7 +4,8 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from 'next/server';
-import { callGemini, extractJson } from '@/lib/pipeline/gemini';
+import { callGemini, extractJson, GeminiError, type GeminiResult } from '@/lib/pipeline/gemini';
+import { researchFromNews } from '@/lib/pipeline/news-research';
 import { RESEARCH_SYSTEM, buildResearchPrompt, type Research, type TopicChoice } from '@/lib/pipeline/prompts';
 
 interface RawResearch {
@@ -27,14 +28,25 @@ export async function POST(request: NextRequest) {
     }
     const topic: TopicChoice = body.topic;
 
-    const result = await callGemini({
-      system: RESEARCH_SYSTEM,
-      prompt: buildResearchPrompt(topic),
-      search: true,
-      temperature: 0.2,
-      maxOutputTokens: 4000,
-      timeoutMs: 50000,
-    });
+    let result: GeminiResult;
+    try {
+      result = await callGemini({
+        system: RESEARCH_SYSTEM,
+        prompt: buildResearchPrompt(topic),
+        search: true,
+        temperature: 0.2,
+        maxOutputTokens: 4000,
+        timeoutMs: 50000,
+      });
+    } catch (error) {
+      // Gemini search is down or out of quota. Build the fact sheet from real,
+      // current news articles with a free model instead. If that cannot find
+      // enough real sources, fail with the original Gemini error.
+      if (!(error instanceof GeminiError)) throw error;
+      const fallback = await researchFromNews(topic);
+      if (!fallback) throw error;
+      result = fallback;
+    }
 
     const raw = extractJson<RawResearch>(result.text);
     const facts = (raw.facts ?? [])
