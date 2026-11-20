@@ -124,24 +124,27 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
   return (
     <>
       {/* Search Bar */}
-      <form onSubmit={handleSearch} className="flex gap-2 max-w-xl mx-auto mt-6">
+      <form
+        onSubmit={handleSearch}
+        className="flex gap-2 max-w-xl mx-auto mt-5 px-4"
+      >
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search articles... e.g. cattle, poultry, dog care"
-          className="flex-1 px-4 py-3 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 min-w-0 px-4 py-3 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
         />
         <button
           type="submit"
-          className="bg-green-600 hover:bg-green-500 text-white font-bold px-6 py-3 rounded-xl text-sm transition shrink-0"
+          className="bg-green-600 hover:bg-green-500 text-white font-bold px-5 py-3 rounded-xl text-sm transition shrink-0"
         >
           Search
         </button>
       </form>
 
       {/* Category Tabs */}
-      <div className="bg-white border-b border-gray-100 w-full sticky top-16 z-40 mt-4">
+      <div className="bg-white border-b border-gray-100 w-full sticky top-16 z-40 mt-3">
         <div className="max-w-6xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto">
           {CATEGORIES.map(({ label, value }) => (
             <button
@@ -163,9 +166,9 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
       </div>
 
       {/* Results */}
-      <div className="max-w-6xl mx-auto px-4 py-16">
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:py-12">
         {(query || activeCategory) && (
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6">
             <p className="text-gray-500 text-sm">
               {filtered.length > 0
                 ? `${filtered.length} article${filtered.length > 1 ? 's' : ''} found`
@@ -261,7 +264,7 @@ export default function ArticleSearch({ initialPosts }: { initialPosts: BlogPost
   return (
     <Suspense
       fallback={
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-4 py-8">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-gray-100 rounded-2xl h-72 animate-pulse" />
           ))}
