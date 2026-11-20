@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import Groq from 'groq-sdk';
+
+export const maxDuration = 30;
 
 interface Q {
   question: string;
@@ -63,10 +64,10 @@ function cleanQuestions(raw: unknown, count: number): Q[] {
     if (!Array.isArray(q.options) || q.options.length !== 4) continue;
     if (!q.options.every((o) => typeof o === 'string' && o.trim())) continue;
     if (q.options.filter((o, i, a) => a.indexOf(o) === i).length !== 4) continue;
-    if (typeof q.correctIndex !== 'number' || !Number.isInteger(q.correctIndex)) continue;
-    if (q.correctIndex < 0 || q.correctIndex > 3) continue;
+    const idx = Number(q.correctIndex);
+    if (!Number.isInteger(idx) || idx < 0 || idx > 3) continue;
 
-    const correct = q.options[q.correctIndex];
+    const correct = q.options[idx];
     const options = shuffle(q.options);
     out.push({
       question: q.question.trim(),
@@ -80,13 +81,73 @@ function cleanQuestions(raw: unknown, count: number): Q[] {
 }
 
 function parseQuestions(text: string, count: number): Q[] {
-  const match = text.match(/\[[\s\S]*\]/);
+  // Strip reasoning blocks and markdown fences some models add.
+  const cleaned = text
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/```json|```/gi, '')
+    .trim();
+  const match = cleaned.match(/\[[\s\S]*\]/);
   if (!match) return [];
   try {
     return cleanQuestions(JSON.parse(match[0]), count);
   } catch {
     return [];
   }
+}
+
+// ---- Free AI providers (all OpenAI-compatible) -----------------------
+interface Provider {
+  name: string;
+  url: string;
+  key: string | undefined;
+  models: string[];
+}
+
+function getProviders(): Provider[] {
+  return [
+    {
+      name: 'groq',
+      url: 'https://api.groq.com/openai/v1/chat/completions',
+      key: process.env.GROQ_API_KEY,
+      models: ['llama-3.3-70b-versatile', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'],
+    },
+    {
+      name: 'cerebras',
+      url: 'https://api.cerebras.ai/v1/chat/completions',
+      key: process.env.CEREBRAS_API_KEY,
+      models: ['gpt-oss-120b', 'llama3.1-8b'],
+    },
+    {
+      name: 'openrouter',
+      url: 'https://openrouter.ai/api/v1/chat/completions',
+      key: process.env.OPENROUTER_API_KEY,
+      models: ['meta-llama/llama-3.3-70b-instruct:free'],
+    },
+  ];
+}
+
+async function askModel(p: Provider, model: string, prompt: string): Promise<string> {
+  const res = await fetch(p.url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${p.key}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 4000,
+    }),
+    signal: AbortSignal.timeout(12_000),
+  });
+
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => '')).slice(0, 300);
+    throw new Error(`${p.name}/${model} HTTP ${res.status}: ${detail}`);
+  }
+  const data = await res.json();
+  return data?.choices?.[0]?.message?.content || '';
 }
 
 export async function POST(req: Request) {
@@ -131,55 +192,31 @@ Return ONLY a valid JSON array, no markdown and no extra text:
 [{"question":"string","options":["A","B","C","D"],"correctIndex":0,"explanation":"string"}]`;
 
   const minimum = Math.ceil(count / 2);
-  const groqKey = process.env.GROQ_API_KEY;
-  const openRouterKey = process.env.OPENROUTER_API_KEY;
+  const started = Date.now();
 
-  // 1. Groq (primary)
-  if (groqKey) {
-    try {
-      const groq = new Groq({ apiKey: groqKey });
-      const completion = await groq.chat.completions.create({
-        model: 'llama-3.1-8b-instant',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.8,
-        max_tokens: 4000,
-      });
-      const questions = parseQuestions(completion.choices[0]?.message?.content || '', count);
-      if (questions.length >= minimum) {
-        return NextResponse.json({ questions, source: 'groq' });
+  // Try each provider/model in turn until one returns usable questions.
+  // Stops early so we stay inside the function time limit.
+  for (const provider of getProviders()) {
+    if (!provider.key) {
+      console.log(`[quiz] ${provider.name}: no API key set, skipping`);
+      continue;
+    }
+    for (const model of provider.models) {
+      if (Date.now() - started > 22_000) break;
+      try {
+        const text = await askModel(provider, model, prompt);
+        const questions = parseQuestions(text, count);
+        if (questions.length >= minimum) {
+          return NextResponse.json({ questions, source: `${provider.name}:${model}` });
+        }
+        console.log(`[quiz] ${provider.name}/${model}: only ${questions.length} usable questions`);
+      } catch (err) {
+        console.log('[quiz] provider failed:', err instanceof Error ? err.message : err);
       }
-    } catch (err) {
-      console.log('Groq failed, switching to OpenRouter...', err);
     }
   }
 
-  // 2. OpenRouter (fallback)
-  if (openRouterKey) {
-    try {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${openRouterKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.8,
-          max_tokens: 4000,
-        }),
-      });
-      const data = await res.json();
-      const questions = parseQuestions(data.choices?.[0]?.message?.content || '', count);
-      if (questions.length >= minimum) {
-        return NextResponse.json({ questions, source: 'openrouter' });
-      }
-    } catch (err) {
-      console.log('OpenRouter failed.', err);
-    }
-  }
-
-  // 3. No placeholder questions: tell the user clearly instead.
+  // No placeholder questions: tell the user clearly instead.
   return NextResponse.json(
     { error: 'Could not generate the quiz right now. Please try again in a moment.' },
     { status: 503 }
