@@ -109,11 +109,46 @@ export interface GeminiResult {
   queries: string[];
 }
 
+/**
+ * Pull the first complete JSON object out of a model reply. Models sometimes
+ * add text or a stray closing brace after the JSON, which made a plain
+ * first-brace-to-last-brace parse fail with "Unexpected non-whitespace
+ * character after JSON" and stopped the autopublish topic stage.
+ */
 export function extractJson<T = unknown>(text: string): T {
   const cleaned = text.replace(/^\s*```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim();
   const start = cleaned.indexOf('{');
+  if (start === -1) {
+    throw new Error('Model response did not contain JSON');
+  }
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        try {
+          return JSON.parse(cleaned.slice(start, i + 1)) as T;
+        } catch {
+          break; // fall back to the wider slice below
+        }
+      }
+    }
+  }
+
   const end = cleaned.lastIndexOf('}');
-  if (start === -1 || end === -1 || end <= start) {
+  if (end === -1 || end <= start) {
     throw new Error('Model response did not contain JSON');
   }
   return JSON.parse(cleaned.slice(start, end + 1)) as T;
@@ -156,6 +191,10 @@ function classify(status: number, detail: string): GeminiError {
 }
 
 const RETRYABLE = new Set([429, 500, 502, 503, 504]);
+
+// Gemini often answers 503 "high demand" for a few seconds at a time. Wait and
+// try again (two retries) instead of failing the whole request on the first one.
+const RETRY_DELAYS_MS = [2000, 5000];
 
 export async function callGemini(options: GeminiOptions): Promise<GeminiResult> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
@@ -203,9 +242,14 @@ export async function callGemini(options: GeminiOptions): Promise<GeminiResult> 
       if (!res.ok) {
         const detail = (await res.text().catch(() => '')).slice(0, 300);
         const error = classify(res.status, detail);
-        // One quick retry for transient problems, only if this attempt was fast.
-        if (attempt === 0 && RETRYABLE.has(res.status) && Date.now() - attemptStartedAt < timeoutMs / 2) {
-          await new Promise((r) => setTimeout(r, 1500));
+        // Retry transient problems, but only when the attempt failed fast so the
+        // route's time limit is not used up.
+        if (
+          attempt < RETRY_DELAYS_MS.length &&
+          RETRYABLE.has(res.status) &&
+          Date.now() - attemptStartedAt < timeoutMs / 2
+        ) {
+          await new Promise((r) => setTimeout(r, RETRY_DELAYS_MS[attempt]));
           continue;
         }
         throw error;
