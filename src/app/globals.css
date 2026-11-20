@@ -11,3 +11,33 @@
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+/* Neumorphic styling for the Academic Writer form (wrapped in .neo-scope) */
+.neo-scope textarea {
+  background-color: #e6e9ef !important;
+  color: #2b3040 !important;
+  border: 0 !important;
+  box-shadow: inset 5px 5px 10px #c5cad6, inset -5px -5px 10px #ffffff !important;
+  color-scheme: light;
+}
+.neo-scope textarea:focus {
+  box-shadow: inset 5px 5px 10px #c5cad6, inset -5px -5px 10px #ffffff, 0 0 0 2px #16a34a !important;
+}
+.neo-scope form button[type='button'] {
+  background-color: #e6e9ef;
+  color: #2b3040;
+  box-shadow: 6px 6px 12px #c5cad6, -6px -6px 12px #ffffff;
+}
+.neo-scope form button[type='button']:hover {
+  background-color: #e6e9ef;
+  box-shadow: 8px 8px 16px #c5cad6, -8px -8px 16px #ffffff;
+}
+.neo-scope form button[type='button'].bg-green-600,
+.neo-scope form button[type='button'].bg-purple-600 {
+  color: #15803d;
+  font-weight: 700;
+  box-shadow: inset 4px 4px 8px #c5cad6, inset -4px -4px 8px #ffffff;
+}
+.neo-scope form button[type='button'] .text-green-100 {
+  color: #6b7280;
+}

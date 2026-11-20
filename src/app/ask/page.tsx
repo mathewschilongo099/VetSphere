@@ -7,6 +7,10 @@ interface Message {
   text: string;
 }
 
+// Explicit colors everywhere so text stays readable in dark mode.
+const raised = 'shadow-[6px_6px_12px_#c5cad6,-6px_-6px_12px_#ffffff]';
+const pressed = 'shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff]';
+
 export default function AskPage() {
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<Message[]>([
@@ -67,29 +71,31 @@ export default function AskPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-
-      {/* Header */}
-      <div className="bg-gray-900 text-white py-12 px-4 text-center">
-        <h1 className="text-3xl sm:text-4xl font-extrabold mb-3">
-          Ask <span className="text-green-400">VetAssist</span>
-        </h1>
-        <p className="text-gray-300 text-base max-w-xl mx-auto">
-          Get instant answers to your questions — powered by AI, built for farmers and pet owners.
-        </p>
-      </div>
-
-      <div className="max-w-3xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-[#e6e9ef] px-4 py-12 text-[#2b3040]">
+      <div className="mx-auto max-w-3xl">
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <div
+            aria-hidden="true"
+            className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[#e6e9ef] text-lg font-extrabold text-green-700 ${raised}`}
+          >
+            VA
+          </div>
+          <h1 className="mb-3 text-3xl font-extrabold sm:text-4xl">Ask VetAssist</h1>
+          <p className="mx-auto max-w-xl text-base text-[#6b7280]">
+            Get instant answers to your questions, powered by AI and built for farmers and pet owners.
+          </p>
+        </div>
 
         {messages.length === 1 && (
-          <div className="mb-6">
-            <p className="text-gray-500 text-sm mb-3 text-center">Try asking:</p>
-            <div className="flex flex-wrap gap-2 justify-center">
+          <div className="mb-8">
+            <p className="mb-4 text-center text-sm text-[#6b7280]">Try asking:</p>
+            <div className="flex flex-wrap justify-center gap-4">
               {suggestedQuestions.map((q, i) => (
                 <button
                   key={i}
                   onClick={() => setQuery(q)}
-                  className="bg-white border border-gray-200 text-gray-700 text-sm px-4 py-2 rounded-full hover:bg-green-50 hover:border-green-300 transition"
+                  className={`rounded-full bg-[#e6e9ef] px-4 py-2 text-sm text-[#2b3040] transition-shadow ${raised} hover:shadow-[8px_8px_16px_#c5cad6,-8px_-8px_16px_#ffffff] active:shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-600`}
                 >
                   {q}
                 </button>
@@ -98,66 +104,73 @@ export default function AskPage() {
           </div>
         )}
 
-        {/* Chat Messages */}
-        <div className="space-y-4 mb-6 max-h-[60vh] overflow-y-auto px-1">
-          {messages.map((msg, i) => (
-            <div
-              key={i}
-              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              {msg.role === 'ai' && (
-                <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold mr-2 shrink-0 mt-1">
+        {/* Chat card */}
+        <div className="rounded-[28px] bg-[#e6e9ef] p-4 shadow-[14px_14px_30px_#c5cad6,-14px_-14px_30px_#ffffff] sm:p-6">
+          <div className="max-h-[55vh] space-y-5 overflow-y-auto p-3">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.role === 'ai' && (
+                  <div
+                    className={`mr-3 mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e6e9ef] text-xs font-bold text-green-700 ${raised}`}
+                  >
+                    VA
+                  </div>
+                )}
+                <div
+                  className={`max-w-[80%] whitespace-pre-wrap rounded-2xl bg-[#e6e9ef] px-4 py-3 text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? `${pressed} font-medium text-green-800`
+                      : `${raised} text-[#2b3040]`
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+
+            {loading && (
+              <div className="flex justify-start">
+                <div
+                  className={`mr-3 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e6e9ef] text-xs font-bold text-green-700 ${raised}`}
+                >
                   VA
                 </div>
-              )}
-              <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
-                  msg.role === 'user'
-                    ? 'bg-green-600 text-white rounded-br-sm'
-                    : 'bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100'
-                }`}
-              >
-                {msg.text}
-              </div>
-            </div>
-          ))}
-
-          {loading && (
-            <div className="flex justify-start">
-              <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold mr-2 shrink-0">
-                VA
-              </div>
-              <div className="bg-white rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm border border-gray-100">
-                <div className="flex gap-1 items-center">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div className={`rounded-2xl bg-[#e6e9ef] px-4 py-3 ${raised}`}>
+                  <div className="flex items-center gap-1" role="status" aria-label="VetAssist is typing">
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-green-600" style={{ animationDelay: '0ms' }} />
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-green-600" style={{ animationDelay: '150ms' }} />
+                    <div className="h-2 w-2 animate-bounce rounded-full bg-green-600" style={{ animationDelay: '300ms' }} />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          <div ref={bottomRef} />
+            )}
+            <div ref={bottomRef} />
+          </div>
+
+          {/* Input */}
+          <form onSubmit={handleAsk} className="mt-6 flex gap-4">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Ask any question..."
+              aria-label="Your question"
+              className="min-w-0 flex-1 rounded-2xl bg-[#e6e9ef] px-5 py-4 text-sm text-[#2b3040] caret-[#2b3040] outline-none [color-scheme:light] placeholder:text-[#8a91a3] shadow-[inset_5px_5px_10px_#c5cad6,inset_-5px_-5px_10px_#ffffff] focus-visible:ring-2 focus-visible:ring-green-600"
+            />
+            <button
+              type="submit"
+              disabled={loading || !query.trim()}
+              className={`rounded-2xl bg-[#e6e9ef] px-6 py-4 font-bold text-green-700 transition-shadow ${raised} hover:shadow-[8px_8px_16px_#c5cad6,-8px_-8px_16px_#ffffff] active:shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-600 disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              {loading ? '…' : 'Ask'}
+            </button>
+          </form>
         </div>
 
-        {/* Input */}
-        <form onSubmit={handleAsk} className="flex gap-3 sticky bottom-4">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Ask any question..."
-            className="flex-1 px-5 py-4 rounded-xl border border-gray-200 bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm"
-          />
-          <button
-            type="submit"
-            disabled={loading || !query.trim()}
-            className="bg-green-600 hover:bg-green-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-6 py-4 rounded-xl transition"
-          >
-            {loading ? '...' : 'Ask'}
-          </button>
-        </form>
-
-        <p className="text-center text-gray-400 text-xs mt-4">
+        <p className="mt-6 text-center text-xs text-[#6b7280]">
           VetAssist is an AI assistant. Always consult a qualified veterinarian for serious animal health concerns.
         </p>
       </div>

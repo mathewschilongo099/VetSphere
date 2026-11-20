@@ -2,25 +2,20 @@ import DynamicQuiz from '@/components/DynamicQuiz';
 
 export default function QuizPage() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950 py-6">
-      <div className="max-w-4xl mx-auto px-6">
-
+    <div className="min-h-screen bg-[#e6e9ef] px-4 py-12 text-[#2b3040]">
+      <div className="mx-auto max-w-3xl">
         {/* HEADER */}
-        <div className="text-center mb-10">
-          <h1 className="text-5xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
+        <div className="mb-10 text-center">
+          <h1 className="mb-3 text-4xl font-extrabold tracking-tight text-[#2b3040] sm:text-5xl">
             VetSphere Quiz Lab
           </h1>
-
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Test your veterinary knowledge
-          </p>
+          <p className="text-lg text-[#6b7280]">Test your veterinary knowledge</p>
         </div>
 
         {/* QUIZ COMPONENT */}
-        <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-md p-4 md:p-6">
+        <div className="rounded-[28px] bg-[#e6e9ef] p-5 shadow-[14px_14px_30px_#c5cad6,-14px_-14px_30px_#ffffff] sm:p-8">
           <DynamicQuiz />
         </div>
-
       </div>
     </div>
   );
