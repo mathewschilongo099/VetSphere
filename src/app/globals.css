@@ -12,32 +12,192 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Neumorphic styling for the Academic Writer form (wrapped in .neo-scope) */
+/* ------------------------------------------------------------------
+   Theme colors. Light by default, dark when the phone/computer is set
+   to dark mode (prefers-color-scheme).
+------------------------------------------------------------------- */
+:root {
+  --neo-bg: #e6e9ef;
+  --neo-hi: #ffffff;
+  --neo-lo: #c5cad6;
+  --neo-text: #2b3040;
+  --neo-muted: #6b7280;
+  --neo-accent: #15803d;
+  --neo-danger: #dc2626;
+  --neo-violet: #7e22ce;
+  --neo-warn: #92400e;
+  --neo-ring: #16a34a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --neo-bg: #1f232c;
+    --neo-hi: #2b303b;
+    --neo-lo: #14171d;
+    --neo-text: #e8ebf2;
+    --neo-muted: #9aa3b5;
+    --neo-accent: #4ade80;
+    --neo-danger: #f87171;
+    --neo-violet: #c084fc;
+    --neo-warn: #fcd34d;
+    --neo-ring: #4ade80;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Neumorphic building blocks (used by Contact, Ask, Quiz, Academic Writer)
+------------------------------------------------------------------- */
+@layer components {
+  .neo-page { background-color: var(--neo-bg); color: var(--neo-text); }
+  .neo-card {
+    background-color: var(--neo-bg);
+    border-radius: 28px;
+    box-shadow: 14px 14px 30px var(--neo-lo), -14px -14px 30px var(--neo-hi);
+  }
+  .neo-raised {
+    background-color: var(--neo-bg);
+    box-shadow: 6px 6px 12px var(--neo-lo), -6px -6px 12px var(--neo-hi);
+  }
+  .neo-inset {
+    background-color: var(--neo-bg);
+    box-shadow: inset 5px 5px 10px var(--neo-lo), inset -5px -5px 10px var(--neo-hi);
+  }
+  .neo-pressed {
+    background-color: var(--neo-bg);
+    box-shadow: inset 4px 4px 8px var(--neo-lo), inset -4px -4px 8px var(--neo-hi);
+  }
+  .neo-circle {
+    background-color: var(--neo-bg);
+    border-radius: 9999px;
+    box-shadow: 12px 12px 24px var(--neo-lo), -12px -12px 24px var(--neo-hi);
+  }
+  .neo-btn {
+    background-color: var(--neo-bg);
+    box-shadow: 6px 6px 12px var(--neo-lo), -6px -6px 12px var(--neo-hi);
+    transition: box-shadow 0.15s;
+    cursor: pointer;
+  }
+  .neo-btn:hover:not(:disabled) {
+    box-shadow: 8px 8px 16px var(--neo-lo), -8px -8px 16px var(--neo-hi);
+  }
+  .neo-btn:active:not(:disabled),
+  .neo-btn[aria-pressed='true'],
+  .neo-btn[aria-pressed='true']:hover:not(:disabled) {
+    box-shadow: inset 4px 4px 8px var(--neo-lo), inset -4px -4px 8px var(--neo-hi);
+  }
+  .neo-btn[aria-pressed='true'] { color: var(--neo-accent); font-weight: 700; }
+  .neo-btn:focus-visible { outline: 2px solid var(--neo-ring); outline-offset: 4px; }
+  .neo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .neo-field {
+    background-color: var(--neo-bg);
+    color: var(--neo-text);
+    caret-color: var(--neo-text);
+    border: 0;
+    outline: none;
+    box-shadow: inset 5px 5px 10px var(--neo-lo), inset -5px -5px 10px var(--neo-hi);
+  }
+  .neo-field::placeholder { color: var(--neo-muted); opacity: 0.85; }
+  .neo-field:focus-visible {
+    box-shadow: inset 5px 5px 10px var(--neo-lo), inset -5px -5px 10px var(--neo-hi), 0 0 0 2px var(--neo-ring);
+  }
+  .neo-field:-webkit-autofill {
+    -webkit-text-fill-color: var(--neo-text);
+    -webkit-box-shadow: 0 0 0 1000px var(--neo-bg) inset;
+  }
+  .neo-text { color: var(--neo-text); }
+  .neo-muted { color: var(--neo-muted); }
+  .neo-accent { color: var(--neo-accent); }
+  .neo-danger { color: var(--neo-danger); }
+  .neo-violet { color: var(--neo-violet); }
+  .neo-warn { color: var(--neo-warn); }
+}
+
+/* Academic Writer form (wrapped in .neo-scope) */
 .neo-scope textarea {
-  background-color: #e6e9ef !important;
-  color: #2b3040 !important;
+  background-color: var(--neo-bg) !important;
+  color: var(--neo-text) !important;
   border: 0 !important;
-  box-shadow: inset 5px 5px 10px #c5cad6, inset -5px -5px 10px #ffffff !important;
-  color-scheme: light;
+  box-shadow: inset 5px 5px 10px var(--neo-lo), inset -5px -5px 10px var(--neo-hi) !important;
 }
 .neo-scope textarea:focus {
-  box-shadow: inset 5px 5px 10px #c5cad6, inset -5px -5px 10px #ffffff, 0 0 0 2px #16a34a !important;
+  box-shadow: inset 5px 5px 10px var(--neo-lo), inset -5px -5px 10px var(--neo-hi), 0 0 0 2px var(--neo-ring) !important;
 }
+.neo-scope form label { color: var(--neo-text); }
+.neo-scope form .text-gray-500,
+.neo-scope form .text-gray-400,
+.neo-scope form button[type='button'] .text-green-100 { color: var(--neo-muted); }
 .neo-scope form button[type='button'] {
-  background-color: #e6e9ef;
-  color: #2b3040;
-  box-shadow: 6px 6px 12px #c5cad6, -6px -6px 12px #ffffff;
+  background-color: var(--neo-bg);
+  color: var(--neo-text);
+  box-shadow: 6px 6px 12px var(--neo-lo), -6px -6px 12px var(--neo-hi);
 }
 .neo-scope form button[type='button']:hover {
-  background-color: #e6e9ef;
-  box-shadow: 8px 8px 16px #c5cad6, -8px -8px 16px #ffffff;
+  background-color: var(--neo-bg);
+  box-shadow: 8px 8px 16px var(--neo-lo), -8px -8px 16px var(--neo-hi);
 }
 .neo-scope form button[type='button'].bg-green-600,
 .neo-scope form button[type='button'].bg-purple-600 {
-  color: #15803d;
+  color: var(--neo-accent);
   font-weight: 700;
-  box-shadow: inset 4px 4px 8px #c5cad6, inset -4px -4px 8px #ffffff;
+  box-shadow: inset 4px 4px 8px var(--neo-lo), inset -4px -4px 8px var(--neo-hi);
 }
-.neo-scope form button[type='button'] .text-green-100 {
-  color: #6b7280;
+
+/* ------------------------------------------------------------------
+   Dark mode for the rest of the site: remaps the light Tailwind colors
+   (white / gray / pale green, red, yellow) to dark equivalents when the
+   device is set to dark mode.
+------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  .bg-white { background-color: #111318; }
+  .bg-gray-50 { background-color: #171a21; }
+  .bg-gray-100 { background-color: #1d212a; }
+  .bg-gray-200 { background-color: #2a2f3a; }
+  .hover\:bg-gray-50:hover,
+  .hover\:bg-gray-100:hover { background-color: #1d212a; }
+  .border-gray-100 { border-color: #232833; }
+  .border-gray-200 { border-color: #2d3340; }
+  .border-gray-300 { border-color: #3a4150; }
+  .text-gray-900,
+  .text-gray-800 { color: #f3f4f6; }
+  .text-gray-700 { color: #d1d5db; }
+  .text-gray-600 { color: #b6bdca; }
+  .text-gray-500 { color: #9ca3af; }
+  .text-gray-400 { color: #8b93a3; }
+
+  .bg-green-50,
+  .bg-green-100,
+  .hover\:bg-green-50:hover { background-color: rgba(34, 197, 94, 0.14); }
+  .border-green-200,
+  .border-green-300 { border-color: rgba(34, 197, 94, 0.35); }
+  .text-green-700 { color: #4ade80; }
+  .text-green-800 { color: #86efac; }
+
+  .bg-red-50 { background-color: rgba(239, 68, 68, 0.14); }
+  .border-red-200 { border-color: rgba(239, 68, 68, 0.35); }
+  .text-red-700 { color: #fca5a5; }
+
+  .bg-yellow-50 { background-color: rgba(250, 204, 21, 0.12); }
+  .border-yellow-200 { border-color: rgba(250, 204, 21, 0.35); }
+  .text-yellow-800 { color: #fde68a; }
+
+  /* Article text (Tailwind typography) */
+  .prose {
+    --tw-prose-body: #d1d5db;
+    --tw-prose-headings: #f9fafb;
+    --tw-prose-lead: #cbd5e1;
+    --tw-prose-links: #4ade80;
+    --tw-prose-bold: #f9fafb;
+    --tw-prose-counters: #9ca3af;
+    --tw-prose-bullets: #6b7280;
+    --tw-prose-hr: #2d3340;
+    --tw-prose-quotes: #f3f4f6;
+    --tw-prose-quote-borders: #2d3340;
+    --tw-prose-captions: #9ca3af;
+    --tw-prose-code: #f9fafb;
+    --tw-prose-pre-code: #e5e7eb;
+    --tw-prose-pre-bg: #0b0d12;
+    --tw-prose-th-borders: #3a4150;
+    --tw-prose-td-borders: #2d3340;
+  }
 }

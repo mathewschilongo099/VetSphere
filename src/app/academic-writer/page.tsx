@@ -6,28 +6,24 @@ export const metadata = {
   description: 'Generate professional academic essays, research papers, and reports for diploma, bachelor, masters, or PhD level instantly.'
 };
 
-const raised = 'shadow-[6px_6px_12px_#c5cad6,-6px_-6px_12px_#ffffff]';
-
 export default function AcademicWriterPage() {
   return (
-    <div className="min-h-screen bg-[#e6e9ef] px-4 py-16 text-[#2b3040]">
+    <div className="neo-page min-h-screen px-4 py-16">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
         <div className="mb-12 text-center">
-          <div className={`mb-5 inline-block rounded-full bg-[#e6e9ef] px-4 py-1.5 text-sm font-semibold text-green-700 ${raised}`}>
+          <div className="neo-raised neo-accent mb-5 inline-block rounded-full px-4 py-1.5 text-sm font-semibold">
             AI-powered academic writing
           </div>
-          <h1 className="mb-4 text-4xl font-extrabold text-[#2b3040] md:text-5xl">
-            Academic Writer
-          </h1>
-          <p className="mx-auto max-w-2xl text-lg text-[#6b7280]">
+          <h1 className="neo-text mb-4 text-4xl font-extrabold md:text-5xl">Academic Writer</h1>
+          <p className="neo-muted mx-auto max-w-2xl text-lg">
             Get a professionally structured essay or research paper at your academic level,
             from Diploma to PhD.
           </p>
         </div>
 
         {/* Form */}
-        <div className="neo-scope rounded-[28px] bg-[#e6e9ef] p-6 text-[#2b3040] shadow-[14px_14px_30px_#c5cad6,-14px_-14px_30px_#ffffff] md:p-9">
+        <div className="neo-scope neo-card neo-text p-6 md:p-9">
           <AcademicWriterForm />
         </div>
 
@@ -50,16 +46,16 @@ export default function AcademicWriterPage() {
               desc: 'Abstract, introduction, body, conclusion, and references'
             }
           ].map((f) => (
-            <div key={f.title} className={`rounded-2xl bg-[#e6e9ef] p-5 ${raised}`}>
+            <div key={f.title} className="neo-raised rounded-2xl p-5">
               <div className="mb-2 text-3xl">{f.icon}</div>
-              <div className="font-bold text-[#2b3040]">{f.title}</div>
-              <div className="mt-1 text-sm text-[#6b7280]">{f.desc}</div>
+              <div className="neo-text font-bold">{f.title}</div>
+              <div className="neo-muted mt-1 text-sm">{f.desc}</div>
             </div>
           ))}
         </div>
 
         {/* Disclaimer */}
-        <div className="mt-8 rounded-2xl bg-[#e6e9ef] p-5 text-sm text-amber-900 shadow-[inset_5px_5px_10px_#c5cad6,inset_-5px_-5px_10px_#ffffff]">
+        <div className="neo-inset neo-warn mt-8 rounded-2xl p-5 text-sm">
           <strong>Academic integrity:</strong> Use this tool as a research aid and reference.
           Always verify citations, adapt content to your specific requirements, and follow your
           institution’s academic integrity policies.

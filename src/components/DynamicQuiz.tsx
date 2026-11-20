@@ -10,20 +10,8 @@ interface Question {
   explanation: string;
 }
 
-// Explicit colors everywhere so text stays readable in dark mode.
-const raised = 'shadow-[6px_6px_12px_#c5cad6,-6px_-6px_12px_#ffffff]';
-const pressed = 'shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff]';
-const fieldCls =
-  'w-full rounded-2xl bg-[#e6e9ef] px-4 py-3.5 text-sm text-[#2b3040] caret-[#2b3040] ' +
-  'placeholder:text-[#8a91a3] outline-none [color-scheme:light] ' +
-  'shadow-[inset_5px_5px_10px_#c5cad6,inset_-5px_-5px_10px_#ffffff] ' +
-  'focus-visible:ring-2 focus-visible:ring-green-600';
-const btn =
-  'rounded-2xl bg-[#e6e9ef] px-5 py-3.5 font-bold transition-shadow ' +
-  `${raised} hover:shadow-[8px_8px_16px_#c5cad6,-8px_-8px_16px_#ffffff] ` +
-  'active:shadow-[inset_4px_4px_8px_#c5cad6,inset_-4px_-4px_8px_#ffffff] ' +
-  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-600 ' +
-  'disabled:opacity-60';
+const fieldCls = 'neo-field w-full rounded-2xl px-4 py-3.5 text-sm';
+const btn = 'neo-btn rounded-2xl px-5 py-3.5 font-bold';
 
 export default function DynamicQuiz() {
   const [topic, setTopic] = useState('livestock diseases');
@@ -215,13 +203,13 @@ export default function DynamicQuiz() {
   // UI
   // -------------------------
   return (
-    <div className="mx-auto max-w-2xl text-[#2b3040]">
+    <div className="neo-text mx-auto max-w-2xl">
       {/* HEADER */}
       <h2 className="mb-2 text-center text-2xl font-extrabold sm:text-3xl">
         Assessment of Veterinary Knowledge by VetSphere
       </h2>
 
-      <p className="mb-8 text-center text-sm text-[#6b7280]">Test your understanding</p>
+      <p className="neo-muted mb-8 text-center text-sm">Test your understanding</p>
 
       {/* START */}
       {!questions.length && !showResult && (
@@ -234,16 +222,12 @@ export default function DynamicQuiz() {
             aria-label="Quiz topic"
           />
 
-          <button
-            onClick={generateQuiz}
-            disabled={loading}
-            className={`${btn} w-full text-green-700`}
-          >
+          <button onClick={generateQuiz} disabled={loading} className={`${btn} neo-accent w-full`}>
             {loading ? 'Generating…' : 'Start exam'}
           </button>
 
           {error && (
-            <p role="alert" className="text-center text-sm font-medium text-red-600">
+            <p role="alert" className="neo-danger text-center text-sm font-medium">
               {error}
             </p>
           )}
@@ -253,39 +237,27 @@ export default function DynamicQuiz() {
       {/* EXAM */}
       {questions.length > 0 && !showResult && currentQuestion && (
         <div>
-          <div className="mb-3 text-sm font-medium text-[#6b7280]">
+          <div className="neo-muted mb-3 text-sm font-medium">
             Question {currentQuestionIndex + 1} / {questions.length}
           </div>
 
           <h3 className="mb-5 text-xl font-bold">{currentQuestion.question}</h3>
 
           <div className="space-y-4">
-            {currentQuestion.options.map((opt, i) => {
-              const selected = answers[currentQuestionIndex] === i;
-              return (
-                <button
-                  key={i}
-                  onClick={() => handleAnswer(i)}
-                  aria-pressed={selected}
-                  className={`block w-full rounded-2xl bg-[#e6e9ef] p-4 text-left text-sm transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-green-600 ${
-                    selected
-                      ? `${pressed} font-bold text-green-700`
-                      : `${raised} text-[#2b3040] hover:shadow-[8px_8px_16px_#c5cad6,-8px_-8px_16px_#ffffff]`
-                  }`}
-                >
-                  {opt}
-                </button>
-              );
-            })}
+            {currentQuestion.options.map((opt, i) => (
+              <button
+                key={i}
+                onClick={() => handleAnswer(i)}
+                aria-pressed={answers[currentQuestionIndex] === i}
+                className="neo-btn neo-text block w-full rounded-2xl p-4 text-left text-sm"
+              >
+                {opt}
+              </button>
+            ))}
           </div>
 
-          <button
-            onClick={nextQuestion}
-            className={`${btn} mt-7 w-full text-green-700`}
-          >
-            {currentQuestionIndex === questions.length - 1
-              ? 'Finish exam'
-              : 'Next question'}
+          <button onClick={nextQuestion} className={`${btn} neo-accent mt-7 w-full`}>
+            {currentQuestionIndex === questions.length - 1 ? 'Finish exam' : 'Next question'}
           </button>
         </div>
       )}
@@ -300,25 +272,17 @@ export default function DynamicQuiz() {
           </p>
 
           {perfectScore && (
-            <p className="mb-4 font-semibold text-green-700">
-              Excellent performance!
-            </p>
+            <p className="neo-accent mb-4 font-semibold">Excellent performance!</p>
           )}
 
           {perfectScore && (
-            <button
-              onClick={downloadCertificate}
-              className={`${btn} mb-5 text-purple-700`}
-            >
+            <button onClick={downloadCertificate} className={`${btn} neo-violet mb-5`}>
               Download certificate
             </button>
           )}
 
           <div className="flex flex-wrap justify-center gap-4">
-            <button
-              onClick={() => setViewReview(true)}
-              className={`${btn} text-red-600`}
-            >
+            <button onClick={() => setViewReview(true)} className={`${btn} neo-danger`}>
               Review mistakes
             </button>
 
@@ -329,7 +293,7 @@ export default function DynamicQuiz() {
                 setAnswers([]);
                 setShowResult(false);
               }}
-              className={`${btn} text-green-700`}
+              className={`${btn} neo-accent`}
             >
               New exam
             </button>
@@ -348,21 +312,16 @@ export default function DynamicQuiz() {
             if (userAnswer === q.correctIndex) return null;
 
             return (
-              <div
-                key={i}
-                className={`mb-6 rounded-2xl bg-[#e6e9ef] p-5 ${raised}`}
-              >
+              <div key={i} className="neo-raised mb-6 rounded-2xl p-5">
                 <p className="font-bold">{q.question}</p>
 
-                <p className="mt-2 text-sm text-red-600">
+                <p className="neo-danger mt-2 text-sm">
                   Your answer: {q.options[userAnswer ?? -1]}
                 </p>
 
-                <p className="text-sm text-green-700">
-                  Correct: {q.options[q.correctIndex]}
-                </p>
+                <p className="neo-accent text-sm">Correct: {q.options[q.correctIndex]}</p>
 
-                <p className="mt-2 text-sm text-[#2b3040]">{q.explanation}</p>
+                <p className="mt-2 text-sm">{q.explanation}</p>
               </div>
             );
           })}
