@@ -5,6 +5,13 @@
 // This is the ONE place that decides which Gemini model is used and how the
 // API key is read. The key is only ever read on the server, is sent in the
 // x-goog-api-key header (never in a URL) and is never logged or returned.
+//
+// Free fallback: when Gemini fails (quota, overload, timeout, bad key), the
+// request is answered by Groq and then Cerebras, using the GROQ_API_KEY and
+// CEREBRAS_API_KEY already set in Vercel. Both have free tiers. Their model is
+// looked up from the provider's own model list, so a retired model name cannot
+// break the fallback. Requests that need web search try Groq's built-in web
+// search (groq/compound-mini) and only count if it returns real source links.
 
 export interface Source {
   title: string;
@@ -190,13 +197,217 @@ function classify(status: number, detail: string): GeminiError {
   return new GeminiError('bad_request', summary, status);
 }
 
-const RETRYABLE = new Set([429, 500, 502, 503, 504]);
+// 429 is not retried: it usually means the quota is used up, so waiting a few
+// seconds does not help and the free fallback below answers right away instead.
+const RETRYABLE = new Set([500, 502, 503, 504]);
 
 // Gemini often answers 503 "high demand" for a few seconds at a time. Wait and
 // try again (two retries) instead of failing the whole request on the first one.
 const RETRY_DELAYS_MS = [2000, 5000];
 
+// ---------------------------------------------------------------------------
+// Free fallback providers (OpenAI-compatible APIs)
+// ---------------------------------------------------------------------------
+
+interface FallbackProvider {
+  name: string;
+  keyEnv: string;
+  modelEnv: string;
+  baseUrl: string;
+  /** Best first. The first one the key can use wins. */
+  preferred: string[];
+}
+
+const GROQ_BASE_URL = 'https://api.groq.com/openai/v1';
+
+const FALLBACK_PROVIDERS: FallbackProvider[] = [
+  {
+    name: 'groq',
+    keyEnv: 'GROQ_API_KEY',
+    modelEnv: 'GROQ_MODEL',
+    baseUrl: GROQ_BASE_URL,
+    preferred: ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b', 'llama-3.1-8b-instant'],
+  },
+  {
+    name: 'cerebras',
+    keyEnv: 'CEREBRAS_API_KEY',
+    modelEnv: 'CEREBRAS_MODEL',
+    baseUrl: 'https://api.cerebras.ai/v1',
+    preferred: ['gpt-oss-120b', 'llama-3.3-70b', 'llama3.1-8b'],
+  },
+];
+
+// Models that are not text chat models (speech, safety filters, embeddings,
+// Groq's own agent systems).
+const NOT_CHAT_MODEL = /whisper|guard|safeguard|tts|orpheus|playai|embed|compound/i;
+
+const MODEL_CACHE_MS = 10 * 60 * 1000;
+const modelCache = new Map<string, { model: string; at: number }>();
+
+async function fetchWithTimeout(url: string, init: RequestInit, ms: number): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Ask the provider which models this key can use, so a retired model name
+// (the reason the old Groq and Cerebras calls returned "model does not exist")
+// can never break the fallback. GROQ_MODEL / CEREBRAS_MODEL override this.
+async function pickModel(provider: FallbackProvider, apiKey: string): Promise<string> {
+  const override = process.env[provider.modelEnv]?.trim();
+  if (override) return override;
+
+  const cached = modelCache.get(provider.name);
+  if (cached && Date.now() - cached.at < MODEL_CACHE_MS) return cached.model;
+
+  const res = await fetchWithTimeout(
+    `${provider.baseUrl}/models`,
+    { headers: { Authorization: `Bearer ${apiKey}` } },
+    8000
+  );
+  if (!res.ok) throw new Error(`model list failed (HTTP ${res.status})`);
+  const json: any = await res.json();
+  const ids: string[] = (json?.data ?? [])
+    .map((m: { id?: string }) => m.id ?? '')
+    .filter((id: string) => id && !NOT_CHAT_MODEL.test(id));
+  const model = provider.preferred.find((p) => ids.includes(p)) ?? ids[0];
+  if (!model) throw new Error('no chat models are available to this key');
+  modelCache.set(provider.name, { model, at: Date.now() });
+  return model;
+}
+
+async function chatCompletion(baseUrl: string, apiKey: string, body: Record<string, unknown>, timeoutMs: number): Promise<any> {
+  const res = await fetchWithTimeout(
+    `${baseUrl}/chat/completions`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify(body),
+    },
+    timeoutMs
+  );
+  if (!res.ok) {
+    const detail = (await res.text().catch(() => '')).slice(0, 200);
+    throw new Error(`HTTP ${res.status}: ${detail}`);
+  }
+  return res.json();
+}
+
+function cleanReply(text: unknown): string {
+  return typeof text === 'string' ? text.replace(/<think>[\s\S]*?<\/think>/gi, '').trim() : '';
+}
+
+// Groq's compound systems run the web search on their side and list the pages
+// they read in message.executed_tools[].search_results.results[].
+function extractGroqSources(tools: unknown): Source[] {
+  const seen = new Set<string>();
+  const out: Source[] = [];
+  if (!Array.isArray(tools)) return out;
+  for (const tool of tools) {
+    const results = (tool as any)?.search_results?.results;
+    if (!Array.isArray(results)) continue;
+    for (const r of results) {
+      const url = typeof r?.url === 'string' ? r.url : '';
+      if (!url || seen.has(url)) continue;
+      seen.add(url);
+      out.push({ title: (typeof r.title === 'string' && r.title.trim()) || hostOf(url), url });
+    }
+  }
+  return out;
+}
+
+function errorText(error: unknown): string {
+  return error instanceof Error ? error.message : 'unknown error';
+}
+
+/** Answer with a free provider when Gemini failed. Returns null if none could. */
+async function callFallbackProviders(options: GeminiOptions): Promise<GeminiResult | null> {
+  const messages: Array<{ role: string; content: string }> = [];
+  if (options.system) messages.push({ role: 'system', content: options.system });
+  messages.push({
+    role: 'user',
+    content: options.json && !options.search ? `${options.prompt}\n\nReply with a single JSON object and nothing else.` : options.prompt,
+  });
+
+  // Research needs real sources. Only Groq's built-in web search can supply
+  // them, and its answer is only used when it comes with source links.
+  if (options.search) {
+    const apiKey = process.env.GROQ_API_KEY?.trim();
+    if (!apiKey) return null;
+    try {
+      const data = await chatCompletion(
+        GROQ_BASE_URL,
+        apiKey,
+        { model: 'groq/compound-mini', messages, temperature: options.temperature ?? 0.2 },
+        35000
+      );
+      const message = data?.choices?.[0]?.message;
+      const text = cleanReply(message?.content);
+      const sources = extractGroqSources(message?.executed_tools);
+      if (text && sources.length > 0) {
+        console.warn('Gemini unavailable; researched with Groq web search (groq/compound-mini).');
+        return { text, sources, queries: [] };
+      }
+      console.warn('Groq web search fallback returned no sources, so it was not used.');
+    } catch (error) {
+      console.warn(`Groq web search fallback failed: ${errorText(error)}`);
+    }
+    return null;
+  }
+
+  for (const provider of FALLBACK_PROVIDERS) {
+    const apiKey = process.env[provider.keyEnv]?.trim();
+    if (!apiKey) continue;
+    try {
+      const model = await pickModel(provider, apiKey);
+      const data = await chatCompletion(
+        provider.baseUrl,
+        apiKey,
+        {
+          model,
+          messages,
+          temperature: options.temperature ?? 0.7,
+          // Reasoning models spend part of the limit on thinking, so leave headroom.
+          max_completion_tokens: (options.maxOutputTokens ?? 4096) + 1024,
+        },
+        20000
+      );
+      const choice = data?.choices?.[0];
+      const text = cleanReply(choice?.message?.content);
+      if (!text) throw new Error('empty reply');
+      if (choice?.finish_reason === 'length') throw new Error('reply was cut off');
+      console.warn(`Gemini unavailable; answered with ${provider.name} (${model}).`);
+      return { text, sources: [], queries: [] };
+    } catch (error) {
+      console.warn(`${provider.name} fallback failed: ${errorText(error)}`);
+      modelCache.delete(provider.name); // re-check the model list next time
+    }
+  }
+  return null;
+}
+
+/**
+ * Ask Gemini; if Gemini fails, ask Groq and then Cerebras (free tiers).
+ * If every provider fails, the original Gemini error is thrown so callers
+ * handle it exactly as before.
+ */
 export async function callGemini(options: GeminiOptions): Promise<GeminiResult> {
+  try {
+    return await callGeminiOnly(options);
+  } catch (error) {
+    if (!(error instanceof GeminiError)) throw error;
+    console.warn(`Gemini failed (${error.kind}); trying free fallback providers.`);
+    const fallback = await callFallbackProviders(options);
+    if (fallback) return fallback;
+    throw error;
+  }
+}
+
+async function callGeminiOnly(options: GeminiOptions): Promise<GeminiResult> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) throw new GeminiError('missing_key', 'GEMINI_API_KEY is not set');
 
