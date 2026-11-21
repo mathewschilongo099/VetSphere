@@ -1,41 +1,40 @@
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 import { NextRequest, NextResponse } from 'next/server';
+import { commitChanges, fetchAllArticles, isSafeArticleName } from '@/lib/admin/github';
 
+// Deletes the chosen articles in ONE commit, so deleting many articles starts a
+// single site rebuild instead of one per article.
 export async function POST(request: NextRequest) {
-  const { files } = await request.json();
+  try {
+    const { files } = await request.json();
+    const requested: string[] = (Array.isArray(files) ? files : [])
+      .map((f: { name?: unknown }) => f?.name)
+      .filter(isSafeArticleName);
 
-  const owner = process.env.GITHUB_OWNER;
-  const repo = process.env.GITHUB_REPO;
-  const token = process.env.GITHUB_TOKEN;
-
-  let successCount = 0;
-
-  for (const file of files) {
-    try {
-      const res = await fetch(
-        `https://api.github.com/repos/${owner}/${repo}/contents/src/content/articles/${file.name}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: `Delete article: ${file.name}`,
-            sha: file.sha,
-          }),
-        }
-      );
-      if (res.ok) successCount++;
-    } catch {
-      // continue
+    if (requested.length === 0) {
+      return NextResponse.json({ success: false, deleted: 0, error: 'No articles selected.' }, { status: 400 });
     }
-  }
 
-  if (process.env.VERCEL_DEPLOY_HOOK) {
-    await fetch(process.env.VERCEL_DEPLOY_HOOK, { method: 'POST' });
-  }
+    const existing = new Set((await fetchAllArticles(true)).map((f) => f.name));
+    const toDelete = requested.filter((name) => existing.has(name));
+    if (toDelete.length === 0) {
+      return NextResponse.json({ success: false, deleted: 0, error: 'Those articles no longer exist.' });
+    }
 
-  return NextResponse.json({ success: successCount > 0, deleted: successCount });
+    const result = await commitChanges(
+      toDelete.map((name) => ({ path: `src/content/articles/${name}`, content: null })),
+      `Delete article: ${toDelete.join(', ').slice(0, 150)}`
+    );
+    if (!result.ok) {
+      return NextResponse.json({ success: false, deleted: 0, error: result.error }, { status: 500 });
+    }
+    return NextResponse.json({ success: true, deleted: toDelete.length });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, deleted: 0, error: error instanceof Error ? error.message : 'Delete failed' },
+      { status: 500 }
+    );
+  }
 }

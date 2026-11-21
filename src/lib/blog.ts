@@ -24,6 +24,18 @@ const GENERIC_TAGS = new Set([
   'health',
 ]);
 
+// Drafts (draft: true) and scheduled articles (publishDate in the future) are
+// hidden from the public site. A scheduled article appears on the first site
+// build after its publish date.
+function isLive(data: { draft?: unknown; publishDate?: unknown }): boolean {
+  if (data.draft === true || String(data.draft).toLowerCase() === 'true') return false;
+  if (data.publishDate) {
+    const time = new Date(data.publishDate as string).getTime();
+    if (Number.isFinite(time) && time > Date.now()) return false;
+  }
+  return true;
+}
+
 // Drops a whole "## Heading" section (up to the next "## " heading).
 function removeSection(markdown: string, headingPattern: RegExp): string {
   const out: string[] = [];
@@ -94,6 +106,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
     if (!fs.existsSync(fullPath)) return null;
     const fileContents = fs.readFileSync(fullPath, 'utf8');
     const { data, content } = matter(fileContents);
+    if (!isLive(data)) return null;
     const readingTime = calculateReadingTime(content);
 
     // Remove the first image and its caption from content since the
