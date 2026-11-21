@@ -1,5 +1,5 @@
 ---
-title: "Ringworm in Cattle"
+title: "Ringworm in Cattle: Symptoms, Treatment and Control"
 description: "Ringworm in cattle is a common, contagious fungal skin infection that can spread quickly through calves, heifers, cows, farm workers, and contaminated..."
 date: "2026-09-12"
 author: "VetSphere"

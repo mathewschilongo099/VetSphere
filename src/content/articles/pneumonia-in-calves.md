@@ -1,5 +1,5 @@
 ---
-title: "Pneumonia in Calves"
+title: "Pneumonia in Calves: Signs, Treatment and Prevention"
 description: "Pneumonia in calves is one of the most important health problems affecting dairy, beef, and veal operations. It can begin with a subtle cough or reduced..."
 date: "2026-09-21"
 author: "VetSphere"

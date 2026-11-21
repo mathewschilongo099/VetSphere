@@ -1,5 +1,5 @@
 ---
-title: "Bloat in Cattle"
+title: "Bloat in Cattle: Causes, Treatment and Prevention"
 description: "Bloat in cattle is a serious digestive emergency that can become fatal in a short time. It occurs when gas produced during normal rumen fermentation becomes..."
 date: "2026-09-15"
 author: "VetSphere"
