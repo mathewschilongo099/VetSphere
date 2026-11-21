@@ -5,7 +5,7 @@ date: "2026-09-20"
 author: "VetSphere"
 category: "Animal Health"
 tags: ["parvovirus in dogs", "parvovirus", "dogs", "animal health", "veterinary"]
-image: "https://images.pexels.com/photos/35764087/pexels-photo-35764087.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
+image: "https://images.pexels.com/photos/9435112/pexels-photo-9435112.jpeg"
 imageAlt: "Parvovirus in Dogs"
 featured: false
 excerpt: "Parvovirus in dogs, commonly called parvo, is one of the most serious and contagious diseases a dog can develop. It can cause sudden vomiting, severe..."
