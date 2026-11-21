@@ -7,7 +7,7 @@ category: "Animal Health"
 tags: ["poultry feed formulation for farmers", "poultry", "feed", "formulation", "farmers", "animal health"]
 image: "https://images.pexels.com/photos/32413936/pexels-photo-32413936.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
 imageAlt: "Poultry Feed Formulation for Farmers"
-featured: false
+featured: true
 excerpt: "Poultry feed formulation is one of the most important skills for profitable chicken farming. Feed affects growth rate, egg production, immunity, body..."
 ---
 
