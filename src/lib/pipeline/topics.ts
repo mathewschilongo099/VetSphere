@@ -10,15 +10,38 @@ export interface Headline {
   date: string; // YYYY-MM-DD
 }
 
-const QUERIES = [
+// Always searched: broad queries that catch whatever is breaking.
+const CORE_QUERIES = [
   'livestock disease outbreak',
+  'animal health livestock WOAH OR FAO OR ILRI',
+];
+
+// Narrower queries. A different few are used each day, so the same disease
+// family does not dominate every run.
+const ROTATING_QUERIES = [
   'cattle OR "dairy cows" disease OR outbreak',
   'poultry OR "avian influenza" OR "bird flu" OR "Newcastle disease"',
   '"foot-and-mouth disease" OR "lumpy skin disease" OR "African swine fever" OR "peste des petits ruminants"',
   'goats OR sheep disease OR vaccine',
+  'pigs OR swine OR "pig farmers" disease OR outbreak',
   'livestock farmers veterinary drought OR feed OR vaccine',
-  'animal health livestock WOAH OR FAO OR ILRI',
+  'drought OR heatwave OR flood livestock deaths OR feed shortage',
+  'livestock vaccination campaign OR vaccine shortage',
+  'livestock movement ban OR export ban OR import ban animal disease',
+  'ticks OR parasites OR tsetse cattle OR goats',
+  'dairy farmers milk disease OR feed OR heat stress',
 ];
+
+const ROTATING_PER_RUN = 5;
+
+function todaysQueries(): string[] {
+  const day = Math.floor(Date.now() / 86400000);
+  const rotating: string[] = [];
+  for (let i = 0; i < ROTATING_PER_RUN; i++) {
+    rotating.push(ROTATING_QUERIES[(day * ROTATING_PER_RUN + i) % ROTATING_QUERIES.length]);
+  }
+  return [...CORE_QUERIES, ...Array.from(new Set(rotating))];
+}
 
 const EDITIONS = [
   { hl: 'en-US', gl: 'US', ceid: 'US:en' },
@@ -55,8 +78,9 @@ async function fetchFeed(query: string, edition: (typeof EDITIONS)[number]): Pro
 }
 
 export async function fetchHeadlines(): Promise<Headline[]> {
+  const queries = todaysQueries();
   const feeds = await Promise.all(
-    QUERIES.flatMap((query, i) => [
+    queries.flatMap((query, i) => [
       fetchFeed(query, EDITIONS[0]),
       fetchFeed(query, EDITIONS[1 + (i % (EDITIONS.length - 1))]),
     ])
