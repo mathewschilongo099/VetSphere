@@ -1,5 +1,5 @@
 ---
-title: "African Swine Fever"
+title: "African Swine Fever: Symptoms, Spread and Prevention"
 description: "African swine fever ASF is one of the most serious diseases affecting pigs worldwide. This highly contagious viral infection can spread quickly through..."
 date: "2026-09-15"
 author: "VetSphere"
