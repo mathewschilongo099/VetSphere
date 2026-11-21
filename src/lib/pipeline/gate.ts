@@ -7,6 +7,10 @@ import { CATEGORIES, inferCategory, DEFAULT_CATEGORY } from '@/lib/categories';
 // News articles are about livestock, so Pet Care is not offered here.
 export const CATEGORY_OPTIONS: string[] = CATEGORIES.filter((c) => c.slug !== 'pet-care').map((c) => c.name);
 
+// Shortest and longest article the gate accepts, in words.
+export const MIN_WORDS = 500;
+export const MAX_WORDS = 2500;
+
 export interface Draft {
   title: string;
   description: string;
@@ -232,8 +236,8 @@ export function checkDraft(draft: Draft, researchText: string): GateResult {
   if (draft.tags.length < 3) issues.push('Need at least 3 tags');
 
   const words = wordCount(body);
-  if (words < 700) issues.push(`Article is too short (${words} words, minimum 700)`);
-  if (words > 1800) issues.push(`Article is too long (${words} words, maximum 1800)`);
+  if (words < MIN_WORDS) issues.push(`Article is too short (${words} words, minimum ${MIN_WORDS})`);
+  if (words > MAX_WORDS) issues.push(`Article is too long (${words} words, maximum ${MAX_WORDS})`);
 
   const h2Count = (body.match(/^##\s+\S/gm) ?? []).length;
   if (h2Count < 3) issues.push('Needs at least 3 section headings (##)');
@@ -286,6 +290,78 @@ export function checkDraft(draft: Draft, researchText: string): GateResult {
   }
 
   return { passed: issues.length === 0, issues };
+}
+
+// ---------- fact-check clean-up ----------
+
+const REFERRAL_WORDS =
+  /\b(veterinarian|veterinarians|veterinary (?:authority|authorities|officer|officers|service|services|surgeon|professional|professionals|advice|guidance)|animal[- ]health (?:worker|workers|officer|officers|authority|authorities|professional|professionals)|local vet|your vet|extension (?:officer|officers|service|services|worker|workers)|paravet|paravets)\b/i;
+const REFERRAL_VERBS = /\b(ask|consult|contact|speak to|talk to|call|see|seek|check with|report|get advice from|visit)\b/i;
+
+/**
+ * A claim the fact-checker should not have listed: plain advice to ask a vet or
+ * local veterinary authority (the writer is told to give this advice), or a
+ * fragment too short to mean anything. Anything with a number still counts.
+ */
+export function isHarmlessClaim(claim: string): boolean {
+  const text = String(claim ?? '').trim();
+  if (text.length < 12) return true;
+  if (/\d/.test(text)) return false;
+  return text.length <= 220 && REFERRAL_WORDS.test(text) && REFERRAL_VERBS.test(text);
+}
+
+function plainWords(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+function sentenceMatchesClaim(sentence: string, claim: string): boolean {
+  const s = plainWords(sentence).join(' ');
+  const c = plainWords(claim.replace(/(…|\.\.\.)\s*$/, '')).join(' ');
+  if (c.length < 12 || s.length < 12) return false;
+  if (s.includes(c) || (s.length >= 25 && c.includes(s))) return true;
+  const claimTokens = new Set(plainWords(c).filter((w) => w.length >= 4));
+  if (claimTokens.size < 3) return false;
+  const sentenceTokens = new Set(plainWords(s));
+  let shared = 0;
+  claimTokens.forEach((w) => {
+    if (sentenceTokens.has(w)) shared++;
+  });
+  return shared / claimTokens.size >= 0.75;
+}
+
+/**
+ * Removes every sentence that contains a claim the fact-checker flagged, and any
+ * heading left with nothing under it. Returns how many sentences were removed.
+ */
+export function removeClaims(body: string, claims: string[]): { body: string; removed: number } {
+  let removed = 0;
+  const blocks = body.split(/\n{2,}/).map((block) => {
+    if (/^\s*#{1,6}\s/.test(block)) return block.trim();
+    return block
+      .split('\n')
+      .map((line) => {
+        const kept = line.split(/(?<=[.!?])\s+/).filter((sentence) => {
+          const hit = claims.some((claim) => sentenceMatchesClaim(sentence, claim));
+          if (hit) removed++;
+          return !hit;
+        });
+        return kept.join(' ').trim();
+      })
+      .filter(Boolean)
+      .join('\n');
+  });
+  const nonEmpty = blocks.filter((b) => b.trim());
+  const isHeading = (b: string) => /^#{1,6}\s/.test(b);
+  const final = nonEmpty.filter((block, i) => {
+    if (!isHeading(block)) return true;
+    const next = nonEmpty[i + 1];
+    return next !== undefined && !isHeading(next);
+  });
+  return { body: final.join('\n\n'), removed };
 }
 
 // ---------- topic relevance ----------

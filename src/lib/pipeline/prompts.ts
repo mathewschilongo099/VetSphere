@@ -99,7 +99,7 @@ TRUTH RULES (most important)
 - Use at least two specific figures or dates from the research (copied exactly) and say what each refers to. Use no other numbers except 1, 2 and 3.
 
 STYLE RULES
-- 900 to 1,300 words. Drafts under 800 words are rejected, so write fully: explain each point and what it means for the farmer.
+- Aim for 900 to 1,300 words. Never fewer than 500 words (shorter drafts are rejected), so write fully: explain each point and what it means for the farmer.
 - The first two sentences give the news or the single most useful fact. No warm-up, no dictionary definition of the animal or the farm.
 - 4 to 6 sections with "##" headings that sound like a person wrote them: specific and short. Never use the headings "Introduction", "Overview", "Conclusion" or "Final thoughts", and never start a heading with "Understanding", "What is" or "What are". For what is unconfirmed, use a heading like "What we still don't know".
 - Mostly paragraphs. Mix lengths: some one-sentence paragraphs, some longer. At most one short bullet list in the whole article.
@@ -126,7 +126,7 @@ OVERRIDE FOR THIS ARTICLE (replaces any conflicting rule above)
 - This is a practical guide for people looking for information, not a news story. Open with the most useful point for the reader.
 - Use the research as the main source. Every number, date, place name, official name or study result must come from it.
 - You may also add widely taught, well-established veterinary and animal-husbandry knowledge (how a problem usually shows, hygiene, housing, feeding, when to call a vet) so the guide is complete and useful. Never add numbers, drug names or doses from memory. If you are not sure something is standard knowledge, leave it out.
-- Length: 1,000 to 1,400 words in 5 to 7 sections. Never fewer than 900 words.`;
+- Length: aim for 1,000 to 1,400 words in 5 to 7 sections. Never fewer than 500 words.`;
 
 export function buildWritePrompt(research: Research, feedback?: string[]): string {
   const facts = {
@@ -147,7 +147,7 @@ export function buildWritePrompt(research: Research, feedback?: string[]): strin
 
 // ---------------------------------------------------------------- 4. judging
 
-export const JUDGE_SYSTEM = `You are a strict fact-checking editor for a veterinary website. You compare an article with the research it was written from. Be harsh: readers may act on this information with their animals.`;
+export const JUDGE_SYSTEM = `You are a fact-checking editor for a veterinary website. You compare an article with the research it was written from. Readers may act on this information with their animals, so you catch invented facts, but you do not nitpick wording or style.`;
 
 export function buildJudgePrompt(research: Research, title: string, body: string): string {
   return `RESEARCH (the only allowed source of facts)
@@ -163,11 +163,12 @@ ${title}
 ${body}
 
 Check the article against the research.
-- An unsupported claim is any statement of fact (number, date, place, cause, rule, treatment, risk level) that is not in the research.
-- General common-sense hygiene advice with no numbers (for example "wash your hands after handling sick animals") is allowed.
-- Also flag anything that reads like generic AI filler or that could mislead a farmer.
+- An unsupported claim is a statement of a specific fact (number, date, place, named disease detail, cause, rule, treatment, risk level) that is not in the research and that a farmer could act on.
+- These are NEVER unsupported claims. Do not list them: advice to ask a veterinarian, animal-health worker or local veterinary authority (the site requires this advice for any treatment question); advice to isolate sick animals, wash hands or keep housing clean; statements about what is not yet known; plain rewording or reasonable explanation of facts that are in the research; general wording that states no specific fact.
+- List a claim only if you are sure the research does not support it. Quote it in under 20 words.
+- Also note anything that reads like generic AI filler in "tone_problems". Tone problems alone never make the article unfaithful.
 
 Return ONLY JSON:
 {"faithful":true or false,"unsupported_claims":["short quote of each unsupported claim"],"tone_problems":["..."],"score":1-10}
-Set "faithful" to false if there is any unsupported claim about a number, date, treatment or disease fact. Score 10 means accurate, practical and natural to read.`;
+Set "faithful" to false only if there is an unsupported claim about a number, date, treatment or disease fact. Score 10 means accurate, practical and natural to read. Give 7 or more when there are no unsupported claims. Do not lower the score because the article advises asking a veterinarian.`;
 }
