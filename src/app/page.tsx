@@ -1,13 +1,28 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { getAllPosts, getFeaturedPosts } from '@/lib/blog';
+import { getAllPosts } from '@/lib/blog';
 import AnimalSearch from '@/components/AnimalSearch';
+
+// Rebuild this page in the background every 10 minutes so the featured
+// article can change on schedule without a new deployment.
+export const revalidate = 600;
+
+// How long each article stays featured before the next one takes over.
+const FEATURED_HOURS = 10;
+// When no (or only one) article is marked `featured: true`, rotate through this many newest articles.
+const ROTATION_POOL_SIZE = 10;
 
 export default async function HomePage() {
   const allPosts = getAllPosts();
 
-  // Featured: the newest article marked `featured: true`; falls back to the newest article.
-  const featured = getFeaturedPosts(1)[0] || allPosts[0] || null;
+  // Rotation pool: articles marked `featured: true` (from the admin dashboard).
+  // If fewer than 2 are marked, rotate through the newest articles instead.
+  const marked = allPosts.filter((p) => p.featured);
+  const pool = marked.length >= 2 ? marked : allPosts.slice(0, ROTATION_POOL_SIZE);
+
+  // Every FEATURED_HOURS the time slot increases by one, which moves to the next article.
+  const slot = Math.floor(Date.now() / (FEATURED_HOURS * 60 * 60 * 1000));
+  const featured = pool.length > 0 ? pool[slot % pool.length] : null;
 
   // Latest: newest articles, excluding the featured one. Shown as a compact list.
   const latestPosts = allPosts.filter((p) => !featured || p.slug !== featured.slug).slice(0, 6);
