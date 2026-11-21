@@ -42,18 +42,19 @@ export default async function HomePage() {
 
         <div className="relative max-w-4xl mx-auto px-4 flex flex-col items-center">
           <div className="flex-1 text-center w-full">
-            <h1 className="text-xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-1.5">
-              Better Animal Health <span className="text-lime-200">Starts Here</span>
+            <h1 className="text-xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-2">
+              Better Animal Health{' '}
+              <span className="inline-block bg-white text-green-700 rounded-lg px-2 py-0.5">Starts Here</span>
             </h1>
-            <p className="text-green-50 text-xs sm:text-base mb-3 max-w-2xl mx-auto leading-snug">
+            <p className="text-white text-xs sm:text-base mb-3 max-w-2xl mx-auto leading-snug">
               Practical veterinary guides for farmers, students, and pet owners.
             </p>
 
             <div className="max-w-xl mx-auto">
-              <div className="bg-white/10 border border-white/25 rounded-2xl p-2 sm:p-3">
+              <div className="bg-black/10 border border-white/30 rounded-2xl p-2 sm:p-3">
                 <div className="flex items-center gap-2 px-1 pb-1.5">
                   <span className="text-white text-[11px] font-bold uppercase tracking-wide">Ask VetAssist</span>
-                  <span className="text-green-100 text-[11px]">— AI-powered answers</span>
+                  <span className="text-white text-[11px]">— AI-powered answers</span>
                 </div>
                 <AnimalSearch compact />
               </div>
