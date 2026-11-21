@@ -118,7 +118,12 @@ export function getPostBySlug(slug: string): BlogPost | null {
 
     // The article page already shows related articles at the bottom, so the
     // hand-written "Related Articles" list inside the text is dropped.
-    const cleanedMarkdown = removeSection(contentWithoutFirstImage, /^##\s+Related Articles\s*$/i);
+    // The "Sources" list is hidden too: VetSphere reads like a blog, not a
+    // research paper. The section stays in the .md file, it is just not shown.
+    const cleanedMarkdown = removeSection(
+      removeSection(contentWithoutFirstImage, /^##\s+Related Articles\s*$/i),
+      /^##\s+(Sources|References)\s*$/i
+    );
 
     const contentHtml = md.render(cleanedMarkdown);
     const description = buildDescription(data.description || '', cleanedMarkdown);
