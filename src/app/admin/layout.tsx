@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import './admin.css';
 
 export const metadata: Metadata = {
   title: 'Admin | VetSphere',
@@ -6,5 +7,12 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return (
+    <div className="neu-admin">
+      <span aria-hidden="true" className="neu-circle c1" />
+      <span aria-hidden="true" className="neu-circle c2" />
+      <span aria-hidden="true" className="neu-circle c3" />
+      <div className="neu-content">{children}</div>
+    </div>
+  );
 }

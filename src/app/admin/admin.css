@@ -1,0 +1,280 @@
+/* ------------------------------------------------------------------
+   Admin theme: soft "neumorphic" look (raised cards, pressed-in inputs,
+   round decorations), the same style as the Contact page.
+
+   It only restyles what is inside .neu-admin and uses the --neo-* colour
+   variables from globals.css, so it follows the phone's light/dark mode.
+   The admin page keeps its existing markup: the old dark utility classes
+   (bg-gray-800, bg-green-600 ...) are re-mapped here.
+------------------------------------------------------------------- */
+
+.neu-admin {
+  --neu-blue: #2563eb;
+  --neu-shadow-s: 5px 5px 10px var(--neo-lo), -5px -5px 10px var(--neo-hi);
+  --neu-shadow-m: 8px 8px 16px var(--neo-lo), -8px -8px 16px var(--neo-hi);
+  --neu-shadow-l: 14px 14px 30px var(--neo-lo), -14px -14px 30px var(--neo-hi);
+  --neu-inset: inset 4px 4px 8px var(--neo-lo), inset -4px -4px 8px var(--neo-hi);
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  background: var(--neo-bg);
+  color: var(--neo-text);
+}
+
+@media (prefers-color-scheme: dark) {
+  .neu-admin {
+    --neu-blue: #60a5fa;
+  }
+}
+
+/* ---------- floating circles ---------- */
+.neu-admin .neu-circle {
+  position: fixed;
+  z-index: 0;
+  display: none;
+  pointer-events: none;
+  border-radius: 9999px;
+  background: var(--neo-bg);
+  box-shadow: 12px 12px 24px var(--neo-lo), -12px -12px 24px var(--neo-hi);
+}
+.neu-admin .neu-circle.c1 { left: 5%; top: 14%; width: 12rem; height: 12rem; }
+.neu-admin .neu-circle.c2 { right: 7%; bottom: 9%; width: 8rem; height: 8rem; }
+.neu-admin .neu-circle.c3 { right: 20%; top: 26%; width: 4.5rem; height: 4.5rem; }
+@media (min-width: 640px) {
+  .neu-admin .neu-circle { display: block; }
+}
+.neu-admin .neu-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- page background ---------- */
+.neu-admin .bg-gray-900 {
+  background: transparent !important;
+}
+
+/* ---------- text colours ---------- */
+.neu-admin .text-white,
+.neu-admin .text-gray-200,
+.neu-admin .text-gray-300,
+.neu-admin .text-gray-900 {
+  color: var(--neo-text) !important;
+}
+.neu-admin .text-gray-400,
+.neu-admin .text-gray-500 {
+  color: var(--neo-muted) !important;
+}
+.neu-admin .text-green-400,
+.neu-admin .text-green-300,
+.neu-admin .text-green-200 {
+  color: var(--neo-accent) !important;
+}
+.neu-admin .text-red-400,
+.neu-admin .text-red-300 {
+  color: var(--neo-danger) !important;
+}
+.neu-admin .text-yellow-400 {
+  color: var(--neo-warn) !important;
+}
+.neu-admin .text-blue-400,
+.neu-admin .text-blue-300 {
+  color: var(--neu-blue) !important;
+}
+.neu-admin .text-purple-400 {
+  color: var(--neo-violet) !important;
+}
+.neu-admin .hover\:text-white:hover {
+  color: var(--neo-text) !important;
+}
+.neu-admin .hover\:text-red-300:hover {
+  color: var(--neo-danger) !important;
+}
+.neu-admin ::placeholder {
+  color: var(--neo-muted) !important;
+  opacity: 0.85;
+}
+
+/* ---------- raised cards ---------- */
+.neu-admin .bg-gray-800 {
+  background: var(--neo-bg) !important;
+  box-shadow: var(--neu-shadow-m) !important;
+  border-radius: 20px !important;
+  transition: box-shadow 0.15s;
+}
+.neu-admin .hover\:bg-gray-700:hover {
+  background: var(--neo-bg) !important;
+  box-shadow: 10px 10px 20px var(--neo-lo), -10px -10px 20px var(--neo-hi) !important;
+}
+/* The login card */
+.neu-admin .max-w-sm.bg-gray-800 {
+  box-shadow: var(--neu-shadow-l) !important;
+  border-radius: 28px !important;
+}
+
+/* ---------- pressed-in boxes (inner panels, tags, code) ---------- */
+.neu-admin .bg-gray-700,
+.neu-admin .bg-white,
+.neu-admin .bg-green-800,
+.neu-admin .bg-green-900\/30,
+.neu-admin .bg-red-900\/30,
+.neu-admin .bg-yellow-900\/30,
+.neu-admin .bg-blue-900\/30,
+.neu-admin .bg-red-900\/40 {
+  background: var(--neo-bg) !important;
+  box-shadow: var(--neu-inset) !important;
+}
+.neu-admin .bg-gray-700,
+.neu-admin .bg-white {
+  border-radius: 16px;
+}
+.neu-admin .bg-white {
+  color: var(--neo-text) !important;
+}
+.neu-admin .bg-green-900\/30,
+.neu-admin .bg-green-800 { color: var(--neo-accent) !important; }
+.neu-admin .bg-red-900\/30 { color: var(--neo-danger) !important; }
+.neu-admin .bg-yellow-900\/30 { color: var(--neo-warn) !important; }
+.neu-admin .bg-blue-900\/30 { color: var(--neu-blue) !important; }
+.neu-admin .bg-red-900\/40 {
+  box-shadow: var(--neu-inset), 0 0 0 2px var(--neo-danger) !important;
+}
+.neu-admin .border-green-700,
+.neu-admin .border-blue-700,
+.neu-admin .border-gray-600 {
+  border-color: transparent !important;
+}
+.neu-admin .border-gray-500 {
+  border-color: var(--neo-muted) !important;
+}
+.neu-admin .border-red-500 {
+  border-color: var(--neo-danger) !important;
+}
+.neu-admin .hover\:border-gray-300:hover {
+  border-color: var(--neo-text) !important;
+}
+/* the small round tick box when an article is selected */
+.neu-admin .bg-red-500 {
+  background: var(--neo-danger) !important;
+}
+.neu-admin .bg-red-500 .text-white {
+  color: #ffffff !important;
+}
+
+/* ---------- inputs ---------- */
+.neu-admin input:not([type='file']):not([type='checkbox']),
+.neu-admin textarea,
+.neu-admin select {
+  background: var(--neo-bg) !important;
+  color: var(--neo-text) !important;
+  caret-color: var(--neo-text);
+  border: 0 !important;
+  border-radius: 16px;
+  box-shadow: var(--neu-inset) !important;
+  outline: none !important;
+}
+.neu-admin input:not([type='file']):not([type='checkbox']):focus,
+.neu-admin textarea:focus,
+.neu-admin select:focus {
+  box-shadow: var(--neu-inset), 0 0 0 2px var(--neo-ring) !important;
+}
+.neu-admin input:-webkit-autofill {
+  -webkit-text-fill-color: var(--neo-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--neo-bg) inset;
+}
+
+/* ---------- raised buttons ---------- */
+.neu-admin button,
+.neu-admin label.cursor-pointer {
+  transition: box-shadow 0.15s;
+}
+.neu-admin button.bg-gray-800,
+.neu-admin button.bg-gray-700,
+.neu-admin button.bg-gray-600,
+.neu-admin a.bg-gray-700,
+.neu-admin .bg-green-600,
+.neu-admin .bg-blue-600,
+.neu-admin button.bg-red-600 {
+  background: var(--neo-bg) !important;
+  box-shadow: var(--neu-shadow-s) !important;
+  border-radius: 16px !important;
+  font-weight: 700;
+}
+.neu-admin button.bg-gray-800,
+.neu-admin button.bg-gray-700,
+.neu-admin button.bg-gray-600 {
+  font-weight: 600;
+}
+.neu-admin button.bg-gray-800:hover:not(:disabled),
+.neu-admin button.bg-gray-700:hover:not(:disabled),
+.neu-admin button.bg-gray-600:hover:not(:disabled),
+.neu-admin .bg-green-600:hover:not(:disabled),
+.neu-admin .bg-blue-600:hover:not(:disabled),
+.neu-admin button.bg-red-600:hover:not(:disabled) {
+  background: var(--neo-bg) !important;
+  box-shadow: var(--neu-shadow-m) !important;
+}
+.neu-admin button.bg-gray-800:active:not(:disabled),
+.neu-admin button.bg-gray-700:active:not(:disabled),
+.neu-admin button.bg-gray-600:active:not(:disabled),
+.neu-admin .bg-green-600:active:not(:disabled),
+.neu-admin .bg-blue-600:active:not(:disabled),
+.neu-admin button.bg-red-600:active:not(:disabled) {
+  box-shadow: var(--neu-inset) !important;
+}
+
+/* button text colours */
+.neu-admin .bg-green-600 { color: var(--neo-accent) !important; }
+.neu-admin .bg-blue-600 { color: var(--neu-blue) !important; }
+.neu-admin button.bg-red-600 { color: var(--neo-danger) !important; }
+
+/* selected tab / selected toggle / current page number: pressed in */
+.neu-admin button.bg-green-600.font-semibold,
+.neu-admin button.bg-blue-600.font-semibold {
+  box-shadow: var(--neu-inset) !important;
+  font-weight: 700;
+}
+.neu-admin button.bg-green-600.font-semibold:hover:not(:disabled),
+.neu-admin button.bg-blue-600.font-semibold:hover:not(:disabled) {
+  box-shadow: var(--neu-inset) !important;
+}
+
+.neu-admin button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.neu-admin button:focus-visible,
+.neu-admin a:focus-visible,
+.neu-admin label:focus-within {
+  outline: 2px solid var(--neo-ring);
+  outline-offset: 3px;
+}
+
+/* the image upload box */
+.neu-admin .border-dashed {
+  background: var(--neo-bg);
+  box-shadow: var(--neu-inset);
+  border-color: var(--neo-accent) !important;
+  border-radius: 18px;
+}
+
+/* ---------- login badge (the paw above the title) ---------- */
+.neu-admin span.text-4xl {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  background: var(--neo-bg);
+  box-shadow: var(--neu-shadow-m);
+  font-size: 1.75rem;
+  line-height: 1;
+}
+
+/* ---------- small details ---------- */
+.neu-admin code {
+  color: var(--neo-accent) !important;
+}
+.neu-admin img {
+  border-radius: 14px;
+}
