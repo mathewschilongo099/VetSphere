@@ -1,8 +1,9 @@
-// Looks at a picture with Gemini (which can see images) and decides whether it
-// really shows the animal the article is about. If Gemini cannot be reached the
-// answer is "not checked", never "fine".
+// Looks at a picture with an AI that can see images (Gemini, then Groq, then
+// OpenRouter) and decides whether it really shows the animal the article is
+// about. If none can be reached the answer is "not checked", never "fine".
 
-import { extractJson, getGeminiModel } from '@/lib/pipeline/gemini';
+import { extractJson } from '@/lib/pipeline/gemini';
+import { generate } from '@/lib/ai/client';
 import type { Subject } from './subjects';
 
 export interface ImageVerdict {
@@ -73,70 +74,6 @@ export function judgeVerdict(raw: unknown): { ok: boolean; reason: string; descr
   return { ok: problems.length === 0, reason: problems.join('; ') || 'matches', description };
 }
 
-// One Gemini call that includes the photo. Uses the same model and key as the
-// rest of the pipeline.
-async function askGeminiAboutImage(input: {
-  system: string;
-  prompt: string;
-  image: { mime: string; base64: string };
-  timeoutMs: number;
-}): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY?.trim();
-  if (!apiKey) throw new Error('GEMINI_API_KEY is not set');
-
-  const model = getGeminiModel();
-  const isGemini3Plus = /^gemini-([3-9]|\d{2,})/.test(model);
-  const generationConfig: Record<string, unknown> = {
-    maxOutputTokens: 400 + (isGemini3Plus ? 1024 : 0),
-    responseMimeType: 'application/json',
-  };
-  if (isGemini3Plus) {
-    generationConfig.thinkingConfig = { thinkingLevel: 'low' };
-  } else {
-    generationConfig.temperature = 0;
-    generationConfig.thinkingConfig = { thinkingBudget: 0 };
-  }
-
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), input.timeoutMs);
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: input.system }] },
-          contents: [
-            {
-              role: 'user',
-              parts: [
-                { inlineData: { mimeType: input.image.mime, data: input.image.base64 } },
-                { text: input.prompt },
-              ],
-            },
-          ],
-          generationConfig,
-        }),
-        signal: controller.signal,
-      }
-    );
-    if (!res.ok) throw new Error(`Gemini picture check failed (HTTP ${res.status})`);
-    const data: any = await res.json();
-    const candidate = data?.candidates?.[0];
-    const text: string = (candidate?.content?.parts ?? [])
-      .filter((p: { thought?: boolean }) => !p.thought)
-      .map((p: { text?: string }) => p.text ?? '')
-      .join('')
-      .trim();
-    if (!text) throw new Error('Gemini returned no text for the picture check');
-    if (candidate?.finishReason === 'MAX_TOKENS') throw new Error('Gemini picture check was cut off');
-    return text;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 export async function verifyImage(input: {
   thumbUrl: string;
   subject: Subject;
@@ -159,14 +96,18 @@ export async function verifyImage(input: {
   const timeoutMs = Math.max(3000, Math.min(15000, remaining));
 
   try {
-    const text = await askGeminiAboutImage({
+    const result = await generate({
       system: IMAGE_JUDGE_SYSTEM,
       prompt: buildImagePrompt(input.subject, input.topic),
-      image,
+      images: [image],
+      json: true,
+      temperature: 0,
+      maxOutputTokens: 400,
       timeoutMs,
+      deadlineMs: input.deadlineMs,
     });
-    const verdict = judgeVerdict(extractJson(text));
-    return { checked: true, ...verdict, provider: 'Gemini' };
+    const verdict = judgeVerdict(extractJson(result.text));
+    return { checked: true, ...verdict, provider: result.provider };
   } catch (error) {
     return {
       checked: false,
