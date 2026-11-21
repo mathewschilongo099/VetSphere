@@ -3,17 +3,18 @@ import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ArticleCard from '@/components/content/ArticleCard';
 import { BlogPost } from '@/types';
+import { normalizeCategoryParam } from '@/lib/categories';
 
 const ARTICLES_PER_PAGE = 9;
 
-// A post matches a category if its category contains the text or one of its
+// A post matches a category if its category is exactly that name or one of its
 // tags equals it, and matches a search if the text appears in its details.
 function matches(post: BlogPost, category: string, query: string): boolean {
-  const c = category.trim().toLowerCase();
+  const c = normalizeCategoryParam(category).toLowerCase();
   const q = query.trim().toLowerCase();
 
   if (c) {
-    const inCategory = post.category.toLowerCase().includes(c);
+    const inCategory = post.category.toLowerCase() === c;
     const inTags = post.tags.some((tag) => tag.toLowerCase() === c);
     if (!inCategory && !inTags) return false;
   }
@@ -49,7 +50,7 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
   useEffect(() => {
     if (!searchParams) return;
     setQuery(searchParams.get('search') ?? '');
-    setActiveCategory(searchParams.get('category') ?? '');
+    setActiveCategory(normalizeCategoryParam(searchParams.get('category')));
   }, [searchParams]);
 
   useEffect(() => {
