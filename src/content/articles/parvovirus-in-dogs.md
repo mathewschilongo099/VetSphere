@@ -1,6 +1,6 @@
 ---
-title: "Parvovirus in Dogs"
-description: "Parvovirus in dogs, commonly called parvo, is one of the most serious and contagious diseases a dog can develop. It can cause sudden vomiting, severe diarrhea,..."
+title: "Parvovirus in Dogs: Symptoms, Treatment and Vaccination"
+description: "Canine parvovirus is highly contagious. Learn the symptoms, how it spreads, treatment options and how vaccination protects puppies."
 date: "2026-09-20"
 author: "VetSphere"
 category: "Animal Health"
@@ -270,4 +270,3 @@ If your dog develops vomiting, diarrhea, lethargy, or loss of appetite—especia
 - [feline leukemia virus](/articles/feline-leukemia-virus)
 - [rabies prevention in dogs](/articles/rabies-prevention-in-dogs)
 - [african swine fever](/articles/african-swine-fever)
-
