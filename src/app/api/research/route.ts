@@ -1,76 +1,60 @@
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 import { NextResponse } from 'next/server';
+import { fetchHeadlines } from '@/lib/pipeline/topics';
+import { findDuplicate, titleSimilarity } from '@/lib/pipeline/gate';
+import { listExistingArticles } from '@/lib/pipeline/github';
 
-// Curated topic pool. Later this can be upgraded to pull from Google Trends
-// or another live source — but starting with a reliable static pool means
-// this step can never fail due to an external API being down, which keeps
-// the rest of the pipeline (generate, publish) dependable.
-const TOPIC_POOL = [
-  'Foot and Mouth Disease in Cattle',
-  'Newcastle Disease in Poultry',
-  'Tick Infestation in Goats',
-  'Bovine Mastitis Treatment',
-  'African Swine Fever Prevention',
-  'Goat Peste des Petits Ruminants',
-  'Lumpy Skin Disease in Cattle',
-  'Milk Fever in Dairy Cows',
-  'Coccidiosis in Poultry',
-  'Rabies Prevention in Dogs',
-  'Parvovirus in Dogs',
-  'Heartworm Disease in Dogs',
-  'Feline Panleukopenia in Cats',
-  'Mineral Deficiencies in Livestock',
-  'Biosecurity on Poultry Farms',
-  'Calf Scours and Dehydration',
-  'Foot Rot in Sheep and Goats',
-  'Brucellosis in Cattle',
-  'Anaplasmosis in Cattle',
-  'East Coast Fever in Cattle',
-];
-
-async function getExistingSlugs(): Promise<string[]> {
-  try {
-    const owner = process.env.GITHUB_OWNER;
-    const repo = process.env.GITHUB_REPO;
-    const token = process.env.GITHUB_TOKEN;
-
-    const res = await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/contents/src/content/articles`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    if (!res.ok) return [];
-    const files = await res.json();
-    if (!Array.isArray(files)) return [];
-    return files.map((f: { name: string }) => f.name.replace(/\.md$/, ''));
-  } catch {
-    return [];
-  }
-}
-
-function topicToSlugPrefix(topic: string): string {
-  return topic.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
+// Suggests topics from what livestock outlets are covering right now. There is
+// no fixed topic list: a story only counts as trending when at least two
+// different outlets cover it, and anything already on the site is skipped.
 export async function GET() {
   try {
-    const existingSlugs = await getExistingSlugs();
+    const [headlines, existing] = await Promise.all([
+      fetchHeadlines(),
+      listExistingArticles().catch(() => [] as Awaited<ReturnType<typeof listExistingArticles>>),
+    ]);
 
-    const unusedTopics = TOPIC_POOL.filter(
-      topic => !existingSlugs.some(slug => slug.startsWith(topicToSlugPrefix(topic)))
-    );
+    const scored = headlines
+      .map((h) => {
+        const outlets = new Set<string>([h.source.toLowerCase()]);
+        for (const other of headlines) {
+          if (other.id !== h.id && titleSimilarity(h.title, other.title) >= 0.25) {
+            outlets.add(other.source.toLowerCase());
+          }
+        }
+        return { h, outlets: outlets.size };
+      })
+      .filter((x) => x.outlets >= 2)
+      .filter((x) => !findDuplicate(x.h.title, existing, 0.5))
+      .sort((a, b) => b.outlets - a.outlets);
 
-    const pool = unusedTopics.length > 0 ? unusedTopics : TOPIC_POOL;
-    const topic = pool[Math.floor(Math.random() * pool.length)];
+    // Keep suggestions distinct from each other.
+    const picked: typeof scored = [];
+    for (const item of scored) {
+      if (picked.every((p) => titleSimilarity(p.h.title, item.h.title) < 0.3)) picked.push(item);
+      if (picked.length >= 5) break;
+    }
+
+    if (picked.length === 0) {
+      return NextResponse.json(
+        {
+          error:
+            'No trending livestock topic was found that two or more outlets cover and the site has not already published. Try again later or type your own topic.',
+        },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
-      topic,
+      topic: picked[0].h.title,
+      suggestions: picked.map((p) => ({
+        topic: p.h.title,
+        outlets: p.outlets,
+        source: p.h.source,
+        date: p.h.date,
+      })),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

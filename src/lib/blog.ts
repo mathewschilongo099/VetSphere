@@ -3,6 +3,7 @@ import path from 'path';
 import matter from 'gray-matter';
 import MarkdownIt from 'markdown-it';
 import { BlogPost } from '@/types';
+import { resolveCategory } from '@/lib/categories';
 
 const md = new MarkdownIt({
   html: true,
@@ -48,7 +49,7 @@ function plainText(markdown: string): string {
 // the first paragraph, ending on a full sentence.
 function buildDescription(description: string, body: string): string {
   const given = (description || '').trim();
-  if (given && !/(\.\.\.|\u2026)$/.test(given)) return given;
+  if (given && !/(\.\.\.|…)$/.test(given)) return given;
 
   const firstParagraph = body
     .split(/\n\s*\n/)
@@ -67,7 +68,7 @@ function buildDescription(description: string, body: string): string {
   if (out.length >= 70) return out;
 
   const cut = text.slice(0, 155);
-  return `${cut.slice(0, cut.lastIndexOf(' ')).trim()}\u2026`;
+  return `${cut.slice(0, cut.lastIndexOf(' ')).trim()}…`;
 }
 
 export function getAllPosts(): BlogPost[] {
@@ -108,6 +109,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
 
     const contentHtml = md.render(cleanedMarkdown);
     const description = buildDescription(data.description || '', cleanedMarkdown);
+    const tags: string[] = data.tags || [];
 
     return {
       slug: realSlug,
@@ -116,8 +118,8 @@ export function getPostBySlug(slug: string): BlogPost | null {
       excerpt: description,
       date: data.date || '',
       author: data.author || 'VetSphere Team',
-      category: data.category || '',
-      tags: data.tags || [],
+      category: resolveCategory(data.category, data.title || '', tags),
+      tags,
       image: data.image || '/images/placeholder.jpg',
       imageAlt: data.imageAlt || data.title,
       content: contentHtml,

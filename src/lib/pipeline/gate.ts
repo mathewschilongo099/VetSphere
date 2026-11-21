@@ -2,12 +2,10 @@
 // network), so it is easy to test. The gate is deliberately strict: a draft
 // that fails is skipped and logged, never published.
 
-export const CATEGORY_OPTIONS = [
-  'Animal Health',
-  'Livestock Production',
-  'Poultry Farming',
-  'Dairy Farming',
-] as const;
+import { CATEGORIES, inferCategory, DEFAULT_CATEGORY } from '@/lib/categories';
+
+// News articles are about livestock, so Pet Care is not offered here.
+export const CATEGORY_OPTIONS: string[] = CATEGORIES.filter((c) => c.slug !== 'pet-care').map((c) => c.name);
 
 export interface Draft {
   title: string;
@@ -68,6 +66,20 @@ export function titleSimilarity(a: string, b: string): number {
   return shared / (ta.size + tb.size - shared);
 }
 
+// How much of the shorter title sits inside the other one. Catches a short
+// topic ("Foot and mouth disease") that is already covered by a longer title.
+export function titleContainment(a: string, b: string): number {
+  const ta = tokens(a);
+  const tb = tokens(b);
+  const smaller = Math.min(ta.size, tb.size);
+  if (smaller < 3) return 0;
+  let shared = 0;
+  ta.forEach((t) => {
+    if (tb.has(t)) shared++;
+  });
+  return shared / smaller;
+}
+
 /** Returns the slug of a too-similar existing article, or null. */
 export function findDuplicate(
   title: string,
@@ -78,6 +90,7 @@ export function findDuplicate(
   for (const article of existing) {
     if (article.slug === slug) return article.slug;
     if (titleSimilarity(title, article.title) >= threshold) return article.slug;
+    if (titleContainment(title, article.title) >= 0.8) return article.slug;
   }
   return null;
 }
@@ -121,6 +134,10 @@ export function findBannedPhrases(text: string): string[] {
   return BANNED_PHRASES.filter((phrase) => lower.includes(phrase));
 }
 
+// Section headings that signal a generic explainer instead of a specific story.
+const GENERIC_HEADING =
+  /^##\s*(introduction|overview|conclusion|summary|final thoughts|what is\b|what are\b|understanding\b|everything you need|key takeaways|frequently asked)/i;
+
 // ---------- numbers must come from the research ----------
 
 function normalizeNumber(raw: string): string {
@@ -151,6 +168,17 @@ export function unsupportedNumbers(article: string, researchText: string): strin
   return Array.from(unsupported);
 }
 
+/** How many different figures or dates from the research the article actually uses. */
+export function groundedFigureCount(article: string, researchText: string): number {
+  const allowed = new Set(extractNumbers(researchText));
+  const found = new Set<string>();
+  for (const n of extractNumbers(article)) {
+    if (Number(n) <= 3) continue;
+    if (allowed.has(n)) found.add(n);
+  }
+  return found.size;
+}
+
 // ---------- the gate ----------
 
 function trimAtWord(text: string, max: number): string {
@@ -167,15 +195,17 @@ export function normalizeDraft(raw: unknown): Draft {
   const r = (raw ?? {}) as Record<string, unknown>;
   const title = String(r.title ?? '').replace(/\s+/g, ' ').trim().replace(/^["“]|["”]$/g, '');
   const description = trimAtWord(String(r.description ?? ''), 160);
-  const category = (CATEGORY_OPTIONS as readonly string[]).includes(String(r.category))
-    ? String(r.category)
-    : 'Animal Health';
   const tags = Array.isArray(r.tags)
     ? r.tags
         .map((t) => String(t).toLowerCase().trim())
         .filter((t) => t.length >= 3 && t.length <= 40)
         .slice(0, 6)
     : [];
+  // Keep the model's choice when it is a real category; otherwise work it out
+  // from the title instead of defaulting everything to "Animal Health".
+  const category = CATEGORY_OPTIONS.includes(String(r.category))
+    ? String(r.category)
+    : inferCategory(title, tags) ?? DEFAULT_CATEGORY;
   const body = String(r.body ?? '')
     .replace(/^\s*#\s+.+\n+/, '') // the page already shows the title
     .replace(/^\s*---\s*$/gm, '')
@@ -200,6 +230,11 @@ export function checkDraft(draft: Draft, researchText: string): GateResult {
   if (h2Count < 3) issues.push('Needs at least 3 section headings (##)');
   if (/^#\s+\S/m.test(body)) issues.push('Body must not contain a top-level # heading');
 
+  const genericHeadings = (body.match(/^##\s+.+$/gm) ?? []).filter((h) => GENERIC_HEADING.test(h));
+  if (genericHeadings.length > 0) {
+    issues.push(`Generic section headings: ${genericHeadings.slice(0, 3).join(' | ')}`);
+  }
+
   const banned = findBannedPhrases(`${title}\n${description}\n${body}`);
   if (banned.length > 0) issues.push(`Contains AI-sounding phrases: ${banned.join(', ')}`);
 
@@ -219,6 +254,13 @@ export function checkDraft(draft: Draft, researchText: string): GateResult {
   const unsupported = unsupportedNumbers(`${title}\n${body}`, researchText);
   if (unsupported.length > 0) {
     issues.push(`Numbers not found in the research: ${unsupported.slice(0, 8).join(', ')}`);
+  }
+
+  // A real news article uses specific figures or dates from its research. An
+  // article with almost none is probably a generic explainer.
+  const grounded = groundedFigureCount(`${title}\n${body}`, researchText);
+  if (grounded < 2) {
+    issues.push(`Too generic: only ${grounded} specific figure(s) or date(s) from the research are used (need at least 2)`);
   }
 
   const normalizedResearch = researchText.toLowerCase().replace(/\s+/g, ' ');
