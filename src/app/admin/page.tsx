@@ -218,7 +218,7 @@ export default function AdminPage() {
           )}
           {tab === 'taxonomy' && <TaxonomyTab articles={articles} onChanged={reload} />}
           {tab === 'media' && <MediaTab articles={articles} onChanged={reload} />}
-          {tab === 'seo' && <SeoTab articles={articles} onEdit={openEditor} />}
+          {tab === 'seo' && <SeoTab articles={articles} onEdit={openEditor} onChanged={reload} />}
           {tab === 'pages' && <PagesTab />}
           {tab === 'ai' && <AiTab />}
           {tab === 'news' && <NewsTab />}
