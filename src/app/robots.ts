@@ -4,6 +4,7 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
+        disallow: ['/admin', '/generate', '/api/'],
       },
     ],
     sitemap: 'https://vetsphere.cc.cd/sitemap.xml',

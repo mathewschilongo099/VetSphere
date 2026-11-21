@@ -2,6 +2,7 @@
 import { useState } from 'react';
 
 const field = 'neo-field w-full rounded-2xl px-4 py-3.5 text-sm';
+const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
 
 export default function ContactPage() {
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
@@ -33,7 +34,6 @@ export default function ContactPage() {
 
   return (
     <div className="neo-page relative min-h-screen w-full overflow-hidden px-4 py-16">
-      {/* Floating circles */}
       <div aria-hidden="true" className="neo-circle pointer-events-none absolute left-[6%] top-[8%] hidden h-48 w-48 sm:block" />
       <div aria-hidden="true" className="neo-circle pointer-events-none absolute bottom-[8%] right-[8%] hidden h-32 w-32 sm:block" />
 
@@ -49,8 +49,17 @@ export default function ContactPage() {
         </div>
 
         <h1 className="neo-text text-center text-2xl font-extrabold">Contact Us</h1>
-        <p className="neo-muted mb-7 mt-2 text-center text-sm">
-          Questions, article ideas or collaboration? We reply within 24–48 hours.
+        <p className="neo-muted mb-3 mt-2 text-center text-sm">
+          Questions, corrections, article ideas or collaboration? We reply within 24–48 hours.
+        </p>
+        <p className="neo-muted mb-7 text-center text-xs">
+          VetSphere · Lusaka, Zambia
+          {CONTACT_EMAIL && (
+            <>
+              {' · '}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="underline">{CONTACT_EMAIL}</a>
+            </>
+          )}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-5">

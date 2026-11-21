@@ -9,27 +9,19 @@ export default function sitemap() {
     lastModified: new Date(post.date),
   }));
 
+  const latest = posts[0] ? new Date(posts[0].date) : new Date();
+  const legalDate = new Date('2026-11-21');
+
   return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-    },
-    {
-      url: `${baseUrl}/articles`,
-      lastModified: new Date(),
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: new Date(),
-    },
-    {
-      url: `${baseUrl}/services`,
-      lastModified: new Date(),
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: new Date(),
-    },
+    { url: baseUrl, lastModified: latest },
+    { url: `${baseUrl}/articles`, lastModified: latest },
+    { url: `${baseUrl}/ask`, lastModified: latest },
+    { url: `${baseUrl}/quiz`, lastModified: latest },
+    { url: `${baseUrl}/about`, lastModified: legalDate },
+    { url: `${baseUrl}/contact`, lastModified: legalDate },
+    { url: `${baseUrl}/privacy-policy`, lastModified: legalDate },
+    { url: `${baseUrl}/terms`, lastModified: legalDate },
+    { url: `${baseUrl}/disclaimer`, lastModified: legalDate },
     ...articleUrls,
   ];
 }

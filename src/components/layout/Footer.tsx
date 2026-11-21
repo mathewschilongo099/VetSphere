@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function Footer() {
   const [email, setEmail] = useState('');
@@ -30,7 +31,6 @@ export default function Footer() {
 
   return (
     <footer className="bg-gray-900 text-gray-300 w-full">
-
       {/* Newsletter Section */}
       <div className="bg-green-700 w-full py-10">
         <div className="max-w-3xl mx-auto px-4 text-center">
@@ -51,6 +51,7 @@ export default function Footer() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email address"
+                aria-label="Email address"
                 className="flex-1 px-4 py-3 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-white"
               />
               <button
@@ -66,67 +67,65 @@ export default function Footer() {
           {subStatus === 'error' && (
             <p className="text-red-300 text-xs mt-3">Something went wrong. Please try again.</p>
           )}
+          <p className="text-green-100/80 text-xs mt-3">
+            By subscribing you agree to our <Link href="/privacy-policy" className="underline">Privacy Policy</Link>.
+          </p>
         </div>
       </div>
 
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-
-        {/* Brand */}
         <div className="lg:col-span-1">
-          <a href="/" className="flex items-center gap-2 mb-4">
+          <Link href="/" className="flex items-center gap-2 mb-4">
             <span className="text-2xl">🐾</span>
             <span className="text-xl font-extrabold text-white">Vet<span className="text-green-400">Sphere</span></span>
-          </a>
+          </Link>
           <p className="text-sm text-gray-400 leading-relaxed">
-            Trusted veterinary knowledge for farmers and pet owners worldwide. Practical, reliable, and free.
+            Educational veterinary information for farmers and pet owners. Not a substitute for advice from a licensed veterinarian.
           </p>
         </div>
 
-        {/* Learn */}
         <div>
           <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Learn</h4>
           <ul className="space-y-2 text-sm">
-            <li><a href="/articles" className="hover:text-green-400 transition">All Articles</a></li>
-            <li><a href="/articles?category=livestock" className="hover:text-green-400 transition">Livestock Health</a></li>
-            <li><a href="/articles?category=pets" className="hover:text-green-400 transition">Pet Care</a></li>
-            <li><a href="/articles?category=disease-prevention" className="hover:text-green-400 transition">Disease Prevention</a></li>
+            <li><Link href="/articles" className="hover:text-green-400 transition">All Articles</Link></li>
+            <li><Link href="/articles?category=livestock" className="hover:text-green-400 transition">Livestock Health</Link></li>
+            <li><Link href="/articles?category=pets" className="hover:text-green-400 transition">Pet Care</Link></li>
+            <li><Link href="/articles?category=disease-prevention" className="hover:text-green-400 transition">Disease Prevention</Link></li>
           </ul>
         </div>
 
-        {/* Company */}
         <div>
           <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Company</h4>
           <ul className="space-y-2 text-sm">
-            <li><a href="/about" className="hover:text-green-400 transition">About Us</a></li>
-            <li><a href="/services" className="hover:text-green-400 transition">Services</a></li>
-            <li><a href="/contact" className="hover:text-green-400 transition">Contact</a></li>
+            <li><Link href="/about" className="hover:text-green-400 transition">About Us</Link></li>
+            <li><Link href="/contact" className="hover:text-green-400 transition">Contact</Link></li>
+            <li><Link href="/privacy-policy" className="hover:text-green-400 transition">Privacy Policy</Link></li>
+            <li><Link href="/terms" className="hover:text-green-400 transition">Terms of Use</Link></li>
+            <li><Link href="/disclaimer" className="hover:text-green-400 transition">Veterinary Disclaimer</Link></li>
           </ul>
         </div>
 
-        {/* Get In Touch */}
         <div>
           <h4 className="text-white font-semibold text-sm uppercase tracking-wider mb-4">Get In Touch</h4>
           <p className="text-sm text-gray-400 mb-4 leading-relaxed">
-            Have a question or want to collaborate? We'd love to hear from you.
+            Spotted an error or want to suggest a topic? We would love to hear from you.
           </p>
-          <a
+          <Link
             href="/contact"
             className="inline-block bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition"
           >
             Contact Us →
-          </a>
+          </Link>
         </div>
       </div>
 
-      {/* Bottom Bar */}
       <div className="border-t border-gray-800 py-5 px-4">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-500">
-          <p>© 2026 VetSphere. All rights reserved.</p>
-          <p>Caring for your animals with expertise 🐄</p>
+          <p>© {new Date().getFullYear()} VetSphere. All rights reserved.</p>
+          <p>For emergencies, contact a veterinarian immediately.</p>
         </div>
       </div>
-
     </footer>
   );
 }
