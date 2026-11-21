@@ -1,5 +1,5 @@
 ---
-title: "Canine Distemper"
+title: "Canine Distemper: Symptoms, Vaccination and Care"
 description: "Canine distemper is one of the most serious infectious diseases a dog can develop. This highly contagious virus can affect a dog’s respiratory system,..."
 date: "2026-09-10"
 author: "VetSphere"
@@ -278,4 +278,3 @@ Protecting your dog from canine distemper starts with a simple step: follow a ve
 
 - [feline panleukopenia in cats](/articles/feline-panleukopenia-in-cats)
 - [peste des petits ruminants in goats](/articles/peste-des-petits-ruminants-in-goats)
-
