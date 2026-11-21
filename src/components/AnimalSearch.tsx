@@ -62,7 +62,7 @@ export default function AnimalSearch({ compact = false }: AnimalSearchProps) {
                 className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? `${compact ? 'bg-white text-green-800' : 'bg-green-500 text-white'} rounded-br-sm`
-                    : 'bg-white/15 text-gray-100 rounded-bl-sm'
+                    : `${compact ? 'bg-white/90 text-gray-900' : 'bg-white/15 text-gray-100'} rounded-bl-sm`
                 }`}
               >
                 {msg.text}
@@ -72,11 +72,11 @@ export default function AnimalSearch({ compact = false }: AnimalSearchProps) {
 
           {loading && (
             <div className="flex justify-start">
-              <div className="bg-white/15 rounded-2xl rounded-bl-sm px-4 py-3">
+              <div className={`${compact ? 'bg-white/90' : 'bg-white/15'} rounded-2xl rounded-bl-sm px-4 py-3`}>
                 <div className="flex gap-1 items-center">
-                  <div className={`w-2 h-2 rounded-full animate-bounce ${compact ? 'bg-white' : 'bg-green-400'}`} style={{ animationDelay: '0ms' }} />
-                  <div className={`w-2 h-2 rounded-full animate-bounce ${compact ? 'bg-white' : 'bg-green-400'}`} style={{ animationDelay: '150ms' }} />
-                  <div className={`w-2 h-2 rounded-full animate-bounce ${compact ? 'bg-white' : 'bg-green-400'}`} style={{ animationDelay: '300ms' }} />
+                  <div className={`w-2 h-2 rounded-full animate-bounce ${compact ? 'bg-green-600' : 'bg-green-400'}`} style={{ animationDelay: '0ms' }} />
+                  <div className={`w-2 h-2 rounded-full animate-bounce ${compact ? 'bg-green-600' : 'bg-green-400'}`} style={{ animationDelay: '150ms' }} />
+                  <div className={`w-2 h-2 rounded-full animate-bounce ${compact ? 'bg-green-600' : 'bg-green-400'}`} style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function AnimalSearch({ compact = false }: AnimalSearchProps) {
         </button>
       </form>
 
-      <p className={`text-[11px] sm:text-xs text-center ${compact ? 'text-green-100 mt-2' : 'text-gray-400 mt-3'}`}>
+      <p className={`text-[11px] sm:text-xs text-center ${compact ? 'text-white mt-2' : 'text-gray-400 mt-3'}`}>
         AI answers are general information and can be wrong. They are not a diagnosis; for a sick animal, contact a veterinarian.
       </p>
     </div>
