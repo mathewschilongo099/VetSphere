@@ -168,6 +168,6 @@ Check the article against the research.
 - Also flag anything that reads like generic AI filler or that could mislead a farmer.
 
 Return ONLY JSON:
-{"faithful":true or false,"unsupported_claims":["short quote of each unsupported claim"],"tone_problems":["short quote of each unsupported claim"],"score":1-10}
+{"faithful":true or false,"unsupported_claims":["short quote of each unsupported claim"],"tone_problems":["..."],"score":1-10}
 Set "faithful" to false if there is any unsupported claim about a number, date, treatment or disease fact. Score 10 means accurate, practical and natural to read.`;
 }
