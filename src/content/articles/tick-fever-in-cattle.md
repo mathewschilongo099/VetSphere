@@ -1,6 +1,6 @@
 ---
 title: "Tick Fever in Cattle"
-description: "Tick fever in cattle can begin with signs that look mild: a cow stands apart from the herd, eats less, or produces less milk. Within a short time, however, the..."
+description: "Learn the signs of tick fever in cattle, how it spreads, and the treatment and tick control steps that protect your herd."
 date: "2026-09-20"
 author: "VetSphere"
 category: "Animal Health"
