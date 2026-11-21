@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { CONTACT_EMAIL } from '@/lib/site';
+import { CATEGORIES } from '@/lib/categories';
 
-const CATEGORY_LINKS = ['Animal Health', 'Poultry', 'Dairy', 'Goat', 'Pig', 'Pet Care'];
+const CATEGORY_LINKS = CATEGORIES.map((c) => c.name);
 
 export default function Footer() {
   const [email, setEmail] = useState('');
