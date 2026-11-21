@@ -108,6 +108,12 @@ export interface GeminiOptions {
    * Keep timeoutMs small enough that two attempts fit in the route's time limit.
    */
   retryOnTimeout?: boolean;
+  /**
+   * When false, a Gemini failure is thrown instead of being answered by the
+   * built-in Groq/Cerebras fallback. The shared client in lib/ai/client.ts sets
+   * this because it runs its own fallback chain.
+   */
+  fallback?: boolean;
 }
 
 export interface GeminiResult {
@@ -400,6 +406,7 @@ export async function callGemini(options: GeminiOptions): Promise<GeminiResult> 
     return await callGeminiOnly(options);
   } catch (error) {
     if (!(error instanceof GeminiError)) throw error;
+    if (options.fallback === false) throw error;
     console.warn(`Gemini failed (${error.kind}); trying free fallback providers.`);
     const fallback = await callFallbackProviders(options);
     if (fallback) return fallback;
