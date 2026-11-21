@@ -30,40 +30,32 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
 
-      {/* Hero (compact) */}
-      <section className="relative bg-gray-900 text-white w-full py-6 sm:py-12 overflow-hidden">
+      {/* Hero (compact, green) */}
+      <section className="relative bg-gradient-to-b from-green-600 to-green-700 text-white w-full py-5 sm:py-10 overflow-hidden">
         <div
-          className="absolute inset-0 opacity-40 pointer-events-none"
+          className="absolute inset-0 opacity-30 pointer-events-none"
           style={{
             background:
-              'radial-gradient(circle at 20% 20%, rgba(34,197,94,0.18), transparent 45%), radial-gradient(circle at 80% 0%, rgba(34,197,94,0.10), transparent 40%)',
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
-          style={{
-            backgroundImage:
-              'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
+              'radial-gradient(circle at 20% 0%, rgba(255,255,255,0.25), transparent 50%)',
           }}
         />
 
         <div className="relative max-w-4xl mx-auto px-4 flex flex-col items-center">
           <div className="flex-1 text-center w-full">
-            <h1 className="text-xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-2">
-              Better Animal Health <span className="text-green-400">Starts Here</span>
+            <h1 className="text-xl sm:text-4xl lg:text-5xl font-extrabold leading-tight mb-1.5">
+              Better Animal Health <span className="text-lime-200">Starts Here</span>
             </h1>
-            <p className="text-gray-300 text-xs sm:text-base mb-3 max-w-2xl mx-auto leading-snug">
+            <p className="text-green-50 text-xs sm:text-base mb-3 max-w-2xl mx-auto leading-snug">
               Practical veterinary guides for farmers, students, and pet owners.
             </p>
 
             <div className="max-w-xl mx-auto">
-              <div className="bg-white/5 border border-white/15 rounded-2xl p-1.5 backdrop-blur-sm">
-                <div className="flex items-center gap-2 px-2.5 pt-1 pb-1">
-                  <span className="text-green-400 text-[11px] font-bold uppercase tracking-wide">Ask VetAssist</span>
-                  <span className="text-gray-400 text-[11px]">— AI-powered answers</span>
+              <div className="bg-white/10 border border-white/25 rounded-2xl p-2 sm:p-3">
+                <div className="flex items-center gap-2 px-1 pb-1.5">
+                  <span className="text-white text-[11px] font-bold uppercase tracking-wide">Ask VetAssist</span>
+                  <span className="text-green-100 text-[11px]">— AI-powered answers</span>
                 </div>
-                <AnimalSearch />
+                <AnimalSearch compact />
               </div>
             </div>
           </div>
