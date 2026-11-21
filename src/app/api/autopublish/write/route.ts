@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
 
     for (let attempt = 1; attempt <= 2; attempt++) {
       // Do not start a second attempt if the first one used most of the time budget.
-      if (attempt === 2 && Date.now() - startedAt > 28000) break;
+      const elapsed = Date.now() - startedAt;
+      if (attempt === 2 && elapsed > 34000) break;
 
       const result = await callGemini({
         system: WRITER_SYSTEM,
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
         json: true,
         temperature: 0.85,
         maxOutputTokens: 6000,
-        timeoutMs: attempt === 1 ? 35000 : 25000,
+        timeoutMs: attempt === 1 ? 35000 : Math.min(25000, 57000 - elapsed),
       });
 
       const candidate = normalizeDraft(extractJson(result.text));
@@ -48,7 +49,11 @@ export async function POST(request: NextRequest) {
         break;
       }
       lastIssues = gate.issues;
-      feedback = gate.issues;
+      feedback = gate.issues.map((issue) =>
+        /too short/i.test(issue)
+          ? `${issue}. Rewrite it at 900 to 1,200 words using ONLY the research: explain how the condition or issue works, what the signs are, what farmers should do step by step, what is not yet known, and why it matters now. Do not add facts that are not in the research.`
+          : issue
+      );
     }
 
     if (!draft) {
