@@ -3,7 +3,7 @@
 // the facts it found, runs the same quality checks as the automatic pipeline, and
 // adds a Sources section with the real links.
 export const dynamic = 'force-dynamic';
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 import { NextRequest, NextResponse } from 'next/server';
 import { callGemini, extractJson, GeminiError, publicGeminiMessage } from '@/lib/pipeline/gemini';
@@ -12,8 +12,8 @@ import { researchTopic } from '@/lib/pipeline/research';
 import { WRITER_SYSTEM, buildWritePrompt, type TopicChoice } from '@/lib/pipeline/prompts';
 
 const MAX_TOPIC_LENGTH = 200;
-// Vercel stops the function at 60 s, so every step works inside this budget.
-const TOTAL_BUDGET_MS = 57000;
+// The function is stopped at 120 s, so every step works inside this budget.
+const TOTAL_BUDGET_MS = 115000;
 
 const FALLBACK_IMAGES = [
   'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
     };
 
     // 1. Research the topic on the live web. No sources, no article.
-    const outcome = await researchTopic(topic, 28000);
+    const outcome = await researchTopic(topic, 55000);
     if (!outcome.ok) {
       return NextResponse.json(
         {
@@ -141,14 +141,14 @@ export async function GET(request: NextRequest) {
     let draft: Draft | null = null;
 
     for (let attempt = 1; attempt <= 2; attempt++) {
-      if (left() < 15000) break;
+      if (left() < 20000) break;
       const result = await callGemini({
         system: WRITER_SYSTEM,
         prompt: buildWritePrompt(research, feedback),
         json: true,
         temperature: 0.85,
         maxOutputTokens: 6000,
-        timeoutMs: Math.min(left() - 3000, 35000),
+        timeoutMs: Math.min(left() - 5000, 45000),
       });
       const candidate = normalizeDraft(extractJson(result.text));
       const gate = checkDraft(candidate, researchText);
