@@ -22,7 +22,7 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
 
       {/* Title bar (compact) */}
-      <section className="bg-gray-900 text-white py-4 sm:py-8 w-full">
+      <section className="bg-green-600 text-white py-4 sm:py-8 w-full">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <h1 className="text-2xl sm:text-4xl font-extrabold">Our Services</h1>
         </div>
