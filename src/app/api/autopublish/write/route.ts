@@ -5,7 +5,7 @@ export const maxDuration = 60;
 
 import { NextRequest, NextResponse } from 'next/server';
 import { callGemini, extractJson } from '@/lib/pipeline/gemini';
-import { checkDraft, normalizeDraft, wordCount, type Draft } from '@/lib/pipeline/gate';
+import { checkDraft, normalizeDraft, researchFigures, wordCount, type Draft } from '@/lib/pipeline/gate';
 import { WRITER_SYSTEM, buildWritePrompt, type Research } from '@/lib/pipeline/prompts';
 
 function isResearch(value: unknown): value is Research {
@@ -49,11 +49,16 @@ export async function POST(request: NextRequest) {
         break;
       }
       lastIssues = gate.issues;
-      feedback = gate.issues.map((issue) =>
-        /too short/i.test(issue)
-          ? `${issue}. Rewrite it at 900 to 1,200 words using ONLY the research: explain how the condition or issue works, what the signs are, what farmers should do step by step, what is not yet known, and why it matters now. Do not add facts that are not in the research.`
-          : issue
-      );
+      feedback = gate.issues.map((issue) => {
+        if (/too short/i.test(issue)) {
+          return `${issue}. Rewrite it at 900 to 1,200 words using ONLY the research: explain how the condition or issue works, what the signs are, what farmers should do step by step, what is not yet known, and why it matters now. Do not add facts that are not in the research.`;
+        }
+        if (/too generic/i.test(issue)) {
+          const figures = researchFigures(researchText).slice(0, 12);
+          return `${issue}. Work at least two of these figures or dates into the article exactly as the research gives them: ${figures.join(', ')}. Say what each one refers to.`;
+        }
+        return issue;
+      });
     }
 
     if (!draft) {

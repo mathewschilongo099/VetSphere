@@ -168,6 +168,15 @@ export function unsupportedNumbers(article: string, researchText: string): strin
   return Array.from(unsupported);
 }
 
+/**
+ * Distinct figures and dates (bigger than 3) that the research really contains.
+ * The "researchedAt" timestamp is bookkeeping, not a fact, so it is ignored.
+ */
+export function researchFigures(researchText: string): string[] {
+  const facts = researchText.replace(/"researchedAt"\s*:\s*"[^"]*"/g, '');
+  return Array.from(new Set(extractNumbers(facts).filter((n) => Number(n) > 3)));
+}
+
 /** How many different figures or dates from the research the article actually uses. */
 export function groundedFigureCount(article: string, researchText: string): number {
   const allowed = new Set(extractNumbers(researchText));
@@ -258,9 +267,12 @@ export function checkDraft(draft: Draft, researchText: string): GateResult {
 
   // A real news article uses specific figures or dates from its research. An
   // article with almost none is probably a generic explainer.
+  // The writer can only use figures the research contains, so a practical guide
+  // whose research has fewer than 2 figures is not failed for that.
   const grounded = groundedFigureCount(`${title}\n${body}`, researchText);
-  if (grounded < 2) {
-    issues.push(`Too generic: only ${grounded} specific figure(s) or date(s) from the research are used (need at least 2)`);
+  const needed = Math.min(2, researchFigures(researchText).length);
+  if (grounded < needed) {
+    issues.push(`Too generic: only ${grounded} specific figure(s) or date(s) from the research are used (need at least ${needed})`);
   }
 
   const normalizedResearch = researchText.toLowerCase().replace(/\s+/g, ' ');
