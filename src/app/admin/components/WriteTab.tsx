@@ -148,13 +148,25 @@ export default function WriteTab({
   const [saving, setSaving] = useState(false);
   const [editMessage, setEditMessage] = useState('');
 
-  const loadEdit = async (name: string, quiet = false) => {
-    if (!quiet) setLoadingEdit(true);
+  const loadEdit = async (
+    name: string,
+    quiet = false,
+    isStale: () => boolean = () => false
+  ) => {
+    if (!quiet) {
+      // Clear the previous article so a failed load can never be saved
+      raw.current = '';
+      setSha('');
+      setEditMeta(EMPTY_META);
+      setEditBody('');
+      setLoadingEdit(true);
+    }
     try {
       const slug = name.replace(/\.md$/, '');
       const data = await api<{ content?: string; sha?: string; error?: string }>(
         `/api/articles/${encodeURIComponent(slug)}`
       );
+      if (isStale()) return; // a newer article was opened meanwhile
       if (data.error || !data.content) throw new Error(data.error || 'Could not load the article.');
       raw.current = data.content;
       setSha(data.sha || '');
@@ -164,22 +176,29 @@ export default function WriteTab({
         setEditBody(parsed.body);
       }
     } catch (err) {
-      setEditMessage(`❌ ${errMsg(err)}`);
+      if (!isStale()) setEditMessage(`❌ ${errMsg(err)}`);
     } finally {
-      setLoadingEdit(false);
+      if (!isStale()) setLoadingEdit(false);
     }
   };
 
   useEffect(() => {
-    if (editName) {
-      setEditMessage('');
-      loadEdit(editName);
-    }
+    if (!editName) return;
+    let stale = false;
+    setEditMessage('');
+    loadEdit(editName, false, () => stale);
+    return () => {
+      stale = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editName]);
 
   const saveEdit = async () => {
     if (!editName) return;
+    if (!raw.current || !sha) {
+      setEditMessage('⚠️ This article did not load properly. Close it and open it again.');
+      return;
+    }
     if (!editMeta.title.trim() || !editBody.trim()) {
       setEditMessage('⚠️ The article needs a title and some text.');
       return;
