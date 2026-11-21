@@ -1,5 +1,5 @@
 ---
-title: "Bovine Tuberculosis"
+title: "Bovine Tuberculosis: Signs, Testing and Control"
 description: "Bovine tuberculosis is a serious disease that can spread quietly through cattle herds before any obvious signs appear. Caused mainly by the bacterium..."
 date: "2026-09-10"
 author: "VetSphere"
