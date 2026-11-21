@@ -9,13 +9,12 @@ function topicToSlug(text: string): string {
   return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 }
 
-// Keeps whole-phrase tags ("foot and mouth disease") and drops the single-word
-// fragments cut from the title ("foot", "mouth"), which made unrelated articles
-// look related.
+// Keeps the researched tags and adds the category as a tag.
 function cleanTags(tags: unknown, category: string): string[] {
-  const list = Array.isArray(tags) ? tags.map((t) => String(t).toLowerCase().trim()) : [];
-  const phrases = list.filter((t) => t.includes(' ') && t.length <= 60);
-  const out = Array.from(new Set([...phrases, category.toLowerCase()]));
+  const list = Array.isArray(tags)
+    ? tags.map((t) => String(t).toLowerCase().trim()).filter((t) => t.length >= 3 && t.length <= 40)
+    : [];
+  const out = Array.from(new Set([...list.slice(0, 5), category.toLowerCase()]));
   if (out.length < 3) out.push('veterinary');
   return out.slice(0, 6);
 }
