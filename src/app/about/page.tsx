@@ -23,12 +23,12 @@ export default function AboutPage() {
     <div className="min-h-screen bg-white w-full overflow-x-hidden">
 
       {/* Hero */}
-      <section className="bg-gray-900 text-white py-20 w-full">
+      <section className="bg-gray-900 text-white py-10 sm:py-20 w-full">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-5 uppercase tracking-widest">
+          <span className="inline-block bg-green-600/20 text-green-400 text-xs font-semibold px-3 py-1 rounded-full mb-4 sm:mb-5 uppercase tracking-widest">
             About Us
           </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold mb-4">About VetSphere</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold mb-3 sm:mb-4">About VetSphere</h1>
           <p className="text-gray-400 text-base sm:text-xl max-w-2xl mx-auto">
             Dedicated to providing trusted veterinary knowledge for farmers and pet owners worldwide.
           </p>
@@ -36,8 +36,8 @@ export default function AboutPage() {
       </section>
 
       {/* Founder Section */}
-      <section className="max-w-4xl mx-auto px-4 py-16">
-        <div className="flex flex-col sm:flex-row items-center gap-8 bg-gray-50 rounded-2xl p-8 border border-gray-100">
+      <section className="max-w-4xl mx-auto px-4 py-6 sm:py-16">
+        <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-8 bg-gray-50 rounded-2xl p-5 sm:p-8 border border-gray-100">
           <div className="relative w-32 h-32 rounded-full overflow-hidden shrink-0 border-4 border-green-500">
             <Image
               src="/images/articles/mathews.jpg"
@@ -58,8 +58,8 @@ export default function AboutPage() {
       </section>
 
       {/* How we work */}
-      <section id="editorial" className="max-w-4xl mx-auto px-4 pb-16 scroll-mt-24">
-        <div className="bg-green-50 border border-green-100 rounded-2xl p-6 sm:p-8">
+      <section id="editorial" className="max-w-4xl mx-auto px-4 pb-8 sm:pb-16 scroll-mt-24">
+        <div className="bg-green-50 border border-green-100 rounded-2xl p-5 sm:p-8">
           <h2 className="text-2xl font-extrabold text-gray-900 mb-3">How our content is made</h2>
           <div className="space-y-3 text-gray-700 text-sm sm:text-base leading-relaxed">
             <p>
@@ -78,14 +78,14 @@ export default function AboutPage() {
       </section>
 
       {/* Mission & Vision */}
-      <section className="max-w-4xl mx-auto px-4 pb-16">
-        <div className="text-center mb-10">
+      <section className="max-w-4xl mx-auto px-4 pb-8 sm:pb-16">
+        <div className="text-center mb-6 sm:mb-10">
           <h2 className="text-3xl font-extrabold text-gray-900 mb-3">What We Stand For</h2>
           <div className="w-16 h-1 bg-green-600 mx-auto rounded-full"></div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {VALUES.map((v) => (
-            <div key={v.title} className="bg-green-50 rounded-2xl p-6">
+            <div key={v.title} className="bg-green-50 rounded-2xl p-5 sm:p-6">
               <div className="text-3xl mb-3">{v.icon}</div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">{v.title}</h3>
               <p className="text-gray-600 text-sm leading-relaxed">{v.desc}</p>
@@ -95,10 +95,10 @@ export default function AboutPage() {
       </section>
 
       {/* CTA */}
-      <section className="bg-green-600 py-16 w-full">
+      <section className="bg-green-600 py-10 sm:py-16 w-full">
         <div className="max-w-3xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-extrabold text-white mb-4">Want to get in touch?</h2>
-          <p className="text-green-100 mb-8">Have a question, a correction or an idea to collaborate? We would love to hear from you.</p>
+          <p className="text-green-100 mb-6 sm:mb-8">Have a question, a correction or an idea to collaborate? We would love to hear from you.</p>
           <Link href="/contact" className="bg-white text-green-700 font-bold px-8 py-4 rounded-xl hover:bg-green-50 transition inline-block">
             Contact Us →
           </Link>
