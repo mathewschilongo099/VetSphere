@@ -1,5 +1,5 @@
 ---
-title: "Foot Rot in Goats"
+title: "Foot Rot in Goats: Causes, Treatment and Prevention"
 description: "Foot rot in goats can begin with something easy to miss: a slight limp, a red patch between the toes, or a goat spending more time lying down. Without prompt..."
 date: "2026-09-16"
 author: "VetSphere"
@@ -294,4 +294,3 @@ The most effective strategy combines isolation, careful hoof inspection, appropr
 - [contagious caprine pleuropneumonia in goats](/articles/contagious-caprine-pleuropneumonia-in-goats)
 - [deworming programs for cattle and goats](/articles/deworming-programs-for-cattle-and-goats)
 - [foot and mouth disease in cattle](/articles/foot-and-mouth-disease-in-cattle)
-
