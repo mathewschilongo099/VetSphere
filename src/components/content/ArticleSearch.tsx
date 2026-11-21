@@ -1,93 +1,65 @@
 'use client';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import ArticleCard from '@/components/content/ArticleCard';
 import { BlogPost } from '@/types';
 
-const CATEGORIES = [
-  { label: 'All Articles', value: '' },
-  { label: 'Livestock Health', value: 'livestock' },
-  { label: 'Pet Care', value: 'pets' },
-  { label: 'Animal Health', value: 'animal health' },
-  { label: 'Disease Prevention', value: 'disease-prevention' },
-];
-
 const ARTICLES_PER_PAGE = 9;
+
+// A post matches a category if its category contains the text or one of its
+// tags equals it, and matches a search if the text appears in its details.
+function matches(post: BlogPost, category: string, query: string): boolean {
+  const c = category.trim().toLowerCase();
+  const q = query.trim().toLowerCase();
+
+  if (c) {
+    const inCategory = post.category.toLowerCase().includes(c);
+    const inTags = post.tags.some((tag) => tag.toLowerCase() === c);
+    if (!inCategory && !inTags) return false;
+  }
+
+  if (q) {
+    return (
+      post.title.toLowerCase().includes(q) ||
+      post.description.toLowerCase().includes(q) ||
+      post.category.toLowerCase().includes(q) ||
+      post.tags.some((tag) => tag.toLowerCase().includes(q))
+    );
+  }
+
+  return true;
+}
 
 function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
   const searchParams = useSearchParams();
 
-  const [filtered, setFiltered] = useState<BlogPost[]>(initialPosts);
   const [query, setQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Category tabs come from the real article categories.
+  const categories = useMemo(
+    () =>
+      Array.from(new Set(initialPosts.map((p) => p.category).filter(Boolean))).sort((a, b) =>
+        a.localeCompare(b)
+      ),
+    [initialPosts]
+  );
+
   useEffect(() => {
     if (!searchParams) return;
-
-    const searchQuery = searchParams.get('search') ?? '';
-    const categoryQuery = searchParams.get('category') ?? '';
-
-    setQuery(searchQuery);
-    setActiveCategory(categoryQuery);
+    setQuery(searchParams.get('search') ?? '');
+    setActiveCategory(searchParams.get('category') ?? '');
   }, [searchParams]);
 
   useEffect(() => {
-    let result = initialPosts;
-
-    if (activeCategory) {
-      result = result.filter((post) =>
-        post.category.toLowerCase().includes(activeCategory.toLowerCase()) ||
-        post.tags.some((tag) =>
-          tag.toLowerCase().includes(activeCategory.toLowerCase())
-        )
-      );
-    }
-
-    if (query.trim()) {
-      const q = query.toLowerCase();
-
-      result = result.filter(
-        (post) =>
-          post.title.toLowerCase().includes(q) ||
-          post.description.toLowerCase().includes(q) ||
-          post.category.toLowerCase().includes(q) ||
-          post.tags.some((tag) => tag.toLowerCase().includes(q))
-      );
-    }
-
-    setFiltered(result);
     setCurrentPage(1);
-  }, [initialPosts, query, activeCategory]);
+  }, [query, activeCategory]);
 
-  function handleSearch(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-
-    const q = query.toLowerCase();
-    let result = initialPosts;
-
-    if (activeCategory) {
-      result = result.filter((post) =>
-        post.category.toLowerCase().includes(activeCategory.toLowerCase()) ||
-        post.tags.some((tag) =>
-          tag.toLowerCase().includes(activeCategory.toLowerCase())
-        )
-      );
-    }
-
-    if (q.trim()) {
-      result = result.filter(
-        (post) =>
-          post.title.toLowerCase().includes(q) ||
-          post.description.toLowerCase().includes(q) ||
-          post.category.toLowerCase().includes(q) ||
-          post.tags.some((tag) => tag.toLowerCase().includes(q))
-      );
-    }
-
-    setFiltered(result);
-    setCurrentPage(1);
-  }
+  const filtered = useMemo(
+    () => initialPosts.filter((post) => matches(post, activeCategory, query)),
+    [initialPosts, activeCategory, query]
+  );
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ARTICLES_PER_PAGE));
   const safePage = Math.min(currentPage, totalPages);
@@ -121,19 +93,22 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
     return pages;
   };
 
+  const tabs = [{ label: 'All Articles', value: '' }, ...categories.map((c) => ({ label: c, value: c }))];
+
   return (
     <>
       {/* Search Bar */}
       <form
-        onSubmit={handleSearch}
+        onSubmit={(e) => e.preventDefault()}
         className="flex gap-2 max-w-xl mx-auto mt-5 px-4"
       >
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          aria-label="Search articles"
           placeholder="Search articles... e.g. cattle, poultry, dog care"
-          className="flex-1 min-w-0 px-4 py-3 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 min-w-0 px-4 py-3 rounded-xl text-sm text-gray-900 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500"
         />
         <button
           type="submit"
@@ -146,15 +121,15 @@ function SearchContent({ initialPosts }: { initialPosts: BlogPost[] }) {
       {/* Category Tabs */}
       <div className="bg-white border-b border-gray-100 w-full sticky top-16 z-40 mt-3">
         <div className="max-w-6xl mx-auto px-4 py-3 flex gap-2 overflow-x-auto">
-          {CATEGORIES.map(({ label, value }) => (
+          {tabs.map(({ label, value }) => (
             <button
-              key={value}
+              key={value || 'all'}
               onClick={() => {
                 setActiveCategory(value);
                 setQuery('');
               }}
               className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium transition ${
-                activeCategory === value
+                activeCategory.toLowerCase() === value.toLowerCase()
                   ? 'bg-green-600 text-white'
                   : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-700'
               }`}

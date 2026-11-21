@@ -1,7 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+
+const NAV = [
+  { href: '/', label: 'Home' },
+  { href: '/articles', label: 'Articles' },
+  { href: '/services', label: 'Services' },
+  { href: '/about', label: 'About' },
+];
+
+const TOOLS = [
+  { href: '/ask', label: 'Ask VetAssist' },
+  { href: '/quiz', label: 'Quiz' },
+  { href: '/academic-writer', label: 'Academic Writer' },
+];
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,6 +40,8 @@ export default function Header() {
     }
   }
 
+  const closeMenu = () => setMenuOpen(false);
+
   return (
     <header
       className={`sticky top-0 z-50 w-full border-b transition-all duration-300 ${
@@ -37,55 +53,61 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
 
         {/* LOGO */}
-        <a href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2" aria-label="VetSphere home">
           <span className="text-2xl">🐾</span>
           <span className="text-xl font-extrabold text-gray-900">
             Vet<span className="text-green-600">Sphere</span>
           </span>
-        </a>
+        </Link>
 
         {/* DESKTOP NAV */}
-        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700">
-          <a href="/">Home</a>
-          <a href="/articles">Articles</a>
-          <a href="/services">Services</a>
-          <a href="/about">About</a>
-          <a href="/ask" className="text-green-600 font-semibold">Ask VetAssist</a>
-          <a href="/quiz" className="text-blue-600 font-semibold">Quiz</a>
-          <a href="/academic-writer" className="text-purple-600 font-semibold">✍️ Academic Writer</a> {/* NEW */}
+        <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-700" aria-label="Main">
+          {NAV.map((item) => (
+            <Link key={item.href} href={item.href} className="hover:text-green-600 transition">
+              {item.label}
+            </Link>
+          ))}
+          {TOOLS.map((item) => (
+            <Link key={item.href} href={item.href} className="text-green-700 font-semibold hover:text-green-500 transition">
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         {/* DESKTOP RIGHT */}
         <div className="hidden md:flex items-center gap-3">
           <button
             onClick={() => setSearchOpen(!searchOpen)}
+            aria-label="Search articles"
+            aria-expanded={searchOpen}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-700"
           >
             🔍
           </button>
 
-          <a
+          <Link
             href="/contact"
-            className="bg-green-600 text-white px-5 py-2.5 rounded-lg font-semibold"
+            className="bg-green-600 hover:bg-green-500 text-white px-5 py-2.5 rounded-lg font-semibold transition"
           >
             Contact
-          </a>
+          </Link>
         </div>
 
-        {/* MOBILE RIGHT (FIXED ICON VISIBILITY) */}
+        {/* MOBILE RIGHT */}
         <div className="flex md:hidden items-center gap-3">
-
-          {/* SEARCH ICON */}
           <button
             onClick={() => setSearchOpen(!searchOpen)}
+            aria-label="Search articles"
+            aria-expanded={searchOpen}
             className="p-2 rounded-lg hover:bg-gray-100 text-gray-900"
           >
             🔍
           </button>
 
-          {/* HAMBURGER (FIXED VISIBILITY) */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
             className="p-2 rounded-lg bg-gray-100 text-gray-900 shadow-sm"
           >
             ☰
@@ -101,7 +123,8 @@ export default function Header() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search articles..."
-              className="flex-1 px-4 py-2 border rounded-lg text-sm"
+              aria-label="Search articles"
+              className="flex-1 px-4 py-2 border rounded-lg text-sm text-gray-900"
             />
             <button className="bg-green-600 text-white px-4 rounded-lg text-sm">
               Search
@@ -113,33 +136,24 @@ export default function Header() {
       {/* MOBILE MENU */}
       {menuOpen && (
         <div className="md:hidden bg-white border-t shadow-lg">
-          <div className="px-4 py-3 flex flex-col gap-2 text-gray-800">
-
-            <a href="/" onClick={() => setMenuOpen(false)}>🏠 Home</a>
-            <a href="/articles" onClick={() => setMenuOpen(false)}>📚 Articles</a>
-            <a href="/services" onClick={() => setMenuOpen(false)}>🧰 Services</a>
-            <a href="/about" onClick={() => setMenuOpen(false)}>ℹ️ About</a>
-
-            <a href="/ask" className="text-green-600 font-semibold" onClick={() => setMenuOpen(false)}>
-              🤖 Ask VetAssist
-            </a>
-
-            <a href="/quiz" className="text-blue-600 font-semibold" onClick={() => setMenuOpen(false)}>
-              🧠 Quiz
-            </a>
-
-            <a href="/academic-writer" className="text-purple-600 font-semibold" onClick={() => setMenuOpen(false)}>
-              ✍️ Academic Writer
-            </a> {/* NEW */}
-
-            <a
+          <div className="px-4 py-3 flex flex-col gap-3 text-gray-800">
+            {NAV.map((item) => (
+              <Link key={item.href} href={item.href} onClick={closeMenu}>
+                {item.label}
+              </Link>
+            ))}
+            {TOOLS.map((item) => (
+              <Link key={item.href} href={item.href} onClick={closeMenu} className="text-green-700 font-semibold">
+                {item.label}
+              </Link>
+            ))}
+            <Link
               href="/contact"
               className="bg-green-600 text-white text-center py-3 rounded-lg mt-2"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
             >
               Contact Us
-            </a>
-
+            </Link>
           </div>
         </div>
       )}

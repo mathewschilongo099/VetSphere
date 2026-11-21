@@ -4,6 +4,23 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
+import MedicalDisclaimer from '@/components/ui/MedicalDisclaimer';
+import { SITE_URL } from '@/lib/site';
+
+const EDITORIAL_BYLINE = 'VetSphere Editorial Team';
+const GENERIC_AUTHORS = ['', 'vetsphere', 'vetsphere team', 'vetsphere editorial', 'admin'];
+
+// Set "author: Name" in an article's frontmatter to credit a named person.
+// Otherwise the article is credited to the editorial team.
+function bylineFor(author?: string): string {
+  const name = (author || '').trim();
+  return GENERIC_AUTHORS.includes(name.toLowerCase()) ? EDITORIAL_BYLINE : name;
+}
+
+function absoluteImage(image?: string): string {
+  if (!image) return `${SITE_URL}/logo.png`;
+  return image.startsWith('http') ? image : `${SITE_URL}${image}`;
+}
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -16,9 +33,8 @@ export async function generateMetadata(
   const post = getPostBySlug(params.slug);
   if (!post) return { title: 'Article Not Found | VetSphere' };
 
-  const imageUrl = post.image?.startsWith('http')
-    ? post.image
-    : `https://vetsphere.cc.cd${post.image}`;
+  const imageUrl = absoluteImage(post.image);
+  const byline = bylineFor(post.author);
 
   return {
     title: `${post.title} | VetSphere`,
@@ -30,8 +46,8 @@ export async function generateMetadata(
       description: post.description,
       type: 'article',
       publishedTime: post.date,
-      authors: ['Mathews Chilongo'],
-      url: `https://vetsphere.cc.cd/articles/${post.slug}`,
+      authors: [byline],
+      url: `${SITE_URL}/articles/${post.slug}`,
       images: [{ url: imageUrl, alt: post.imageAlt || post.title }],
     },
     twitter: {
@@ -55,8 +71,47 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
+  const byline = bylineFor(post.author);
+  const isPerson = byline !== EDITORIAL_BYLINE;
+  const url = `${SITE_URL}/articles/${post.slug}`;
+
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title,
+      description: post.description,
+      image: [absoluteImage(post.image)],
+      datePublished: post.date,
+      dateModified: post.date,
+      author: isPerson
+        ? { '@type': 'Person', name: byline }
+        : { '@type': 'Organization', name: 'VetSphere', url: SITE_URL },
+      publisher: {
+        '@type': 'Organization',
+        name: 'VetSphere',
+        url: SITE_URL,
+        logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` },
+      },
+      mainEntityOfPage: url,
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: 'Articles', item: `${SITE_URL}/articles` },
+        { '@type': 'ListItem', position: 3, name: post.title, item: url },
+      ],
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
         <div className="mb-4 sm:mb-6">
           <Link
@@ -81,7 +136,16 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
         </h1>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-500 mb-6">
-          <span>By <span className="font-medium text-gray-700">Mathews Chilongo</span></span>
+          <span>
+            By{' '}
+            {isPerson ? (
+              <span className="font-medium text-gray-700">{byline}</span>
+            ) : (
+              <Link href="/about#editorial" className="font-medium text-gray-700 hover:text-green-600">
+                {byline}
+              </Link>
+            )}
+          </span>
           <span>•</span>
           <time dateTime={post.date}>
             {new Date(post.date).toLocaleDateString('en-US', {
@@ -134,6 +198,54 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           "
           dangerouslySetInnerHTML={{ __html: cleanContent }}
         />
+
+        <MedicalDisclaimer />
+
+        <section className="mt-8 border-t border-gray-100 pt-6 text-sm text-gray-600">
+          <h2 className="text-base font-bold text-gray-900 mb-2">
+            Further reading from authoritative sources
+          </h2>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <a
+                href="https://www.woah.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-700 underline"
+              >
+                World Organisation for Animal Health (WOAH)
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.fao.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-700 underline"
+              >
+                Food and Agriculture Organization (FAO)
+              </a>
+            </li>
+            <li>
+              <a
+                href="https://www.merckvetmanual.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-green-700 underline"
+              >
+                Merck Veterinary Manual
+              </a>
+            </li>
+          </ul>
+          <p className="mt-3 text-xs text-gray-500">
+            General background reading. Listing these organisations does not mean they reviewed this
+            article. Spotted a mistake?{' '}
+            <Link href="/contact" className="text-green-700 underline">
+              Tell us
+            </Link>
+            .
+          </p>
+        </section>
       </article>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16">

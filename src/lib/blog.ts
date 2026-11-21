@@ -12,6 +12,64 @@ const md = new MarkdownIt({
 
 const POSTS_DIRECTORY = path.join(process.cwd(), 'src/content/articles');
 
+// Tags that are too general to say two articles are really related.
+const GENERIC_TAGS = new Set([
+  'veterinary',
+  'animal health',
+  'livestock',
+  'farming',
+  'vetsphere',
+  'animals',
+  'health',
+]);
+
+// Drops a whole "## Heading" section (up to the next "## " heading).
+function removeSection(markdown: string, headingPattern: RegExp): string {
+  const out: string[] = [];
+  let skipping = false;
+  for (const line of markdown.split('\n')) {
+    if (/^##\s/.test(line)) skipping = headingPattern.test(line);
+    if (!skipping) out.push(line);
+  }
+  return out.join('\n');
+}
+
+function plainText(markdown: string): string {
+  return markdown
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/[*_`>#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+// Older articles have meta descriptions cut off with "...". Rebuild those from
+// the first paragraph, ending on a full sentence.
+function buildDescription(description: string, body: string): string {
+  const given = (description || '').trim();
+  if (given && !/(\.\.\.|\u2026)$/.test(given)) return given;
+
+  const firstParagraph = body
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .find((p) => p && !/^(#|<|!|[-*]\s|\d+\.\s)/.test(p));
+  const text = plainText(firstParagraph || given);
+  if (text.length <= 158) return text;
+
+  const sentences = text.match(/[^.!?]+[.!?]+(\s|$)/g) || [];
+  let out = '';
+  for (const sentence of sentences) {
+    if ((out + sentence).trim().length > 158) break;
+    out += sentence;
+  }
+  out = out.trim();
+  if (out.length >= 70) return out;
+
+  const cut = text.slice(0, 155);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).trim()}\u2026`;
+}
+
 export function getAllPosts(): BlogPost[] {
   if (!fs.existsSync(POSTS_DIRECTORY)) {
     return [];
@@ -38,22 +96,24 @@ export function getPostBySlug(slug: string): BlogPost | null {
     const readingTime = calculateReadingTime(content);
 
     // Remove the first image and its caption from content since the
-    // hero image is already shown above the article body — this fixes
-    // the duplicate image that appears at the top of old articles.
+    // hero image is already shown above the article body.
     const contentWithoutFirstImage = content
-      // Remove markdown image followed by optional Photo: caption line
       .replace(/!\[[^\]]*\]\([^)]*\)\s*\n*\*?Photo:[^\n]*\n*/g, '')
-      // Remove any remaining standalone Photo: ... via Unsplash lines
       .replace(/\*Photo:[^\n]*via Unsplash[^\n]*\*\n*/gi, '')
       .replace(/Photo:[^\n]*via Unsplash[^\n]*\n*/gi, '');
 
-    const contentHtml = md.render(contentWithoutFirstImage);
+    // The article page already shows related articles at the bottom, so the
+    // hand-written "Related Articles" list inside the text is dropped.
+    const cleanedMarkdown = removeSection(contentWithoutFirstImage, /^##\s+Related Articles\s*$/i);
+
+    const contentHtml = md.render(cleanedMarkdown);
+    const description = buildDescription(data.description || '', cleanedMarkdown);
 
     return {
       slug: realSlug,
       title: data.title || '',
-      description: data.description || '',
-      excerpt: data.description || '',
+      description,
+      excerpt: description,
       date: data.date || '',
       author: data.author || 'VetSphere Team',
       category: data.category || '',
@@ -87,16 +147,30 @@ export function getFeaturedPosts(count: number = 3): BlogPost[] {
     .slice(0, count);
 }
 
+// Ranks other articles by shared specific tags (generic tags are ignored) and
+// category, then recency, so related articles are about the same topic.
 export function getRelatedPosts(slug: string, count: number = 3): BlogPost[] {
-  const post = getPostBySlug(slug);
+  const all = getAllPosts();
+  const post = all.find((p) => p.slug === slug);
   if (!post) return [];
-  return getAllPosts()
-    .filter(
-      (p) =>
-        p.slug !== slug &&
-        (p.category === post.category || p.tags.some((tag) => post.tags.includes(tag)))
+
+  const specific = (tags: string[]) =>
+    tags.map((t) => t.toLowerCase()).filter((t) => !GENERIC_TAGS.has(t));
+  const mine = new Set(specific(post.tags));
+
+  return all
+    .filter((p) => p.slug !== slug)
+    .map((p) => {
+      const shared = specific(p.tags).filter((t) => mine.has(t)).length;
+      const sameCategory = p.category && p.category === post.category ? 1 : 0;
+      return { p, score: shared * 2 + sameCategory };
+    })
+    .sort(
+      (a, b) =>
+        b.score - a.score || new Date(b.p.date).getTime() - new Date(a.p.date).getTime()
     )
-    .slice(0, count);
+    .slice(0, count)
+    .map((x) => x.p);
 }
 
 export function getAdjacentPosts(slug: string): { prev: BlogPost | null; next: BlogPost | null } {
