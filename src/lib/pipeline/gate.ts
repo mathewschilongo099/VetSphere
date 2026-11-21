@@ -136,7 +136,7 @@ export function findBannedPhrases(text: string): string[] {
 
 // Section headings that signal a generic explainer instead of a specific story.
 const GENERIC_HEADING =
-  /^##\s*(introduction|overview|conclusion|summary|final thoughts|what is\b|what are\b|understanding\b|everything you need|key takeaways|frequently asked)/i;
+  /^##\s*(introduction|overview|conclusion|summary|final thoughts|what (?:is|are)\b(?! not| still| unknown| unclear| yet)|understanding\b|everything you need|key takeaways|frequently asked)/i;
 
 // ---------- numbers must come from the research ----------
 

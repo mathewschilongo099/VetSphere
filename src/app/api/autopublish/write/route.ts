@@ -1,5 +1,5 @@
 // Stage 3 of 4: write the article from the fact sheet, then run the strict
-// quality checks. One automatic rewrite is allowed if the first draft fails.
+// quality checks. Up to two automatic rewrites are allowed if a draft fails.
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -26,11 +26,12 @@ export async function POST(request: NextRequest) {
     let feedback: string[] | undefined;
     let lastIssues: string[] = [];
     let draft: Draft | null = null;
+    let previousBody = '';
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
-      // Do not start a second attempt if the first one used most of the time budget.
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      // Do not start another attempt unless enough of the time budget is left.
       const elapsed = Date.now() - startedAt;
-      if (attempt === 2 && elapsed > 34000) break;
+      if (attempt > 1 && 57000 - elapsed < 14000) break;
 
       const result = await callGemini({
         system: WRITER_SYSTEM,
@@ -38,7 +39,7 @@ export async function POST(request: NextRequest) {
         json: true,
         temperature: 0.85,
         maxOutputTokens: 6000,
-        timeoutMs: attempt === 1 ? 35000 : Math.min(25000, 57000 - elapsed),
+        timeoutMs: attempt === 1 ? 35000 : Math.min(30000, 57000 - elapsed),
       });
 
       const candidate = normalizeDraft(extractJson(result.text));
@@ -49,9 +50,10 @@ export async function POST(request: NextRequest) {
         break;
       }
       lastIssues = gate.issues;
+      previousBody = candidate.body;
       feedback = gate.issues.map((issue) => {
         if (/too short/i.test(issue)) {
-          return `${issue}. Rewrite it at 900 to 1,200 words using ONLY the research: explain how the condition or issue works, what the signs are, what farmers should do step by step, what is not yet known, and why it matters now. Do not add facts that are not in the research.`;
+          return `${issue}. Rewrite it at 900 to 1,200 words using ONLY the research: explain how the condition or issue works, what the signs are, what farmers should do step by step, what is not yet known, and why it matters now. Do not add facts that are not in the research.\n\nYour previous draft, to expand (add detail from the research, do not just repeat it):\n${previousBody}`;
         }
         if (/too generic/i.test(issue)) {
           const figures = researchFigures(researchText).slice(0, 12);

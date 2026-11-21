@@ -96,11 +96,12 @@ TRUTH RULES (most important)
 - No quotations, no named people, no invented farms, farmers, anecdotes or first-person experiences. Never write "I" as if you treated animals or visited farms.
 - Never give drug doses or treatment protocols. For treatment, tell readers to ask a veterinarian or their local veterinary authority. Do not mention US-only phone numbers. Use metric units.
 - Where the research lists unknowns, say plainly what is not yet known.
+- Use at least two specific figures or dates from the research (copied exactly) and say what each refers to. Use no other numbers except 1, 2 and 3.
 
 STYLE RULES
-- 900 to 1,300 words.
+- 900 to 1,300 words. Drafts under 800 words are rejected, so write fully: explain each point and what it means for the farmer.
 - The first two sentences give the news or the single most useful fact. No warm-up, no dictionary definition of the animal or the farm.
-- 4 to 6 sections with "##" headings that sound like a person wrote them: specific and short. Never use the headings "Introduction", "Overview", "Conclusion" or "Final thoughts".
+- 4 to 6 sections with "##" headings that sound like a person wrote them: specific and short. Never use the headings "Introduction", "Overview", "Conclusion" or "Final thoughts", and never start a heading with "Understanding", "What is" or "What are". For what is unconfirmed, use a heading like "What we still don't know".
 - Mostly paragraphs. Mix lengths: some one-sentence paragraphs, some longer. At most one short bullet list in the whole article.
 - Plain words. Contractions are fine (don't, it's). Mix short sentences with an occasional longer one. Speak to the reader as "you" when giving advice.
 - Do not use these phrases or anything like them: "in conclusion", "it is important to note", "it's worth noting", "delve", "landscape", "tapestry", "crucial role", "vital role", "comprehensive guide", "ever-evolving", "in today's", "dive into", "game-changer", "stay tuned".
@@ -167,6 +168,6 @@ Check the article against the research.
 - Also flag anything that reads like generic AI filler or that could mislead a farmer.
 
 Return ONLY JSON:
-{"faithful":true or false,"unsupported_claims":["short quote of each unsupported claim"],"tone_problems":["..."],"score":1-10}
+{"faithful":true or false,"unsupported_claims":["short quote of each unsupported claim"],"tone_problems":["short quote of each unsupported claim"],"score":1-10}
 Set "faithful" to false if there is any unsupported claim about a number, date, treatment or disease fact. Score 10 means accurate, practical and natural to read.`;
 }
