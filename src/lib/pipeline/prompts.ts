@@ -28,28 +28,28 @@ export interface Research {
 
 // ---------------------------------------------------------------- 1. topic
 
-export const TOPIC_SYSTEM = `You are the news editor of VetSphere, a free website that helps livestock farmers, animal-health workers and veterinary students around the world.
-You choose what the site should write about today. Be selective: only pick stories that a farmer or animal-health worker can use.`;
+export const TOPIC_SYSTEM = `You are the editor of VetSphere, a free website that helps livestock farmers, animal-health workers and veterinary students around the world.
+You choose what the site should write next. Prefer topics that answer a question people really search for and that stay useful for years: how-to guides, "what to do when" explainers, feeding, housing, prevention, record keeping, calf and chick care. Use news only when it changes what a farmer should do this week.`;
 
 export function buildTopicPrompt(headlines: Headline[], existingTitles: string[]): string {
   const list = headlines
     .map((h) => `${h.id}. ${h.title} (${h.source}, ${h.date || 'recent'})`)
     .join('\n');
-  return `Here are livestock-related headlines from the last 7 days:
+  return `Recent livestock headlines (optional inspiration only):
 
 ${list}
 
-Articles VetSphere has ALREADY published (do not repeat these; a genuinely new development on the same disease is fine if the angle is clearly different):
-${existingTitles.slice(0, 150).join('; ') || '(none)'}
+Articles VetSphere has ALREADY published. Do NOT pick the same subject, even under another name (for example bird flu, avian influenza and H5N1 are one subject):
+${existingTitles.join('; ') || '(none)'}
 
-Pick up to 3 topics, best first. A good topic:
-- is covered by 2 or more different outlets (trending), 
-- matters to people who keep or look after livestock (disease outbreaks and alerts, vaccines and treatments, feed or water problems, trade or movement rules that affect farmers, climate effects on animals, new farm practices that are backed by evidence),
-- can be explained with practical advice.
-Skip: human health stories, pets, company promotions, stock-market news, opinion about politics, anything you cannot explain with facts.
+Pick 3 topics, best first.
+- The FIRST must be "evergreen": a practical guide a farmer or student can use at any time (kind = "evergreen"). It does not need a headline.
+- The other two may be news (kind = "news") if two or more outlets cover the story and it matters to people who look after livestock.
+- Every topic must be explainable with practical advice.
+Skip: human health stories, pets, company promotions, stock-market news, political opinion, anything you cannot explain with facts.
 
 Return ONLY JSON:
-{"candidates":[{"topic":"short plain topic name","angle":"the specific story to tell, one sentence","why_now":"why it matters this week, one sentence","headline_ids":[numbers of the headlines about this topic]}]}`;
+{"candidates":[{"kind":"evergreen or news","topic":"short plain topic name","angle":"the specific question this answers, one sentence","why_now":"why it helps readers, one sentence","headline_ids":[numbers of related headlines, or empty for evergreen]}]}`;
 }
 
 // ------------------------------------------------------------- 2. research
@@ -115,6 +115,17 @@ Return ONLY JSON with these keys:
 "category": one of ${CATEGORY_OPTIONS.map((c) => `"${c}"`).join(', ')}
 "tags": 4 to 6 lowercase tags
 "body": the article in markdown, without a title heading`;
+
+// Used by the admin "Generate" button. People who type a topic want a complete,
+// useful guide, so the writer may add well-established general knowledge, but
+// still never numbers, drug names or doses from memory.
+export const WRITER_GUIDE_SYSTEM = `${WRITER_SYSTEM}
+
+OVERRIDE FOR THIS ARTICLE (replaces any conflicting rule above)
+- This is a practical guide for people looking for information, not a news story. Open with the most useful point for the reader.
+- Use the research as the main source. Every number, date, place name, official name or study result must come from it.
+- You may also add widely taught, well-established veterinary and animal-husbandry knowledge (how a problem usually shows, hygiene, housing, feeding, when to call a vet) so the guide is complete and useful. Never add numbers, drug names or doses from memory. If you are not sure something is standard knowledge, leave it out.
+- Length: 1,000 to 1,400 words in 5 to 7 sections. Never fewer than 900 words.`;
 
 export function buildWritePrompt(research: Research, feedback?: string[]): string {
   const facts = {

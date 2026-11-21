@@ -1,7 +1,8 @@
 // Manual article writer used by the admin page. It no longer writes from the
-// model's memory: it researches the topic on the live web first, writes only from
-// the facts it found, runs the same quality checks as the automatic pipeline, and
-// adds a Sources section with the real links.
+// model's memory: it researches the topic on the live web first, writes from
+// the facts it found, runs the same quality checks as the automatic pipeline,
+// adds matching photos (one at the top, one under each subheading) and a
+// Sources section with the real links.
 export const dynamic = 'force-dynamic';
 export const maxDuration = 120;
 
@@ -9,79 +10,106 @@ import { NextRequest, NextResponse } from 'next/server';
 import { callGemini, extractJson, GeminiError, publicGeminiMessage } from '@/lib/pipeline/gemini';
 import { checkDraft, normalizeDraft, wordCount, type Draft } from '@/lib/pipeline/gate';
 import { researchTopic } from '@/lib/pipeline/research';
-import { WRITER_SYSTEM, buildWritePrompt, type TopicChoice } from '@/lib/pipeline/prompts';
+import { WRITER_GUIDE_SYSTEM, buildWritePrompt, type TopicChoice } from '@/lib/pipeline/prompts';
 
 const MAX_TOPIC_LENGTH = 200;
 // The function is stopped at 120 s, so every step works inside this budget.
 const TOTAL_BUDGET_MS = 115000;
 
-const FALLBACK_IMAGES = [
-  'https://images.pexels.com/photos/18351958/pexels-photo-18351958/free-photo-of-a-cow-standing-in-a-field-next-to-a-tree.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351948/pexels-photo-18351948/free-photo-of-a-group-of-chickens-in-a-pen.jpeg?w=800&h=400&fit=crop',
-  'https://images.pexels.com/photos/18351947/pexels-photo-18351947/free-photo-of-a-goat-standing-in-a-field.jpeg?w=800&h=400&fit=crop',
+// ---------------------------------------------------------------- images
+
+async function searchImages(query: string): Promise<string[]> {
+  const pexels = process.env.PEXELS_API_KEY;
+  if (pexels) {
+    try {
+      const res = await fetch(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=8&orientation=landscape`,
+        { headers: { Authorization: pexels }, cache: 'no-store' }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const urls: string[] = (data.photos ?? []).map((p: any) => p?.src?.large).filter(Boolean);
+        if (urls.length) return urls;
+      }
+    } catch {}
+  }
+  const unsplash = process.env.UNSPLASH_ACCESS_KEY;
+  if (unsplash) {
+    try {
+      const res = await fetch(
+        `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=8&orientation=landscape`,
+        { headers: { Authorization: `Client-ID ${unsplash}` }, cache: 'no-store' }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const urls: string[] = (data.results ?? []).map((r: any) => r?.urls?.regular).filter(Boolean);
+        if (urls.length) return urls;
+      }
+    } catch {}
+  }
+  return [];
+}
+
+const ANIMALS: Array<[RegExp, string]> = [
+  [/\b(dairy|milk|mastitis|calf|calves|cow|cows|cattle|bovine|beef)\b/i, 'cattle'],
+  [/\b(poultry|chicken|chickens|broiler|layer|hen|hens|newcastle|avian|duck|turkey)\b/i, 'chickens'],
+  [/\b(goat|goats)\b/i, 'goats'],
+  [/\b(sheep|lamb|lambs|ewe|ewes)\b/i, 'sheep'],
+  [/\b(pig|pigs|swine|piglet|piglets)\b/i, 'pigs'],
 ];
 
-function randomFallback(): string {
-  return FALLBACK_IMAGES[Math.floor(Math.random() * FALLBACK_IMAGES.length)];
+function animalFor(text: string): string {
+  for (const [re, name] of ANIMALS) if (re.test(text)) return name;
+  return 'livestock';
 }
 
-async function getPexelsImage(query: string): Promise<string | null> {
-  const key = process.env.PEXELS_API_KEY;
-  if (!key) return null;
-  try {
-    const page = Math.floor(Math.random() * 3) + 1;
-    const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=10&page=${page}&orientation=landscape`,
-      { headers: { Authorization: key }, cache: 'no-store' }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const photos: Array<{ src?: { large?: string } }> = data.photos || [];
-    const pick = photos[Math.floor(Math.random() * Math.min(photos.length, 5))];
-    return pick?.src?.large ?? null;
-  } catch {
-    return null;
-  }
+// A photo search phrase that fits what the section is about.
+function sectionQuery(heading: string, animal: string): string {
+  if (/sign|symptom|spot|look for|recogni/i.test(heading)) return `sick ${animal}`;
+  if (/treat|vet|care for/i.test(heading)) return `veterinarian examining ${animal}`;
+  if (/prevent|vaccin|biosecurity|protect/i.test(heading)) return `vaccinating ${animal}`;
+  if (/feed|nutrition|diet/i.test(heading)) return `${animal} feeding`;
+  if (/hous|shed|barn|pen|ventilat/i.test(heading)) return `${animal} barn`;
+  if (/water/i.test(heading)) return `${animal} drinking water`;
+  return `${animal} farm`;
 }
 
-async function getUnsplashImage(query: string): Promise<string | null> {
-  const key = process.env.UNSPLASH_ACCESS_KEY;
-  if (!key) return null;
-  try {
-    const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=10&orientation=landscape`,
-      { headers: { Authorization: `Client-ID ${key}` }, cache: 'no-store' }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    const results: Array<{ urls?: { regular?: string } }> = data.results || [];
-    const pick = results[Math.floor(Math.random() * Math.min(results.length, 5))];
-    return pick?.urls?.regular ?? null;
-  } catch {
-    return null;
-  }
-}
+// One matching photo under each "##" heading. If no photo is found, none is added:
+// a missing picture is better than a wrong one.
+async function addSectionImages(body: string, animal: string, used: Set<string>): Promise<string> {
+  const headings = Array.from(body.matchAll(/^##\s+(.+?)\s*$/gm))
+    .map((m) => m[1].replace(/[*_`]/g, ''))
+    .slice(0, 5);
+  if (headings.length === 0) return body;
 
-async function getArticleImage(query: string): Promise<string> {
-  return (await getPexelsImage(query)) ?? (await getUnsplashImage(query)) ?? randomFallback();
-}
+  const lists = await Promise.all(
+    headings.map(async (h) => {
+      const found = await searchImages(sectionQuery(h, animal));
+      return found.length ? found : searchImages(`${animal} farm`);
+    })
+  );
 
-// A plain photo search phrase based on what the article is about.
-function imageQuery(category: string): string {
-  switch (category) {
-    case 'Cattle':
-      return 'cattle farm';
-    case 'Dairy Farming':
-      return 'dairy cows farm';
-    case 'Goats & Sheep':
-      return 'goats sheep farm';
-    case 'Poultry':
-      return 'chickens farm';
-    case 'Pig Farming':
-      return 'pigs farm';
-    default:
-      return 'livestock farm';
-  }
+  const picked = new Map<string, string>();
+  headings.forEach((h, i) => {
+    const url = lists[i].find((u) => !used.has(u));
+    if (url) {
+      used.add(url);
+      picked.set(h, url);
+    }
+  });
+
+  return body
+    .split('\n')
+    .flatMap((line) => {
+      const m = line.match(/^##\s+(.+?)\s*$/);
+      if (!m) return [line];
+      const clean = m[1].replace(/[*_`]/g, '');
+      const url = picked.get(clean);
+      if (!url) return [line];
+      picked.delete(clean);
+      return [line, '', `![${clean.replace(/[\[\]]/g, '')}](${url})`, ''];
+    })
+    .join('\n');
 }
 
 function sourcesSection(sources: Array<{ title: string; url: string }>): string {
@@ -117,7 +145,7 @@ export async function GET(request: NextRequest) {
 
     const topic: TopicChoice = {
       topic: topicText,
-      angle: 'A specific, practical article for farmers built only from what the sources say',
+      angle: 'A specific, practical guide for farmers and students built on what reliable sources say',
       whyNow: 'Chosen by the editor',
       headlines: [],
     };
@@ -135,15 +163,15 @@ export async function GET(request: NextRequest) {
     const research = outcome.research;
     const researchText = JSON.stringify(research);
 
-    // 2. Write only from the research, then run the quality checks.
+    // 2. Write the guide, then run the quality checks (up to 3 tries).
     let feedback: string[] | undefined;
     let issues: string[] = [];
     let draft: Draft | null = null;
 
-    for (let attempt = 1; attempt <= 2; attempt++) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
       if (left() < 20000) break;
       const result = await callGemini({
-        system: WRITER_SYSTEM,
+        system: WRITER_GUIDE_SYSTEM,
         prompt: buildWritePrompt(research, feedback),
         json: true,
         temperature: 0.85,
@@ -158,7 +186,12 @@ export async function GET(request: NextRequest) {
         break;
       }
       issues = gate.issues;
-      feedback = gate.issues;
+      feedback = gate.issues.some((i) => i.includes('too short'))
+        ? [
+            ...gate.issues,
+            'Expand the article to about 1,100 words: 5 to 6 sections of 3 to 4 paragraphs each, with practical detail a farmer can use. Do not add numbers that are not in the research.',
+          ]
+        : gate.issues;
     }
 
     if (!draft) {
@@ -170,9 +203,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // 3. Add the real sources and a matching photo.
-    const content = `${draft.body}${sourcesSection(research.sources)}`;
-    const heroImage = await getArticleImage(imageQuery(draft.category));
+    // 3. Matching photos: one at the top, one under each subheading, plus sources.
+    const animal = animalFor(`${topicText} ${draft.title}`);
+    const used = new Set<string>();
+    const heroList = await searchImages(`${animal} farm`);
+    const heroImage = heroList[0] ?? '';
+    if (heroImage) used.add(heroImage);
+    const bodyWithImages = await addSectionImages(draft.body, animal, used);
+    const content = `${bodyWithImages}${sourcesSection(research.sources)}`;
 
     return NextResponse.json({
       content,
