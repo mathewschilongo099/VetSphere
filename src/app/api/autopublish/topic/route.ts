@@ -45,13 +45,17 @@ export async function POST() {
     const parsed = extractJson<{ candidates?: Candidate[] }>(result.text);
     const candidates = parsed.candidates ?? [];
 
+    // Prefer a story two or more outlets cover. If none qualifies, fall back to the
+    // best single-outlet story; the research stage still needs 4+ facts from 2+ sources.
+    let fallback: TopicChoice | null = null;
+
     for (const candidate of candidates) {
       const topic = (candidate.topic ?? '').trim();
       if (!topic) continue;
 
       const matched = headlines.filter((h) => (candidate.headline_ids ?? []).includes(h.id));
       const outlets = new Set(matched.map((h) => h.source.toLowerCase()));
-      if (outlets.size < 2) continue; // not trending: only one outlet
+      if (matched.length === 0) continue;
 
       if (findDuplicate(topic, existing, 0.5)) continue; // already on the site
 
@@ -61,13 +65,19 @@ export async function POST() {
         whyNow: (candidate.why_now ?? '').trim(),
         headlines: matched.slice(0, 8).map((h) => ({ title: h.title, source: h.source, date: h.date })),
       };
+      if (outlets.size < 2) {
+        fallback = fallback ?? choice;
+        continue;
+      }
       return NextResponse.json({ ok: true, topic: choice });
     }
+
+    if (fallback) return NextResponse.json({ ok: true, topic: fallback });
 
     return NextResponse.json({
       ok: false,
       skipped: true,
-      reason: 'No trending livestock topic was found that two or more outlets cover and the site has not already published.',
+      reason: 'No fresh livestock news topic was found that the site has not already published.',
     });
   } catch (error) {
     console.error('autopublish/topic failed:', error);
