@@ -1,4 +1,5 @@
-// Stage 1 of 4: choose today's topic from what is trending in livestock news.
+// Stage 1 of 4: choose today's topic. Prefers a practical, evergreen guide;
+// news stories are the second choice.
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
@@ -10,6 +11,7 @@ import { TOPIC_SYSTEM, buildTopicPrompt, type TopicChoice } from '@/lib/pipeline
 import { fetchHeadlines } from '@/lib/pipeline/topics';
 
 interface Candidate {
+  kind?: string;
   topic?: string;
   angle?: string;
   why_now?: string;
@@ -19,14 +21,6 @@ interface Candidate {
 export async function POST() {
   try {
     const [existing, headlines] = await Promise.all([listExistingArticles(), fetchHeadlines()]);
-
-    if (headlines.length < 5) {
-      return NextResponse.json({
-        ok: false,
-        skipped: true,
-        reason: `Only ${headlines.length} fresh livestock headlines were found, so no topic was chosen.`,
-      });
-    }
 
     // Headlines take up to ~7 s, so two 22 s attempts still fit in the 60 s limit.
     const result = await callGemini({
@@ -45,17 +39,19 @@ export async function POST() {
     const parsed = extractJson<{ candidates?: Candidate[] }>(result.text);
     const candidates = parsed.candidates ?? [];
 
-    // Prefer a story two or more outlets cover. If none qualifies, fall back to the
-    // best single-outlet story; the research stage still needs 4+ facts from 2+ sources.
+    // Evergreen guides are returned straight away. A news story needs two or more
+    // outlets; if none qualifies, the best single-outlet story is the fallback and
+    // the research stage still needs 4+ facts from 2+ sources.
     let fallback: TopicChoice | null = null;
 
     for (const candidate of candidates) {
       const topic = (candidate.topic ?? '').trim();
       if (!topic) continue;
 
+      const evergreen = candidate.kind === 'evergreen';
       const matched = headlines.filter((h) => (candidate.headline_ids ?? []).includes(h.id));
       const outlets = new Set(matched.map((h) => h.source.toLowerCase()));
-      if (matched.length === 0) continue;
+      if (matched.length === 0 && !evergreen) continue;
 
       if (findDuplicate(topic, existing, 0.5)) continue; // already on the site
 
@@ -65,6 +61,7 @@ export async function POST() {
         whyNow: (candidate.why_now ?? '').trim(),
         headlines: matched.slice(0, 8).map((h) => ({ title: h.title, source: h.source, date: h.date })),
       };
+      if (evergreen) return NextResponse.json({ ok: true, topic: choice });
       if (outlets.size < 2) {
         fallback = fallback ?? choice;
         continue;
@@ -77,7 +74,7 @@ export async function POST() {
     return NextResponse.json({
       ok: false,
       skipped: true,
-      reason: 'No fresh livestock news topic was found that the site has not already published.',
+      reason: 'No new topic was found that the site has not already published.',
     });
   } catch (error) {
     console.error('autopublish/topic failed:', error);
