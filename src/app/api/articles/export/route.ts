@@ -5,7 +5,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { fetchAllArticles } from '@/lib/admin/github';
 import { articleStatus, parseArticle, wordCount } from '@/lib/frontmatter';
 
-const csvCell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
+// Quotes a CSV cell. A leading = + - or @ would be run as a formula when the
+// file is opened in Excel or Sheets, so those cells get a leading apostrophe.
+const csvCell = (value: unknown) => {
+  let s = String(value ?? '');
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
+  return `"${s.replace(/"/g, '""')}"`;
+};
 
 // Backup download. ?format=json (default) holds every article in full;
 // ?format=csv is a spreadsheet-friendly index without the article text.

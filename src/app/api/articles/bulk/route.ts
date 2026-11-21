@@ -19,12 +19,16 @@ const ACTIONS = [
 ] as const;
 type Action = (typeof ACTIONS)[number];
 
+// These actions work on the whole site (for example renaming a category), so
+// they may leave out "names". Every other action must say which articles to
+// change, so a missing list can never hide or edit every article by accident.
+const WHOLE_SITE: Action[] = ['rename_tag', 'rename_category', 'replace_image', 'remove_tag'];
+
 const text = (v: unknown, max = 200): string => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 const same = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 const unique = (tags: string[]) => tags.filter((t, i) => tags.findIndex((x) => same(x, t)) === i);
 
-// Changes many articles in a single commit. When "names" is left out, the
-// action looks at every article (used for renaming a category or tag).
+// Changes many articles in a single commit.
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -36,6 +40,10 @@ export async function POST(request: NextRequest) {
     const names: Set<string> | null = Array.isArray(body.names)
       ? new Set<string>(body.names.filter(isSafeArticleName))
       : null;
+    if (!WHOLE_SITE.includes(action) && (!names || names.size === 0)) {
+      return NextResponse.json({ success: false, error: 'Select at least one article.' }, { status: 400 });
+    }
+
     const flag = body.value === true;
     const value = text(body.value, 500);
     const from = text(body.from, 500);
