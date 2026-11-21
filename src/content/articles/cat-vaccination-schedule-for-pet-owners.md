@@ -1,6 +1,6 @@
 ---
 title: "Cat Vaccination Schedule for Pet Owners"
-description: "Bringing home a kitten is exciting, but caring for a young cat involves more than food, toys, and a comfortable bed. Vaccinations are one of the most important..."
+description: "Bringing home a kitten is exciting, but caring for a young cat involves more than food, toys, and a comfortable bed."
 date: "2026-09-18"
 author: "VetSphere"
 category: "Animal Health"

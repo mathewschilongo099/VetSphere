@@ -1,6 +1,6 @@
 ---
 title: "Deworming Programs for Cattle and Goats"
-description: "Internal parasites can quietly reduce weight gain, milk production, fertility, and overall herd performance. In severe cases, worms can cause anemia, diarrhea,..."
+description: "Internal parasites can quietly reduce weight gain, milk production, fertility, and overall herd performance."
 date: "2026-09-11"
 author: "VetSphere"
 category: "Animal Health"

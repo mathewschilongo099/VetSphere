@@ -1,6 +1,6 @@
 ---
 title: "Milk Fever in Dairy Cows"
-description: "Milk fever in dairy cows is a serious metabolic disorder that can develop around calving. Despite its name, milk fever is not an infectious disease and usually..."
+description: "Milk fever in dairy cows is a serious metabolic disorder that can develop around calving."
 date: "2026-09-19"
 author: "VetSphere"
 category: "Animal Health"

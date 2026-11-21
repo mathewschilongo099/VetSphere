@@ -1,6 +1,6 @@
 ---
 title: "Anthrax in Livestock"
-description: "Anthrax in livestock is a serious disease that can kill cattle, sheep, goats, horses, and other animals quickly—sometimes before you notice any warning signs...."
+description: "Anthrax in livestock is a serious disease that can kill cattle, sheep, goats, horses, and other animals quickly—sometimes before you notice any warning…"
 date: "2026-09-16"
 author: "VetSphere"
 category: "Animal Health"

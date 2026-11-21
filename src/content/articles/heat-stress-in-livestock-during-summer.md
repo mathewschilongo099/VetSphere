@@ -1,6 +1,6 @@
 ---
 title: "Heat Stress in Livestock During Summer"
-description: "Summer heat can become a serious health and welfare threat for livestock. When temperatures rise, animals must work harder to maintain a safe body temperature...."
+description: "Summer heat can become a serious health and welfare threat for livestock."
 date: "2026-09-16"
 author: "VetSphere"
 category: "Animal Health"

@@ -1,6 +1,6 @@
 ---
 title: "Feline Panleukopenia in Cats"
-description: "Feline panleukopenia in cats is a highly contagious and potentially fatal viral disease. It is especially dangerous for kittens, unvaccinated cats, and animals..."
+description: "Feline panleukopenia in cats is a highly contagious and potentially fatal viral disease."
 date: "2026-09-10"
 author: "VetSphere"
 category: "Animal Health"

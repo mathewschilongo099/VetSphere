@@ -1,6 +1,6 @@
 ---
 title: "Avian Influenza in Poultry"
-description: "Avian influenza in poultry, commonly called bird flu, is one of the most serious infectious disease threats facing commercial farms, backyard flocks, and wild..."
+description: "Avian influenza in poultry, commonly called bird flu, is one of the most serious infectious disease threats facing commercial farms, backyard flocks, and…"
 date: "2026-09-14"
 author: "VetSphere"
 category: "Animal Health"
