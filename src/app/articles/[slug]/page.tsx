@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
 
+const SITE = 'https://vetsphere.cc.cd';
+
+function absoluteImage(image?: string) {
+  if (!image) return `${SITE}/logo.png`;
+  return image.startsWith('http') ? image : `${SITE}${image}`;
+}
+
 export async function generateStaticParams() {
   const posts = getAllPosts();
   return posts.map((post) => ({ slug: post.slug }));
@@ -16,22 +23,21 @@ export async function generateMetadata(
   const post = getPostBySlug(params.slug);
   if (!post) return { title: 'Article Not Found | VetSphere' };
 
-  const imageUrl = post.image?.startsWith('http')
-    ? post.image
-    : `https://vetsphere.cc.cd${post.image}`;
+  const imageUrl = absoluteImage(post.image);
 
   return {
     title: `${post.title} | VetSphere`,
     description: post.description,
     keywords: post.tags?.join(', ') || '',
+    authors: [{ name: post.author }],
     alternates: { canonical: `/articles/${post.slug}` },
     openGraph: {
       title: post.title,
       description: post.description,
       type: 'article',
       publishedTime: post.date,
-      authors: ['Mathews Chilongo'],
-      url: `https://vetsphere.cc.cd/articles/${post.slug}`,
+      authors: [post.author],
+      url: `${SITE}/articles/${post.slug}`,
       images: [{ url: imageUrl, alt: post.imageAlt || post.title }],
     },
     twitter: {
@@ -49,16 +55,56 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
 
   const { prev, next } = getAdjacentPosts(params.slug);
   const relatedPosts = getRelatedPosts(params.slug, 3);
+  const url = `${SITE}/articles/${post.slug}`;
+  const dateLabel = new Date(post.date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
 
   const cleanContent = post.content
     .replace(/^---\s*$/gm, '')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Article',
+        headline: post.title,
+        description: post.description,
+        image: [absoluteImage(post.image)],
+        datePublished: post.date,
+        dateModified: post.date,
+        author: { '@type': 'Person', name: post.author },
+        publisher: {
+          '@type': 'Organization',
+          name: 'VetSphere',
+          logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` },
+        },
+        mainEntityOfPage: url,
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+          { '@type': 'ListItem', position: 2, name: 'Articles', item: `${SITE}/articles` },
+          { '@type': 'ListItem', position: 3, name: post.title, item: url },
+        ],
+      },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }}
+      />
+
       <article className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        <div className="mb-4 sm:mb-6">
+        <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6">
           <Link
             href="/articles"
             className="inline-flex items-center gap-2 text-gray-500 hover:text-green-600 transition-colors text-sm font-medium"
@@ -66,7 +112,7 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
             <ArrowLeft className="w-4 h-4" />
             Back to Articles
           </Link>
-        </div>
+        </nav>
 
         {post.category && (
           <div className="mb-3">
@@ -81,18 +127,17 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
         </h1>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs sm:text-sm text-gray-500 mb-6">
-          <span>By <span className="font-medium text-gray-700">Mathews Chilongo</span></span>
+          <span>By <Link href="/about" className="font-medium text-gray-700 hover:text-green-600">{post.author}</Link></span>
           <span>•</span>
-          <time dateTime={post.date}>
-            {new Date(post.date).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })}
-          </time>
+          <time dateTime={post.date}>{dateLabel}</time>
           <span>•</span>
           <span>{post.readTime || '5 min read'}</span>
         </div>
+
+        <p className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-lg px-3 py-2 mb-6">
+          Educational information only — not a substitute for a licensed veterinarian. See our{' '}
+          <Link href="/disclaimer" className="text-green-600 underline">Veterinary Disclaimer</Link>.
+        </p>
 
         {post.image && (
           <div className="relative w-full h-48 sm:h-64 lg:h-80 rounded-xl overflow-hidden mb-6 bg-gray-100">
@@ -134,6 +179,20 @@ export default function ArticlePage({ params }: { params: { slug: string } }) {
           "
           dangerouslySetInnerHTML={{ __html: cleanContent }}
         />
+
+        <aside className="mt-10 flex items-start gap-4 bg-gray-50 border border-gray-100 rounded-2xl p-5">
+          <div className="w-12 h-12 shrink-0 rounded-full bg-green-600 text-white flex items-center justify-center font-bold">
+            {post.author.charAt(0)}
+          </div>
+          <div className="text-sm text-gray-600 leading-relaxed">
+            <p className="font-semibold text-gray-900">{post.author}</p>
+            <p>
+              Founder of VetSphere and a veterinary student in Zambia. Articles are AI-assisted, then reviewed and edited by the author. Spotted an error?{' '}
+              <Link href="/contact" className="text-green-600 underline">Tell us</Link>. Read our{' '}
+              <Link href="/about" className="text-green-600 underline">editorial policy</Link>.
+            </p>
+          </div>
+        </aside>
       </article>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-12 sm:pb-16">
