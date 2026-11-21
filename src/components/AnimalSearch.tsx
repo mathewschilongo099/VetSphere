@@ -54,7 +54,7 @@ export default function AnimalSearch() {
               className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-green-500 text-white rounded-br-sm'
                     : 'bg-white/15 text-gray-100 rounded-bl-sm'
@@ -87,6 +87,7 @@ export default function AnimalSearch() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Ask any animal health question..."
+          aria-label="Ask an animal health question"
           className="flex-1 px-5 py-4 rounded-xl text-gray-900 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-green-400 bg-white/95 placeholder-gray-400"
         />
         <button
@@ -98,11 +99,9 @@ export default function AnimalSearch() {
         </button>
       </form>
 
-      {messages.length === 0 && (
-        <p className="text-gray-400 text-xs text-center mt-3">
-          Ask about livestock diseases, pet care, nutrition and more
-        </p>
-      )}
+      <p className="text-gray-400 text-xs text-center mt-3">
+        AI answers are general information and can be wrong. They are not a diagnosis; for a sick animal, contact a veterinarian.
+      </p>
     </div>
   );
 }

@@ -10,7 +10,7 @@ export default async function HomePage() {
 
       {/* Hero */}
       <section className="relative bg-gray-900 text-white w-full py-10 sm:py-16 overflow-hidden">
-        {/* Subtle ambient texture — radial glow + faint grid, no images needed */}
+        {/* Subtle ambient texture: radial glow + faint grid, no images needed */}
         <div
           className="absolute inset-0 opacity-40 pointer-events-none"
           style={{
@@ -37,12 +37,12 @@ export default async function HomePage() {
               Practical veterinary guides for livestock farmers, students, and pet owners.
             </p>
 
-            {/* Ask feature — promoted as the primary action, since it's a real, working tool */}
+            {/* Ask feature: promoted as the primary action */}
             <div className="max-w-xl mx-auto mb-4">
               <div className="bg-white/5 border border-white/15 rounded-2xl p-1.5 backdrop-blur-sm">
                 <div className="flex items-center gap-2 px-2.5 pt-1.5 pb-1">
-                  <span className="text-green-400 text-[11px] font-bold uppercase tracking-wide">Ask VetSphere</span>
-                  <span className="text-gray-400 text-[11px]">— instant answers</span>
+                  <span className="text-green-400 text-[11px] font-bold uppercase tracking-wide">Ask VetAssist</span>
+                  <span className="text-gray-400 text-[11px]">— AI-powered answers</span>
                 </div>
                 <AnimalSearch />
               </div>
@@ -66,7 +66,7 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
             <div>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900">Latest Articles</h2>
-              <p className="text-gray-500 mt-2">Fresh veterinary knowledge published daily</p>
+              <p className="text-gray-500 mt-2">Practical veterinary guides, added regularly</p>
             </div>
             <a href="/articles" className="text-green-600 font-semibold text-sm hover:underline shrink-0">View all</a>
           </div>
@@ -109,6 +109,10 @@ export default async function HomePage() {
               <p className="text-gray-500 text-sm leading-relaxed">Learn how to identify early signs of illness, set up proper biosecurity, and keep your animals healthy before problems start.</p>
             </div>
           </div>
+          <p className="text-gray-400 text-xs mt-8 max-w-xl mx-auto">
+            VetSphere shares general educational information. It is not a substitute for advice from a qualified veterinarian.{' '}
+            <a href="/disclaimer" className="underline hover:text-green-600">Read the disclaimer</a>.
+          </p>
         </div>
       </section>
 
@@ -126,4 +130,4 @@ export default async function HomePage() {
 
     </div>
   );
-      }
+}

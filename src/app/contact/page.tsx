@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
+import { CONTACT_EMAIL } from '@/lib/site';
 
 const field = 'neo-field w-full rounded-2xl px-4 py-3.5 text-sm';
 
@@ -50,8 +52,17 @@ export default function ContactPage() {
 
         <h1 className="neo-text text-center text-2xl font-extrabold">Contact Us</h1>
         <p className="neo-muted mb-7 mt-2 text-center text-sm">
-          Questions, article ideas or collaboration? We reply within 24–48 hours.
+          Questions, corrections, article ideas or collaboration? We reply within 24–48 hours.
         </p>
+
+        {CONTACT_EMAIL && (
+          <p className="neo-muted mb-6 text-center text-sm">
+            Or email us at{' '}
+            <a href={`mailto:${CONTACT_EMAIL}`} className="neo-text font-semibold underline break-all">
+              {CONTACT_EMAIL}
+            </a>
+          </p>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           {status === 'success' && (
@@ -74,6 +85,12 @@ export default function ContactPage() {
           <button type="submit" disabled={status === 'sending'} className="neo-btn neo-accent w-full rounded-2xl py-4 text-base font-bold">
             {status === 'sending' ? 'Sending…' : 'Send message'}
           </button>
+
+          <p className="neo-muted text-center text-xs">
+            We use your details only to reply to you. See our{' '}
+            <Link href="/privacy-policy" className="underline">Privacy Policy</Link>.
+            VetSphere cannot give veterinary diagnoses; for sick animals contact a veterinarian.
+          </p>
         </form>
       </div>
     </div>
