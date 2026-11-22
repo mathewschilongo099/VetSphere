@@ -1,9 +1,12 @@
 // src/app/academic-writer/page.tsx
+import type { Metadata } from 'next';
 import AcademicWriterForm from '@/components/academic/AcademicWriterForm';
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'Academic Writer - Generate Research & Essays | VetSphere',
-  description: 'Generate professional academic essays, research papers, and reports for diploma, bachelor, masters, or PhD level instantly.'
+  description: 'Generate professional academic essays, research papers, and reports for diploma, bachelor, masters, or PhD level instantly.',
+  // Not listed in search engines. The page still works for people who visit the site.
+  robots: { index: false, follow: false },
 };
 
 export default function AcademicWriterPage() {
