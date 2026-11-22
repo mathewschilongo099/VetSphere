@@ -1,18 +1,5 @@
-import type { Metadata } from 'next';
-import './admin.css';
-
-export const metadata: Metadata = {
-  title: 'Admin | VetSphere',
-  robots: { index: false, follow: false },
-};
-
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="neu-admin">
-      <span aria-hidden="true" className="neu-circle c1" />
-      <span aria-hidden="true" className="neu-circle c2" />
-      <span aria-hidden="true" className="neu-circle c3" />
-      <div className="neu-content">{children}</div>
-    </div>
-  );
+// Old /admin route is disabled (page.tsx returns 404). The dashboard lives at
+// the secret URL. Components and admin.css in this folder are still used there.
+export default function OldAdminLayout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }
