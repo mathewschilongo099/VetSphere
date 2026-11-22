@@ -47,6 +47,66 @@ function removeSection(markdown: string, headingPattern: RegExp): string {
   return out.join('\n');
 }
 
+// Styles for the tap-to-open FAQ rows. Written next to the FAQ so it works in
+// light and dark mode without touching the site's stylesheets.
+const FAQ_STYLE = `<style>
+.faq-item{border:1px solid rgba(128,128,128,.35);border-radius:12px;margin:10px 0;background:rgba(128,128,128,.06)}
+.faq-item[open]{background:rgba(22,163,74,.08);border-color:rgba(22,163,74,.5)}
+.faq-item>summary{cursor:pointer;list-style:none;padding:14px 16px;font-weight:600;font-size:1rem;line-height:1.4;display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0}
+.faq-item>summary::-webkit-details-marker{display:none}
+.faq-item>summary::marker{content:""}
+.faq-item>summary::after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);flex-shrink:0;margin-right:4px;transition:transform .2s}
+.faq-item[open]>summary::after{transform:rotate(-135deg)}
+.faq-answer{padding:0 16px 14px}
+.faq-answer>p:first-child{margin-top:0}
+.faq-answer>p:last-child{margin-bottom:0}
+</style>`;
+
+// Turns the "Frequently Asked Questions" section into tap-to-open rows: only
+// the questions show, and tapping one opens its answer (no page load, built-in
+// <details> element). Each "### Question" becomes a row; the text under it is
+// the answer. Articles without an FAQ section render as before.
+function renderWithFaq(markdown: string): string {
+  const lines = markdown.split('\n');
+  const start = lines.findIndex(
+    (l) => /^##\s/.test(l) && /(frequently asked questions|\bfaqs?\b)/i.test(l)
+  );
+  if (start === -1) return md.render(markdown);
+
+  let end = lines.findIndex((l, i) => i > start && /^##\s/.test(l));
+  if (end === -1) end = lines.length;
+
+  const faqLines = lines.slice(start + 1, end);
+  const firstQuestion = faqLines.findIndex((l) => /^###\s/.test(l));
+  if (firstQuestion === -1) return md.render(markdown);
+
+  const intro = faqLines.slice(0, firstQuestion).join('\n');
+  const items: { question: string; answer: string[] }[] = [];
+  for (const line of faqLines.slice(firstQuestion)) {
+    const q = line.match(/^###\s+(.*)$/);
+    if (q) items.push({ question: q[1].trim(), answer: [] });
+    else items[items.length - 1].answer.push(line);
+  }
+
+  const rows = items
+    .map(
+      (item) =>
+        `<details class="faq-item"><summary>${md.renderInline(item.question)}</summary><div class="faq-answer">${md.render(
+          item.answer.join('\n').trim()
+        )}</div></details>`
+    )
+    .join('\n');
+
+  return [
+    md.render(lines.slice(0, start).join('\n')),
+    md.render(lines[start]),
+    intro.trim() ? md.render(intro) : '',
+    FAQ_STYLE,
+    rows,
+    md.render(lines.slice(end).join('\n')),
+  ].join('\n');
+}
+
 function plainText(markdown: string): string {
   return markdown
     .replace(/<[^>]+>/g, ' ')
@@ -125,7 +185,7 @@ export function getPostBySlug(slug: string): BlogPost | null {
       /^##\s+(Sources|References)\s*$/i
     );
 
-    const contentHtml = md.render(cleanedMarkdown);
+    const contentHtml = renderWithFaq(cleanedMarkdown);
     const description = buildDescription(data.description || '', cleanedMarkdown);
     const tags: string[] = data.tags || [];
 
