@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SESSION_COOKIE, hasValidCronSecret, verifySessionToken } from '@/lib/auth';
 
+// The dashboard is served at this secret URL. The real /admin route is hidden
+// (404) so nobody can find it by guessing. The password login still applies.
+const ADMIN_HIDDEN_PATH = '/72251156/admin';
+
 // Every /api route is private unless it is listed here. New routes are
 // therefore protected by default (fail closed).
 const PUBLIC_API_PREFIXES = [
@@ -75,6 +79,17 @@ function checkRateLimit(ip: string, pathname: string): number | null {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Secret admin URL -> internal /admin page. Rewrites do not re-run middleware.
+  if (matchesPrefix(pathname, [ADMIN_HIDDEN_PATH])) {
+    const rest = pathname.slice(ADMIN_HIDDEN_PATH.length);
+    return NextResponse.rewrite(new URL(`/admin${rest}`, request.url));
+  }
+
+  // Direct visits to /admin look like a normal missing page.
+  if (matchesPrefix(pathname, ['/admin'])) {
+    return NextResponse.rewrite(new URL('/404', request.url));
+  }
+
   if (matchesPrefix(pathname, PUBLIC_API_PREFIXES)) {
     const retryAfter = checkRateLimit(clientIp(request), pathname);
     if (retryAfter !== null) {
@@ -101,5 +116,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/api/:path*'],
+  matcher: ['/api/:path*', '/admin', '/admin/:path*', '/72251156/:path*'],
 };
