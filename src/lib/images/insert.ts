@@ -1,4 +1,6 @@
-// Puts the chosen pictures into the article text, right under each ## heading.
+// Puts the chosen pictures into the article text, right under each ## heading,
+// except the first one: the article page already shows the hero picture at the
+// top, so a picture under the first heading would stack two pictures together.
 
 import type { PickedImage } from './pick';
 
@@ -15,11 +17,17 @@ export function sectionHeadings(body: string, max = 5): string[] {
 
 export function insertUnderHeadings(body: string, picks: Map<string, PickedImage>): string {
   const remaining = new Map(picks);
+  let seenFirstHeading = false;
   return body
     .split('\n')
     .flatMap((line) => {
       const m = line.match(/^##\s+(.+?)\s*$/);
       if (!m) return [line];
+      // No picture under the first heading (the hero picture is right above it).
+      if (!seenFirstHeading) {
+        seenFirstHeading = true;
+        return [line];
+      }
       const key = cleanHeading(m[1]);
       const pick = remaining.get(key);
       if (!pick) return [line];
