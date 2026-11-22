@@ -1,0 +1,26 @@
+{
+  "site": {
+    "name": "VetSphere",
+    "tagline": "Let's care for livestock and pets",
+    "description": "Free veterinary articles and tools for farmers and pet owners worldwide.",
+    "email": "",
+    "url": "https://vetsphere.cc.cd"
+  },
+  "homepage": {
+    "hero_title": "Trusted Veterinary Knowledge for",
+    "hero_highlight": "Farmers and Pet Owners",
+    "hero_description": "Practical, accurate and free veterinary guidance for livestock and pets, wherever you are."
+  },
+  "footer": {
+    "tagline": "Free veterinary knowledge for farmers and pet owners worldwide.",
+    "copyright": "© 2026 VetSphere. All rights reserved.",
+    "credit": ""
+  },
+  "chatbot": {
+    "greeting": "Hi! I'm VetAssist. Ask me any animal health question.",
+    "system_prompt": ""
+  },
+  "autopublish": {
+    "topics": []
+  }
+}
