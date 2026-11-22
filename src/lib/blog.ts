@@ -47,6 +47,26 @@ function removeSection(markdown: string, headingPattern: RegExp): string {
   return out.join('\n');
 }
 
+// The article page already shows the hero photo above the text. Many articles
+// also start with a second photo right under their first heading, which makes
+// two photos stack at the top. This removes that first photo when it comes
+// before any paragraph text. Photos further down the article are kept.
+function removeLeadingImage(markdown: string): string {
+  const lines = markdown.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line === '' || /^#{1,6}\s/.test(line)) continue;
+    if (/^!\[[^\]]*\]\([^)]*\)$/.test(line)) {
+      lines.splice(i, 1);
+      while (i < lines.length && lines[i].trim() === '') lines.splice(i, 1);
+      // Keep one blank line between the heading and the text that follows.
+      lines.splice(i, 0, '');
+    }
+    break;
+  }
+  return lines.join('\n');
+}
+
 // Styles for the tap-to-open FAQ rows. Written next to the FAQ so it works in
 // light and dark mode without touching the site's stylesheets.
 const FAQ_STYLE = `<style>
@@ -171,10 +191,12 @@ export function getPostBySlug(slug: string): BlogPost | null {
 
     // Remove the first image and its caption from content since the
     // hero image is already shown above the article body.
-    const contentWithoutFirstImage = content
-      .replace(/!\[[^\]]*\]\([^)]*\)\s*\n*\*?Photo:[^\n]*\n*/g, '')
-      .replace(/\*Photo:[^\n]*via Unsplash[^\n]*\*\n*/gi, '')
-      .replace(/Photo:[^\n]*via Unsplash[^\n]*\n*/gi, '');
+    const contentWithoutFirstImage = removeLeadingImage(
+      content
+        .replace(/!\[[^\]]*\]\([^)]*\)\s*\n*\*?Photo:[^\n]*\n*/g, '')
+        .replace(/\*Photo:[^\n]*via Unsplash[^\n]*\*\n*/gi, '')
+        .replace(/Photo:[^\n]*via Unsplash[^\n]*\n*/gi, '')
+    );
 
     // The article page already shows related articles at the bottom, so the
     // hand-written "Related Articles" list inside the text is dropped.
