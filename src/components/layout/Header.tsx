@@ -14,7 +14,8 @@ const NAV = [
 const TOOLS = [
   { href: '/ask', label: 'Ask VetAssist' },
   { href: '/quiz', label: 'Quiz' },
-  { href: '/academic-writer', label: 'Academic Writer' },
+  // Hidden until AdSense approval. To show it again, remove the two slashes below.
+  // { href: '/academic-writer', label: 'Academic Writer' },
 ];
 
 export default function Header() {
