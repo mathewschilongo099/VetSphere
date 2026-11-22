@@ -4,7 +4,7 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Services & Free Tools | VetSphere',
   description:
-    'Free veterinary learning resources: livestock and pet health guides, the Ask VetAssist AI assistant, quizzes and an academic writing tool.',
+    'Free veterinary learning resources: livestock and pet health guides, the Ask VetAssist AI assistant and a learning quiz.',
   alternates: { canonical: '/services' },
 };
 
@@ -14,7 +14,9 @@ const SERVICES = [
   { icon: '💊', title: 'Disease Prevention', desc: 'Vaccination, biosecurity and early warning signs.', href: '/articles?category=Animal%20Health', cta: 'Browse animal health' },
   { icon: '🐾', title: 'Pet Care', desc: 'Health, vaccination and nutrition for dogs and cats.', href: '/articles?category=Pet%20Care', cta: 'Browse pet care' },
   { icon: '🤖', title: 'Ask VetAssist', desc: 'AI assistant for general animal health questions. It can make mistakes.', href: '/ask', cta: 'Ask a question' },
-  { icon: '🧠', title: 'Quiz & Academic Writer', desc: 'A learning quiz and an AI writing helper for students.', href: '/quiz', cta: 'Try the quiz' },
+  // Academic Writer is hidden until AdSense approval. The quiz card below was
+  // "Quiz & Academic Writer"; to bring it back, change the title and text again.
+  { icon: '🧠', title: 'Veterinary Quiz', desc: 'Test what you have learned with a short learning quiz.', href: '/quiz', cta: 'Try the quiz' },
 ];
 
 export default function ServicesPage() {
