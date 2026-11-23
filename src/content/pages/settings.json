@@ -17,7 +17,7 @@
     "credit": ""
   },
   "chatbot": {
-    "greeting": "Hello boi atishani",
+    "greeting": "Hi! I'm VetAssist. Ask me any animal health question.",
     "system_prompt": ""
   },
   "autopublish": {
