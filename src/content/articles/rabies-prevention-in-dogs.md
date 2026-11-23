@@ -4,7 +4,7 @@ description: "Rabies is one of the most serious diseases your dog can face. It a
 date: "2026-09-19"
 author: "VetSphere"
 category: "Animal Health"
-tags: ["rabies prevention in dogs", "rabies", "prevention", "dogs", "animal health", "veterinary"]
+tags: ["rabies prevention in dogs","rabies","prevention","animal health","veterinary"]
 image: "https://images.pexels.com/photos/7469223/pexels-photo-7469223.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
 imageAlt: "Rabies Prevention in Dogs"
 featured: false

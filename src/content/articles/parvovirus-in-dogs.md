@@ -4,7 +4,7 @@ description: "Canine parvovirus is highly contagious. Learn the symptoms, how it
 date: "2026-09-20"
 author: "VetSphere"
 category: "Animal Health"
-tags: ["parvovirus in dogs", "parvovirus", "dogs", "animal health", "veterinary"]
+tags: ["parvovirus in dogs","parvovirus","animal health","veterinary"]
 image: "https://images.pexels.com/photos/9435112/pexels-photo-9435112.jpeg"
 imageAlt: "Parvovirus in Dogs"
 featured: false
