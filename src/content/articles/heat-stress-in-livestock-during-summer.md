@@ -4,7 +4,7 @@ description: "Summer heat can become a serious health and welfare threat for liv
 date: "2026-09-16"
 author: "VetSphere"
 category: "Animal Health"
-tags: ["heat stress in livestock during summer", "heat", "stress", "livestock", "during", "summer"]
+tags: ["heat stress in livestock during summer","stress","livestock","during","summer"]
 image: "https://images.pexels.com/photos/8747798/pexels-photo-8747798.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
 imageAlt: "Heat Stress in Livestock During Summer"
 featured: false

@@ -4,7 +4,7 @@ description: "Recognizing the signs of heat in dairy cows is one of the most imp
 date: "2026-09-13"
 author: "VetSphere"
 category: "Animal Health"
-tags: ["signs of heat in dairy cows", "signs", "heat", "dairy", "cows", "animal health"]
+tags: ["signs of heat in dairy cows","signs","dairy","cows","animal health"]
 image: "https://images.pexels.com/photos/8637743/pexels-photo-8637743.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
 imageAlt: "Signs of Heat in Dairy Cows"
 featured: false
