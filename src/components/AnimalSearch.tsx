@@ -62,7 +62,7 @@ export default function AnimalSearch({ compact = false }: AnimalSearchProps) {
                 className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? `${compact ? 'bg-white text-green-800' : 'bg-green-500 text-white'} rounded-br-sm`
-                    : `${compact ? 'bg-white/90 text-gray-900' : 'bg-white/15 text-gray-100'} rounded-bl-sm`
+                    : `${compact ? 'bg-[#111318] text-gray-100' : 'bg-white/15 text-gray-100'} rounded-bl-sm`
                 }`}
               >
                 {msg.text}
