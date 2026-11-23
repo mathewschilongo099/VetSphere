@@ -1,18 +1,18 @@
 {
   "site": {
     "name": "VetSphere",
-    "tagline": "Let's care for livestock and pets",
-    "description": "Free veterinary articles and tools for farmers and pet owners worldwide.",
-    "email": "",
+    "tagline": "Practical animal health",
+    "description": "Practical livestock health, nutrition and farm management guidance for commercial and smallholder farmers worldwide. Prevent disease, cut losses and run a more profitable farm.",
+    "email": "matthewchilongo553@gmail.com",
     "url": "https://vetsphere.cc.cd"
   },
   "homepage": {
-    "hero_title": "Trusted Veterinary Knowledge for",
-    "hero_highlight": "Farmers and Pet Owners",
-    "hero_description": "Practical, accurate and free veterinary guidance for livestock and pets, wherever you are."
+    "hero_title": "Animals health and productiona",
+    "hero_highlight": "Protect your livestock ",
+    "hero_description": "Disease prevention, feed efficiency and farm management guides for poultry, dairy, beef, pig and goat farmers, with calculators and checklists you can use today"
   },
   "footer": {
-    "tagline": "Free veterinary knowledge for farmers and pet owners worldwide.",
+    "tagline": "Veterinary knowledge ",
     "copyright": "© 2026 VetSphere. All rights reserved.",
     "credit": ""
   },
