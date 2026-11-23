@@ -4,7 +4,7 @@ description: "Feline panleukopenia in cats is a highly contagious and potentiall
 date: "2026-09-10"
 author: "VetSphere"
 category: "Animal Health"
-tags: ["feline panleukopenia in cats", "feline", "panleukopenia", "cats", "animal health", "veterinary"]
+tags: ["feline panleukopenia in cats","panleukopenia","cats","animal health","veterinary"]
 image: "https://images.pexels.com/photos/34389859/pexels-photo-34389859.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
 imageAlt: "Feline Panleukopenia in Cats"
 featured: false

@@ -4,7 +4,7 @@ description: "Feline leukemia virus, commonly called FeLV, is one of the most im
 date: "2026-09-18"
 author: "VetSphere"
 category: "Animal Health"
-tags: ["feline leukemia virus", "feline", "leukemia", "virus", "animal health", "veterinary"]
+tags: ["feline leukemia virus","leukemia","virus","animal health","veterinary"]
 image: "https://images.pexels.com/photos/34389860/pexels-photo-34389860.jpeg?auto=compress&cs=tinysrgb&h=650&w=940"
 imageAlt: "Feline Leukemia Virus"
 featured: false
