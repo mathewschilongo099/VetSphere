@@ -5,18 +5,61 @@ import { useState, useRef, useEffect } from 'react';
 interface Message {
   role: 'user' | 'ai';
   text: string;
+  // Error notices are shown but never sent back to the AI as history.
+  error?: boolean;
 }
+
+const GREETING: Message = {
+  role: 'ai',
+  text: 'Hello! I am VetAssist, the AI assistant for VetSphere. Ask me anything about animal health, livestock, pets, or any other question and I will do my best to help you.',
+};
+
+const STORAGE_KEY = 'vetassist-chat-v1';
+const MAX_STORED_MESSAGES = 40;
+const MAX_HISTORY_MESSAGES = 12;
 
 export default function AskPage() {
   const [query, setQuery] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'ai',
-      text: 'Hello! I am VetAssist, the AI assistant for VetSphere. Ask me anything about animal health, livestock, pets, or any other question and I will do my best to help you.',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([GREETING]);
   const [loading, setLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Restore the previous conversation after a refresh.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const valid: Message[] = parsed
+            .filter(
+              (m) =>
+                m &&
+                (m.role === 'user' || m.role === 'ai') &&
+                typeof m.text === 'string'
+            )
+            .map((m) => ({ role: m.role, text: m.text, error: m.error === true }));
+          if (valid.length > 0) setMessages([GREETING, ...valid.slice(-MAX_STORED_MESSAGES)]);
+        }
+      }
+    } catch {
+      // Storage unavailable or corrupted: start a fresh chat.
+    }
+    setHydrated(true);
+  }, []);
+
+  // Save the conversation (without the greeting) whenever it changes.
+  useEffect(() => {
+    if (!hydrated) return;
+    try {
+      const toSave = messages.slice(1).slice(-MAX_STORED_MESSAGES);
+      if (toSave.length === 0) localStorage.removeItem(STORAGE_KEY);
+      else localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    } catch {
+      // Ignore storage errors.
+    }
+  }, [messages, hydrated]);
 
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -33,29 +76,48 @@ export default function AskPage() {
 
     const userMessage = query.trim();
     setQuery('');
-    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+
+    // The recent conversation (without the greeting and error notices) plus the
+    // new question is sent so VetAssist remembers what was said before.
+    const history = [...messages.slice(1).filter((m) => !m.error), { role: 'user' as const, text: userMessage }]
+      .slice(-MAX_HISTORY_MESSAGES)
+      .map((m) => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
+
+    setMessages((prev) => [...prev, { role: 'user', text: userMessage }]);
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `/api/search?query=${encodeURIComponent(userMessage)}`
-      );
-      const data = await res.json();
-      setMessages(prev => [
+      const res = await fetch('/api/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+      const data = await res.json().catch(() => ({}));
+      const answer = typeof data.answer === 'string' && data.answer ? data.answer : '';
+      setMessages((prev) => [
         ...prev,
-        {
-          role: 'ai',
-          text: data.answer || 'Sorry, I could not find an answer. Please try again.',
-        },
+        answer
+          ? { role: 'ai', text: answer }
+          : {
+              role: 'ai',
+              text: data.error || 'Sorry, I could not find an answer. Please try again.',
+              error: true,
+            },
       ]);
     } catch {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
-        { role: 'ai', text: 'Something went wrong. Please try again.' },
+        { role: 'ai', text: 'Something went wrong. Please try again.', error: true },
       ]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const newChat = () => {
+    if (loading) return;
+    setMessages([GREETING]);
+    setQuery('');
   };
 
   const suggestedQuestions = [
@@ -102,6 +164,18 @@ export default function AskPage() {
 
         {/* Chat card */}
         <div className="neo-card p-4 sm:p-6">
+          {messages.length > 1 && (
+            <div className="mb-2 flex justify-end px-3">
+              <button
+                type="button"
+                onClick={newChat}
+                disabled={loading}
+                className="neo-btn neo-text rounded-full px-4 py-2 text-xs"
+              >
+                New chat
+              </button>
+            </div>
+          )}
           <div className="max-h-[55vh] space-y-5 overflow-y-auto p-3">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -147,6 +221,7 @@ export default function AskPage() {
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Ask any question..."
               aria-label="Your question"
+              maxLength={500}
               className="neo-field min-w-0 flex-1 rounded-2xl px-5 py-4 text-sm"
             />
             <button
