@@ -6,6 +6,10 @@ import Footer from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://vetsphere.cc.cd'),
+  // Self-referencing canonical for every page that doesn't set its own
+  // (home, /articles, /about, etc.). Resolves against metadataBase, so the
+  // canonical is always on https://vetsphere.cc.cd and never the old domain.
+  alternates: { canonical: './' },
   applicationName: 'VetSphere',
   title: 'VetSphere - Trusted Veterinary Knowledge for Livestock & Pets',
   description:
