@@ -2,7 +2,7 @@
 
 Veterinary care website for livestock and pets.
 
-Live at: https://vet-sphere.vercel.app
+Live at: https://vetsphere.cc.cd
 
 ## Features
 - Home, About, Services, Contact, Gallery, Articles
